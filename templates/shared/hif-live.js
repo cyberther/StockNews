@@ -11,7 +11,7 @@
 const DIRECT = 'https://finnhub.io/api/v1';
 const PROXY = '/api/finnhub';
 const cache = new Map();
-const TTL = { quote: 60000, news: 300000, search: 300000, recs: 900000 };
+const TTL = { quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000 };
 let proxyState = 'unknown'; // 'unknown' | 'yes' | 'no'
 
 function fresh(kind, arg){
@@ -66,13 +66,40 @@ async function quote(symbol, token){
 async function news(symbol, token, limit){
   if (!available(token)) return null;
   const hit = fresh('news', symbol); if (hit) return hit.slice(0, limit || 8);
-  const j = await get('/company-news', { symbol: symbol, from: isoDay(-2), to: isoDay(0) }, token);
+  const j = await get('/company-news', { symbol: symbol, from: isoDay(-30), to: isoDay(0) }, token);
   const rows = (Array.isArray(j) ? j : []).filter(n => n && n.headline)
     .sort((a,b) => b.datetime - a.datetime)
     .map(n => ({ headline: n.headline, source: n.source || '', stamp: stamp(n.datetime), ts: n.datetime, url: n.url || '',
       summary: (n.summary || '').replace(/\s+/g, ' ').trim().slice(0, 160) }));
   put('news', symbol, rows);
-  return rows.slice(0, limit || 8);
+  return rows.slice(0, limit || 5);
+}
+
+async function chart(symbol, range){
+  const key = symbol + ':' + range;
+  const hit = fresh('chart', key); if (hit) return hit;
+  const j = await callProxy('/chart', { symbol: symbol, range: range });
+  const result = j && j.chart && j.chart.result && j.chart.result[0];
+  if (!result) return put('chart', key, null);
+  const timestamps = result.timestamp || [];
+  const quote = result.indicators && result.indicators.quote && result.indicators.quote[0];
+  const closes = quote && quote.close || [];
+  const rows = timestamps.map((ts, i) => ({ ts: ts, close: Number(closes[i]) }))
+    .filter(p => Number.isFinite(p.close));
+  return put('chart', key, { points: rows, currency: result.meta && result.meta.currency || 'USD' });
+}
+
+async function earnings(symbol, token){
+  if (!available(token)) return null;
+  const hit = fresh('earnings', symbol); if (hit) return hit;
+  let j;
+  try { j = await get('/stock/earnings', { symbol: symbol, limit: 24 }, token); }
+  catch (e) { return put('earnings', symbol, []); }
+  const rows = (Array.isArray(j) ? j : []).filter(x => x && x.period).map(x => ({
+    date: x.period, actual: x.actual, estimate: x.estimate,
+    surprise: x.surprise, surprisePercent: x.surprisePercent
+  }));
+  return put('earnings', symbol, rows);
 }
 
 // { buyPct, detail } from the most recent recommendation period, or null when the plan blocks it.
@@ -110,7 +137,7 @@ async function load(symbols, token, opts){
     try {
       const [q, n, r] = await Promise.all([
         quote(sym, token),
-        o.news === false ? null : news(sym, token, 6),
+        o.news === false ? null : news(sym, token, 5),
         o.recs === false ? null : recommendation(sym, token)
       ]);
       if (q) out.quotes[sym] = q;
@@ -122,7 +149,7 @@ async function load(symbols, token, opts){
   return out;
 }
 
-window.HIFLive = { quote, news, recommendation, search, load,
+window.HIFLive = { quote, news, recommendation, search, chart, earnings, load,
   get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();

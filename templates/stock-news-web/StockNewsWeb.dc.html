@@ -151,6 +151,7 @@
 <sc-if value="{{ noStockNews }}" hint-placeholder-val="{{ false }}">
 <div style="padding:16px 28px;border-top:1px solid #333333;font-size:13px;color:#A0A0A0">{{ ui.noNews }}</div>
 </sc-if>
+<div style="padding:22px 28px;border-top:1px solid #333333">{{ technicalAnalysis }}</div>
 <div style="height:28px"></div>
 </div>
 <div>
@@ -350,19 +351,18 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;finnhubToken&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;dac3t81r01qk72tt0kkgdac3t81r01qk72tt0kl0&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Live data&quot;},&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Heard It First&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;finnhubToken&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Live data&quot;},&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Heard It First&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
 class Component extends DCLogic {
   state = { screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed',
-    quotes:{}, liveNews:{}, liveRecs:{}, liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false };
+    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, chartRange:'6mo', chartHover:null,
+    liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false, detailLoading:false };
   componentDidMount() {
     if (!window.HIF) { this._poll = setInterval(() => { if (window.HIF) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
     this.syncLive();
+    this.syncDetail(this.state.selected);
   }
-  componentDidUpdate(prevProps, prevState) {
-    const s = this.state;
-    if (prevState.follows.join() !== s.follows.join() || prevProps.finnhubToken !== this.props.finnhubToken) this.syncLive();
-    else if (s.screen === 'feed' && prevState.screen !== 'feed') this.syncLive();
-    else if (s.screen === 'detail' && prevState.selected !== s.selected) this.syncLive([s.selected]);
+  componentDidUpdate(prevProps) {
+    if (prevProps && prevProps.finnhubToken !== this.props.finnhubToken) this.syncLive();
   }
   componentWillUnmount() { clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); }
   get token() { return (this.props.finnhubToken || '').trim(); }
@@ -391,6 +391,19 @@ class Component extends DCLogic {
       });
     }).catch(e => this.setState({ refreshing:false, liveStatus:'error', liveError:e.message }));
   }
+  syncDetail(symbol, force, requestedRange) {
+    if (!window.HIFLive || !symbol) return;
+    if (force) window.HIFLive.clearCache();
+    const range = requestedRange || this.state.chartRange;
+    this.setState({ detailLoading:true, chartHover:null });
+    Promise.all([window.HIFLive.chart(symbol, range), window.HIFLive.earnings(symbol, this.token)])
+      .then(([chart, earnings]) => this.setState({
+        detailLoading:false,
+        charts: chart ? Object.assign({}, this.state.charts, { [symbol + ':' + range]: chart }) : this.state.charts,
+        liveEarnings: earnings ? Object.assign({}, this.state.liveEarnings, { [symbol]: earnings }) : this.state.liveEarnings
+      }))
+      .catch(() => this.setState({ detailLoading:false }));
+  }
   liveSearch(q) {
     clearTimeout(this._search);
     if (!this.token || !window.HIFLive || q.trim().length < 1) { this.setState({ liveHits:null }); return; }
@@ -404,38 +417,83 @@ class Component extends DCLogic {
   go(screen) { this.setState(s => ({ screen, prev: (s.screen === 'paywall') ? s.prev : s.screen })); }
   flash(toast) { this.setState({ toast }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast:'' }), 2200); }
   activateFromKeyboard(action, event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); action(); } }
+  openTicker(ticker) {
+    this.setState({ selected:ticker, screen:'detail', prev:this.state.screen });
+    this.syncLive([ticker]);
+    this.syncDetail(ticker);
+  }
   navItem(key, label, count) {
     const on = this.state.screen === key || (key === 'feed' && this.state.screen === 'detail');
     return { key, label, count: count || '', on, off: !on, go: () => this.go(key) };
   }
-  series(ticker, trend) {
-    let seed = 0;
-    for (let i = 0; i < ticker.length; i++) seed = (seed * 31 + ticker.charCodeAt(i)) % 9973;
-    const n = 28, out = [];
-    let v = 40;
-    for (let i = 0; i < n; i++) {
-      seed = (seed * 1103515245 + 12345) % 2147483648;
-      const noise = ((seed / 2147483648) - 0.5) * 22;
-      v = Math.max(6, Math.min(94, v + trend * (60 / n) + noise));
-      out.push(v);
+  chartPath(values, width, height, min, max) {
+    const spread = Math.max(max - min, 0.01);
+    return values.map((v,i) => (i * width / Math.max(values.length - 1, 1)).toFixed(1) + ',' + (height - 12 - ((v - min) / spread) * (height - 24)).toFixed(1)).join(' ');
+  }
+  movingAverage(values, period) {
+    return values.map((_, i) => i < period - 1 ? null : values.slice(i - period + 1, i + 1).reduce((a,b) => a + b, 0) / period);
+  }
+  rsi(values, period) {
+    if (values.length <= period) return null;
+    let gains = 0, losses = 0;
+    for (let i = values.length - period; i < values.length; i++) {
+      const d = values[i] - values[i-1]; if (d >= 0) gains += d; else losses -= d;
     }
-    return out;
+    if (!losses) return 100;
+    return 100 - (100 / (1 + gains / losses));
   }
   chartEl(stock) {
-    const perf = stock.perf6m || '+0.0%';
-    const trend = perf.charAt(0) === '−' || perf.charAt(0) === '-' ? -1 : 1;
-    const pts = this.series(stock.ticker, trend);
-    const w = 900, h = 240, step = w / (pts.length - 1);
-    const d = pts.map((v,i) => (i*step).toFixed(1) + ',' + (h - 14 - v * 2.1).toFixed(1)).join(' ');
+    const ranges = [['1d','1D'],['5d','1W'],['1mo','1M'],['6mo','6M'],['ytd','YTD'],['1y','1Y'],['5y','5Y']];
+    const data = this.state.charts[stock.ticker + ':' + this.state.chartRange];
+    const points = data && data.points || [], values = points.map(p => p.close);
+    const w = 900, h = 240, min = values.length ? Math.min(...values) : 0, max = values.length ? Math.max(...values) : 1;
+    const d = values.length ? this.chartPath(values, w, h, min, max) : '';
+    const perf = values.length > 1 ? ((values[values.length-1] / values[0] - 1) * 100) : 0;
     return React.createElement('div', null,
-      React.createElement('div', { style:{ display:'flex', justifyContent:'space-between', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:'#A0A0A0', marginBottom:8 } },
-        React.createElement('span', null, '6M · ' + stock.ticker), React.createElement('span', null, perf)),
-      React.createElement('svg', { viewBox:'0 0 ' + w + ' ' + h, preserveAspectRatio:'none', style:{ width:'100%', height:h, display:'block' } },
+      React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:6, marginBottom:10 } },
+        React.createElement('span', { style:{ marginRight:'auto', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:'#A0A0A0' } }, stock.ticker + ' · ACTUAL PRICE'),
+        ...ranges.map(r => React.createElement('button', { key:r[0], onClick:()=>{this.setState({chartRange:r[0]});this.syncDetail(stock.ticker,false,r[0]);}, style:{ padding:'5px 8px', border:'1px solid #333333', background:this.state.chartRange===r[0]?'#D4AF37':'transparent', color:this.state.chartRange===r[0]?'#121212':'#A0A0A0', fontSize:9, fontWeight:800, cursor:'pointer' } }, r[1])),
+        React.createElement('span', { style:{ minWidth:68, textAlign:'right', fontSize:11, fontWeight:800, color:perf < 0 ? '#D4AF37' : '#F5F5F7' } }, values.length ? (perf < 0 ? '−' : '+') + Math.abs(perf).toFixed(1) + '%' : 'LOADING')),
+      values.length ? React.createElement('svg', { viewBox:'0 0 ' + w + ' ' + h, preserveAspectRatio:'none', style:{ width:'100%', height:h, display:'block' } },
         React.createElement('line', { x1:0, y1:h-1, x2:w, y2:h-1, stroke:'#333333', strokeWidth:1 }),
         React.createElement('line', { x1:0, y1:h*0.5, x2:w, y2:h*0.5, stroke:'#333333', strokeWidth:1, strokeDasharray:'2 6' }),
         React.createElement('line', { x1:0, y1:h*0.25, x2:w, y2:h*0.25, stroke:'#333333', strokeWidth:1, strokeDasharray:'2 6' }),
         React.createElement('polyline', { points:d, fill:'none', stroke:'#D4AF37', strokeWidth:2 })
-      ));
+      ) : React.createElement('div',{style:{height:h,display:'grid',placeItems:'center',border:'1px solid #333333',color:'#A0A0A0',fontSize:11,letterSpacing:'0.12em'}},this.state.detailLoading?'LOADING MARKET HISTORY…':'MARKET HISTORY UNAVAILABLE'));
+  }
+  technicalEl(stock) {
+    const data = this.state.charts[stock.ticker + ':' + this.state.chartRange];
+    const points = data && data.points || [], values = points.map(p => p.close);
+    if (values.length < 3) return React.createElement('div',{style:{color:'#A0A0A0',fontSize:12}},'TECHNICAL ANALYSIS LOADS WITH MARKET HISTORY');
+    const sma20 = this.movingAverage(values, Math.min(20, Math.max(3, Math.floor(values.length/5))));
+    const sma50 = this.movingAverage(values, Math.min(50, Math.max(5, Math.floor(values.length/2))));
+    const all = values.concat(sma20.filter(Boolean),sma50.filter(Boolean)), min=Math.min(...all), max=Math.max(...all), w=900,h=220;
+    const compact = arr => arr.map((v,i)=>v==null?null:{v,i}).filter(Boolean);
+    const pathFor = arr => { const rows=compact(arr), spread=Math.max(max-min,.01); return rows.map(p=>(p.i*w/Math.max(values.length-1,1)).toFixed(1)+','+(h-12-((p.v-min)/spread)*(h-24)).toFixed(1)).join(' '); };
+    const earnings = this.state.liveEarnings[stock.ticker] || [];
+    const markers = earnings.map(e => { const ts=Date.parse(e.date)/1000; let idx=0,best=Infinity; points.forEach((p,i)=>{const d=Math.abs(p.ts-ts);if(d<best){best=d;idx=i;}}); return Object.assign({},e,{idx,price:values[idx]}); }).filter(e=>e.price && e.idx>=0 && e.idx<values.length);
+    const rsi = this.rsi(values,Math.min(14,values.length-1)), last=values[values.length-1], m20=sma20[sma20.length-1], m50=sma50[sma50.length-1];
+    const signal = m20 && m50 ? (last>m20 && m20>m50?'BULLISH':last<m20 && m20<m50?'BEARISH':'MIXED') : 'BUILDING';
+    const spread=Math.max(max-min,.01), hover=this.state.chartHover;
+    return React.createElement('div',null,
+      React.createElement('div',{style:{display:'flex',gap:18,alignItems:'baseline',marginBottom:10}},
+        React.createElement('span',{style:{fontSize:9,letterSpacing:'.14em',color:'#D4AF37'}},'TECHNICAL + EARNINGS OVERLAY'),
+        React.createElement('span',{style:{fontSize:11,fontWeight:800}},signal),
+        React.createElement('span',{style:{fontSize:11,color:'#A0A0A0'}},'RSI '+(rsi==null?'—':rsi.toFixed(1))),
+        React.createElement('span',{style:{marginLeft:'auto',fontSize:10,color:'#A0A0A0'}},'PRICE · SMA FAST · SMA SLOW · EARNINGS')),
+      React.createElement('div',{style:{position:'relative'}},
+        React.createElement('svg',{viewBox:'0 0 '+w+' '+h,preserveAspectRatio:'none',onMouseLeave:()=>this.setState({chartHover:null}),style:{width:'100%',height:h,display:'block',background:'#1A1A1A'}},
+          React.createElement('polyline',{points:pathFor(values),fill:'none',stroke:'#F5F5F7',strokeWidth:1.5}),
+          React.createElement('polyline',{points:pathFor(sma20),fill:'none',stroke:'#D4AF37',strokeWidth:1.5}),
+          React.createElement('polyline',{points:pathFor(sma50),fill:'none',stroke:'#A0A0A0',strokeWidth:1,strokeDasharray:'5 5'}),
+          ...markers.map((e,i)=>React.createElement('g',{key:e.date,onMouseEnter:()=>this.setState({chartHover:e})},
+            React.createElement('line',{x1:e.idx*w/Math.max(values.length-1,1),y1:0,x2:e.idx*w/Math.max(values.length-1,1),y2:h,stroke:'#D4AF37',strokeWidth:1,strokeDasharray:'3 5'}),
+            React.createElement('circle',{cx:e.idx*w/Math.max(values.length-1,1),cy:h-12-((e.price-min)/spread)*(h-24),r:7,fill:'#D4AF37',stroke:'#121212',strokeWidth:2})))),
+        hover ? React.createElement('div',{style:{position:'absolute',right:10,top:10,padding:'10px 12px',background:'#121212',border:'1px solid #D4AF37',fontSize:11,lineHeight:1.5}},
+          React.createElement('div',{style:{fontWeight:800,color:'#D4AF37'}},'EARNINGS · '+hover.date),
+          React.createElement('div',null,'EPS actual: '+(hover.actual==null?'—':hover.actual)),
+          React.createElement('div',null,'Estimate: '+(hover.estimate==null?'—':hover.estimate)),
+          React.createElement('div',null,'Surprise: '+(hover.surprisePercent==null?'—':Number(hover.surprisePercent).toFixed(1)+'%'))) : null));
   }
   renderVals() {
     const H = window.HIF;
@@ -467,8 +525,8 @@ class Component extends DCLogic {
     }
     const feed = baseFeed.map(n => Object.assign({}, n, {
       down: !n.up,
-      open: () => { this.setState({ selected:n.ticker }); this.go('detail'); },
-      keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:n.ticker }); this.go('detail'); }, event)
+      open: () => this.openTicker(n.ticker),
+      keyOpen: event => this.activateFromKeyboard(() => this.openTicker(n.ticker), event)
     }));
     const q = s.query.trim().toUpperCase();
     const pool = UNIVERSE.filter(x => !q || x.ticker.includes(q) || x.name.toUpperCase().includes(q));
@@ -504,8 +562,8 @@ class Component extends DCLogic {
       score: live ? '#' + storyCount(r.ticker) : r.score,
       down: !r.up,
       alert: isFree ? u.pushOff : u.pushOn,
-      open: () => { this.setState({ selected:r.ticker }); this.go('detail'); },
-      keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:r.ticker }); this.go('detail'); }, event)
+      open: () => this.openTicker(r.ticker),
+      keyOpen: event => this.activateFromKeyboard(() => this.openTicker(r.ticker), event)
     }));
     return {
       ui: u,
@@ -527,7 +585,7 @@ class Component extends DCLogic {
       liveLabel: live
         ? (s.liveMode === 'proxy' ? 'LIVE · FINNHUB' : 'LIVE · FINNHUB (DIRECT)')
         : (s.refreshing ? 'FINNHUB …' : (s.liveStatus === 'error' ? 'FINNHUB · ' + (s.liveError || 'error').toUpperCase() : 'DEMO DATA')),
-      refreshTicker: () => this.syncLive([stock.ticker], true),
+      refreshTicker: () => { this.syncLive([stock.ticker], true); this.syncDetail(stock.ticker, true); },
       refreshLabel: s.refreshing ? '…' : '↻',
       signOut: () => { this.setState({ plan:'free', follows:['NVDA','AAPL','TSLA'] }); this.go('feed'); this.flash(u.signOut.toUpperCase()); },
       goPaywall: () => this.go('paywall'),
@@ -561,9 +619,10 @@ class Component extends DCLogic {
       }),
       chart: this.chartEl(stock),
       stockNews: (live && LN[stock.ticker] && LN[stock.ticker].length)
-        ? LN[stock.ticker].map(n => ({ headline:n.headline, source:n.source, stamp:n.stamp, score:'' }))
-        : NEWS.filter(n => n.ticker === stock.ticker).map(n => Object.assign({}, n, { headline: n.headline[L] })),
+        ? LN[stock.ticker].slice(0,5).map(n => ({ headline:n.headline, source:n.source, stamp:n.stamp, score:'' }))
+        : NEWS.filter(n => n.ticker === stock.ticker).slice(0,5).map(n => Object.assign({}, n, { headline: n.headline[L] })),
       noStockNews: live ? !(LN[stock.ticker] && LN[stock.ticker].length) : !NEWS.some(n => n.ticker === stock.ticker),
+      technicalAnalysis: this.technicalEl(stock),
       freqNote: isFree ? u.freqFree : u.freqPro,
       detailActionLabel: following ? (isFree ? u.enablePush : u.pushEnabled.replace('%s', stock.ticker)) : u.addToList.replace('%s', stock.ticker),
       primaryDetailAction: () => {

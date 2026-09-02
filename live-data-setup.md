@@ -10,10 +10,8 @@ The Finnhub dashboard shows one 40-character string — that whole string **is**
 two 20-char halves are rejected on their own). Verified working against `/quote`,
 `/company-news`, `/search` and `/stock/recommendation`.
 
-It is currently set as the default of the `finnhubToken` tweak so the prototype runs live
-out of the box, which means **it travels with the source** (repo, downloads, any page I
-publish). Once the proxy site is up, clear that tweak default and keep the key only in
-`FINNHUB_KEY`.
+The deployed site keeps the key only in Netlify's protected `FINNHUB_KEY` environment
+variable. Never place it in the `finnhubToken` tweak default or commit it to source.
 
 ## 1. Deploy from the repo (needed for the proxy)
 
@@ -38,19 +36,23 @@ Sanity check: `https://<site>/api/finnhub?path=/quote&symbol=NVDA` should return
 | In the app | Endpoint | Notes |
 | --- | --- | --- |
 | Price, daily change, tape | `/quote` | cached 60s |
-| Feed + tape headlines, detail tape | `/company-news` | cached 5 min, last 48h, English only |
+| Feed + tape headlines, detail tape | `/company-news` | cached 5 min, latest five from a 30-day lookup, English only |
 | Screener search | `/search` | cached 5 min, debounced 350ms |
 | Analyst card | `/stock/recommendation` | cached 15 min; works on this key (NVDA: 65 / 3 / 1 → 94%); **card hides itself** if a plan blocks it |
+| Price charts | Yahoo chart service via `/chart` | actual history for 1D, 1W, 1M, 6M, YTD, 1Y and 5Y |
+| Earnings overlay | `/stock/earnings` | recent EPS actuals, estimates and surprises |
 
-Not available on the free plan, so these stay demo values: news score, volume vs average,
-earnings countdown, 6-month chart (the chart is generated per ticker from its 6-month figure).
+News score, volume versus average and the forward earnings countdown remain demo values.
+Price history, technical averages, RSI and available historical earnings are live.
 
 ## 3. When to refresh
 
-Manual by design — no polling:
+The detail page loads automatically — no polling:
 
 - opening the **Feed** triggers a sync (usually served from cache),
-- the **↻** button on a ticker's detail page forces a fresh fetch for that ticker,
+- opening any ticker loads its quote, five latest stories, analyst data, selected chart range and earnings,
+- changing a chart range fetches that range immediately,
+- the **↻** button remains as an explicit retry that bypasses the client cache,
 - following a new ticker fetches it immediately.
 
 ## 4. Running without the proxy (local dev)
