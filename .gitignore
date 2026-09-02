@@ -1,0 +1,5 @@
+# Local Netlify folder
+.netlify
+
+# Generated Netlify publish bundle
+dist
