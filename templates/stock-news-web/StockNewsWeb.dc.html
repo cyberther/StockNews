@@ -142,11 +142,11 @@
 </div>
 <div style="padding:14px 28px 6px;border-top:1px solid #333333;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.tape }} · {{ stock.ticker }}</div>
 <sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
-<div style="display:grid;grid-template-columns:96px 1fr 48px;gap:16px;padding:14px 28px;border-top:1px solid #333333;align-items:baseline">
+<article role="button" tabIndex="0" onClick="{{ n.open }}" onKeyDown="{{ n.keyOpen }}" style="display:grid;grid-template-columns:96px 1fr 48px;gap:16px;padding:14px 28px;border-top:1px solid #333333;align-items:baseline;cursor:pointer">
 <span style="font-size:11px;letter-spacing:0.06em;color:#A0A0A0">{{ n.stamp }}</span>
 <div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.25;text-wrap:pretty">{{ n.headline }}</div><div style="font-size:11px;color:#A0A0A0;margin-top:3px">{{ n.source }}</div></div>
 <span style="font-family:var(--font-heading);font-weight:800;font-size:14px;text-align:right">{{ n.score }}</span>
-</div>
+</article>
 </sc-for>
 <sc-if value="{{ noStockNews }}" hint-placeholder-val="{{ false }}">
 <div style="padding:16px 28px;border-top:1px solid #333333;font-size:13px;color:#A0A0A0">{{ ui.noNews }}</div>
@@ -329,7 +329,7 @@
 </div>
 </sc-for>
 <div style="padding:14px 18px"><button onClick="{{ goSearch }}" style="width:100%;min-height:40px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.addTicker }}</button></div>
-</div>
+</article>
 
 </div>
 
@@ -407,6 +407,14 @@ class Component extends DCLogic {
   go(screen) { this.setState(s => ({ screen, prev: (s.screen === 'paywall') ? s.prev : s.screen })); }
   flash(toast) { this.setState({ toast }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast:'' }), 2200); }
   activateFromKeyboard(action, event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); action(); } }
+  openNews(item) {
+    if (item && /^https?:\/\//i.test(item.url || '')) {
+      const opened = window.open(item.url, '_blank', 'noopener,noreferrer');
+      if (opened) opened.opener = null;
+      return;
+    }
+    if (item && item.ticker) this.openTicker(item.ticker);
+  }
   openTicker(ticker) {
     this.setState({ selected:ticker, screen:'detail', prev:this.state.screen });
     this.syncLive([ticker]);
@@ -504,7 +512,7 @@ class Component extends DCLogic {
       const syms = s.feedTab === 'following' ? s.follows : Object.keys(LN);
       const rows = [];
       syms.forEach(t => (LN[t] || []).forEach(n => rows.push({
-        ticker:t, source:n.source, stamp:n.stamp, ts:n.ts, headline:n.headline, watch:n.summary || '',
+        ticker:t, source:n.source, stamp:n.stamp, ts:n.ts, headline:n.headline, watch:n.summary || '', url:n.url || '',
         score:'#' + storyCount(t), vol:'—', delta:(Q[t] || {}).move || '—', up:(Q[t] || {}).up !== false
       })));
       baseFeed = rows.sort((a,b) => b.ts - a.ts).slice(0, 14);
@@ -515,8 +523,8 @@ class Component extends DCLogic {
     }
     const feed = baseFeed.map(n => Object.assign({}, n, {
       down: !n.up,
-      open: () => this.openTicker(n.ticker),
-      keyOpen: event => this.activateFromKeyboard(() => this.openTicker(n.ticker), event)
+      open: () => this.openNews(n),
+      keyOpen: event => this.activateFromKeyboard(() => this.openNews(n), event)
     }));
     const q = s.query.trim().toUpperCase();
     const pool = UNIVERSE.filter(x => !q || x.ticker.includes(q) || x.name.toUpperCase().includes(q));
@@ -607,9 +615,13 @@ class Component extends DCLogic {
         storiesLabel: storiesOf(stock.ticker) + ' ' + u.storiesWord
       }),
       chart: this.chartEl(stock),
-      stockNews: (live && LN[stock.ticker] && LN[stock.ticker].length)
-        ? LN[stock.ticker].slice(0,5).map(n => ({ headline:n.headline, source:n.source, stamp:n.stamp, score:'' }))
-        : NEWS.filter(n => n.ticker === stock.ticker).slice(0,5).map(n => Object.assign({}, n, { headline: n.headline[L] })),
+      stockNews: ((live && LN[stock.ticker] && LN[stock.ticker].length)
+        ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, headline:n.headline, source:n.source, stamp:n.stamp, score:'', url:n.url || '' }))
+        : NEWS.filter(n => n.ticker === stock.ticker).slice(0,5).map(n => Object.assign({}, n, { headline: n.headline[L] })))
+        .map(n => Object.assign({}, n, {
+          open: () => this.openNews(n),
+          keyOpen: event => this.activateFromKeyboard(() => this.openNews(n), event)
+        })),
       noStockNews: live ? !(LN[stock.ticker] && LN[stock.ticker].length) : !NEWS.some(n => n.ticker === stock.ticker),
       technicalAnalysis: this.technicalEl(stock),
       freqNote: isFree ? u.freqFree : u.freqPro,
