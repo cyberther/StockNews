@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Stock news app" description="Mobile-first stock news product: auth, news feed, watchlist, search, stock detail, paywall and account, with a desktop feed frame." -->
+<helmet><script src="./ds-base.js"></script><style>@keyframes obfade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0}</style></helmet>
+<div style="min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body)">
+<div style="display:flex;align-items:baseline;gap:16px;padding:20px 24px;border-bottom:2px solid var(--color-divider)">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:20px;letter-spacing:-0.02em">{{ brand }}</div>
+<div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Stock news — product prototype</div>
+<div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+<span class="tag tag-outline">{{ planLabel }}</span>
+<button class="btn btn-secondary" onClick="{{ togglePlan }}">{{ planToggleLabel }}</button>
+</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;padding:40px 24px 80px;justify-content:center">
+
+<div>
+<div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Mobile — tap through it</div>
+<div style="width:390px;height:800px;background:#201e1d;padding:10px;box-shadow:var(--shadow-lg)">
+<div style="width:100%;height:100%;background:var(--color-bg);display:flex;flex-direction:column;overflow:hidden;position:relative">
+<div style="display:flex;justify-content:space-between;padding:8px 16px 2px;font-size:11px;font-weight:600;color:var(--color-neutral-700)"><span>9:41</span><span>▮▮▮ ⌁</span></div>
+
+<sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;padding:32px 24px 24px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:0.95;letter-spacing:-0.03em">{{ brand }}</div>
+<div style="height:2px;background:var(--color-accent);margin:16px 0 20px;width:64px"></div>
+<p style="font-size:15px;line-height:1.5;margin:0 0 4px">The news that moves your stocks — followed, scanned every two hours, pushed to you first.</p>
+<div style="margin-top:auto;display:flex;flex-direction:column;gap:10px">
+<button class="btn btn-secondary btn-block" onClick="{{ signIn }}" style="min-height:48px;margin-top:0">Continue with Google</button>
+<button class="btn btn-secondary btn-block" onClick="{{ signIn }}" style="min-height:48px;margin-top:0">Continue with Apple</button>
+<div class="field" style="margin-top:6px"><label>Or use your email</label><input class="input" placeholder="you@email.com" style="min-height:44px"></div>
+<button class="btn btn-primary btn-block" onClick="{{ signIn }}" style="min-height:48px;margin-top:0">Continue with email</button>
+<div style="font-size:11px;color:var(--color-neutral-600);margin-top:4px">Free accounts read the news. Pro follows stocks and gets it first.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isFeed }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:10px 16px 12px;border-bottom:2px solid var(--color-divider)">
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;letter-spacing:-0.02em">Feed</div><div style="margin-left:auto;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">{{ scanLabel }}</div></div>
+<div style="display:flex;gap:0;margin-top:10px;border:1px solid var(--color-divider)">
+<button class="btn" onClick="{{ setFeedFollowing }}" style="position:relative;overflow:hidden;flex:1;justify-content:flex-start;min-height:38px;border:0;background:transparent">
+<sc-if value="{{ feedFollowingOn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--color-bg)">Following</span></sc-if>
+<sc-if value="{{ feedFollowingOff }}" hint-placeholder-val="{{ false }}"><span>Following</span></sc-if>
+</button>
+<button class="btn" onClick="{{ setFeedMarket }}" style="position:relative;overflow:hidden;flex:1;justify-content:flex-start;min-height:38px;border:0;border-left:1px solid var(--color-divider);background:transparent">
+<sc-if value="{{ feedMarketOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--color-bg)">Market</span></sc-if>
+<sc-if value="{{ feedMarketOff }}" hint-placeholder-val="{{ true }}"><span>Market</span></sc-if>
+</button>
+</div>
+</div>
+<div style="flex:1;overflow-y:auto">
+<sc-for list="{{ feed }}" as="item" hint-placeholder-count="4">
+<div onClick="{{ item.open }}" style="display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--color-divider);cursor:pointer;align-items:flex-start">
+<div class="grayscale" style="width:78px;height:78px;flex:none;background:var(--color-surface);background-image:repeating-linear-gradient(135deg,transparent 0 6px,rgba(32,30,29,0.14) 6px 7px)"></div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span style="font-family:var(--font-heading);font-weight:800;font-size:12px;color:var(--color-accent)">{{ item.ticker }}</span><span style="font-size:11px;color:var(--color-neutral-600)">{{ item.source }} · {{ item.time }}</span></div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.2;letter-spacing:-0.01em;text-wrap:pretty">{{ item.headline }}</div>
+<div style="font-size:12px;color:var(--color-neutral-700);line-height:1.45;margin-top:4px">{{ item.body }}</div>
+<div style="display:flex;gap:8px;align-items:center;margin-top:8px"><span style="font-family:var(--font-heading);font-weight:800;font-size:13px">{{ item.score }}</span><span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">news score</span></div>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ showFeedGate }}" hint-placeholder-val="{{ false }}">
+<div style="margin:16px;padding:16px;background:var(--color-surface);border-left:2px solid var(--color-accent)">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.2">Pro readers saw these 2 hours ago</div>
+<p style="font-size:13px;color:var(--color-neutral-700);margin:6px 0 12px">Free gets the news on delay and up to 3 followed stocks. Pro follows everything and gets pushed first.</p>
+<button class="btn btn-primary" onClick="{{ goPaywall }}" style="min-height:42px">See Pro</button>
+</div>
+</sc-if>
+<div style="height:24px"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isWatch }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:10px 16px 12px;border-bottom:2px solid var(--color-divider);display:flex;align-items:baseline;gap:8px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:26px;letter-spacing:-0.02em">Watchlist</div>
+<div style="margin-left:auto;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)"><sc-if value="{{ capWarn }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent-700)">{{ capLabel }}</span></sc-if><sc-if value="{{ capOk }}" hint-placeholder-val="{{ true }}"><span>{{ capLabel }}</span></sc-if></div>
+</div>
+<div style="flex:1;overflow-y:auto">
+<sc-for list="{{ follows }}" as="row" hint-placeholder-count="3">
+<div onClick="{{ row.open }}" style="padding:14px 16px;border-bottom:1px solid var(--color-divider);cursor:pointer">
+<div style="display:flex;align-items:baseline;gap:10px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px">{{ row.ticker }}</div>
+<div style="font-size:12px;color:var(--color-neutral-600);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ row.price }}</div>
+<div style="font-size:13px;font-weight:600;color:var(--color-text);min-width:56px;text-align:right"><sc-if value="{{ row.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent-700)">{{ row.move }}</span></sc-if><sc-if value="{{ row.up }}" hint-placeholder-val="{{ true }}"><span>{{ row.move }}</span></sc-if></div>
+</div>
+<div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+<span class="tag tag-neutral">{{ row.scoreLabel }}</span>
+<span class="tag tag-neutral">{{ row.analyst }}</span>
+<span style="margin-left:auto;font-size:11px;color:var(--color-neutral-600)"><sc-if value="{{ row.alertWarn }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent-700)">{{ row.alert }}</span></sc-if><sc-if value="{{ row.alertOk }}" hint-placeholder-val="{{ true }}"><span>{{ row.alert }}</span></sc-if></span>
+</div>
+<div style="font-size:12px;color:var(--color-neutral-700);margin-top:8px;line-height:1.4">{{ row.latest }}</div>
+</div>
+</sc-for>
+<sc-if value="{{ atCap }}" hint-placeholder-val="{{ true }}">
+<div style="margin:16px;padding:16px;background:var(--color-surface);border-left:2px solid var(--color-accent)">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.2">3 of 3 slots used</div>
+<p style="font-size:13px;color:var(--color-neutral-700);margin:6px 0 12px">Free tracks three stocks with no push notifications. Pro is unlimited and scans every 30 minutes.</p>
+<button class="btn btn-primary" onClick="{{ goPaywall }}" style="min-height:42px">Unlock unlimited</button>
+</div>
+</sc-if>
+<div style="padding:16px"><button class="btn btn-secondary btn-block" onClick="{{ goSearch }}" style="min-height:44px">Add a stock</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:10px 16px 12px;border-bottom:2px solid var(--color-divider)">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:26px;letter-spacing:-0.02em;margin-bottom:10px">Add a stock</div>
+<input class="input" placeholder="Ticker or company — e.g. NVDA" value="{{ query }}" onChange="{{ onQuery }}" style="min-height:44px">
+</div>
+<div style="flex:1;overflow-y:auto">
+<div style="padding:12px 16px 6px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">{{ resultsLabel }}</div>
+<sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--color-divider)">
+<div style="flex:1;min-width:0">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ r.ticker }}</div>
+<div style="font-size:12px;color:var(--color-neutral-600);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div>
+</div>
+<div style="font-size:12px;color:var(--color-neutral-600);text-align:right;min-width:64px">{{ r.stories }}</div>
+<button class="btn" onClick="{{ r.toggle }}" style="position:relative;overflow:hidden;min-height:36px;background:transparent;border:1px solid var(--color-divider)">
+<sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--color-bg)">Follow</span></sc-if>
+<sc-if value="{{ r.following }}" hint-placeholder-val="{{ false }}"><span>Following</span></sc-if>
+</button>
+</div>
+</sc-for>
+<div style="height:24px"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:8px 16px 12px;border-bottom:2px solid var(--color-divider)">
+<button class="btn btn-ghost" onClick="{{ back }}" style="margin-bottom:6px">← Back</button>
+<div style="display:flex;align-items:baseline;gap:10px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:32px;letter-spacing:-0.03em">{{ stock.ticker }}</div>
+<div style="font-size:12px;color:var(--color-neutral-600);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ stock.name }}</div>
+<div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:20px">{{ stock.price }}</div><div style="font-size:13px;font-weight:600;color:var(--color-text)"><sc-if value="{{ stock.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent-700)">{{ stock.move }}</span></sc-if><sc-if value="{{ stock.up }}" hint-placeholder-val="{{ true }}"><span>{{ stock.move }}</span></sc-if></div></div>
+</div>
+</div>
+<div style="flex:1;overflow-y:auto">
+<div style="padding:16px">{{ chart }}</div>
+<div style="display:flex;gap:0;border-top:1px solid var(--color-divider);border-bottom:2px solid var(--color-divider)">
+<div style="flex:1;padding:14px 16px;border-right:1px solid var(--color-divider)">
+<div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:4px">News score</div>
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:40px;line-height:1;letter-spacing:-0.03em;color:var(--color-accent-700)">{{ stock.score }}</div><div style="font-size:11px;color:var(--color-neutral-600)">of 100 · 28 stories</div></div>
+</div>
+<div style="flex:1;padding:14px 16px">
+<div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:4px">Analysts</div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:20px;line-height:1.1">{{ stock.analyst }}</div>
+<div style="font-size:11px;color:var(--color-neutral-600);margin-top:2px">{{ stock.analystDetail }}</div>
+</div>
+</div>
+<div style="padding:16px;border-bottom:2px solid var(--color-divider)">
+<div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:8px">Scan for news every</div>
+<div class="seg" style="width:100%">
+<label class="seg-opt" style="flex:1;justify-content:flex-start"><input type="radio" name="freq" checked="{{ freq30 }}" onChange="{{ setFreq30 }}"><span>30 min</span></label>
+<label class="seg-opt" style="flex:1;justify-content:flex-start"><input type="radio" name="freq" checked="{{ freq2h }}" onChange="{{ setFreq2h }}"><span>2 hours</span></label>
+<label class="seg-opt" style="flex:1;justify-content:flex-start"><input type="radio" name="freq" checked="{{ freqDay }}" onChange="{{ setFreqDay }}"><span>Daily</span></label>
+</div>
+<div style="font-size:11px;color:var(--color-neutral-600);margin-top:8px"><sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent-700)">{{ freqNote }}</span></sc-if><sc-if value="{{ isProTier }}" hint-placeholder-val="{{ false }}"><span>{{ freqNote }}</span></sc-if></div>
+<button class="btn btn-primary btn-block" onClick="{{ primaryDetailAction }}" style="min-height:46px">{{ detailActionLabel }}</button>
+</div>
+<div style="padding:12px 16px 6px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Latest on {{ stock.ticker }}</div>
+<sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
+<div style="display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--color-divider)">
+<div class="grayscale" style="width:64px;height:64px;flex:none;background:var(--color-surface);background-image:repeating-linear-gradient(135deg,transparent 0 6px,rgba(32,30,29,0.14) 6px 7px)"></div>
+<div style="flex:1;min-width:0">
+<div style="font-size:11px;color:var(--color-neutral-600);margin-bottom:3px">{{ n.source }} · {{ n.time }}</div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:15px;line-height:1.2;text-wrap:pretty">{{ n.headline }}</div>
+<div style="font-size:12px;color:var(--color-neutral-700);margin-top:4px">{{ n.body }}</div>
+</div>
+</div>
+</sc-for>
+<div style="height:24px"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPaywall }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:8px 16px 12px;border-bottom:2px solid var(--color-divider)">
+<button class="btn btn-ghost" onClick="{{ back }}" style="margin-bottom:6px">← Back</button>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">Get the news first</div>
+</div>
+<div style="flex:1;overflow-y:auto">
+<table class="table"><thead><tr><th>What you get</th><th style="text-align:center">Free</th><th style="text-align:center;color:var(--color-accent)">Pro</th></tr></thead><tbody>
+<sc-for list="{{ planRows }}" as="p" hint-placeholder-count="6">
+<tr><td style="font-size:13px">{{ p.label }}</td><td style="text-align:center;font-size:13px;color:var(--color-neutral-600)">{{ p.free }}</td><td style="text-align:center;font-size:13px;font-weight:600">{{ p.pro }}</td></tr>
+</sc-for>
+</tbody></table>
+<div style="padding:16px">
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:34px;letter-spacing:-0.03em">$7</div><div style="font-size:13px;color:var(--color-neutral-600)">/ month · or $60 a year</div></div>
+<button class="btn btn-primary btn-block" onClick="{{ upgrade }}" style="min-height:48px">Start 7 days free</button>
+<button class="btn btn-secondary btn-block" onClick="{{ back }}" style="min-height:44px">Stay on Free</button>
+<div style="font-size:11px;color:var(--color-neutral-600);margin-top:10px">Cancel any time. Free keeps 3 stocks and delayed news.</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMore }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:10px 16px 12px;border-bottom:2px solid var(--color-divider);font-family:var(--font-heading);font-weight:800;font-size:26px;letter-spacing:-0.02em">More</div>
+<div style="flex:1;overflow-y:auto">
+<sc-for list="{{ moreItems }}" as="m" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--color-divider)">
+<div style="flex:1"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ m.label }}</div><div style="font-size:12px;color:var(--color-neutral-600)">{{ m.note }}</div></div>
+<span class="tag tag-outline">Soon</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:10px 16px 12px;border-bottom:2px solid var(--color-divider);font-family:var(--font-heading);font-weight:800;font-size:26px;letter-spacing:-0.02em">Account</div>
+<div style="flex:1;overflow-y:auto">
+<div style="padding:16px;border-bottom:2px solid var(--color-divider)">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px">{{ accountName }}</div>
+<div style="font-size:12px;color:var(--color-neutral-600)">Signed in with Google · {{ accountEmail }}</div>
+<div style="display:flex;gap:8px;margin-top:10px;align-items:center"><span class="tag tag-accent">{{ planLabel }}</span><span style="font-size:12px;color:var(--color-neutral-600)">{{ planNote }}</span></div>
+<button class="btn btn-primary btn-block" onClick="{{ accountPlanAction }}" style="min-height:44px">{{ accountPlanLabel }}</button>
+</div>
+<div style="padding:16px;border-bottom:1px solid var(--color-divider)">
+<div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:10px">Notifications</div>
+<sc-for list="{{ notifRows }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px;padding:8px 0"><div style="flex:1"><div style="font-size:14px;font-weight:600">{{ s.label }}</div><div style="font-size:11px;color:var(--color-neutral-600)">{{ s.note }}</div></div><span class="tag tag-neutral">{{ s.value }}</span></div>
+</sc-for>
+</div>
+<div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+<button class="btn btn-secondary btn-block" style="min-height:42px;margin-top:0">Default scan frequency</button>
+<button class="btn btn-secondary btn-block" style="min-height:42px;margin-top:0">Quiet hours</button>
+<button class="btn btn-secondary btn-block" style="min-height:42px;margin-top:0">Manage subscription</button>
+<button class="btn btn-secondary btn-block" onClick="{{ signOut }}" style="min-height:42px;margin-top:0;color:var(--color-accent-700)">Sign out</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;border-top:2px solid var(--color-divider);background:var(--color-bg)">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+<button onClick="{{ t.go }}" style="position:relative;flex:1;padding:12px 4px 14px;border:0;background:transparent;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:var(--color-neutral-600)">
+<sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-2px;left:0;right:0;height:2px;background:var(--color-accent)"></span><span style="color:var(--color-accent)">{{ t.label }}</span></sc-if>
+<sc-if value="{{ t.off }}" hint-placeholder-val="{{ true }}"><span>{{ t.label }}</span></sc-if>
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:16px;right:16px;bottom:76px;padding:12px 14px;background:#201e1d;color:var(--color-bg);animation:obfade 0.2s ease-out">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:13px">{{ toast }}</div>
+</div>
+</sc-if>
+</div>
+</div>
+</div>
+
+<div style="flex:1;min-width:620px;max-width:900px">
+<div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600);margin-bottom:12px">Desktop — same system, wider grid</div>
+<div style="border:2px solid var(--color-divider);background:var(--color-bg);box-shadow:var(--shadow-md)">
+<div class="nav"><div class="nav-brand">{{ brand }}</div><a href="#" aria-current="page">Feed</a><a href="#">Watchlist</a><a href="#">Screener</a><a href="#">Portfolio</a><button class="btn btn-primary" style="margin-left:8px">Go Pro</button></div>
+<div style="display:grid;grid-template-columns:1fr 280px">
+<div style="border-right:2px solid var(--color-divider)">
+<div style="padding:16px 20px;border-bottom:2px solid var(--color-divider);display:flex;align-items:baseline;gap:12px"><div style="font-family:var(--font-heading);font-weight:800;font-size:28px;letter-spacing:-0.02em">Following</div><div style="margin-left:auto;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-neutral-600)">{{ scanLabel }}</div></div>
+<sc-for list="{{ feed }}" as="d" hint-placeholder-count="4">
+<div style="display:flex;gap:16px;padding:18px 20px;border-bottom:1px solid var(--color-divider)">
+<div class="grayscale" style="width:132px;height:88px;flex:none;background:var(--color-surface);background-image:repeating-linear-gradient(135deg,transparent 0 6px,rgba(32,30,29,0.14) 6px 7px)"></div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:4px"><span style="font-family:var(--font-heading);font-weight:800;font-size:12px;color:var(--color-accent)">{{ d.ticker }}</span><span style="font-size:11px;color:var(--color-neutral-600)">{{ d.source }} · {{ d.time }}</span><span style="margin-left:auto;font-family:var(--font-heading);font-weight:800;font-size:13px">{{ d.score }}</span></div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:20px;line-height:1.15;letter-spacing:-0.015em;text-wrap:pretty">{{ d.headline }}</div>
+<div style="font-size:13px;color:var(--color-neutral-700);margin-top:5px;line-height:1.5">{{ d.body }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+<div>
+<div style="padding:16px 16px 10px;border-bottom:2px solid var(--color-divider);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-neutral-600)">Watchlist</div>
+<sc-for list="{{ follows }}" as="w" hint-placeholder-count="3">
+<div style="padding:12px 16px;border-bottom:1px solid var(--color-divider)">
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ w.ticker }}</div><div style="margin-left:auto;font-size:13px">{{ w.price }}</div><div style="font-size:12px;font-weight:600;color:var(--color-text)"><sc-if value="{{ w.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent-700)">{{ w.move }}</span></sc-if><sc-if value="{{ w.up }}" hint-placeholder-val="{{ true }}"><span>{{ w.move }}</span></sc-if></div></div>
+<div style="font-size:11px;color:var(--color-neutral-600);margin-top:4px">{{ w.scoreLabel }} · {{ w.alert }}</div>
+</div>
+</sc-for>
+<div style="padding:16px"><button class="btn btn-secondary btn-block" style="min-height:40px;margin-top:0">Add a stock</button></div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Openbell&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Alex Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
+const RED = 'var(--color-accent-700)';
+const NEWS = [
+  { ticker:'NVDA', source:'Reuters', time:'12m ago', score:'+72', headline:'Nvidia lifts its data-centre outlook again', body:'The company says orders for its newest chips are booked out into next year — a good sign for revenue, but it leans on a handful of very large customers.' },
+  { ticker:'AAPL', source:'Bloomberg', time:'48m ago', score:'+18', headline:'Apple starts a quieter services push in India', body:'Subscriptions grew faster than hardware last quarter. Small numbers today, but it is the part of the business investors watch for margin.' },
+  { ticker:'TSLA', source:'WSJ', time:'1h ago', score:'−34', headline:'Tesla trims prices in Europe for the second time this quarter', body:'Cheaper cars usually mean more deliveries and thinner profit per car. Watch the margin line at the next earnings call.' },
+  { ticker:'NVDA', source:'The Verge', time:'2h ago', score:'+9', headline:'A new rival chip lands, and it is aimed squarely at inference', body:'Competition is arriving in the cheaper end of AI computing first. Not an immediate threat to revenue, worth tracking.' },
+  { ticker:'AAPL', source:'FT', time:'3h ago', score:'−6', headline:'Regulators ask Apple for more detail on App Store fees', body:'Another inquiry rather than a ruling. These have historically moved the stock only when a fine or a rule change actually lands.' }
+];
+const FOLLOWS = {
+  NVDA: { ticker:'NVDA', name:'NVIDIA Corp', price:'$184.20', move:'+2.4%', up:true, score:'+72', analyst:'Buy · 41 of 52', analystDetail:'41 buy · 9 hold · 2 sell', latest:'Data-centre outlook raised — 3 new stories in the last hour.' },
+  AAPL: { ticker:'AAPL', name:'Apple Inc', price:'$241.06', move:'+0.3%', up:true, score:'+18', analyst:'Hold · mixed', analystDetail:'19 buy · 22 hold · 4 sell', latest:'Services growth in India; a fresh App Store inquiry in the EU.' },
+  TSLA: { ticker:'TSLA', name:'Tesla Inc', price:'$318.77', move:'−1.8%', up:false, score:'−34', analyst:'Hold · cautious', analystDetail:'12 buy · 20 hold · 11 sell', latest:'European price cuts are pressuring the margin story.' }
+};
+const UNIVERSE = [
+  { ticker:'NVDA', name:'NVIDIA Corp', stories:'28 today' },
+  { ticker:'AAPL', name:'Apple Inc', stories:'19 today' },
+  { ticker:'TSLA', name:'Tesla Inc', stories:'31 today' },
+  { ticker:'MSFT', name:'Microsoft Corp', stories:'14 today' },
+  { ticker:'AMZN', name:'Amazon.com Inc', stories:'22 today' },
+  { ticker:'ASML', name:'ASML Holding NV', stories:'6 today' },
+  { ticker:'NOVO', name:'Novo Nordisk A/S', stories:'11 today' }
+];
+class Component extends DCLogic {
+  state = { screen:'auth', plan:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', freq:'2h', toast:'', prev:'feed' };
+  get plan() { return this.state.plan || this.props.plan || 'free'; }
+  go(screen) { this.setState(s => ({ screen, prev: (s.screen === 'paywall' || s.screen === 'detail') ? s.prev : s.screen })); }
+  flash(toast) { this.setState({ toast }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast:'' }), 2200); }
+  tab(key, label) {
+    const on = this.state.screen === key || (key === 'feed' && this.state.screen === 'detail');
+    return { label, on, off: !on, go: () => this.go(key) };
+  }
+  chartEl() {
+    const pts = [4,12,9,18,15,26,22,34,30,42,38,52,46,60,58,72,64,80,76,92,86,104,96,116];
+    const d = pts.map((v,i) => (i*14+8) + ',' + (120 - v)).join(' ');
+    return React.createElement('div', { style:{ position:'relative' } },
+      React.createElement('div', { style:{ fontSize:10, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--color-neutral-600)', marginBottom:8 } }, '6 months'),
+      React.createElement('svg', { viewBox:'0 0 330 130', style:{ width:'100%', height:130, display:'block' } },
+        React.createElement('line', { x1:0, y1:129, x2:330, y2:129, stroke:'var(--color-divider)', strokeWidth:2 }),
+        React.createElement('line', { x1:0, y1:65, x2:330, y2:65, stroke:'var(--color-divider)', strokeWidth:1, strokeDasharray:'3 4' }),
+        React.createElement('polyline', { points:d, fill:'none', stroke:'var(--color-accent)', strokeWidth:2 })
+      ));
+  }
+  renderVals() {
+    const s = this.state, plan = this.plan, isFree = plan === 'free';
+    const screen = s.screen;
+    const feed = (s.feedTab === 'following' ? NEWS.filter(n => s.follows.includes(n.ticker)) : NEWS).map(n => Object.assign({}, n, { open: () => { this.setState({ selected:n.ticker }); this.go('detail'); } }));
+    const q = s.query.trim().toUpperCase();
+    const results = UNIVERSE.filter(u => !q || u.ticker.includes(q) || u.name.toUpperCase().includes(q)).map(u => {
+      const on = s.follows.includes(u.ticker);
+      return Object.assign({}, u, {
+        following: on, notFollowing: !on,
+        toggle: () => {
+          if (on) return this.setState(st => ({ follows: st.follows.filter(f => f !== u.ticker) }));
+          if (isFree && s.follows.length >= 3) { this.flash('Free tracks 3 stocks — go Pro for unlimited'); return this.go('paywall'); }
+          this.setState(st => ({ follows: st.follows.concat(u.ticker) }));
+          this.flash(u.ticker + ' followed · scanning every ' + (isFree ? '2 hours' : '30 min'));
+        }
+      });
+    });
+    const stock = FOLLOWS[s.selected] || FOLLOWS.NVDA;
+    const following = s.follows.includes(stock.ticker);
+    return {
+      brand: this.props.brand || 'Openbell',
+      planLabel: isFree ? 'Free' : 'Pro',
+      planToggleLabel: isFree ? 'Preview as Pro' : 'Preview as Free',
+      togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),
+      isAuth: screen === 'auth', isFeed: screen === 'feed', isWatch: screen === 'watchlist', isSearch: screen === 'search',
+      isDetail: screen === 'detail', isPaywall: screen === 'paywall', isMore: screen === 'more', isAccount: screen === 'account',
+      showNav: screen !== 'auth' && screen !== 'paywall',
+      signIn: () => { this.go('feed'); this.flash('Signed in — 3 stocks ready to follow'); },
+      signOut: () => this.go('auth'),
+      goPaywall: () => this.go('paywall'),
+      goSearch: () => this.go('search'),
+      back: () => this.go(s.prev || 'feed'),
+      upgrade: () => { this.setState({ plan:'pro' }); this.go('feed'); this.flash('Pro active — scanning every 30 minutes'); },
+      tabs: [this.tab('feed','Feed'), this.tab('watchlist','List'), this.tab('search','Add'), this.tab('more','More'), this.tab('account','You')],
+      scanLabel: isFree ? 'delayed 2h' : 'scanned 12m ago',
+      setFeedFollowing: () => this.setState({ feedTab:'following' }),
+      setFeedMarket: () => this.setState({ feedTab:'market' }),
+      feedFollowingOn: s.feedTab === 'following', feedFollowingOff: s.feedTab !== 'following',
+      feedMarketOn: s.feedTab === 'market', feedMarketOff: s.feedTab !== 'market',
+      isFreeTier: isFree, isProTier: !isFree,
+      feed,
+      showFeedGate: isFree,
+      follows: s.follows.map(t => Object.assign({}, FOLLOWS[t], {
+        down: !FOLLOWS[t].up, scoreLabel: 'Score ' + FOLLOWS[t].score,
+        alert: isFree ? 'Push is Pro' : 'Every 30 min',
+        alertWarn: isFree, alertOk: !isFree,
+        open: () => { this.setState({ selected:t }); this.go('detail'); }
+      })),
+      atCap: isFree && s.follows.length >= 3,
+      capLabel: isFree ? s.follows.length + ' of 3' : 'Unlimited',
+      capWarn: isFree && s.follows.length >= 3, capOk: !(isFree && s.follows.length >= 3),
+      query: s.query,
+      onQuery: e => this.setState({ query: e.target.value }),
+      resultsLabel: q ? 'Results for “' + q + '”' : 'Most followed today',
+      results,
+      stock: Object.assign({}, stock, { down: !stock.up }),
+      chart: this.chartEl(),
+      stockNews: NEWS.filter(n => n.ticker === stock.ticker).concat(NEWS.slice(0,2)).slice(0,3),
+      freq30: s.freq === '30m', freq2h: s.freq === '2h', freqDay: s.freq === 'daily',
+      setFreq30: () => isFree ? (this.flash('30-minute scanning is Pro'), this.go('paywall')) : this.setState({ freq:'30m' }),
+      setFreq2h: () => this.setState({ freq:'2h' }),
+      setFreqDay: () => this.setState({ freq:'daily' }),
+      freqNote: isFree ? 'Free scans every 2 hours and shows news on delay — no push.' : 'You get a push notification the moment a scan finds something.',
+      detailActionLabel: following ? (isFree ? 'Turn on push — go Pro' : 'Push on for ' + stock.ticker) : 'Follow ' + stock.ticker,
+      primaryDetailAction: () => {
+        if (isFree) { this.flash('Push notifications are Pro'); return this.go('paywall'); }
+        if (!following) { this.setState(st => ({ follows: st.follows.concat(stock.ticker) })); return this.flash(stock.ticker + ' followed'); }
+        this.flash('Push on for ' + stock.ticker);
+      },
+      planRows: [
+        { label:'Read the news', free:'Delayed 2h', pro:'The moment it lands' },
+        { label:'Follow stocks', free:'3', pro:'Unlimited' },
+        { label:'Push notifications', free:'—', pro:'Yes' },
+        { label:'Scan frequency', free:'2 hours', pro:'30 min / 2h / daily' },
+        { label:'News score & analysts', free:'Score only', pro:'Full breakdown' },
+        { label:'Charts & history', free:'6 months', pro:'Full history' },
+        { label:'Morning digest email', free:'—', pro:'Yes' }
+      ],
+      moreItems: [
+        { label:'Portfolio', note:'Track what you actually hold, not just what you watch' },
+        { label:'Earnings calendar', note:'Every date for your followed stocks' },
+        { label:'Screener', note:'Find stocks by news activity and sentiment' },
+        { label:'Digests', note:'A short email before the open' },
+        { label:'Connect your broker', note:'Import holdings automatically' }
+      ],
+      accountName: this.props.accountName || 'Alex Novak',
+      accountEmail: 'alex@email.com',
+      planNote: isFree ? '3 stocks · news on delay' : 'Unlimited · renews 3 Oct',
+      accountPlanLabel: isFree ? 'Upgrade to Pro' : 'Manage Pro',
+      accountPlanAction: () => this.go('paywall'),
+      notifRows: [
+        { label:'Followed stocks', note:'A push when a scan finds news', value: isFree ? 'Off — Pro' : 'On' },
+        { label:'Big moves', note:'Price swings over 5%', value: isFree ? 'Off — Pro' : 'On' },
+        { label:'Quiet hours', note:'No pushes overnight', value:'22:00 – 07:00' }
+      ],
+      toast: s.toast
+    };
+  }
+}
+
+</script>
+</body>
+</html>
