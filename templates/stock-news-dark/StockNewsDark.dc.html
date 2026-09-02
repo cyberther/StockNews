@@ -9,37 +9,37 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news app — dark terminal" description="Executive/terminal variant of the stock news product: dark surfaces, numbers-forward rows, one decision per screen, separate app and content languages." -->
-<helmet><script src="./ds-base.js"></script><style>@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:#14171a}</style></helmet>
-<div style="min-height:100vh;background:#14171a;color:#e8e6e3;font-family:var(--font-body);font-variant-numeric:tabular-nums">
-<div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid #2b3036">
+<helmet><script src="./ds-base.js"></script><style>@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:#121212}</style></helmet>
+<div style="min-height:100vh;background:#121212;color:#F5F5F7;--color-accent:#D4AF37;font-family:var(--font-body);font-variant-numeric:tabular-nums">
+<div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid #333333">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:18px;letter-spacing:-0.02em">{{ brand }}</div>
-<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.terminal }}</div>
+<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.terminal }}</div>
 <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
-<span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ planLabel }}</span>
-<button onClick="{{ togglePlan }}" style="padding:7px 12px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ planToggleLabel }}</button>
+<span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ planLabel }}</span>
+<button onClick="{{ togglePlan }}" style="padding:7px 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ planToggleLabel }}</button>
 </div>
 </div>
 <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;padding:40px 24px 80px;justify-content:center">
 
 <div>
-<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;margin-bottom:12px">{{ ui.mobile }}</div>
+<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;margin-bottom:12px">{{ ui.mobile }}</div>
 <div style="width:calc(100vw - 48px);max-width:390px;height:800px;background:#000;padding:9px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">
-<div style="width:100%;height:100%;background:#14171a;display:flex;flex-direction:column;overflow:hidden;position:relative">
-<div style="display:flex;justify-content:space-between;padding:8px 16px 2px;font-size:10px;font-weight:600;color:#8a9099"><span>09:41:22</span><span>LIVE ▮▮▮</span></div>
+<div style="width:100%;height:100%;background:#121212;display:flex;flex-direction:column;overflow:hidden;position:relative">
+<div style="display:flex;justify-content:space-between;padding:8px 16px 2px;font-size:10px;font-weight:600;color:#A0A0A0"><span>09:41:22</span><span>LIVE ▮▮▮</span></div>
 
 <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;padding:30px 22px 22px">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:40px;line-height:0.92;letter-spacing:-0.035em">{{ brand }}</div>
 <div style="height:2px;background:var(--color-accent);margin:14px 0 18px;width:56px"></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#2b3036;border:1px solid #2b3036;margin-bottom:18px">
-<div style="background:#14171a;padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">30<span style="font-size:12px;color:#8a9099"> min</span></div></div>
-<div style="background:#14171a;padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.sources }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">840</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#333333;border:1px solid #333333;margin-bottom:18px">
+<div style="background:#121212;padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">30<span style="font-size:12px;color:#A0A0A0"> min</span></div></div>
+<div style="background:#121212;padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.sources }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">840</div></div>
 </div>
-<p style="font-size:14px;line-height:1.5;color:#b6bbc1;margin:0">{{ ui.pitch }}</p>
+<p style="font-size:14px;line-height:1.5;color:#A0A0A0;margin:0">{{ ui.pitch }}</p>
 <div style="margin-top:auto;display:flex;flex-direction:column;gap:9px">
-<button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contGoogle }}</button>
-<button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contApple }}</button>
-<input type="email" aria-label="Email address" autocomplete="email" placeholder="you@email.com" style="min-height:44px;padding:0 14px;background:#1b1f23;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-body);font-size:14px">
+<button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contGoogle }}</button>
+<button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contApple }}</button>
+<input type="email" aria-label="Email address" autocomplete="email" placeholder="you@email.com" style="min-height:44px;padding:0 14px;background:#1A1A1A;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-body);font-size:14px">
 <button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contEmail }}</button>
 </div>
 </div>
@@ -48,35 +48,35 @@
 <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ true }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
 <div style="padding:8px 16px 0">
-<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.feed }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ scanLabel }}</div></div>
-<div style="display:flex;gap:18px;margin-top:10px;border-bottom:1px solid #2b3036">
-<button onClick="{{ setFeedFollowing }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#8a9099">
-<sc-if value="{{ feedFollowingOn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:#e8e6e3">{{ ui.following }}</span></sc-if>
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.feed }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ scanLabel }}</div></div>
+<div style="display:flex;gap:18px;margin-top:10px;border-bottom:1px solid #333333">
+<button onClick="{{ setFeedFollowing }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#A0A0A0">
+<sc-if value="{{ feedFollowingOn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:#F5F5F7">{{ ui.following }}</span></sc-if>
 <sc-if value="{{ feedFollowingOff }}" hint-placeholder-val="{{ false }}"><span>{{ ui.following }}</span></sc-if>
 </button>
-<button onClick="{{ setFeedMarket }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#8a9099">
-<sc-if value="{{ feedMarketOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:#e8e6e3">{{ ui.market }}</span></sc-if>
+<button onClick="{{ setFeedMarket }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#A0A0A0">
+<sc-if value="{{ feedMarketOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:#F5F5F7">{{ ui.market }}</span></sc-if>
 <sc-if value="{{ feedMarketOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.market }}</span></sc-if>
 </button>
 </div>
 </div>
 <div style="flex:1;overflow-y:auto">
 <sc-for list="{{ feed }}" as="item" hint-placeholder-count="4">
-<article role="button" tabIndex="0" onClick="{{ item.open }}" onKeyDown="{{ item.keyOpen }}" style="display:block;width:100%;padding:13px 16px;border-bottom:1px solid #2b3036;cursor:pointer">
+<article role="button" tabIndex="0" onClick="{{ item.open }}" onKeyDown="{{ item.keyOpen }}" style="display:block;width:100%;padding:13px 16px;border-bottom:1px solid #333333;cursor:pointer">
 <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
 <span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.02em">{{ item.ticker }}</span>
-<span style="font-size:12px;font-weight:600;color:#e8e6e3"><sc-if value="{{ item.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ item.delta }}</span></sc-if><sc-if value="{{ item.up }}" hint-placeholder-val="{{ true }}"><span>{{ item.delta }}</span></sc-if></span>
-<span style="margin-left:auto;font-size:10px;letter-spacing:0.08em;color:#8a9099">{{ item.stamp }}</span>
+<span style="font-size:12px;font-weight:600;color:#F5F5F7"><sc-if value="{{ item.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ item.delta }}</span></sc-if><sc-if value="{{ item.up }}" hint-placeholder-val="{{ true }}"><span>{{ item.delta }}</span></sc-if></span>
+<span style="margin-left:auto;font-size:10px;letter-spacing:0.08em;color:#A0A0A0">{{ item.stamp }}</span>
 </div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.2;letter-spacing:-0.015em;text-wrap:pretty">{{ item.headline }}</div>
-<div style="display:flex;gap:1px;background:#2b3036;margin-top:10px">
-<div style="flex:1;background:#1b1f23;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.score }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ item.score }}</div></div>
-<div style="flex:1;background:#1b1f23;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.volAvg }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ item.vol }}</div></div>
-<div style="flex:1.6;background:#1b1f23;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.source }}</div><div style="font-size:12px;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ item.source }}</div></div>
+<div style="display:flex;gap:1px;background:#333333;margin-top:10px">
+<div style="flex:1;background:#1A1A1A;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.score }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ item.score }}</div></div>
+<div style="flex:1;background:#1A1A1A;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.volAvg }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ item.vol }}</div></div>
+<div style="flex:1.6;background:#1A1A1A;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.source }}</div><div style="font-size:12px;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ item.source }}</div></div>
 </div>
 <div style="display:flex;gap:6px;align-items:baseline;margin-top:9px">
 <span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ ui.watch }}</span>
-<span style="font-size:12px;color:#b6bbc1;line-height:1.4">{{ item.watch }}</span>
+<span style="font-size:12px;color:#A0A0A0;line-height:1.4">{{ item.watch }}</span>
 </div>
 </article>
 </sc-for>
@@ -94,55 +94,55 @@
 
 <sc-if value="{{ isWatch }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:8px 16px 12px;border-bottom:1px solid #2b3036;display:flex;align-items:baseline;gap:8px">
+<div style="padding:8px 16px 12px;border-bottom:1px solid #333333;display:flex;align-items:baseline;gap:8px">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.watchlist }}</div>
-<div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099"><sc-if value="{{ capWarn }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ capLabel }}</span></sc-if><sc-if value="{{ capOk }}" hint-placeholder-val="{{ true }}"><span>{{ capLabel }}</span></sc-if></div>
+<div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0"><sc-if value="{{ capWarn }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ capLabel }}</span></sc-if><sc-if value="{{ capOk }}" hint-placeholder-val="{{ true }}"><span>{{ capLabel }}</span></sc-if></div>
 </div>
-<div style="display:flex;padding:8px 16px;border-bottom:1px solid #2b3036;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">
+<div style="display:flex;padding:8px 16px;border-bottom:1px solid #333333;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">
 <div style="flex:1">{{ ui.ticker }}</div><div style="width:66px;text-align:right">{{ ui.last }}</div><div style="width:56px;text-align:right">{{ ui.chg }}</div><div style="width:44px;text-align:right">{{ ui.score }}</div>
 </div>
 <div style="flex:1;overflow-y:auto">
 <sc-for list="{{ follows }}" as="row" hint-placeholder-count="3">
-<article role="button" tabIndex="0" onClick="{{ row.open }}" onKeyDown="{{ row.keyOpen }}" style="display:block;width:100%;padding:12px 16px;border-bottom:1px solid #2b3036;cursor:pointer">
+<article role="button" tabIndex="0" onClick="{{ row.open }}" onKeyDown="{{ row.keyOpen }}" style="display:block;width:100%;padding:12px 16px;border-bottom:1px solid #333333;cursor:pointer">
 <div style="display:flex;align-items:baseline">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ row.ticker }}</div><div style="font-size:11px;color:#8a9099;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div></div>
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ row.ticker }}</div><div style="font-size:11px;color:#A0A0A0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div></div>
 <div style="width:66px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:15px">{{ row.price }}</div>
 <div style="width:56px;text-align:right;font-size:13px;font-weight:600"><sc-if value="{{ row.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ row.move }}</span></sc-if><sc-if value="{{ row.up }}" hint-placeholder-val="{{ true }}"><span>{{ row.move }}</span></sc-if></div>
 <div style="width:44px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:15px">{{ row.score }}</div>
 </div>
 <div style="display:flex;gap:6px;align-items:baseline;margin-top:7px">
-<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;flex:none">{{ row.alert }}</span>
-<span style="margin-left:auto;font-size:11px;color:#b6bbc1;text-align:right">{{ row.latest }}</span>
+<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;flex:none">{{ row.alert }}</span>
+<span style="margin-left:auto;font-size:11px;color:#A0A0A0;text-align:right">{{ row.latest }}</span>
 </div>
 </article>
 </sc-for>
 <sc-if value="{{ atCap }}" hint-placeholder-val="{{ true }}">
 <div style="margin:14px 16px;border:1px solid var(--color-accent);padding:14px">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:30px;line-height:1;letter-spacing:-0.03em">3 / 3</div>
-<div style="font-size:12px;color:#b6bbc1;margin-top:6px">{{ ui.capNote }}</div>
+<div style="font-size:12px;color:#A0A0A0;margin-top:6px">{{ ui.capNote }}</div>
 <button onClick="{{ goPaywall }}" style="width:100%;min-height:42px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.liftCap }}</button>
 </div>
 </sc-if>
-<div style="padding:14px 16px"><button onClick="{{ goSearch }}" style="width:100%;min-height:44px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.addTicker }}</button></div>
+<div style="padding:14px 16px"><button onClick="{{ goSearch }}" style="width:100%;min-height:44px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.addTicker }}</button></div>
 </div>
 </div>
 </sc-if>
 
 <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:8px 16px 12px;border-bottom:1px solid #2b3036">
+<div style="padding:8px 16px 12px;border-bottom:1px solid #333333">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;margin-bottom:10px">{{ ui.addTicker }}</div>
-<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="NVDA" value="{{ query }}" onChange="{{ onQuery }}" style="width:100%;min-height:44px;padding:0 12px;background:#1b1f23;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
+<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="NVDA" value="{{ query }}" onChange="{{ onQuery }}" style="width:100%;min-height:44px;padding:0 12px;background:#1A1A1A;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
 </div>
 <div style="flex:1;overflow-y:auto">
-<div style="padding:10px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ resultsLabel }}</div>
+<div style="padding:10px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ resultsLabel }}</div>
 <sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
-<div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #2b3036">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.ticker }}</div><div style="font-size:11px;color:#8a9099;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
-<div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ r.stories }}</div><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.stories24 }}</div></div>
-<button onClick="{{ r.toggle }}" style="position:relative;overflow:hidden;min-width:84px;min-height:38px;padding:0 12px;text-align:left;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
+<div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #333333">
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.ticker }}</div><div style="font-size:11px;color:#A0A0A0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
+<div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ r.stories }}</div><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.stories24 }}</div></div>
+<button onClick="{{ r.toggle }}" style="position:relative;overflow:hidden;min-width:84px;min-height:38px;padding:0 12px;text-align:left;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
 <sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">{{ ui.add }}</span></sc-if>
-<sc-if value="{{ r.following }}" hint-placeholder-val="{{ false }}"><span style="color:#8a9099">{{ ui.added }}</span></sc-if>
+<sc-if value="{{ r.following }}" hint-placeholder-val="{{ false }}"><span style="color:#A0A0A0">{{ ui.added }}</span></sc-if>
 </button>
 </div>
 </sc-for>
@@ -153,32 +153,32 @@
 
 <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:6px 16px 12px;border-bottom:1px solid #2b3036">
-<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:#8a9099;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.backFeed }}</button>
+<div style="padding:6px 16px 12px;border-bottom:1px solid #333333">
+<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:#A0A0A0;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.backFeed }}</button>
 <div style="display:flex;align-items:flex-end;gap:10px;margin-top:4px">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.035em;line-height:1">{{ stock.ticker }}</div><div style="font-size:11px;color:#8a9099;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ stock.name }}</div></div>
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.035em;line-height:1">{{ stock.ticker }}</div><div style="font-size:11px;color:#A0A0A0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ stock.name }}</div></div>
 <div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;line-height:1">{{ stock.price }}</div><div style="font-size:13px;font-weight:600"><sc-if value="{{ stock.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ stock.move }}</span></sc-if><sc-if value="{{ stock.up }}" hint-placeholder-val="{{ true }}"><span>{{ stock.move }}</span></sc-if></div></div>
 </div>
 </div>
 <div style="flex:1;overflow-y:auto">
 <div style="padding:14px 16px 4px">{{ chart }}</div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#2b3036;border-top:1px solid #2b3036;border-bottom:1px solid #2b3036">
-<div style="background:#14171a;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.newsScore }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1;color:var(--color-accent)">{{ stock.score }}</div><div style="font-size:10px;color:#8a9099">{{ ui.storiesN }}</div></div>
-<div style="background:#14171a;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.analyst }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1">{{ stock.buyPct }}</div><div style="font-size:10px;color:#8a9099">{{ stock.analystDetail }}</div></div>
-<div style="background:#14171a;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.earnings }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1">{{ stock.earnDays }}</div><div style="font-size:10px;color:#8a9099">{{ stock.earnDate }}</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#333333;border-top:1px solid #333333;border-bottom:1px solid #333333">
+<div style="background:#121212;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.newsScore }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1;color:var(--color-accent)">{{ stock.score }}</div><div style="font-size:10px;color:#A0A0A0">{{ ui.storiesN }}</div></div>
+<div style="background:#121212;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.analyst }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1">{{ stock.buyPct }}</div><div style="font-size:10px;color:#A0A0A0">{{ stock.analystDetail }}</div></div>
+<div style="background:#121212;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.earnings }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1">{{ stock.earnDays }}</div><div style="font-size:10px;color:#A0A0A0">{{ stock.earnDate }}</div></div>
 </div>
-<div style="padding:14px 16px;border-bottom:1px solid #2b3036">
+<div style="padding:14px 16px;border-bottom:1px solid #333333">
 <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);margin-bottom:5px">{{ ui.theCall }}</div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.25;text-wrap:pretty">{{ stock.call }}</div>
 </div>
-<div style="padding:14px 16px;border-bottom:1px solid #2b3036">
-<div style="font-size:11px;color:#8a9099"><sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent)">{{ freqNote }}</span></sc-if><sc-if value="{{ isProTier }}" hint-placeholder-val="{{ false }}"><span>{{ freqNote }}</span></sc-if></div>
+<div style="padding:14px 16px;border-bottom:1px solid #333333">
+<div style="font-size:11px;color:#A0A0A0"><sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent)">{{ freqNote }}</span></sc-if><sc-if value="{{ isProTier }}" hint-placeholder-val="{{ false }}"><span>{{ freqNote }}</span></sc-if></div>
 <button onClick="{{ primaryDetailAction }}" style="width:100%;min-height:46px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ detailActionLabel }}</button>
 </div>
-<div style="padding:12px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.tape }} · {{ stock.ticker }}</div>
+<div style="padding:12px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.tape }} · {{ stock.ticker }}</div>
 <sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
-<div style="padding:12px 16px;border-bottom:1px solid #2b3036">
-<div style="display:flex;gap:8px;align-items:baseline;margin-bottom:4px"><span style="font-size:10px;letter-spacing:0.08em;color:#8a9099">{{ n.stamp }}</span><span style="font-size:10px;color:#8a9099">{{ n.source }}</span><span style="margin-left:auto;font-family:var(--font-heading);font-weight:800;font-size:12px">{{ n.score }}</span></div>
+<div style="padding:12px 16px;border-bottom:1px solid #333333">
+<div style="display:flex;gap:8px;align-items:baseline;margin-bottom:4px"><span style="font-size:10px;letter-spacing:0.08em;color:#A0A0A0">{{ n.stamp }}</span><span style="font-size:10px;color:#A0A0A0">{{ n.source }}</span><span style="margin-left:auto;font-family:var(--font-heading);font-weight:800;font-size:12px">{{ n.score }}</span></div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:15px;line-height:1.2;text-wrap:pretty">{{ n.headline }}</div>
 </div>
 </sc-for>
@@ -189,24 +189,24 @@
 
 <sc-if value="{{ isPaywall }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:6px 16px 14px;border-bottom:1px solid #2b3036">
-<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:#8a9099;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.back }}</button>
+<div style="padding:6px 16px 14px;border-bottom:1px solid #333333">
+<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:#A0A0A0;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.back }}</button>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:28px;letter-spacing:-0.035em;line-height:1;margin-top:4px">{{ ui.paywallTitle }}</div>
-<div style="font-size:12px;color:#8a9099;margin-top:6px">{{ ui.paywallSub }}</div>
+<div style="font-size:12px;color:#A0A0A0;margin-top:6px">{{ ui.paywallSub }}</div>
 </div>
 <div style="flex:1;overflow-y:auto">
-<div style="display:flex;padding:9px 16px;border-bottom:1px solid #2b3036;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099"><div style="flex:1"></div><div style="width:72px;text-align:right">{{ ui.free }}</div><div style="width:84px;text-align:right">{{ ui.pro }}</div></div>
+<div style="display:flex;padding:9px 16px;border-bottom:1px solid #333333;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0"><div style="flex:1"></div><div style="width:72px;text-align:right">{{ ui.free }}</div><div style="width:84px;text-align:right">{{ ui.pro }}</div></div>
 <sc-for list="{{ planRows }}" as="p" hint-placeholder-count="6">
-<div style="display:flex;padding:11px 16px;border-bottom:1px solid #2b3036;align-items:baseline">
+<div style="display:flex;padding:11px 16px;border-bottom:1px solid #333333;align-items:baseline">
 <div style="flex:1;font-size:13px">{{ p.label }}</div>
-<div style="width:72px;text-align:right;font-size:13px;color:#8a9099">{{ p.free }}</div>
+<div style="width:72px;text-align:right;font-size:13px;color:#A0A0A0">{{ p.free }}</div>
 <div style="width:84px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:13px">{{ p.pro }}</div>
 </div>
 </sc-for>
 <div style="padding:16px">
-<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:36px;letter-spacing:-0.035em;line-height:1">$7</div><div style="font-size:12px;color:#8a9099">{{ ui.perMonth }}</div></div>
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:36px;letter-spacing:-0.035em;line-height:1">$7</div><div style="font-size:12px;color:#A0A0A0">{{ ui.perMonth }}</div></div>
 <button onClick="{{ upgrade }}" style="width:100%;min-height:48px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.start7 }}</button>
-<button onClick="{{ back }}" style="width:100%;min-height:44px;margin-top:8px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:#8a9099;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.stayFree }}</button>
+<button onClick="{{ back }}" style="width:100%;min-height:44px;margin-top:8px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#A0A0A0;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.stayFree }}</button>
 </div>
 </div>
 </div>
@@ -214,12 +214,12 @@
 
 <sc-if value="{{ isMore }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:8px 16px 12px;border-bottom:1px solid #2b3036;font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.more }}</div>
+<div style="padding:8px 16px 12px;border-bottom:1px solid #333333;font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.more }}</div>
 <div style="flex:1;overflow-y:auto">
 <sc-for list="{{ moreItems }}" as="m" hint-placeholder-count="5">
-<div style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid #2b3036">
-<div style="flex:1"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ m.label }}</div><div style="font-size:11px;color:#8a9099">{{ m.note }}</div></div>
-<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;border:1px solid #2b3036;padding:4px 8px">{{ m.eta }}</span>
+<div style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid #333333">
+<div style="flex:1"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ m.label }}</div><div style="font-size:11px;color:#A0A0A0">{{ m.note }}</div></div>
+<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;border:1px solid #333333;padding:4px 8px">{{ m.eta }}</span>
 </div>
 </sc-for>
 </div>
@@ -228,71 +228,71 @@
 
 <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:8px 16px 12px;border-bottom:1px solid #2b3036;font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.account }}</div>
+<div style="padding:8px 16px 12px;border-bottom:1px solid #333333;font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.account }}</div>
 <div style="flex:1;overflow-y:auto">
-<div style="padding:14px 16px;border-bottom:1px solid #2b3036">
+<div style="padding:14px 16px;border-bottom:1px solid #333333">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:17px">{{ accountName }}</div>
-<div style="font-size:11px;color:#8a9099">Google · {{ accountEmail }}</div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#2b3036;border:1px solid #2b3036;margin-top:12px">
-<div style="background:#14171a;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.plan }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ planLabel }}</div></div>
-<div style="background:#14171a;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.tickers }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ capLabel }}</div></div>
-<div style="background:#14171a;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ intervalLabel }}</div></div>
+<div style="font-size:11px;color:#A0A0A0">Google · {{ accountEmail }}</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#333333;border:1px solid #333333;margin-top:12px">
+<div style="background:#121212;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.plan }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ planLabel }}</div></div>
+<div style="background:#121212;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.tickers }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ capLabel }}</div></div>
+<div style="background:#121212;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ intervalLabel }}</div></div>
 </div>
 <button onClick="{{ accountPlanAction }}" style="width:100%;min-height:44px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ accountPlanLabel }}</button>
 </div>
-<div style="padding:14px 16px;border-bottom:1px solid #2b3036">
-<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;margin-bottom:8px">{{ ui.appLang }}</div>
-<div style="display:flex;border:1px solid #2b3036">
-<button onClick="{{ setAppEn }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<div style="padding:14px 16px;border-bottom:1px solid #333333">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;margin-bottom:8px">{{ ui.appLang }}</div>
+<div style="display:flex;border:1px solid #333333">
+<button onClick="{{ setAppEn }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
 <sc-if value="{{ appEn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">English</span></sc-if>
 <sc-if value="{{ appEnOff }}" hint-placeholder-val="{{ false }}"><span>English</span></sc-if>
 </button>
-<button onClick="{{ setAppRo }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<button onClick="{{ setAppRo }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
 <sc-if value="{{ appRo }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Română</span></sc-if>
 <sc-if value="{{ appRoOff }}" hint-placeholder-val="{{ true }}"><span>Română</span></sc-if>
 </button>
-<button onClick="{{ setAppDe }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<button onClick="{{ setAppDe }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
 <sc-if value="{{ appDe }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Deutsch</span></sc-if>
 <sc-if value="{{ appDeOff }}" hint-placeholder-val="{{ true }}"><span>Deutsch</span></sc-if>
 </button>
 </div>
-<div style="font-size:11px;color:#8a9099;margin-top:7px">{{ ui.appLangNote }}</div>
+<div style="font-size:11px;color:#A0A0A0;margin-top:7px">{{ ui.appLangNote }}</div>
 </div>
-<div style="padding:14px 16px;border-bottom:1px solid #2b3036">
-<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;margin-bottom:8px">{{ ui.contentLang }}</div>
-<div style="display:flex;border:1px solid #2b3036">
-<button onClick="{{ setLangEn }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<div style="padding:14px 16px;border-bottom:1px solid #333333">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;margin-bottom:8px">{{ ui.contentLang }}</div>
+<div style="display:flex;border:1px solid #333333">
+<button onClick="{{ setLangEn }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
 <sc-if value="{{ langEn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">English</span></sc-if>
 <sc-if value="{{ langEnOff }}" hint-placeholder-val="{{ false }}"><span>English</span></sc-if>
 </button>
-<button onClick="{{ setLangRo }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<button onClick="{{ setLangRo }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
 <sc-if value="{{ langRo }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Română</span></sc-if>
 <sc-if value="{{ langRoOff }}" hint-placeholder-val="{{ true }}"><span>Română</span></sc-if>
 </button>
-<button onClick="{{ setLangDe }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<button onClick="{{ setLangDe }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
 <sc-if value="{{ langDe }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Deutsch</span></sc-if>
 <sc-if value="{{ langDeOff }}" hint-placeholder-val="{{ true }}"><span>Deutsch</span></sc-if>
 </button>
 </div>
-<div style="font-size:11px;color:#8a9099;margin-top:7px">{{ langNote }}</div>
+<div style="font-size:11px;color:#A0A0A0;margin-top:7px">{{ langNote }}</div>
 </div>
 <sc-for list="{{ notifRows }}" as="s" hint-placeholder-count="3">
-<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #2b3036"><div style="flex:1"><div style="font-size:13px;font-weight:600">{{ s.label }}</div><div style="font-size:11px;color:#8a9099">{{ s.note }}</div></div><span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#8a9099">{{ s.value }}</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #333333"><div style="flex:1"><div style="font-size:13px;font-weight:600">{{ s.label }}</div><div style="font-size:11px;color:#A0A0A0">{{ s.note }}</div></div><span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#A0A0A0">{{ s.value }}</span></div>
 </sc-for>
 <div style="padding:14px 16px;display:flex;flex-direction:column;gap:8px">
-<button style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.quiet }}</button>
-<button style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.manageSub }}</button>
-<button onClick="{{ signOut }}" style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.signOut }}</button>
+<button style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.quiet }}</button>
+<button style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.manageSub }}</button>
+<button onClick="{{ signOut }}" style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.signOut }}</button>
 </div>
 </div>
 </div>
 </sc-if>
 
 <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
-<div style="display:flex;border-top:1px solid #2b3036;background:#14171a">
+<div style="display:flex;border-top:1px solid #333333;background:#121212">
 <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
-<button onClick="{{ t.go }}" style="position:relative;flex:1;padding:12px 4px 14px;border:0;background:transparent;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#8a9099">
-<sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-1px;left:0;right:0;height:2px;background:var(--color-accent)"></span><span style="color:#e8e6e3">{{ t.label }}</span></sc-if>
+<button onClick="{{ t.go }}" style="position:relative;flex:1;padding:12px 4px 14px;border:0;background:transparent;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#A0A0A0">
+<sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-1px;left:0;right:0;height:2px;background:var(--color-accent)"></span><span style="color:#F5F5F7">{{ t.label }}</span></sc-if>
 <sc-if value="{{ t.off }}" hint-placeholder-val="{{ true }}"><span>{{ t.label }}</span></sc-if>
 </button>
 </sc-for>
@@ -300,7 +300,7 @@
 </sc-if>
 
 <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute;left:16px;right:16px;bottom:74px;padding:11px 13px;background:#e8e6e3;color:#14171a;animation:hfin 0.2s ease-out">
+<div style="position:absolute;left:16px;right:16px;bottom:74px;padding:11px 13px;background:#F5F5F7;color:#121212;animation:hfin 0.2s ease-out">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.02em">{{ toast }}</div>
 </div>
 </sc-if>
@@ -309,41 +309,41 @@
 </div>
 
 <div style="flex:1;width:100%;min-width:0;max-width:900px">
-<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;margin-bottom:12px">{{ ui.desktop }}</div>
-<div style="border:1px solid #2b3036;background:#14171a">
-<div style="display:flex;align-items:center;gap:20px;padding:14px 20px;border-bottom:1px solid #2b3036">
+<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;margin-bottom:12px">{{ ui.desktop }}</div>
+<div style="border:1px solid #333333;background:#121212">
+<div style="display:flex;align-items:center;gap:20px;padding:14px 20px;border-bottom:1px solid #333333">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:16px;margin-right:auto">{{ brand }}</div>
-<button type="button" onClick="{{ desktopFeed }}" style="padding:0;background:transparent;border:0;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.feed }}</button>
-<button type="button" onClick="{{ desktopWatchlist }}" style="padding:0;background:transparent;border:0;color:#8a9099;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.watchlist }}</button>
-<button type="button" onClick="{{ desktopScreener }}" style="padding:0;background:transparent;border:0;color:#8a9099;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.screener }}</button>
+<button type="button" onClick="{{ desktopFeed }}" style="padding:0;background:transparent;border:0;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.feed }}</button>
+<button type="button" onClick="{{ desktopWatchlist }}" style="padding:0;background:transparent;border:0;color:#A0A0A0;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.watchlist }}</button>
+<button type="button" onClick="{{ desktopScreener }}" style="padding:0;background:transparent;border:0;color:#A0A0A0;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.screener }}</button>
 <button type="button" onClick="{{ goPaywall }}" style="padding:9px 14px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.goPro }}</button>
 </div>
 <div style="display:grid;grid-template-columns:1fr 300px">
-<div style="border-right:1px solid #2b3036">
-<div style="display:flex;align-items:baseline;gap:12px;padding:14px 20px;border-bottom:1px solid #2b3036"><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;letter-spacing:-0.02em">{{ ui.following }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ scanLabel }}</div></div>
+<div style="border-right:1px solid #333333">
+<div style="display:flex;align-items:baseline;gap:12px;padding:14px 20px;border-bottom:1px solid #333333"><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;letter-spacing:-0.02em">{{ ui.following }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ scanLabel }}</div></div>
 <sc-for list="{{ feed }}" as="d" hint-placeholder-count="4">
-<div style="padding:16px 20px;border-bottom:1px solid #2b3036">
+<div style="padding:16px 20px;border-bottom:1px solid #333333">
 <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:5px">
 <span style="font-family:var(--font-heading);font-weight:800;font-size:13px">{{ d.ticker }}</span>
 <span style="font-size:12px;font-weight:600"><sc-if value="{{ d.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ d.delta }}</span></sc-if><sc-if value="{{ d.up }}" hint-placeholder-val="{{ true }}"><span>{{ d.delta }}</span></sc-if></span>
-<span style="font-size:10px;color:#8a9099">{{ d.source }}</span>
-<span style="margin-left:auto;font-size:10px;color:#8a9099">{{ d.stamp }}</span>
+<span style="font-size:10px;color:#A0A0A0">{{ d.source }}</span>
+<span style="margin-left:auto;font-size:10px;color:#A0A0A0">{{ d.stamp }}</span>
 <span style="font-family:var(--font-heading);font-weight:800;font-size:13px;min-width:34px;text-align:right">{{ d.score }}</span>
 </div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.18;letter-spacing:-0.02em;text-wrap:pretty">{{ d.headline }}</div>
-<div style="display:flex;gap:6px;align-items:baseline;margin-top:6px"><span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ ui.watch }}</span><span style="font-size:12px;color:#b6bbc1">{{ d.watch }}</span></div>
+<div style="display:flex;gap:6px;align-items:baseline;margin-top:6px"><span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ ui.watch }}</span><span style="font-size:12px;color:#A0A0A0">{{ d.watch }}</span></div>
 </div>
 </sc-for>
 </div>
 <div>
-<div style="display:flex;padding:14px 16px 10px;border-bottom:1px solid #2b3036;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099"><div style="flex:1">{{ ui.ticker }}</div><div style="width:62px;text-align:right">{{ ui.last }}</div><div style="width:48px;text-align:right">{{ ui.chg }}</div></div>
+<div style="display:flex;padding:14px 16px 10px;border-bottom:1px solid #333333;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0"><div style="flex:1">{{ ui.ticker }}</div><div style="width:62px;text-align:right">{{ ui.last }}</div><div style="width:48px;text-align:right">{{ ui.chg }}</div></div>
 <sc-for list="{{ follows }}" as="w" hint-placeholder-count="3">
-<div style="padding:11px 16px;border-bottom:1px solid #2b3036">
+<div style="padding:11px 16px;border-bottom:1px solid #333333">
 <div style="display:flex;align-items:baseline"><div style="flex:1;font-family:var(--font-heading);font-weight:800;font-size:14px">{{ w.ticker }}</div><div style="width:62px;text-align:right;font-size:13px">{{ w.price }}</div><div style="width:48px;text-align:right;font-size:12px;font-weight:600"><sc-if value="{{ w.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ w.move }}</span></sc-if><sc-if value="{{ w.up }}" hint-placeholder-val="{{ true }}"><span>{{ w.move }}</span></sc-if></div></div>
-<div style="font-size:10px;color:#8a9099;margin-top:3px">{{ w.scoreLabel }} · {{ w.alert }}</div>
+<div style="font-size:10px;color:#A0A0A0;margin-top:3px">{{ w.scoreLabel }} · {{ w.alert }}</div>
 </div>
 </sc-for>
-<div style="padding:14px 16px"><button type="button" onClick="{{ goSearch }}" style="width:100%;min-height:40px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.addTicker }}</button></div>
+<div style="padding:14px 16px"><button type="button" onClick="{{ goSearch }}" style="width:100%;min-height:40px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.addTicker }}</button></div>
 </div>
 </div>
 </div>
@@ -474,12 +474,12 @@ class Component extends DCLogic {
     const pts = [4,12,9,18,15,26,22,34,30,42,38,52,46,60,58,72,64,80,76,92,86,104,96,116];
     const d = pts.map((v,i) => (i*14+4) + ',' + (110 - v * 0.85)).join(' ');
     return React.createElement('div', null,
-      React.createElement('div', { style:{ display:'flex', justifyContent:'space-between', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:'#8a9099', marginBottom:6 } },
+      React.createElement('div', { style:{ display:'flex', justifyContent:'space-between', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:'#A0A0A0', marginBottom:6 } },
         React.createElement('span', null, '6M'), React.createElement('span', null, '+41.8%')),
       React.createElement('svg', { viewBox:'0 0 330 115', style:{ width:'100%', height:115, display:'block' } },
-        React.createElement('line', { x1:0, y1:114, x2:330, y2:114, stroke:'#2b3036', strokeWidth:1 }),
-        React.createElement('line', { x1:0, y1:57, x2:330, y2:57, stroke:'#2b3036', strokeWidth:1, strokeDasharray:'2 5' }),
-        React.createElement('polyline', { points:d, fill:'none', stroke:'#ec3013', strokeWidth:1.75 })
+        React.createElement('line', { x1:0, y1:114, x2:330, y2:114, stroke:'#333333', strokeWidth:1 }),
+        React.createElement('line', { x1:0, y1:57, x2:330, y2:57, stroke:'#333333', strokeWidth:1, strokeDasharray:'2 5' }),
+        React.createElement('polyline', { points:d, fill:'none', stroke:'#D4AF37', strokeWidth:1.75 })
       ));
   }
   renderVals() {
