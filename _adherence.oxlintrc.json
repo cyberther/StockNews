@@ -13,7 +13,14 @@
     "no-restricted-imports": [
       "warn",
       {
-        "patterns": []
+        "patterns": [
+          {
+            "group": [
+              "netlify/functions/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
       }
     ],
     "no-restricted-syntax": [

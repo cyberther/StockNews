@@ -9,7 +9,8 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news app — dark terminal" description="Executive/terminal variant of the stock news product: dark surfaces, numbers-forward rows, one decision per screen, separate app and content languages." -->
-<helmet><script src="./ds-base.js"></script><style>@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:#121212}</style></helmet>
+<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><style>@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:#121212}</style></helmet>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">TERMINAL</text></svg></template>
 <div style="min-height:100vh;background:#121212;color:#F5F5F7;--color-accent:#D4AF37;font-family:var(--font-body);font-variant-numeric:tabular-nums">
 <div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid #333333">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:18px;letter-spacing:-0.02em">{{ brand }}</div>
@@ -22,7 +23,6 @@
 <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;padding:40px 24px 80px;justify-content:center">
 
 <div>
-<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;margin-bottom:12px">{{ ui.mobile }}</div>
 <div style="width:calc(100vw - 48px);max-width:390px;height:800px;background:#000;padding:9px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">
 <div style="width:100%;height:100%;background:#121212;display:flex;flex-direction:column;overflow:hidden;position:relative">
 <div style="display:flex;justify-content:space-between;padding:8px 16px 2px;font-size:10px;font-weight:600;color:#A0A0A0"><span>09:41:22</span><span>LIVE ▮▮▮</span></div>
@@ -308,154 +308,14 @@
 </div>
 </div>
 
-<div style="flex:1;width:100%;min-width:0;max-width:900px">
-<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;margin-bottom:12px">{{ ui.desktop }}</div>
-<div style="border:1px solid #333333;background:#121212">
-<div style="display:flex;align-items:center;gap:20px;padding:14px 20px;border-bottom:1px solid #333333">
-<div style="font-family:var(--font-heading);font-weight:800;font-size:16px;margin-right:auto">{{ brand }}</div>
-<button type="button" onClick="{{ desktopFeed }}" style="padding:0;background:transparent;border:0;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.feed }}</button>
-<button type="button" onClick="{{ desktopWatchlist }}" style="padding:0;background:transparent;border:0;color:#A0A0A0;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.watchlist }}</button>
-<button type="button" onClick="{{ desktopScreener }}" style="padding:0;background:transparent;border:0;color:#A0A0A0;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.screener }}</button>
-<button type="button" onClick="{{ goPaywall }}" style="padding:9px 14px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.goPro }}</button>
-</div>
-<div style="display:grid;grid-template-columns:1fr 300px">
-<div style="border-right:1px solid #333333">
-<div style="display:flex;align-items:baseline;gap:12px;padding:14px 20px;border-bottom:1px solid #333333"><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;letter-spacing:-0.02em">{{ ui.following }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ scanLabel }}</div></div>
-<sc-for list="{{ feed }}" as="d" hint-placeholder-count="4">
-<div style="padding:16px 20px;border-bottom:1px solid #333333">
-<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:5px">
-<span style="font-family:var(--font-heading);font-weight:800;font-size:13px">{{ d.ticker }}</span>
-<span style="font-size:12px;font-weight:600"><sc-if value="{{ d.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ d.delta }}</span></sc-if><sc-if value="{{ d.up }}" hint-placeholder-val="{{ true }}"><span>{{ d.delta }}</span></sc-if></span>
-<span style="font-size:10px;color:#A0A0A0">{{ d.source }}</span>
-<span style="margin-left:auto;font-size:10px;color:#A0A0A0">{{ d.stamp }}</span>
-<span style="font-family:var(--font-heading);font-weight:800;font-size:13px;min-width:34px;text-align:right">{{ d.score }}</span>
-</div>
-<div style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.18;letter-spacing:-0.02em;text-wrap:pretty">{{ d.headline }}</div>
-<div style="display:flex;gap:6px;align-items:baseline;margin-top:6px"><span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ ui.watch }}</span><span style="font-size:12px;color:#A0A0A0">{{ d.watch }}</span></div>
-</div>
-</sc-for>
-</div>
-<div>
-<div style="display:flex;padding:14px 16px 10px;border-bottom:1px solid #333333;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0"><div style="flex:1">{{ ui.ticker }}</div><div style="width:62px;text-align:right">{{ ui.last }}</div><div style="width:48px;text-align:right">{{ ui.chg }}</div></div>
-<sc-for list="{{ follows }}" as="w" hint-placeholder-count="3">
-<div style="padding:11px 16px;border-bottom:1px solid #333333">
-<div style="display:flex;align-items:baseline"><div style="flex:1;font-family:var(--font-heading);font-weight:800;font-size:14px">{{ w.ticker }}</div><div style="width:62px;text-align:right;font-size:13px">{{ w.price }}</div><div style="width:48px;text-align:right;font-size:12px;font-weight:600"><sc-if value="{{ w.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ w.move }}</span></sc-if><sc-if value="{{ w.up }}" hint-placeholder-val="{{ true }}"><span>{{ w.move }}</span></sc-if></div></div>
-<div style="font-size:10px;color:#A0A0A0;margin-top:3px">{{ w.scoreLabel }} · {{ w.alert }}</div>
-</div>
-</sc-for>
-<div style="padding:14px 16px"><button type="button" onClick="{{ goSearch }}" style="width:100%;min-height:40px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.addTicker }}</button></div>
-</div>
-</div>
-</div>
-</div>
+
 
 </div>
 </div>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Heard It First&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
-const NEWS = [
-  { ticker:'NVDA', source:'Reuters', stamp:'09:29:14', score:'+72', delta:'+2.4%', up:true, vol:'1.8x',
-    headline:{ EN:'Data-centre guidance raised for the third straight quarter', RO:'Estimările pentru centrele de date, majorate al treilea trimestru consecutiv', DE:'Data-Center-Prognose zum dritten Quartal in Folge erhöht' },
-    watch:{ EN:'Order book concentration — top three customers are 41% of revenue.', RO:'Concentrarea comenzilor — primii trei clienți acoperă 41% din venituri.', DE:'Konzentration im Auftragsbuch — die drei größten Kunden stehen für 41% des Umsatzes.' } },
-  { ticker:'AAPL', source:'Bloomberg', stamp:'08:53:02', score:'+18', delta:'+0.3%', up:true, vol:'0.9x',
-    headline:{ EN:'Services revenue in India up 34% year on year', RO:'Veniturile din servicii în India, plus 34% de la an la an', DE:'Services-Umsatz in Indien 34% über Vorjahr' },
-    watch:{ EN:'Services margin, not headline growth — it carries the multiple.', RO:'Marja din servicii, nu creșterea din titlu — ea susține multiplul.', DE:'Die Services-Marge, nicht das Umsatzwachstum — sie trägt das Multiple.' } },
-  { ticker:'TSLA', source:'WSJ', stamp:'08:11:47', score:'−34', delta:'−1.8%', up:false, vol:'2.3x',
-    headline:{ EN:'Second European price cut this quarter', RO:'A doua reducere de preț în Europa în acest trimestru', DE:'Zweite Preissenkung in Europa in diesem Quartal' },
-    watch:{ EN:'Gross margin ex-credits at the next print.', RO:'Marja brută fără credite de mediu, la următorul raport.', DE:'Bruttomarge ohne Emissionsgutschriften im nächsten Bericht.' } },
-  { ticker:'NVDA', source:'The Verge', stamp:'07:40:22', score:'+9', delta:'+2.4%', up:true, vol:'1.8x',
-    headline:{ EN:'Rival inference chip ships at roughly half the price', RO:'Un chip de inferență concurent se lansează la aproximativ jumătate de preț', DE:'Konkurrierender Inferenz-Chip kommt zum halben Preis' },
-    watch:{ EN:'Low-end share loss first; no near-term revenue impact.', RO:'Mai întâi pierdere de cotă la gama inferioară; fără impact imediat pe venituri.', DE:'Zunächst Marktanteilsverlust im Einstiegssegment; kurzfristig kein Umsatzeffekt.' } },
-  { ticker:'AAPL', source:'FT', stamp:'06:58:31', score:'−6', delta:'+0.3%', up:true, vol:'0.9x',
-    headline:{ EN:'EU regulator requests further App Store fee disclosure', RO:'Autoritatea UE cere date suplimentare despre comisioanele App Store', DE:'EU-Behörde fordert weitere Angaben zu App-Store-Gebühren' },
-    watch:{ EN:'Inquiry, not a ruling — historically moves only on a fine.', RO:'O anchetă, nu o decizie — istoric, mișcă prețul doar la amendă.', DE:'Eine Prüfung, kein Urteil — bewegt den Kurs historisch erst bei einer Strafe.' } }
-];
-const FOLLOWS = {
-  NVDA: { ticker:'NVDA', name:'NVIDIA Corp', price:'184.20', move:'+2.4%', up:true, score:'+72', buyPct:'79%', analystDetail:'41 / 9 / 2', earnDays:'12d', earnDate:'14 Sep',
-    latest:{ EN:'3 stories · 1h', RO:'3 știri · 1h', DE:'3 Meldungen · 1h' },
-    call:{ EN:'Raised guidance is priced in; the risk is customer concentration, not demand.', RO:'Estimările majorate sunt deja în preț; riscul e concentrarea clienților, nu cererea.', DE:'Die höhere Prognose ist eingepreist; das Risiko ist die Kundenkonzentration, nicht die Nachfrage.' } },
-  AAPL: { ticker:'AAPL', name:'Apple Inc', price:'241.06', move:'+0.3%', up:true, score:'+18', buyPct:'42%', analystDetail:'19 / 22 / 4', earnDays:'34d', earnDate:'06 Oct',
-    latest:{ EN:'2 stories · 3h', RO:'2 știri · 3h', DE:'2 Meldungen · 3h' },
-    call:{ EN:'Services growth is the story; the EU inquiry is noise until a number is attached.', RO:'Creșterea serviciilor e subiectul; ancheta UE e zgomot până apare o cifră.', DE:'Das Services-Wachstum ist die Story; die EU-Prüfung ist Rauschen, solange keine Zahl daran hängt.' } },
-  TSLA: { ticker:'TSLA', name:'Tesla Inc', price:'318.77', move:'−1.8%', up:false, score:'−34', buyPct:'28%', analystDetail:'12 / 20 / 11', earnDays:'21d', earnDate:'23 Sep',
-    latest:{ EN:'4 stories · 2h', RO:'4 știri · 2h', DE:'4 Meldungen · 2h' },
-    call:{ EN:'Volume is being bought with margin. Watch gross margin ex-credits.', RO:'Volumul e cumpărat cu marjă. Urmărește marja brută fără credite.', DE:'Volumen wird mit Marge gekauft. Bruttomarge ohne Gutschriften beobachten.' } }
-};
-const UNIVERSE = [
-  { ticker:'NVDA', name:'NVIDIA Corp', stories:'28' },
-  { ticker:'AAPL', name:'Apple Inc', stories:'19' },
-  { ticker:'TSLA', name:'Tesla Inc', stories:'31' },
-  { ticker:'MSFT', name:'Microsoft Corp', stories:'14' },
-  { ticker:'AMZN', name:'Amazon.com Inc', stories:'22' },
-  { ticker:'ASML', name:'ASML Holding NV', stories:'6' },
-  { ticker:'NOVO', name:'Novo Nordisk A/S', stories:'11' }
-];
-const UI = {
-  EN: { terminal:'Terminal build · v2', mobile:'Mobile', desktop:'Desktop', free:'Free', pro:'Pro', viewPro:'View as Pro', viewFree:'View as Free',
-    interval:'Scan interval', sources:'Sources', pitch:'Every followed ticker scanned on the interval you set. Push the moment a story lands, not on the next refresh.',
-    contGoogle:'Continue with Google', contApple:'Continue with Apple', contEmail:'Continue with email',
-    feed:'Feed', following:'Following', market:'Market', score:'Score', volAvg:'Vol vs avg', source:'Source', watch:'Watch',
-    delayed24:'Delayed 24 h', proYesterday:'Pro read this yesterday', removeDelay:'Remove the delay', delayLabel:'delay 24h', lastScan:'last scan 09:41',
-    watchlist:'Watchlist', ticker:'Ticker', last:'Last', chg:'Chg', pushOff:'push off', pushOn:'push 30m', addTicker:'Add ticker',
-    capNote:'Free caps the list at three and never pushes. Pro is uncapped at a 30-minute interval.', liftCap:'Lift the cap',
-    stories24:'stories 24h', add:'Add', added:'Added', match:'Match', topVolume:'Highest news volume · 24h',
-    backFeed:'← Feed', back:'← Back', newsScore:'News score', storiesN:'28 stories', analyst:'Analyst', earnings:'Earnings', theCall:'The call', tape:'Tape',
-    freqFree:'Free: 24h delay, no push, one scan a day.', freqPro:'Push fires the moment a scan returns a match.',
-    addToList:'Add %s to watchlist', enablePush:'Enable push · upgrade', pushEnabled:'Push enabled · %s',
-    paywallTitle:'A full day of edge', paywallSub:'Free reads the news 24 hours late. Pro reads it as it lands.',
-    perMonth:'/ mo · $60 / yr', start7:'Start 7 days free', stayFree:'Stay on Free',
-    rowLatency:'Feed latency', rowTickers:'Tickers followed', rowPush:'Push notifications', rowAnalyst:'Analyst breakdown', rowChart:'Chart history', rowDigest:'Pre-open digest', unlimited:'Unlimited', full:'Full', max:'Max',
-    more:'More', portfolio:'Portfolio', portfolioNote:'Cost basis, weight, P/L against the news', calendar:'Earnings calendar', calendarNote:'Dates and surprise history per ticker',
-    screener:'Screener', screenerNote:'Filter by news volume and score', digests:'Digests', digestsNote:'06:30 pre-open email', broker:'Broker link', brokerNote:'Import holdings automatically',
-    account:'Account', plan:'Plan', tickers:'Tickers', appLang:'App language', contentLang:'Content language',
-    appLangNote:'Buttons, labels and menus appear in English.', quiet:'Quiet hours · 22:00–07:00', manageSub:'Manage subscription', signOut:'Sign out',
-    upgradeBtn:'Upgrade · $7/mo', managePro:'Manage Pro', goPro:'Go Pro',
-    notifTickers:'Followed tickers', notifTickersNote:'Push on scan match', notifMove:'Move threshold', notifMoveNote:'Absolute daily change', notifQuiet:'Quiet hours', notifQuietNote:'Suppressed overnight',
-    tabFeed:'Feed', tabList:'List', tabAdd:'Add', tabMore:'More', tabYou:'You', langNote:'News, watch notes and alerts are delivered in English.' },
-  RO: { terminal:'Versiune terminal · v2', mobile:'Mobil', desktop:'Desktop', free:'Gratuit', pro:'Pro', viewPro:'Vezi ca Pro', viewFree:'Vezi ca Gratuit',
-    interval:'Interval scanare', sources:'Surse', pitch:'Fiecare simbol urmărit este scanat la intervalul stabilit. Notificarea pleacă în momentul apariției știrii, nu la următoarea reîmprospătare.',
-    contGoogle:'Continuă cu Google', contApple:'Continuă cu Apple', contEmail:'Continuă cu e-mail',
-    feed:'Flux', following:'Urmărite', market:'Piață', score:'Scor', volAvg:'Vol vs medie', source:'Sursă', watch:'Urmărește',
-    delayed24:'Întârziat 24 h', proYesterday:'Pro a citit asta ieri', removeDelay:'Elimină întârzierea', delayLabel:'întârziere 24h', lastScan:'ultima scanare 09:41',
-    watchlist:'Listă', ticker:'Simbol', last:'Ultim', chg:'Var', pushOff:'fără push', pushOn:'push 30m', addTicker:'Adaugă simbol',
-    capNote:'Varianta gratuită limitează lista la trei și nu trimite notificări. Pro nu are limită, cu scanare la 30 de minute.', liftCap:'Ridică limita',
-    stories24:'știri 24h', add:'Adaugă', added:'Adăugat', match:'Rezultat', topVolume:'Cel mai mare volum de știri · 24h',
-    backFeed:'← Flux', back:'← Înapoi', newsScore:'Scor știri', storiesN:'28 știri', analyst:'Analiști', earnings:'Raportare', theCall:'Concluzia', tape:'Fluxul',
-    freqFree:'Gratuit: întârziere 24h, fără notificări, o scanare pe zi.', freqPro:'Notificarea pleacă imediat ce scanarea găsește ceva.',
-    addToList:'Adaugă %s în listă', enablePush:'Activează notificările · upgrade', pushEnabled:'Notificări active · %s',
-    paywallTitle:'O zi întreagă de avans', paywallSub:'Gratuit citește știrile cu 24 de ore întârziere. Pro le citește când apar.',
-    perMonth:'/ lună · 60 $ / an', start7:'Începe 7 zile gratuit', stayFree:'Rămân pe Gratuit',
-    rowLatency:'Întârziere flux', rowTickers:'Simboluri urmărite', rowPush:'Notificări push', rowAnalyst:'Detalii analiști', rowChart:'Istoric grafic', rowDigest:'Sumar pre-deschidere', unlimited:'Nelimitat', full:'Complet', max:'Maxim',
-    more:'Mai multe', portfolio:'Portofoliu', portfolioNote:'Cost de achiziție, pondere, profit/pierdere față de știri', calendar:'Calendar raportări', calendarNote:'Date și istoric al surprizelor pe simbol',
-    screener:'Filtrare', screenerNote:'Filtrează după volumul de știri și scor', digests:'Sumare', digestsNote:'E-mail la 06:30, înainte de deschidere', broker:'Conectare broker', brokerNote:'Importă automat pozițiile',
-    account:'Cont', plan:'Plan', tickers:'Simboluri', appLang:'Limba aplicației', contentLang:'Limba conținutului',
-    appLangNote:'Butoanele, etichetele și meniurile apar în română.', quiet:'Ore silențioase · 22:00–07:00', manageSub:'Gestionează abonamentul', signOut:'Deconectare',
-    upgradeBtn:'Upgrade · 7 $/lună', managePro:'Gestionează Pro', goPro:'Trec pe Pro',
-    notifTickers:'Simboluri urmărite', notifTickersNote:'Notificare la potrivire', notifMove:'Prag de variație', notifMoveNote:'Variație zilnică absolută', notifQuiet:'Ore silențioase', notifQuietNote:'Blocate peste noapte',
-    tabFeed:'Flux', tabList:'Listă', tabAdd:'Adaugă', tabMore:'Mai mult', tabYou:'Tu', langNote:'Știrile, notele și alertele sunt livrate în română.' },
-  DE: { terminal:'Terminal-Build · v2', mobile:'Mobil', desktop:'Desktop', free:'Gratis', pro:'Pro', viewPro:'Als Pro ansehen', viewFree:'Als Gratis ansehen',
-    interval:'Scan-Intervall', sources:'Quellen', pitch:'Jeder verfolgte Ticker wird im festgelegten Intervall gescannt. Push kommt, sobald eine Meldung erscheint — nicht erst beim nächsten Aktualisieren.',
-    contGoogle:'Weiter mit Google', contApple:'Weiter mit Apple', contEmail:'Weiter mit E-Mail',
-    feed:'Feed', following:'Verfolgt', market:'Markt', score:'Score', volAvg:'Vol vs Ø', source:'Quelle', watch:'Beachten',
-    delayed24:'24 Std. verzögert', proYesterday:'Pro hat das gestern gelesen', removeDelay:'Verzögerung entfernen', delayLabel:'Verzögerung 24 Std.', lastScan:'letzter Scan 09:41',
-    watchlist:'Watchlist', ticker:'Ticker', last:'Letzter', chg:'Änd', pushOff:'kein Push', pushOn:'Push 30m', addTicker:'Ticker hinzufügen',
-    capNote:'Gratis begrenzt die Liste auf drei und sendet keine Pushes. Pro ist unbegrenzt, im 30-Minuten-Intervall.', liftCap:'Limit aufheben',
-    stories24:'Meldungen 24 Std.', add:'Hinzu', added:'Hinzugefügt', match:'Treffer', topVolume:'Höchstes Meldungsvolumen · 24 Std.',
-    backFeed:'← Feed', back:'← Zurück', newsScore:'News-Score', storiesN:'28 Meldungen', analyst:'Analysten', earnings:'Zahlen', theCall:'Die Einschätzung', tape:'Tape',
-    freqFree:'Gratis: 24 Std. Verzögerung, kein Push, ein Scan pro Tag.', freqPro:'Push wird gesendet, sobald ein Scan etwas findet.',
-    addToList:'%s zur Watchlist', enablePush:'Push aktivieren · Upgrade', pushEnabled:'Push aktiv · %s',
-    paywallTitle:'Ein ganzer Tag Vorsprung', paywallSub:'Gratis liest die Nachrichten 24 Stunden später. Pro liest sie sofort.',
-    perMonth:'/ Mon. · 60 $ / Jahr', start7:'7 Tage gratis starten', stayFree:'Bei Gratis bleiben',
-    rowLatency:'Feed-Verzögerung', rowTickers:'Verfolgte Ticker', rowPush:'Push-Benachrichtigungen', rowAnalyst:'Analysten-Details', rowChart:'Chart-Historie', rowDigest:'Digest vor Handelsstart', unlimited:'Unbegrenzt', full:'Voll', max:'Max',
-    more:'Mehr', portfolio:'Portfolio', portfolioNote:'Einstandskurs, Gewichtung, G/V im Verhältnis zu den News', calendar:'Zahlenkalender', calendarNote:'Termine und Überraschungshistorie pro Ticker',
-    screener:'Screener', screenerNote:'Nach Meldungsvolumen und Score filtern', digests:'Digests', digestsNote:'E-Mail um 06:30 vor Handelsstart', broker:'Broker-Anbindung', brokerNote:'Positionen automatisch importieren',
-    account:'Konto', plan:'Tarif', tickers:'Ticker', appLang:'App-Sprache', contentLang:'Inhaltssprache',
-    appLangNote:'Buttons, Bezeichnungen und Menüs erscheinen auf Deutsch.', quiet:'Ruhezeiten · 22:00–07:00', manageSub:'Abo verwalten', signOut:'Abmelden',
-    upgradeBtn:'Upgrade · 7 $/Mon.', managePro:'Pro verwalten', goPro:'Pro holen',
-    notifTickers:'Verfolgte Ticker', notifTickersNote:'Push bei Scan-Treffer', notifMove:'Bewegungsschwelle', notifMoveNote:'Absolute Tagesveränderung', notifQuiet:'Ruhezeiten', notifQuietNote:'Nachts unterdrückt',
-    tabFeed:'Feed', tabList:'Liste', tabAdd:'Neu', tabMore:'Mehr', tabYou:'Du', langNote:'Meldungen, Hinweise und Alerts werden auf Deutsch geliefert.' }
-};
+const { NEWS, FOLLOWS, UNIVERSE, UI } = window.HIF;
 class Component extends DCLogic {
   state = { screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed' };
   get plan() { return this.state.plan || this.props.plan || 'free'; }
