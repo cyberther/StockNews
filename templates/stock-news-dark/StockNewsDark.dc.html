@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Stock news app — dark terminal" description="Executive/terminal variant of the stock news product: dark surfaces, numbers-forward rows, one decision per screen, separate app and content languages." -->
+<helmet><script src="./ds-base.js"></script><style>@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:#14171a}</style></helmet>
+<div style="min-height:100vh;background:#14171a;color:#e8e6e3;font-family:var(--font-body);font-variant-numeric:tabular-nums">
+<div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid #2b3036">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px;letter-spacing:-0.02em">{{ brand }}</div>
+<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.terminal }}</div>
+<div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+<span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ planLabel }}</span>
+<button onClick="{{ togglePlan }}" style="padding:7px 12px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ planToggleLabel }}</button>
+</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;padding:40px 24px 80px;justify-content:center">
+
+<div>
+<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;margin-bottom:12px">{{ ui.mobile }}</div>
+<div style="width:390px;height:800px;background:#000;padding:9px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">
+<div style="width:100%;height:100%;background:#14171a;display:flex;flex-direction:column;overflow:hidden;position:relative">
+<div style="display:flex;justify-content:space-between;padding:8px 16px 2px;font-size:10px;font-weight:600;color:#8a9099"><span>09:41:22</span><span>LIVE ▮▮▮</span></div>
+
+<sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;padding:30px 22px 22px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:40px;line-height:0.92;letter-spacing:-0.035em">{{ brand }}</div>
+<div style="height:2px;background:var(--color-accent);margin:14px 0 18px;width:56px"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#2b3036;border:1px solid #2b3036;margin-bottom:18px">
+<div style="background:#14171a;padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">30<span style="font-size:12px;color:#8a9099"> min</span></div></div>
+<div style="background:#14171a;padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.sources }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">840</div></div>
+</div>
+<p style="font-size:14px;line-height:1.5;color:#b6bbc1;margin:0">{{ ui.pitch }}</p>
+<div style="margin-top:auto;display:flex;flex-direction:column;gap:9px">
+<button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contGoogle }}</button>
+<button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contApple }}</button>
+<input placeholder="you@email.com" style="min-height:44px;padding:0 14px;background:#1b1f23;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-body);font-size:14px">
+<button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contEmail }}</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isFeed }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:8px 16px 0">
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.feed }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ scanLabel }}</div></div>
+<div style="display:flex;gap:18px;margin-top:10px;border-bottom:1px solid #2b3036">
+<button onClick="{{ setFeedFollowing }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#8a9099">
+<sc-if value="{{ feedFollowingOn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:#e8e6e3">{{ ui.following }}</span></sc-if>
+<sc-if value="{{ feedFollowingOff }}" hint-placeholder-val="{{ false }}"><span>{{ ui.following }}</span></sc-if>
+</button>
+<button onClick="{{ setFeedMarket }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#8a9099">
+<sc-if value="{{ feedMarketOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:#e8e6e3">{{ ui.market }}</span></sc-if>
+<sc-if value="{{ feedMarketOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.market }}</span></sc-if>
+</button>
+</div>
+</div>
+<div style="flex:1;overflow-y:auto">
+<sc-for list="{{ feed }}" as="item" hint-placeholder-count="4">
+<div onClick="{{ item.open }}" style="padding:13px 16px;border-bottom:1px solid #2b3036;cursor:pointer">
+<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
+<span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.02em">{{ item.ticker }}</span>
+<span style="font-size:12px;font-weight:600;color:#e8e6e3"><sc-if value="{{ item.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ item.delta }}</span></sc-if><sc-if value="{{ item.up }}" hint-placeholder-val="{{ true }}"><span>{{ item.delta }}</span></sc-if></span>
+<span style="margin-left:auto;font-size:10px;letter-spacing:0.08em;color:#8a9099">{{ item.stamp }}</span>
+</div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.2;letter-spacing:-0.015em;text-wrap:pretty">{{ item.headline }}</div>
+<div style="display:flex;gap:1px;background:#2b3036;margin-top:10px">
+<div style="flex:1;background:#1b1f23;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.score }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ item.score }}</div></div>
+<div style="flex:1;background:#1b1f23;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.volAvg }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ item.vol }}</div></div>
+<div style="flex:1.6;background:#1b1f23;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.source }}</div><div style="font-size:12px;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ item.source }}</div></div>
+</div>
+<div style="display:flex;gap:6px;align-items:baseline;margin-top:9px">
+<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ ui.watch }}</span>
+<span style="font-size:12px;color:#b6bbc1;line-height:1.4">{{ item.watch }}</span>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}">
+<div style="margin:14px 16px;border:1px solid var(--color-accent);padding:14px">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">{{ ui.delayed24 }}</div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px;line-height:1.15;margin-top:4px">{{ ui.proYesterday }}</div>
+<button onClick="{{ goPaywall }}" style="width:100%;min-height:42px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.removeDelay }}</button>
+</div>
+</sc-if>
+<div style="height:20px"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isWatch }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:8px 16px 12px;border-bottom:1px solid #2b3036;display:flex;align-items:baseline;gap:8px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.watchlist }}</div>
+<div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099"><sc-if value="{{ capWarn }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ capLabel }}</span></sc-if><sc-if value="{{ capOk }}" hint-placeholder-val="{{ true }}"><span>{{ capLabel }}</span></sc-if></div>
+</div>
+<div style="display:flex;padding:8px 16px;border-bottom:1px solid #2b3036;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">
+<div style="flex:1">{{ ui.ticker }}</div><div style="width:66px;text-align:right">{{ ui.last }}</div><div style="width:56px;text-align:right">{{ ui.chg }}</div><div style="width:44px;text-align:right">{{ ui.score }}</div>
+</div>
+<div style="flex:1;overflow-y:auto">
+<sc-for list="{{ follows }}" as="row" hint-placeholder-count="3">
+<div onClick="{{ row.open }}" style="padding:12px 16px;border-bottom:1px solid #2b3036;cursor:pointer">
+<div style="display:flex;align-items:baseline">
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ row.ticker }}</div><div style="font-size:11px;color:#8a9099;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div></div>
+<div style="width:66px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:15px">{{ row.price }}</div>
+<div style="width:56px;text-align:right;font-size:13px;font-weight:600"><sc-if value="{{ row.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ row.move }}</span></sc-if><sc-if value="{{ row.up }}" hint-placeholder-val="{{ true }}"><span>{{ row.move }}</span></sc-if></div>
+<div style="width:44px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:15px">{{ row.score }}</div>
+</div>
+<div style="display:flex;gap:6px;align-items:baseline;margin-top:7px">
+<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;flex:none">{{ row.alert }}</span>
+<span style="margin-left:auto;font-size:11px;color:#b6bbc1;text-align:right">{{ row.latest }}</span>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ atCap }}" hint-placeholder-val="{{ true }}">
+<div style="margin:14px 16px;border:1px solid var(--color-accent);padding:14px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:30px;line-height:1;letter-spacing:-0.03em">3 / 3</div>
+<div style="font-size:12px;color:#b6bbc1;margin-top:6px">{{ ui.capNote }}</div>
+<button onClick="{{ goPaywall }}" style="width:100%;min-height:42px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.liftCap }}</button>
+</div>
+</sc-if>
+<div style="padding:14px 16px"><button onClick="{{ goSearch }}" style="width:100%;min-height:44px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.addTicker }}</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:8px 16px 12px;border-bottom:1px solid #2b3036">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;margin-bottom:10px">{{ ui.addTicker }}</div>
+<input placeholder="NVDA" value="{{ query }}" onChange="{{ onQuery }}" style="width:100%;min-height:44px;padding:0 12px;background:#1b1f23;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
+</div>
+<div style="flex:1;overflow-y:auto">
+<div style="padding:10px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ resultsLabel }}</div>
+<sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #2b3036">
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.ticker }}</div><div style="font-size:11px;color:#8a9099;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
+<div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ r.stories }}</div><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.stories24 }}</div></div>
+<button onClick="{{ r.toggle }}" style="position:relative;overflow:hidden;min-width:84px;min-height:38px;padding:0 12px;text-align:left;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
+<sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">{{ ui.add }}</span></sc-if>
+<sc-if value="{{ r.following }}" hint-placeholder-val="{{ false }}"><span style="color:#8a9099">{{ ui.added }}</span></sc-if>
+</button>
+</div>
+</sc-for>
+<div style="height:20px"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:6px 16px 12px;border-bottom:1px solid #2b3036">
+<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:#8a9099;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.backFeed }}</button>
+<div style="display:flex;align-items:flex-end;gap:10px;margin-top:4px">
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.035em;line-height:1">{{ stock.ticker }}</div><div style="font-size:11px;color:#8a9099;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ stock.name }}</div></div>
+<div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;line-height:1">{{ stock.price }}</div><div style="font-size:13px;font-weight:600"><sc-if value="{{ stock.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ stock.move }}</span></sc-if><sc-if value="{{ stock.up }}" hint-placeholder-val="{{ true }}"><span>{{ stock.move }}</span></sc-if></div></div>
+</div>
+</div>
+<div style="flex:1;overflow-y:auto">
+<div style="padding:14px 16px 4px">{{ chart }}</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#2b3036;border-top:1px solid #2b3036;border-bottom:1px solid #2b3036">
+<div style="background:#14171a;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.newsScore }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1;color:var(--color-accent)">{{ stock.score }}</div><div style="font-size:10px;color:#8a9099">{{ ui.storiesN }}</div></div>
+<div style="background:#14171a;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.analyst }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1">{{ stock.buyPct }}</div><div style="font-size:10px;color:#8a9099">{{ stock.analystDetail }}</div></div>
+<div style="background:#14171a;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.earnings }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1">{{ stock.earnDays }}</div><div style="font-size:10px;color:#8a9099">{{ stock.earnDate }}</div></div>
+</div>
+<div style="padding:14px 16px;border-bottom:1px solid #2b3036">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);margin-bottom:5px">{{ ui.theCall }}</div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.25;text-wrap:pretty">{{ stock.call }}</div>
+</div>
+<div style="padding:14px 16px;border-bottom:1px solid #2b3036">
+<div style="font-size:11px;color:#8a9099"><sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent)">{{ freqNote }}</span></sc-if><sc-if value="{{ isProTier }}" hint-placeholder-val="{{ false }}"><span>{{ freqNote }}</span></sc-if></div>
+<button onClick="{{ primaryDetailAction }}" style="width:100%;min-height:46px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ detailActionLabel }}</button>
+</div>
+<div style="padding:12px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.tape }} · {{ stock.ticker }}</div>
+<sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
+<div style="padding:12px 16px;border-bottom:1px solid #2b3036">
+<div style="display:flex;gap:8px;align-items:baseline;margin-bottom:4px"><span style="font-size:10px;letter-spacing:0.08em;color:#8a9099">{{ n.stamp }}</span><span style="font-size:10px;color:#8a9099">{{ n.source }}</span><span style="margin-left:auto;font-family:var(--font-heading);font-weight:800;font-size:12px">{{ n.score }}</span></div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:15px;line-height:1.2;text-wrap:pretty">{{ n.headline }}</div>
+</div>
+</sc-for>
+<div style="height:20px"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPaywall }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:6px 16px 14px;border-bottom:1px solid #2b3036">
+<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:#8a9099;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.back }}</button>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:28px;letter-spacing:-0.035em;line-height:1;margin-top:4px">{{ ui.paywallTitle }}</div>
+<div style="font-size:12px;color:#8a9099;margin-top:6px">{{ ui.paywallSub }}</div>
+</div>
+<div style="flex:1;overflow-y:auto">
+<div style="display:flex;padding:9px 16px;border-bottom:1px solid #2b3036;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099"><div style="flex:1"></div><div style="width:72px;text-align:right">{{ ui.free }}</div><div style="width:84px;text-align:right">{{ ui.pro }}</div></div>
+<sc-for list="{{ planRows }}" as="p" hint-placeholder-count="6">
+<div style="display:flex;padding:11px 16px;border-bottom:1px solid #2b3036;align-items:baseline">
+<div style="flex:1;font-size:13px">{{ p.label }}</div>
+<div style="width:72px;text-align:right;font-size:13px;color:#8a9099">{{ p.free }}</div>
+<div style="width:84px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:13px">{{ p.pro }}</div>
+</div>
+</sc-for>
+<div style="padding:16px">
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:36px;letter-spacing:-0.035em;line-height:1">$7</div><div style="font-size:12px;color:#8a9099">{{ ui.perMonth }}</div></div>
+<button onClick="{{ upgrade }}" style="width:100%;min-height:48px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.start7 }}</button>
+<button onClick="{{ back }}" style="width:100%;min-height:44px;margin-top:8px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:#8a9099;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.stayFree }}</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isMore }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:8px 16px 12px;border-bottom:1px solid #2b3036;font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.more }}</div>
+<div style="flex:1;overflow-y:auto">
+<sc-for list="{{ moreItems }}" as="m" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid #2b3036">
+<div style="flex:1"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ m.label }}</div><div style="font-size:11px;color:#8a9099">{{ m.note }}</div></div>
+<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;border:1px solid #2b3036;padding:4px 8px">{{ m.eta }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:8px 16px 12px;border-bottom:1px solid #2b3036;font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.account }}</div>
+<div style="flex:1;overflow-y:auto">
+<div style="padding:14px 16px;border-bottom:1px solid #2b3036">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:17px">{{ accountName }}</div>
+<div style="font-size:11px;color:#8a9099">Google · {{ accountEmail }}</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#2b3036;border:1px solid #2b3036;margin-top:12px">
+<div style="background:#14171a;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.plan }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ planLabel }}</div></div>
+<div style="background:#14171a;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.tickers }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ capLabel }}</div></div>
+<div style="background:#14171a;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ intervalLabel }}</div></div>
+</div>
+<button onClick="{{ accountPlanAction }}" style="width:100%;min-height:44px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ accountPlanLabel }}</button>
+</div>
+<div style="padding:14px 16px;border-bottom:1px solid #2b3036">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;margin-bottom:8px">{{ ui.appLang }}</div>
+<div style="display:flex;border:1px solid #2b3036">
+<button onClick="{{ setAppEn }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ appEn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">English</span></sc-if>
+<sc-if value="{{ appEnOff }}" hint-placeholder-val="{{ false }}"><span>English</span></sc-if>
+</button>
+<button onClick="{{ setAppRo }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ appRo }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Română</span></sc-if>
+<sc-if value="{{ appRoOff }}" hint-placeholder-val="{{ true }}"><span>Română</span></sc-if>
+</button>
+<button onClick="{{ setAppDe }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ appDe }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Deutsch</span></sc-if>
+<sc-if value="{{ appDeOff }}" hint-placeholder-val="{{ true }}"><span>Deutsch</span></sc-if>
+</button>
+</div>
+<div style="font-size:11px;color:#8a9099;margin-top:7px">{{ ui.appLangNote }}</div>
+</div>
+<div style="padding:14px 16px;border-bottom:1px solid #2b3036">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;margin-bottom:8px">{{ ui.contentLang }}</div>
+<div style="display:flex;border:1px solid #2b3036">
+<button onClick="{{ setLangEn }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ langEn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">English</span></sc-if>
+<sc-if value="{{ langEnOff }}" hint-placeholder-val="{{ false }}"><span>English</span></sc-if>
+</button>
+<button onClick="{{ setLangRo }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ langRo }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Română</span></sc-if>
+<sc-if value="{{ langRoOff }}" hint-placeholder-val="{{ true }}"><span>Română</span></sc-if>
+</button>
+<button onClick="{{ setLangDe }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ langDe }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Deutsch</span></sc-if>
+<sc-if value="{{ langDeOff }}" hint-placeholder-val="{{ true }}"><span>Deutsch</span></sc-if>
+</button>
+</div>
+<div style="font-size:11px;color:#8a9099;margin-top:7px">{{ langNote }}</div>
+</div>
+<sc-for list="{{ notifRows }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #2b3036"><div style="flex:1"><div style="font-size:13px;font-weight:600">{{ s.label }}</div><div style="font-size:11px;color:#8a9099">{{ s.note }}</div></div><span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#8a9099">{{ s.value }}</span></div>
+</sc-for>
+<div style="padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+<button style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.quiet }}</button>
+<button style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.manageSub }}</button>
+<button onClick="{{ signOut }}" style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.signOut }}</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;border-top:1px solid #2b3036;background:#14171a">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+<button onClick="{{ t.go }}" style="position:relative;flex:1;padding:12px 4px 14px;border:0;background:transparent;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#8a9099">
+<sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-1px;left:0;right:0;height:2px;background:var(--color-accent)"></span><span style="color:#e8e6e3">{{ t.label }}</span></sc-if>
+<sc-if value="{{ t.off }}" hint-placeholder-val="{{ true }}"><span>{{ t.label }}</span></sc-if>
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:16px;right:16px;bottom:74px;padding:11px 13px;background:#e8e6e3;color:#14171a;animation:hfin 0.2s ease-out">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.02em">{{ toast }}</div>
+</div>
+</sc-if>
+</div>
+</div>
+</div>
+
+<div style="flex:1;min-width:620px;max-width:900px">
+<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099;margin-bottom:12px">{{ ui.desktop }}</div>
+<div style="border:1px solid #2b3036;background:#14171a">
+<div style="display:flex;align-items:center;gap:20px;padding:14px 20px;border-bottom:1px solid #2b3036">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:16px;margin-right:auto">{{ brand }}</div>
+<a href="#" style="color:#e8e6e3;text-decoration:none;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase">{{ ui.feed }}</a>
+<a href="#" style="color:#8a9099;text-decoration:none;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase">{{ ui.watchlist }}</a>
+<a href="#" style="color:#8a9099;text-decoration:none;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase">{{ ui.screener }}</a>
+<button style="padding:9px 14px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.goPro }}</button>
+</div>
+<div style="display:grid;grid-template-columns:1fr 300px">
+<div style="border-right:1px solid #2b3036">
+<div style="display:flex;align-items:baseline;gap:12px;padding:14px 20px;border-bottom:1px solid #2b3036"><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;letter-spacing:-0.02em">{{ ui.following }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099">{{ scanLabel }}</div></div>
+<sc-for list="{{ feed }}" as="d" hint-placeholder-count="4">
+<div style="padding:16px 20px;border-bottom:1px solid #2b3036">
+<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:5px">
+<span style="font-family:var(--font-heading);font-weight:800;font-size:13px">{{ d.ticker }}</span>
+<span style="font-size:12px;font-weight:600"><sc-if value="{{ d.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ d.delta }}</span></sc-if><sc-if value="{{ d.up }}" hint-placeholder-val="{{ true }}"><span>{{ d.delta }}</span></sc-if></span>
+<span style="font-size:10px;color:#8a9099">{{ d.source }}</span>
+<span style="margin-left:auto;font-size:10px;color:#8a9099">{{ d.stamp }}</span>
+<span style="font-family:var(--font-heading);font-weight:800;font-size:13px;min-width:34px;text-align:right">{{ d.score }}</span>
+</div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:19px;line-height:1.18;letter-spacing:-0.02em;text-wrap:pretty">{{ d.headline }}</div>
+<div style="display:flex;gap:6px;align-items:baseline;margin-top:6px"><span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ ui.watch }}</span><span style="font-size:12px;color:#b6bbc1">{{ d.watch }}</span></div>
+</div>
+</sc-for>
+</div>
+<div>
+<div style="display:flex;padding:14px 16px 10px;border-bottom:1px solid #2b3036;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#8a9099"><div style="flex:1">{{ ui.ticker }}</div><div style="width:62px;text-align:right">{{ ui.last }}</div><div style="width:48px;text-align:right">{{ ui.chg }}</div></div>
+<sc-for list="{{ follows }}" as="w" hint-placeholder-count="3">
+<div style="padding:11px 16px;border-bottom:1px solid #2b3036">
+<div style="display:flex;align-items:baseline"><div style="flex:1;font-family:var(--font-heading);font-weight:800;font-size:14px">{{ w.ticker }}</div><div style="width:62px;text-align:right;font-size:13px">{{ w.price }}</div><div style="width:48px;text-align:right;font-size:12px;font-weight:600"><sc-if value="{{ w.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ w.move }}</span></sc-if><sc-if value="{{ w.up }}" hint-placeholder-val="{{ true }}"><span>{{ w.move }}</span></sc-if></div></div>
+<div style="font-size:10px;color:#8a9099;margin-top:3px">{{ w.scoreLabel }} · {{ w.alert }}</div>
+</div>
+</sc-for>
+<div style="padding:14px 16px"><button style="width:100%;min-height:40px;text-align:left;padding:0 12px;background:transparent;border:1px solid #2b3036;color:#e8e6e3;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.addTicker }}</button></div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Heard It First&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
+const NEWS = [
+  { ticker:'NVDA', source:'Reuters', stamp:'09:29:14', score:'+72', delta:'+2.4%', up:true, vol:'1.8x',
+    headline:{ EN:'Data-centre guidance raised for the third straight quarter', RO:'Estimările pentru centrele de date, majorate al treilea trimestru consecutiv', DE:'Data-Center-Prognose zum dritten Quartal in Folge erhöht' },
+    watch:{ EN:'Order book concentration — top three customers are 41% of revenue.', RO:'Concentrarea comenzilor — primii trei clienți acoperă 41% din venituri.', DE:'Konzentration im Auftragsbuch — die drei größten Kunden stehen für 41% des Umsatzes.' } },
+  { ticker:'AAPL', source:'Bloomberg', stamp:'08:53:02', score:'+18', delta:'+0.3%', up:true, vol:'0.9x',
+    headline:{ EN:'Services revenue in India up 34% year on year', RO:'Veniturile din servicii în India, plus 34% de la an la an', DE:'Services-Umsatz in Indien 34% über Vorjahr' },
+    watch:{ EN:'Services margin, not headline growth — it carries the multiple.', RO:'Marja din servicii, nu creșterea din titlu — ea susține multiplul.', DE:'Die Services-Marge, nicht das Umsatzwachstum — sie trägt das Multiple.' } },
+  { ticker:'TSLA', source:'WSJ', stamp:'08:11:47', score:'−34', delta:'−1.8%', up:false, vol:'2.3x',
+    headline:{ EN:'Second European price cut this quarter', RO:'A doua reducere de preț în Europa în acest trimestru', DE:'Zweite Preissenkung in Europa in diesem Quartal' },
+    watch:{ EN:'Gross margin ex-credits at the next print.', RO:'Marja brută fără credite de mediu, la următorul raport.', DE:'Bruttomarge ohne Emissionsgutschriften im nächsten Bericht.' } },
+  { ticker:'NVDA', source:'The Verge', stamp:'07:40:22', score:'+9', delta:'+2.4%', up:true, vol:'1.8x',
+    headline:{ EN:'Rival inference chip ships at roughly half the price', RO:'Un chip de inferență concurent se lansează la aproximativ jumătate de preț', DE:'Konkurrierender Inferenz-Chip kommt zum halben Preis' },
+    watch:{ EN:'Low-end share loss first; no near-term revenue impact.', RO:'Mai întâi pierdere de cotă la gama inferioară; fără impact imediat pe venituri.', DE:'Zunächst Marktanteilsverlust im Einstiegssegment; kurzfristig kein Umsatzeffekt.' } },
+  { ticker:'AAPL', source:'FT', stamp:'06:58:31', score:'−6', delta:'+0.3%', up:true, vol:'0.9x',
+    headline:{ EN:'EU regulator requests further App Store fee disclosure', RO:'Autoritatea UE cere date suplimentare despre comisioanele App Store', DE:'EU-Behörde fordert weitere Angaben zu App-Store-Gebühren' },
+    watch:{ EN:'Inquiry, not a ruling — historically moves only on a fine.', RO:'O anchetă, nu o decizie — istoric, mișcă prețul doar la amendă.', DE:'Eine Prüfung, kein Urteil — bewegt den Kurs historisch erst bei einer Strafe.' } }
+];
+const FOLLOWS = {
+  NVDA: { ticker:'NVDA', name:'NVIDIA Corp', price:'184.20', move:'+2.4%', up:true, score:'+72', buyPct:'79%', analystDetail:'41 / 9 / 2', earnDays:'12d', earnDate:'14 Sep',
+    latest:{ EN:'3 stories · 1h', RO:'3 știri · 1h', DE:'3 Meldungen · 1h' },
+    call:{ EN:'Raised guidance is priced in; the risk is customer concentration, not demand.', RO:'Estimările majorate sunt deja în preț; riscul e concentrarea clienților, nu cererea.', DE:'Die höhere Prognose ist eingepreist; das Risiko ist die Kundenkonzentration, nicht die Nachfrage.' } },
+  AAPL: { ticker:'AAPL', name:'Apple Inc', price:'241.06', move:'+0.3%', up:true, score:'+18', buyPct:'42%', analystDetail:'19 / 22 / 4', earnDays:'34d', earnDate:'06 Oct',
+    latest:{ EN:'2 stories · 3h', RO:'2 știri · 3h', DE:'2 Meldungen · 3h' },
+    call:{ EN:'Services growth is the story; the EU inquiry is noise until a number is attached.', RO:'Creșterea serviciilor e subiectul; ancheta UE e zgomot până apare o cifră.', DE:'Das Services-Wachstum ist die Story; die EU-Prüfung ist Rauschen, solange keine Zahl daran hängt.' } },
+  TSLA: { ticker:'TSLA', name:'Tesla Inc', price:'318.77', move:'−1.8%', up:false, score:'−34', buyPct:'28%', analystDetail:'12 / 20 / 11', earnDays:'21d', earnDate:'23 Sep',
+    latest:{ EN:'4 stories · 2h', RO:'4 știri · 2h', DE:'4 Meldungen · 2h' },
+    call:{ EN:'Volume is being bought with margin. Watch gross margin ex-credits.', RO:'Volumul e cumpărat cu marjă. Urmărește marja brută fără credite.', DE:'Volumen wird mit Marge gekauft. Bruttomarge ohne Gutschriften beobachten.' } }
+};
+const UNIVERSE = [
+  { ticker:'NVDA', name:'NVIDIA Corp', stories:'28' },
+  { ticker:'AAPL', name:'Apple Inc', stories:'19' },
+  { ticker:'TSLA', name:'Tesla Inc', stories:'31' },
+  { ticker:'MSFT', name:'Microsoft Corp', stories:'14' },
+  { ticker:'AMZN', name:'Amazon.com Inc', stories:'22' },
+  { ticker:'ASML', name:'ASML Holding NV', stories:'6' },
+  { ticker:'NOVO', name:'Novo Nordisk A/S', stories:'11' }
+];
+const UI = {
+  EN: { terminal:'Terminal build · v2', mobile:'Mobile', desktop:'Desktop', free:'Free', pro:'Pro', viewPro:'View as Pro', viewFree:'View as Free',
+    interval:'Scan interval', sources:'Sources', pitch:'Every followed ticker scanned on the interval you set. Push the moment a story lands, not on the next refresh.',
+    contGoogle:'Continue with Google', contApple:'Continue with Apple', contEmail:'Continue with email',
+    feed:'Feed', following:'Following', market:'Market', score:'Score', volAvg:'Vol vs avg', source:'Source', watch:'Watch',
+    delayed24:'Delayed 24 h', proYesterday:'Pro read this yesterday', removeDelay:'Remove the delay', delayLabel:'delay 24h', lastScan:'last scan 09:41',
+    watchlist:'Watchlist', ticker:'Ticker', last:'Last', chg:'Chg', pushOff:'push off', pushOn:'push 30m', addTicker:'Add ticker',
+    capNote:'Free caps the list at three and never pushes. Pro is uncapped at a 30-minute interval.', liftCap:'Lift the cap',
+    stories24:'stories 24h', add:'Add', added:'Added', match:'Match', topVolume:'Highest news volume · 24h',
+    backFeed:'← Feed', back:'← Back', newsScore:'News score', storiesN:'28 stories', analyst:'Analyst', earnings:'Earnings', theCall:'The call', tape:'Tape',
+    freqFree:'Free: 24h delay, no push, one scan a day.', freqPro:'Push fires the moment a scan returns a match.',
+    addToList:'Add %s to watchlist', enablePush:'Enable push · upgrade', pushEnabled:'Push enabled · %s',
+    paywallTitle:'A full day of edge', paywallSub:'Free reads the news 24 hours late. Pro reads it as it lands.',
+    perMonth:'/ mo · $60 / yr', start7:'Start 7 days free', stayFree:'Stay on Free',
+    rowLatency:'Feed latency', rowTickers:'Tickers followed', rowPush:'Push notifications', rowAnalyst:'Analyst breakdown', rowChart:'Chart history', rowDigest:'Pre-open digest', unlimited:'Unlimited', full:'Full', max:'Max',
+    more:'More', portfolio:'Portfolio', portfolioNote:'Cost basis, weight, P/L against the news', calendar:'Earnings calendar', calendarNote:'Dates and surprise history per ticker',
+    screener:'Screener', screenerNote:'Filter by news volume and score', digests:'Digests', digestsNote:'06:30 pre-open email', broker:'Broker link', brokerNote:'Import holdings automatically',
+    account:'Account', plan:'Plan', tickers:'Tickers', appLang:'App language', contentLang:'Content language',
+    appLangNote:'Buttons, labels and menus appear in English.', quiet:'Quiet hours · 22:00–07:00', manageSub:'Manage subscription', signOut:'Sign out',
+    upgradeBtn:'Upgrade · $7/mo', managePro:'Manage Pro', goPro:'Go Pro',
+    notifTickers:'Followed tickers', notifTickersNote:'Push on scan match', notifMove:'Move threshold', notifMoveNote:'Absolute daily change', notifQuiet:'Quiet hours', notifQuietNote:'Suppressed overnight',
+    tabFeed:'Feed', tabList:'List', tabAdd:'Add', tabMore:'More', tabYou:'You', langNote:'News, watch notes and alerts are delivered in English.' },
+  RO: { terminal:'Versiune terminal · v2', mobile:'Mobil', desktop:'Desktop', free:'Gratuit', pro:'Pro', viewPro:'Vezi ca Pro', viewFree:'Vezi ca Gratuit',
+    interval:'Interval scanare', sources:'Surse', pitch:'Fiecare simbol urmărit este scanat la intervalul stabilit. Notificarea pleacă în momentul apariției știrii, nu la următoarea reîmprospătare.',
+    contGoogle:'Continuă cu Google', contApple:'Continuă cu Apple', contEmail:'Continuă cu e-mail',
+    feed:'Flux', following:'Urmărite', market:'Piață', score:'Scor', volAvg:'Vol vs medie', source:'Sursă', watch:'Urmărește',
+    delayed24:'Întârziat 24 h', proYesterday:'Pro a citit asta ieri', removeDelay:'Elimină întârzierea', delayLabel:'întârziere 24h', lastScan:'ultima scanare 09:41',
+    watchlist:'Listă', ticker:'Simbol', last:'Ultim', chg:'Var', pushOff:'fără push', pushOn:'push 30m', addTicker:'Adaugă simbol',
+    capNote:'Varianta gratuită limitează lista la trei și nu trimite notificări. Pro nu are limită, cu scanare la 30 de minute.', liftCap:'Ridică limita',
+    stories24:'știri 24h', add:'Adaugă', added:'Adăugat', match:'Rezultat', topVolume:'Cel mai mare volum de știri · 24h',
+    backFeed:'← Flux', back:'← Înapoi', newsScore:'Scor știri', storiesN:'28 știri', analyst:'Analiști', earnings:'Raportare', theCall:'Concluzia', tape:'Fluxul',
+    freqFree:'Gratuit: întârziere 24h, fără notificări, o scanare pe zi.', freqPro:'Notificarea pleacă imediat ce scanarea găsește ceva.',
+    addToList:'Adaugă %s în listă', enablePush:'Activează notificările · upgrade', pushEnabled:'Notificări active · %s',
+    paywallTitle:'O zi întreagă de avans', paywallSub:'Gratuit citește știrile cu 24 de ore întârziere. Pro le citește când apar.',
+    perMonth:'/ lună · 60 $ / an', start7:'Începe 7 zile gratuit', stayFree:'Rămân pe Gratuit',
+    rowLatency:'Întârziere flux', rowTickers:'Simboluri urmărite', rowPush:'Notificări push', rowAnalyst:'Detalii analiști', rowChart:'Istoric grafic', rowDigest:'Sumar pre-deschidere', unlimited:'Nelimitat', full:'Complet', max:'Maxim',
+    more:'Mai multe', portfolio:'Portofoliu', portfolioNote:'Cost de achiziție, pondere, profit/pierdere față de știri', calendar:'Calendar raportări', calendarNote:'Date și istoric al surprizelor pe simbol',
+    screener:'Filtrare', screenerNote:'Filtrează după volumul de știri și scor', digests:'Sumare', digestsNote:'E-mail la 06:30, înainte de deschidere', broker:'Conectare broker', brokerNote:'Importă automat pozițiile',
+    account:'Cont', plan:'Plan', tickers:'Simboluri', appLang:'Limba aplicației', contentLang:'Limba conținutului',
+    appLangNote:'Butoanele, etichetele și meniurile apar în română.', quiet:'Ore silențioase · 22:00–07:00', manageSub:'Gestionează abonamentul', signOut:'Deconectare',
+    upgradeBtn:'Upgrade · 7 $/lună', managePro:'Gestionează Pro', goPro:'Trec pe Pro',
+    notifTickers:'Simboluri urmărite', notifTickersNote:'Notificare la potrivire', notifMove:'Prag de variație', notifMoveNote:'Variație zilnică absolută', notifQuiet:'Ore silențioase', notifQuietNote:'Blocate peste noapte',
+    tabFeed:'Flux', tabList:'Listă', tabAdd:'Adaugă', tabMore:'Mai mult', tabYou:'Tu', langNote:'Știrile, notele și alertele sunt livrate în română.' },
+  DE: { terminal:'Terminal-Build · v2', mobile:'Mobil', desktop:'Desktop', free:'Gratis', pro:'Pro', viewPro:'Als Pro ansehen', viewFree:'Als Gratis ansehen',
+    interval:'Scan-Intervall', sources:'Quellen', pitch:'Jeder verfolgte Ticker wird im festgelegten Intervall gescannt. Push kommt, sobald eine Meldung erscheint — nicht erst beim nächsten Aktualisieren.',
+    contGoogle:'Weiter mit Google', contApple:'Weiter mit Apple', contEmail:'Weiter mit E-Mail',
+    feed:'Feed', following:'Verfolgt', market:'Markt', score:'Score', volAvg:'Vol vs Ø', source:'Quelle', watch:'Beachten',
+    delayed24:'24 Std. verzögert', proYesterday:'Pro hat das gestern gelesen', removeDelay:'Verzögerung entfernen', delayLabel:'Verzögerung 24 Std.', lastScan:'letzter Scan 09:41',
+    watchlist:'Watchlist', ticker:'Ticker', last:'Letzter', chg:'Änd', pushOff:'kein Push', pushOn:'Push 30m', addTicker:'Ticker hinzufügen',
+    capNote:'Gratis begrenzt die Liste auf drei und sendet keine Pushes. Pro ist unbegrenzt, im 30-Minuten-Intervall.', liftCap:'Limit aufheben',
+    stories24:'Meldungen 24 Std.', add:'Hinzu', added:'Hinzugefügt', match:'Treffer', topVolume:'Höchstes Meldungsvolumen · 24 Std.',
+    backFeed:'← Feed', back:'← Zurück', newsScore:'News-Score', storiesN:'28 Meldungen', analyst:'Analysten', earnings:'Zahlen', theCall:'Die Einschätzung', tape:'Tape',
+    freqFree:'Gratis: 24 Std. Verzögerung, kein Push, ein Scan pro Tag.', freqPro:'Push wird gesendet, sobald ein Scan etwas findet.',
+    addToList:'%s zur Watchlist', enablePush:'Push aktivieren · Upgrade', pushEnabled:'Push aktiv · %s',
+    paywallTitle:'Ein ganzer Tag Vorsprung', paywallSub:'Gratis liest die Nachrichten 24 Stunden später. Pro liest sie sofort.',
+    perMonth:'/ Mon. · 60 $ / Jahr', start7:'7 Tage gratis starten', stayFree:'Bei Gratis bleiben',
+    rowLatency:'Feed-Verzögerung', rowTickers:'Verfolgte Ticker', rowPush:'Push-Benachrichtigungen', rowAnalyst:'Analysten-Details', rowChart:'Chart-Historie', rowDigest:'Digest vor Handelsstart', unlimited:'Unbegrenzt', full:'Voll', max:'Max',
+    more:'Mehr', portfolio:'Portfolio', portfolioNote:'Einstandskurs, Gewichtung, G/V im Verhältnis zu den News', calendar:'Zahlenkalender', calendarNote:'Termine und Überraschungshistorie pro Ticker',
+    screener:'Screener', screenerNote:'Nach Meldungsvolumen und Score filtern', digests:'Digests', digestsNote:'E-Mail um 06:30 vor Handelsstart', broker:'Broker-Anbindung', brokerNote:'Positionen automatisch importieren',
+    account:'Konto', plan:'Tarif', tickers:'Ticker', appLang:'App-Sprache', contentLang:'Inhaltssprache',
+    appLangNote:'Buttons, Bezeichnungen und Menüs erscheinen auf Deutsch.', quiet:'Ruhezeiten · 22:00–07:00', manageSub:'Abo verwalten', signOut:'Abmelden',
+    upgradeBtn:'Upgrade · 7 $/Mon.', managePro:'Pro verwalten', goPro:'Pro holen',
+    notifTickers:'Verfolgte Ticker', notifTickersNote:'Push bei Scan-Treffer', notifMove:'Bewegungsschwelle', notifMoveNote:'Absolute Tagesveränderung', notifQuiet:'Ruhezeiten', notifQuietNote:'Nachts unterdrückt',
+    tabFeed:'Feed', tabList:'Liste', tabAdd:'Neu', tabMore:'Mehr', tabYou:'Du', langNote:'Meldungen, Hinweise und Alerts werden auf Deutsch geliefert.' }
+};
+class Component extends DCLogic {
+  state = { screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed' };
+  get plan() { return this.state.plan || this.props.plan || 'free'; }
+  get lang() { return this.state.lang || this.props.lang || 'EN'; }
+  get appLang() { return this.state.appLang || this.props.appLang || 'EN'; }
+  go(screen) { this.setState(s => ({ screen, prev: (s.screen === 'paywall' || s.screen === 'detail') ? s.prev : s.screen })); }
+  flash(toast) { this.setState({ toast }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast:'' }), 2200); }
+  tab(key, label) {
+    const on = this.state.screen === key || (key === 'feed' && this.state.screen === 'detail');
+    return { label, on, off: !on, go: () => this.go(key) };
+  }
+  chartEl() {
+    const pts = [4,12,9,18,15,26,22,34,30,42,38,52,46,60,58,72,64,80,76,92,86,104,96,116];
+    const d = pts.map((v,i) => (i*14+4) + ',' + (110 - v * 0.85)).join(' ');
+    return React.createElement('div', null,
+      React.createElement('div', { style:{ display:'flex', justifyContent:'space-between', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:'#8a9099', marginBottom:6 } },
+        React.createElement('span', null, '6M'), React.createElement('span', null, '+41.8%')),
+      React.createElement('svg', { viewBox:'0 0 330 115', style:{ width:'100%', height:115, display:'block' } },
+        React.createElement('line', { x1:0, y1:114, x2:330, y2:114, stroke:'#2b3036', strokeWidth:1 }),
+        React.createElement('line', { x1:0, y1:57, x2:330, y2:57, stroke:'#2b3036', strokeWidth:1, strokeDasharray:'2 5' }),
+        React.createElement('polyline', { points:d, fill:'none', stroke:'#ec3013', strokeWidth:1.75 })
+      ));
+  }
+  renderVals() {
+    const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen;
+    const L = this.lang, A = this.appLang, u = UI[A];
+    const feed = (s.feedTab === 'following' ? NEWS.filter(n => s.follows.includes(n.ticker)) : NEWS).map(n => Object.assign({}, n, {
+      headline: n.headline[L], watch: n.watch[L],
+      down: !n.up, open: () => { this.setState({ selected:n.ticker }); this.go('detail'); }
+    }));
+    const q = s.query.trim().toUpperCase();
+    const results = UNIVERSE.filter(x => !q || x.ticker.includes(q) || x.name.toUpperCase().includes(q)).map(x => {
+      const on = s.follows.includes(x.ticker);
+      return Object.assign({}, x, {
+        following: on, notFollowing: !on,
+        toggle: () => {
+          if (on) return this.setState(st => ({ follows: st.follows.filter(f => f !== x.ticker) }));
+          if (isFree && s.follows.length >= 3) { this.flash('3 / 3 — ' + u.liftCap.toUpperCase()); return this.go('paywall'); }
+          this.setState(st => ({ follows: st.follows.concat(x.ticker) }));
+          this.flash(x.ticker + ' · ' + u.added.toUpperCase());
+        }
+      });
+    });
+    const stock = FOLLOWS[s.selected] || FOLLOWS.NVDA;
+    const following = s.follows.includes(stock.ticker);
+    return {
+      ui: u,
+      brand: this.props.brand || 'Heard It First',
+      planLabel: isFree ? u.free : u.pro,
+      planToggleLabel: isFree ? u.viewPro : u.viewFree,
+      togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),
+      isAuth: screen === 'auth', isFeed: screen === 'feed', isWatch: screen === 'watchlist', isSearch: screen === 'search',
+      isDetail: screen === 'detail', isPaywall: screen === 'paywall', isMore: screen === 'more', isAccount: screen === 'account',
+      showNav: screen !== 'auth' && screen !== 'paywall',
+      isFreeTier: isFree, isProTier: !isFree,
+      signIn: () => { this.go('feed'); this.flash(u.tabYou.toUpperCase() + ' · 3 / 3'); },
+      signOut: () => this.go('auth'),
+      goPaywall: () => this.go('paywall'),
+      goSearch: () => this.go('search'),
+      back: () => this.go(s.prev || 'feed'),
+      upgrade: () => { this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
+      tabs: [this.tab('feed',u.tabFeed), this.tab('watchlist',u.tabList), this.tab('search',u.tabAdd), this.tab('more',u.tabMore), this.tab('account',u.tabYou)],
+      scanLabel: isFree ? u.delayLabel : u.lastScan,
+      setFeedFollowing: () => this.setState({ feedTab:'following' }),
+      setFeedMarket: () => this.setState({ feedTab:'market' }),
+      feedFollowingOn: s.feedTab === 'following', feedFollowingOff: s.feedTab !== 'following',
+      feedMarketOn: s.feedTab === 'market', feedMarketOff: s.feedTab !== 'market',
+      feed,
+      follows: s.follows.map(t => Object.assign({}, FOLLOWS[t], {
+        latest: FOLLOWS[t].latest[L],
+        scoreLabel: u.score + ' ' + FOLLOWS[t].score,
+        down: !FOLLOWS[t].up,
+        alert: isFree ? u.pushOff : u.pushOn,
+        open: () => { this.setState({ selected:t }); this.go('detail'); }
+      })),
+      atCap: isFree && s.follows.length >= 3,
+      capLabel: isFree ? s.follows.length + ' / 3' : s.follows.length + ' / ∞',
+      capWarn: isFree && s.follows.length >= 3, capOk: !(isFree && s.follows.length >= 3),
+      intervalLabel: isFree ? '24h' : '30m',
+      query: s.query,
+      onQuery: e => this.setState({ query: e.target.value }),
+      resultsLabel: q ? u.match + ' · ' + q : u.topVolume,
+      results,
+      stock: Object.assign({}, stock, { down: !stock.up, call: stock.call[L] }),
+      chart: this.chartEl(),
+      stockNews: NEWS.filter(n => n.ticker === stock.ticker).concat(NEWS.slice(0,2)).slice(0,3).map(n => Object.assign({}, n, { headline: n.headline[L] })),
+      freqNote: isFree ? u.freqFree : u.freqPro,
+      detailActionLabel: following ? (isFree ? u.enablePush : u.pushEnabled.replace('%s', stock.ticker)) : u.addToList.replace('%s', stock.ticker),
+      primaryDetailAction: () => {
+        if (isFree) { this.flash(u.enablePush.toUpperCase()); return this.go('paywall'); }
+        if (!following) { this.setState(st => ({ follows: st.follows.concat(stock.ticker) })); return this.flash(stock.ticker + ' · ' + u.added.toUpperCase()); }
+        this.flash(u.pushEnabled.replace('%s', stock.ticker).toUpperCase());
+      },
+      langEn: L === 'EN', langEnOff: L !== 'EN',
+      langRo: L === 'RO', langRoOff: L !== 'RO',
+      langDe: L === 'DE', langDeOff: L !== 'DE',
+      langNote: UI[L].langNote,
+      setLangEn: () => this.setState({ lang:'EN' }),
+      setLangRo: () => this.setState({ lang:'RO' }),
+      setLangDe: () => this.setState({ lang:'DE' }),
+      appEn: A === 'EN', appEnOff: A !== 'EN',
+      appRo: A === 'RO', appRoOff: A !== 'RO',
+      appDe: A === 'DE', appDeOff: A !== 'DE',
+      setAppEn: () => this.setState({ appLang:'EN' }),
+      setAppRo: () => this.setState({ appLang:'RO' }),
+      setAppDe: () => this.setState({ appLang:'DE' }),
+      planRows: [
+        { label:u.rowLatency, free:'24h', pro:'0m' },
+        { label:u.rowTickers, free:'3', pro:u.unlimited },
+        { label:u.rowPush, free:'—', pro:'✓' },
+        { label:u.rowAnalyst, free:'—', pro:u.full },
+        { label:u.rowChart, free:'6M', pro:u.max },
+        { label:u.rowDigest, free:'—', pro:'06:30' }
+      ],
+      moreItems: [
+        { label:u.portfolio, note:u.portfolioNote, eta:'Q4' },
+        { label:u.calendar, note:u.calendarNote, eta:'Q4' },
+        { label:u.screener, note:u.screenerNote, eta:'Q1' },
+        { label:u.digests, note:u.digestsNote, eta:'Q1' },
+        { label:u.broker, note:u.brokerNote, eta:'Q2' }
+      ],
+      accountName: this.props.accountName || 'A. Novak',
+      accountEmail: 'alex@email.com',
+      accountPlanLabel: isFree ? u.upgradeBtn : u.managePro,
+      accountPlanAction: () => this.go('paywall'),
+      notifRows: [
+        { label:u.notifTickers, note:u.notifTickersNote, value: isFree ? u.pro : '✓' },
+        { label:u.notifMove, note:u.notifMoveNote, value: isFree ? u.pro : '5%' },
+        { label:u.notifQuiet, note:u.notifQuietNote, value:'22–07' }
+      ],
+      toast: s.toast
+    };
+  }
+}
+
+</script>
+</body>
+</html>

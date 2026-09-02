@@ -308,7 +308,7 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Openbell&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Alex Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Heard It First&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Alex Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
 const RED = 'var(--color-accent-700)';
 const NEWS = [
   { ticker:'NVDA', source:'Reuters', time:'12m ago', score:'+72', headline:'Nvidia lifts its data-centre outlook again', body:'The company says orders for its newest chips are booked out into next year — a good sign for revenue, but it leans on a handful of very large customers.' },
@@ -371,7 +371,7 @@ class Component extends DCLogic {
     const stock = FOLLOWS[s.selected] || FOLLOWS.NVDA;
     const following = s.follows.includes(stock.ticker);
     return {
-      brand: this.props.brand || 'Openbell',
+      brand: this.props.brand || 'Heard It First',
       planLabel: isFree ? 'Free' : 'Pro',
       planToggleLabel: isFree ? 'Preview as Pro' : 'Preview as Free',
       togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),

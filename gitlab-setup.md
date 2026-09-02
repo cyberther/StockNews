@@ -1,4 +1,4 @@
-# Putting Openbell into GitLab
+# Putting Heard It First into GitLab
 
 The download contains the whole project. Nothing needs building — every file is plain HTML/CSS/JS.
 
@@ -20,7 +20,7 @@ The download contains the whole project. Nothing needs building — every file i
 
 git init
 git add .
-git commit -m "Openbell stock news prototype on the Modernist design system"
+git commit -m "Heard It First stock news prototype on the Modernist design system"
 git branch -M main
 git remote add origin git@gitlab.com:<you>/<project>.git
 git push -u origin main
