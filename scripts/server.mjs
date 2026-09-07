@@ -30,7 +30,7 @@ const pageHeaders = {
   'referrer-policy': 'strict-origin-when-cross-origin',
   'permissions-policy': 'camera=(), microphone=(), geolocation=()',
   // The generated DC runtime compiles component expressions with new Function.
-  'content-security-policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://finnhub.io; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+  'content-security-policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://finnhub.io; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
 };
 
 function clientId(req) {
@@ -44,10 +44,8 @@ async function sendResponse(res, response) {
 }
 
 async function serveStatic(pathname, res) {
-  const route = pathname === '/' ? '/templates/stock-news-web/StockNewsWeb.dc.html'
-    : pathname === '/mobile' ? '/templates/stock-news-dark/StockNewsDark.dc.html' : pathname;
   let decoded;
-  try { decoded = decodeURIComponent(route); } catch { res.writeHead(400, pageHeaders).end('Bad request'); return; }
+  try { decoded = decodeURIComponent(pathname); } catch { res.writeHead(400, pageHeaders).end('Bad request'); return; }
   const file = resolve(root, '.' + decoded);
   if (file !== root && !file.startsWith(root + sep)) { res.writeHead(403, pageHeaders).end('Forbidden'); return; }
   try {
@@ -76,6 +74,11 @@ const server = createServer(async (req, res) => {
         clientId: clientId(req)
       });
       await sendResponse(res, response);
+      return;
+    }
+    if (url.pathname === '/' || url.pathname === '/mobile') {
+      const location = url.pathname === '/' ? '/templates/stock-news-web/StockNewsWeb.dc.html' : '/templates/stock-news-dark/StockNewsDark.dc.html';
+      res.writeHead(302, { ...pageHeaders, location }).end();
       return;
     }
     if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405, { ...pageHeaders, allow: 'GET, HEAD' }).end('Method not allowed'); return; }
