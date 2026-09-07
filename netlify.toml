@@ -7,6 +7,14 @@
 [build.environment]
   NODE_VERSION = "20"
 
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://finnhub.io; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+
 # Convenience: open the web app at the site root.
 [[redirects]]
   from = "/"

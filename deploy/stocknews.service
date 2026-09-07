@@ -1,0 +1,21 @@
+[Unit]
+Description=StockNews web application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=stocknews
+Group=stocknews
+WorkingDirectory=/opt/stocknews
+EnvironmentFile=/opt/stocknews/.env
+ExecStart=/usr/bin/node /opt/stocknews/scripts/server.mjs
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

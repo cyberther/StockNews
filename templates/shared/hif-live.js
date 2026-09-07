@@ -12,7 +12,7 @@ const DIRECT = 'https://finnhub.io/api/v1';
 const PROXY = '/api/finnhub';
 const cache = new Map();
 const TTL = { quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000 };
-let proxyState = 'unknown'; // 'unknown' | 'yes' | 'no'
+let proxyState = window.location && window.location.protocol === 'file:' ? 'no' : 'unknown'; // 'unknown' | 'yes' | 'no'
 
 function fresh(kind, arg){
   const hit = cache.get(kind + ':' + arg);
@@ -28,7 +28,11 @@ function qs(params){
 async function callProxy(path, params){
   const res = await fetch(PROXY + '?' + qs(Object.assign({ path: path }, params)));
   if (res.status === 404 || res.status === 405) { proxyState = 'no'; return null; }
-  if (!res.ok) throw new Error('proxy ' + res.status);
+  if (!res.ok) {
+    let message = 'proxy ' + res.status;
+    try { const body = await res.json(); if (body && body.error) message = body.error; } catch (_) {}
+    throw new Error(message);
+  }
   proxyState = 'yes';
   return res.json();
 }
@@ -44,7 +48,7 @@ async function callDirect(path, params, token){
 async function get(path, params, token){
   if (proxyState !== 'no') {
     try { const j = await callProxy(path, params); if (j) return j; }
-    catch (e) { if (proxyState === 'unknown') proxyState = 'no'; else throw e; }
+    catch (e) { throw e; }
   }
   return callDirect(path, params, token);
 }

@@ -3,3 +3,9 @@
 
 # Generated Netlify publish bundle
 dist
+
+# Local secrets and runtime state
+.env
+.env.*
+!.env.example
+*.log

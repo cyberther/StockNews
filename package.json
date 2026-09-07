@@ -1,0 +1,16 @@
+{
+  "name": "stocknews",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build-netlify.mjs",
+    "start": "node scripts/server.mjs",
+    "serve": "npm run build && npm start",
+    "test": "node --test",
+    "check": "node --check scripts/server.mjs && node --check netlify/functions/finnhub.js && node --check netlify/functions/_shared/market-proxy.js && node --check templates/shared/hif-live.js"
+  }
+}

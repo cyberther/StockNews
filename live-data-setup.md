@@ -6,8 +6,8 @@ in the page.
 
 ## 0. The key
 
-The Finnhub dashboard shows one 40-character string — that whole string **is** the key (the
-two 20-char halves are rejected on their own). Verified working against `/quote`,
+Use the complete API key shown in the Finnhub dashboard. Do not split or shorten it. Verify it
+against `/quote`,
 `/company-news`, `/search` and `/stock/recommendation`.
 
 The deployed site keeps the key only in Netlify's protected `FINNHUB_KEY` environment
@@ -19,11 +19,11 @@ The proxy is a Netlify Function, so the site has to be a **git-connected Netlify
 the one-file preview deploy can't run functions.
 
 1. Netlify → Add new site → Import an existing project → pick `cyberther/StockNews`.
-2. Build command: none. Publish directory: `.` (already set in `netlify.toml`).
+2. Build command: `node scripts/build-netlify.mjs`. Publish directory: `dist` (already set in `netlify.toml`).
 3. Site configuration → Environment variables → add:
 
    ```
-   FINNHUB_KEY = <your 20-character Finnhub key>
+   FINNHUB_KEY = <your complete Finnhub key>
    ```
 
 4. Deploy. The web app is at `/` (redirect), the mobile mock at `/mobile`.
