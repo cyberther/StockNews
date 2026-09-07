@@ -9,38 +9,100 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news app — dark terminal" description="Executive/terminal variant of the stock news product: dark surfaces, numbers-forward rows, one decision per screen, separate app and content languages." -->
-<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><style>@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:#121212}</style></helmet>
+<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-store.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">TERMINAL</text></svg></template>
-<div style="min-height:100vh;background:#121212;color:#F5F5F7;--color-accent:#D4AF37;font-family:var(--font-body);font-variant-numeric:tabular-nums">
-<div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid #333333">
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums">
+<div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:18px;letter-spacing:-0.02em">{{ brand }}</div>
-<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.terminal }}</div>
+<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.terminal }}</div>
 <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
-<span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ planLabel }}</span>
-<button onClick="{{ togglePlan }}" style="padding:7px 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ planToggleLabel }}</button>
+<span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ planLabel }}</span>
+<button onClick="{{ togglePlan }}" style="padding:7px 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ planToggleLabel }}</button>
 </div>
 </div>
 <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;padding:40px 24px 80px;justify-content:center">
 
 <div>
 <div style="width:calc(100vw - 48px);max-width:390px;height:800px;background:#000;padding:9px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">
-<div style="width:100%;height:100%;background:#121212;display:flex;flex-direction:column;overflow:hidden;position:relative">
-<div style="display:flex;justify-content:space-between;padding:8px 16px 2px;font-size:10px;font-weight:600;color:#A0A0A0"><span>09:41:22</span><span>LIVE ▮▮▮</span></div>
+<div style="width:100%;height:100%;background:var(--s-bg);display:flex;flex-direction:column;overflow:hidden;position:relative">
+<div style="display:flex;justify-content:space-between;padding:8px 16px 2px;font-size:10px;font-weight:600;color:var(--s-mute)"><span>09:41:22</span><span>LIVE ▮▮▮</span></div>
 
 <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
-<div style="flex:1;display:flex;flex-direction:column;padding:30px 22px 22px">
+<div style="flex:1;display:flex;flex-direction:column;padding:22px 22px 20px;overflow-y:auto">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:40px;line-height:0.92;letter-spacing:-0.035em">{{ brand }}</div>
 <div style="height:2px;background:var(--color-accent);margin:14px 0 18px;width:56px"></div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#333333;border:1px solid #333333;margin-bottom:18px">
-<div style="background:#121212;padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">30<span style="font-size:12px;color:#A0A0A0"> min</span></div></div>
-<div style="background:#121212;padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.sources }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">840</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--s-rule);border:1px solid var(--s-rule);margin-bottom:18px">
+<div style="background:var(--s-bg);padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">30<span style="font-size:12px;color:var(--s-mute)"> min</span></div></div>
+<div style="background:var(--s-bg);padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.sources }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">840</div></div>
 </div>
-<p style="font-size:14px;line-height:1.5;color:#A0A0A0;margin:0">{{ ui.pitch }}</p>
-<div style="margin-top:auto;display:flex;flex-direction:column;gap:9px">
-<button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contGoogle }}</button>
-<button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contApple }}</button>
-<input type="email" aria-label="Email address" autocomplete="email" placeholder="you@email.com" style="min-height:44px;padding:0 14px;background:#1A1A1A;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-body);font-size:14px">
-<button onClick="{{ signIn }}" style="min-height:48px;text-align:left;padding:0 14px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.contEmail }}</button>
+<p style="font-size:13px;line-height:1.45;color:var(--s-mute);margin:0">{{ ui.authKicker }}</p>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
+<button onClick="{{ signInGoogle }}" style="min-height:48px;display:flex;align-items:center;gap:11px;text-align:left;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer"><span style="flex:none;width:20px;height:20px;border:1px solid var(--s-faint);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--s-mute)">G</span>{{ ui.contGoogle }}</button>
+<button onClick="{{ signInICloud }}" style="min-height:48px;display:flex;align-items:center;gap:11px;text-align:left;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer"><span style="flex:none;width:20px;height:20px;border:1px solid var(--s-faint);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--s-mute)">⌘</span>{{ ui.contICloud }}</button>
+</div>
+<div style="display:flex;align-items:center;gap:10px;margin:16px 0 14px">
+<span style="flex:1;height:1px;background:var(--s-rule)"></span>
+<span style="flex:none;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.orEmail }}</span>
+<span style="flex:1;height:1px;background:var(--s-rule)"></span>
+</div>
+<div style="display:flex;flex-direction:column;gap:11px">
+<label style="display:block">
+<span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.emailLabel }}</span>
+<input type="email" autocomplete="email" placeholder="you@email.com" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px">
+</label>
+<label style="display:block">
+<span style="display:flex;align-items:baseline;gap:8px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.pwLabel }}</span>
+<input type="{{ pwType }}" autocomplete="current-password" placeholder="••••••••" value="{{ authPw }}" onChange="{{ onAuthPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px">
+</label>
+<button onClick="{{ togglePwShow }}" style="align-self:flex-start;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">{{ pwShowLabel }}</button>
+</div>
+<sc-if value="{{ pwTyped }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:12px">
+<div style="display:flex;gap:3px">
+<sc-for list="{{ pwSegs }}" as="g" hint-placeholder-count="4">
+<span style="flex:1;height:3px;background:{{ g.bg }}"></span>
+</sc-for>
+</div>
+<div style="display:flex;gap:8px;align-items:baseline;margin-top:7px">
+<span style="flex:none;font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase">{{ pwScoreLabel }}</span>
+<span style="font-size:11px;color:var(--s-mute);line-height:1.35">{{ pwHint }}</span>
+</div>
+<sc-if value="{{ pwBreached }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:8px;border:1px solid var(--color-accent);padding:8px 10px;font-size:11px;color:var(--color-accent);line-height:1.35">{{ ui.pwBreach }}</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ authErr }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:12px;font-size:11px;color:var(--color-accent)">{{ authErr }}</div>
+</sc-if>
+<button onClick="{{ submitAuth }}" style="min-height:48px;margin-top:16px;text-align:left;padding:0 14px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.contBtn }}</button>
+<div style="font-size:11px;color:var(--s-mute);margin-top:14px;line-height:1.45">{{ ui.authFoot }}</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isOnboard }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:14px 20px 14px;border-bottom:1px solid var(--s-rule)">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:26px;letter-spacing:-0.03em;line-height:1.02">{{ ui.obTitle }}</div>
+<div style="font-size:12px;color:var(--s-mute);margin-top:8px;line-height:1.45;text-wrap:pretty">{{ ui.obSub }}</div>
+<div style="display:flex;align-items:baseline;gap:8px;margin-top:12px">
+<span style="flex:none;font-family:var(--font-heading);font-weight:800;font-size:22px;line-height:1">{{ obCount }}</span>
+<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.obCount }}</span>
+</div>
+</div>
+<div style="flex:1;overflow-y:auto">
+<sc-for list="{{ obPicks }}" as="p" hint-placeholder-count="8">
+<button onClick="{{ p.toggle }}" style="display:flex;width:100%;align-items:center;gap:12px;padding:13px 20px;border:0;border-bottom:1px solid var(--s-rule);background:transparent;text-align:left;cursor:pointer">
+<span style="flex:none;width:16px;height:16px;background:{{ p.box }};border:1px solid {{ p.boxEdge }}"></span>
+<span style="flex:1;min-width:0"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:15px;color:var(--s-ink)">{{ p.ticker }}</span><span style="display:block;font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span></span>
+<span style="flex:none;text-align:right"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:13px;color:var(--s-ink)">{{ p.stories }}</span><span style="display:block;font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stories24 }}</span></span>
+</button>
+</sc-for>
+<div style="height:12px"></div>
+</div>
+<div style="padding:12px 20px;border-top:1px solid var(--s-rule);display:flex;flex-direction:column;gap:8px">
+<button onClick="{{ finishOnboard }}" style="min-height:46px;text-align:left;padding:0 14px;font-size:13px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.obGo }}</button>
+<button onClick="{{ skipOnboard }}" style="min-height:42px;text-align:left;padding:0 14px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.obSkip }}</button>
 </div>
 </div>
 </sc-if>
@@ -48,35 +110,35 @@
 <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ true }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
 <div style="padding:8px 16px 0">
-<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.feed }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ scanLabel }}</div></div>
-<div style="display:flex;gap:18px;margin-top:10px;border-bottom:1px solid #333333">
-<button onClick="{{ setFeedFollowing }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#A0A0A0">
-<sc-if value="{{ feedFollowingOn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:#F5F5F7">{{ ui.following }}</span></sc-if>
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.feed }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ scanLabel }}</div></div>
+<div style="display:flex;gap:18px;margin-top:10px;border-bottom:1px solid var(--s-rule)">
+<button onClick="{{ setFeedFollowing }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">
+<sc-if value="{{ feedFollowingOn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.following }}</span></sc-if>
 <sc-if value="{{ feedFollowingOff }}" hint-placeholder-val="{{ false }}"><span>{{ ui.following }}</span></sc-if>
 </button>
-<button onClick="{{ setFeedMarket }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#A0A0A0">
-<sc-if value="{{ feedMarketOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:#F5F5F7">{{ ui.market }}</span></sc-if>
+<button onClick="{{ setFeedMarket }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">
+<sc-if value="{{ feedMarketOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.market }}</span></sc-if>
 <sc-if value="{{ feedMarketOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.market }}</span></sc-if>
 </button>
 </div>
 </div>
 <div style="flex:1;overflow-y:auto">
 <sc-for list="{{ feed }}" as="item" hint-placeholder-count="4">
-<article role="button" tabIndex="0" onClick="{{ item.open }}" onKeyDown="{{ item.keyOpen }}" style="display:block;width:100%;padding:13px 16px;border-bottom:1px solid #333333;cursor:pointer">
+<article role="button" tabIndex="0" onClick="{{ item.open }}" onKeyDown="{{ item.keyOpen }}" style="display:block;width:100%;padding:13px 16px;border-bottom:1px solid var(--s-rule);cursor:pointer">
 <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
 <span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.02em">{{ item.ticker }}</span>
-<span style="font-size:12px;font-weight:600;color:#F5F5F7"><sc-if value="{{ item.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ item.delta }}</span></sc-if><sc-if value="{{ item.up }}" hint-placeholder-val="{{ true }}"><span>{{ item.delta }}</span></sc-if></span>
-<span style="margin-left:auto;font-size:10px;letter-spacing:0.08em;color:#A0A0A0">{{ item.stamp }}</span>
+<span style="font-size:12px;font-weight:600;color:var(--s-ink)"><sc-if value="{{ item.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ item.delta }}</span></sc-if><sc-if value="{{ item.up }}" hint-placeholder-val="{{ true }}"><span>{{ item.delta }}</span></sc-if></span>
+<sc-if value="{{ item.outlier }}" hint-placeholder-val="{{ false }}"><span style="padding:1px 4px;border:1px solid var(--color-accent);color:var(--color-accent);font-size:8px;letter-spacing:0.1em;text-transform:uppercase">{{ item.volBadge }}</span></sc-if>
+<span style="margin-left:auto;font-size:10px;letter-spacing:0.08em;color:var(--s-mute)">{{ item.stamp }}</span>
 </div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.2;letter-spacing:-0.015em;text-wrap:pretty">{{ item.headline }}</div>
-<div style="display:flex;gap:1px;background:#333333;margin-top:10px">
-<div style="flex:1;background:#1A1A1A;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.score }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ item.score }}</div></div>
-<div style="flex:1;background:#1A1A1A;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.volAvg }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ item.vol }}</div></div>
-<div style="flex:1.6;background:#1A1A1A;padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.source }}</div><div style="font-size:12px;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ item.source }}</div></div>
+<div style="display:flex;gap:1px;background:var(--s-rule);margin-top:10px">
+<div style="flex:1;background:var(--s-panel);padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.volAvg }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ item.vol }}</div></div>
+<div style="flex:1.6;background:var(--s-panel);padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.source }}</div><div style="font-size:12px;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ item.source }}</div></div>
 </div>
 <div style="display:flex;gap:6px;align-items:baseline;margin-top:9px">
 <span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ ui.watch }}</span>
-<span style="font-size:12px;color:#A0A0A0;line-height:1.4">{{ item.watch }}</span>
+<span style="font-size:13px;color:var(--s-ink);line-height:1.4">{{ item.watch }}</span>
 </div>
 </article>
 </sc-for>
@@ -84,7 +146,7 @@
 <div style="margin:14px 16px;border:1px solid var(--color-accent);padding:14px">
 <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">{{ ui.delayed24 }}</div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:18px;line-height:1.15;margin-top:4px">{{ ui.proYesterday }}</div>
-<button onClick="{{ goPaywall }}" style="width:100%;min-height:42px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.removeDelay }}</button>
+<button onClick="{{ goPaywall }}" style="width:100%;min-height:42px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.removeDelay }}</button>
 </div>
 </sc-if>
 <div style="height:20px"></div>
@@ -94,55 +156,63 @@
 
 <sc-if value="{{ isWatch }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:8px 16px 12px;border-bottom:1px solid #333333;display:flex;align-items:baseline;gap:8px">
+<div style="padding:8px 16px 12px;border-bottom:1px solid var(--s-rule);display:flex;align-items:baseline;gap:8px">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.watchlist }}</div>
-<div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0"><sc-if value="{{ capWarn }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ capLabel }}</span></sc-if><sc-if value="{{ capOk }}" hint-placeholder-val="{{ true }}"><span>{{ capLabel }}</span></sc-if></div>
+<div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)"><sc-if value="{{ capWarn }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ capLabel }}</span></sc-if><sc-if value="{{ capOk }}" hint-placeholder-val="{{ true }}"><span>{{ capLabel }}</span></sc-if></div>
 </div>
-<div style="display:flex;padding:8px 16px;border-bottom:1px solid #333333;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">
-<div style="flex:1">{{ ui.ticker }}</div><div style="width:66px;text-align:right">{{ ui.last }}</div><div style="width:56px;text-align:right">{{ ui.chg }}</div><div style="width:44px;text-align:right">{{ ui.score }}</div>
+<div style="display:flex;padding:8px 16px;border-bottom:1px solid var(--s-rule);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">
+<div style="flex:1">{{ ui.ticker }}</div><div style="width:66px;text-align:right">{{ ui.last }}</div><div style="width:56px;text-align:right">{{ ui.chg }}</div><div style="width:62px;text-align:right">1D</div>
 </div>
 <div style="flex:1;overflow-y:auto">
 <sc-for list="{{ follows }}" as="row" hint-placeholder-count="3">
-<article role="button" tabIndex="0" onClick="{{ row.open }}" onKeyDown="{{ row.keyOpen }}" style="display:block;width:100%;padding:12px 16px;border-bottom:1px solid #333333;cursor:pointer">
+<article role="button" tabIndex="0" onClick="{{ row.open }}" onKeyDown="{{ row.keyOpen }}" style="display:block;width:100%;padding:12px 16px;border-bottom:1px solid var(--s-rule);cursor:pointer">
 <div style="display:flex;align-items:baseline">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ row.ticker }}</div><div style="font-size:11px;color:#A0A0A0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div></div>
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ row.ticker }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div></div>
 <div style="width:66px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:15px">{{ row.price }}</div>
 <div style="width:56px;text-align:right;font-size:13px;font-weight:600"><sc-if value="{{ row.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ row.move }}</span></sc-if><sc-if value="{{ row.up }}" hint-placeholder-val="{{ true }}"><span>{{ row.move }}</span></sc-if></div>
-<div style="width:44px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:15px">{{ row.score }}</div>
+<div style="width:62px;align-self:center">{{ row.spark }}</div>
 </div>
 <div style="display:flex;gap:6px;align-items:baseline;margin-top:7px">
-<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;flex:none">{{ row.alert }}</span>
-<span style="margin-left:auto;font-size:11px;color:#A0A0A0;text-align:right">{{ row.latest }}</span>
+<button onClick="{{ row.togglePush }}" style="flex:none;min-height:30px;padding:0 9px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ row.pushLabel }}</button>
+<span style="margin-left:auto;font-size:11px;color:var(--s-mute);text-align:right">{{ row.latest }}</span>
 </div>
 </article>
 </sc-for>
 <sc-if value="{{ atCap }}" hint-placeholder-val="{{ true }}">
 <div style="margin:14px 16px;border:1px solid var(--color-accent);padding:14px">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:30px;line-height:1;letter-spacing:-0.03em">3 / 3</div>
-<div style="font-size:12px;color:#A0A0A0;margin-top:6px">{{ ui.capNote }}</div>
-<button onClick="{{ goPaywall }}" style="width:100%;min-height:42px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.liftCap }}</button>
+<div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ ui.capNote }}</div>
+<button onClick="{{ goPaywall }}" style="width:100%;min-height:42px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.liftCap }}</button>
 </div>
 </sc-if>
-<div style="padding:14px 16px"><button onClick="{{ goSearch }}" style="width:100%;min-height:44px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.addTicker }}</button></div>
+<div style="padding:14px 16px"><button onClick="{{ goSearch }}" style="width:100%;min-height:44px;text-align:left;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.addTicker }}</button></div>
 </div>
 </div>
 </sc-if>
 
 <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:8px 16px 12px;border-bottom:1px solid #333333">
+<div style="padding:8px 16px 12px;border-bottom:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;margin-bottom:10px">{{ ui.addTicker }}</div>
-<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="NVDA" value="{{ query }}" onChange="{{ onQuery }}" style="width:100%;min-height:44px;padding:0 12px;background:#1A1A1A;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
+<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="NVDA" value="{{ query }}" onChange="{{ onQuery }}" style="width:100%;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
+<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+<sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+<button onClick="{{ f.set }}" style="position:relative;overflow:hidden;min-height:32px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">
+<sc-if value="{{ f.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">{{ f.label }}</span></sc-if>
+<sc-if value="{{ f.off }}" hint-placeholder-val="{{ true }}"><span>{{ f.label }}</span></sc-if>
+</button>
+</sc-for>
+</div>
 </div>
 <div style="flex:1;overflow-y:auto">
-<div style="padding:10px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ resultsLabel }}</div>
+<div style="padding:10px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ resultsLabel }}</div>
 <sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
-<div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #333333">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.ticker }}</div><div style="font-size:11px;color:#A0A0A0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
-<div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ r.stories }}</div><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.stories24 }}</div></div>
-<button onClick="{{ r.toggle }}" style="position:relative;overflow:hidden;min-width:84px;min-height:38px;padding:0 12px;text-align:left;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
-<sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">{{ ui.add }}</span></sc-if>
-<sc-if value="{{ r.following }}" hint-placeholder-val="{{ false }}"><span style="color:#A0A0A0">{{ ui.added }}</span></sc-if>
+<div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.ticker }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
+<div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ r.stories }}</div><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stories24 }}</div></div>
+<button onClick="{{ r.toggle }}" style="position:relative;overflow:hidden;min-width:84px;min-height:38px;padding:0 12px;text-align:left;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
+<sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">{{ ui.add }}</span></sc-if>
+<sc-if value="{{ r.following }}" hint-placeholder-val="{{ false }}"><span style="color:var(--s-mute)">{{ ui.added }}</span></sc-if>
 </button>
 </div>
 </sc-for>
@@ -153,32 +223,41 @@
 
 <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:6px 16px 12px;border-bottom:1px solid #333333">
-<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:#A0A0A0;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.backFeed }}</button>
+<div style="padding:6px 16px 12px;border-bottom:1px solid var(--s-rule)">
+<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.backFeed }}</button>
 <div style="display:flex;align-items:flex-end;gap:10px;margin-top:4px">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.035em;line-height:1">{{ stock.ticker }}</div><div style="font-size:11px;color:#A0A0A0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ stock.name }}</div></div>
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.035em;line-height:1">{{ stock.ticker }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ stock.name }}</div></div>
 <div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;line-height:1">{{ stock.price }}</div><div style="font-size:13px;font-weight:600"><sc-if value="{{ stock.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ stock.move }}</span></sc-if><sc-if value="{{ stock.up }}" hint-placeholder-val="{{ true }}"><span>{{ stock.move }}</span></sc-if></div></div>
 </div>
 </div>
 <div style="flex:1;overflow-y:auto">
 <div style="padding:14px 16px 4px">{{ chart }}</div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#333333;border-top:1px solid #333333;border-bottom:1px solid #333333">
-<div style="background:#121212;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.newsScore }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1;color:var(--color-accent)">{{ stock.score }}</div><div style="font-size:10px;color:#A0A0A0">{{ ui.storiesN }}</div></div>
-<div style="background:#121212;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.analyst }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1">{{ stock.buyPct }}</div><div style="font-size:10px;color:#A0A0A0">{{ stock.analystDetail }}</div></div>
-<div style="background:#121212;padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.earnings }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1">{{ stock.earnDays }}</div><div style="font-size:10px;color:#A0A0A0">{{ stock.earnDate }}</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--s-rule);border-top:1px solid var(--s-rule);border-bottom:1px solid var(--s-rule)">
+<div style="background:var(--s-bg);padding:12px 10px">
+<div style="display:flex;align-items:baseline;gap:6px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.analyst }}</div><sc-if value="{{ analystLocked }}" hint-placeholder-val="{{ true }}"><span style="font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent);border:1px solid var(--color-accent);padding:0 4px">{{ ui.pro }}</span></sc-if></div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px;line-height:1.15;margin-top:3px">{{ stock.analystSentiment }}</div>
+<sc-if value="{{ analystFull }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;height:6px;margin-top:8px;background:var(--s-rule)"><span style="background:var(--s-ink);width:{{ stock.buyW }}"></span><span style="background:var(--s-mute);width:{{ stock.holdW }}"></span><span style="background:var(--color-accent);width:{{ stock.sellW }}"></span></div>
+<div style="font-size:10px;color:var(--s-mute);margin-top:5px">{{ stock.analystDetail }}</div>
+</sc-if>
+<sc-if value="{{ analystLocked }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ goPaywall }}" style="margin-top:8px;padding:5px 8px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.rowAnalyst }} · {{ ui.pro }}</button>
+</sc-if>
 </div>
-<div style="padding:14px 16px;border-bottom:1px solid #333333">
+<div style="background:var(--s-bg);padding:12px 10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.earnings }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:26px;line-height:1.1">{{ stock.earnDays }}</div><div style="font-size:10px;color:var(--s-mute)">{{ stock.earnDate }}</div><div style="font-size:10px;color:var(--s-ink);margin-top:6px">{{ stock.lastEarn }}</div></div>
+</div>
+<div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
 <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);margin-bottom:5px">{{ ui.theCall }}</div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.25;text-wrap:pretty">{{ stock.call }}</div>
 </div>
-<div style="padding:14px 16px;border-bottom:1px solid #333333">
-<div style="font-size:11px;color:#A0A0A0"><sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent)">{{ freqNote }}</span></sc-if><sc-if value="{{ isProTier }}" hint-placeholder-val="{{ false }}"><span>{{ freqNote }}</span></sc-if></div>
-<button onClick="{{ primaryDetailAction }}" style="width:100%;min-height:46px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ detailActionLabel }}</button>
+<div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="font-size:11px;color:var(--s-mute)"><sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent)">{{ freqNote }}</span></sc-if><sc-if value="{{ isProTier }}" hint-placeholder-val="{{ false }}"><span>{{ freqNote }}</span></sc-if></div>
+<button onClick="{{ primaryDetailAction }}" style="width:100%;min-height:46px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ detailActionLabel }}</button>
 </div>
-<div style="padding:12px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.tape }} · {{ stock.ticker }}</div>
+<div style="padding:12px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tape }} · {{ stock.ticker }}</div>
 <sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
-<div style="padding:12px 16px;border-bottom:1px solid #333333">
-<div style="display:flex;gap:8px;align-items:baseline;margin-bottom:4px"><span style="font-size:10px;letter-spacing:0.08em;color:#A0A0A0">{{ n.stamp }}</span><span style="font-size:10px;color:#A0A0A0">{{ n.source }}</span><span style="margin-left:auto;font-family:var(--font-heading);font-weight:800;font-size:12px">{{ n.score }}</span></div>
+<div style="padding:12px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="display:flex;gap:8px;align-items:baseline;margin-bottom:4px"><span style="font-size:10px;letter-spacing:0.08em;color:var(--s-mute)">{{ n.stamp }}</span><span style="font-size:10px;color:var(--s-mute)">{{ n.source }}</span></div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:15px;line-height:1.2;text-wrap:pretty">{{ n.headline }}</div>
 </div>
 </sc-for>
@@ -189,24 +268,24 @@
 
 <sc-if value="{{ isPaywall }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:6px 16px 14px;border-bottom:1px solid #333333">
-<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:#A0A0A0;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.back }}</button>
+<div style="padding:6px 16px 14px;border-bottom:1px solid var(--s-rule)">
+<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.back }}</button>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:28px;letter-spacing:-0.035em;line-height:1;margin-top:4px">{{ ui.paywallTitle }}</div>
-<div style="font-size:12px;color:#A0A0A0;margin-top:6px">{{ ui.paywallSub }}</div>
+<div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ ui.paywallSub }}</div>
 </div>
 <div style="flex:1;overflow-y:auto">
-<div style="display:flex;padding:9px 16px;border-bottom:1px solid #333333;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0"><div style="flex:1"></div><div style="width:72px;text-align:right">{{ ui.free }}</div><div style="width:84px;text-align:right">{{ ui.pro }}</div></div>
+<div style="display:flex;padding:9px 16px;border-bottom:1px solid var(--s-rule);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)"><div style="flex:1"></div><div style="width:72px;text-align:right">{{ ui.free }}</div><div style="width:84px;text-align:right">{{ ui.pro }}</div></div>
 <sc-for list="{{ planRows }}" as="p" hint-placeholder-count="6">
-<div style="display:flex;padding:11px 16px;border-bottom:1px solid #333333;align-items:baseline">
+<div style="display:flex;padding:11px 16px;border-bottom:1px solid var(--s-rule);align-items:baseline">
 <div style="flex:1;font-size:13px">{{ p.label }}</div>
-<div style="width:72px;text-align:right;font-size:13px;color:#A0A0A0">{{ p.free }}</div>
+<div style="width:72px;text-align:right;font-size:13px;color:var(--s-mute)">{{ p.free }}</div>
 <div style="width:84px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:13px">{{ p.pro }}</div>
 </div>
 </sc-for>
 <div style="padding:16px">
-<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:36px;letter-spacing:-0.035em;line-height:1">$7</div><div style="font-size:12px;color:#A0A0A0">{{ ui.perMonth }}</div></div>
-<button onClick="{{ upgrade }}" style="width:100%;min-height:48px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.start7 }}</button>
-<button onClick="{{ back }}" style="width:100%;min-height:44px;margin-top:8px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#A0A0A0;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.stayFree }}</button>
+<div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:36px;letter-spacing:-0.035em;line-height:1">$7</div><div style="font-size:12px;color:var(--s-mute)">{{ ui.perMonth }}</div></div>
+<button onClick="{{ upgrade }}" style="width:100%;min-height:48px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.start7 }}</button>
+<button onClick="{{ back }}" style="width:100%;min-height:44px;margin-top:8px;text-align:left;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.stayFree }}</button>
 </div>
 </div>
 </div>
@@ -214,12 +293,12 @@
 
 <sc-if value="{{ isMore }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:8px 16px 12px;border-bottom:1px solid #333333;font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.more }}</div>
+<div style="padding:8px 16px 12px;border-bottom:1px solid var(--s-rule);font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.more }}</div>
 <div style="flex:1;overflow-y:auto">
 <sc-for list="{{ moreItems }}" as="m" hint-placeholder-count="5">
-<div style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid #333333">
-<div style="flex:1"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ m.label }}</div><div style="font-size:11px;color:#A0A0A0">{{ m.note }}</div></div>
-<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;border:1px solid #333333;padding:4px 8px">{{ m.eta }}</span>
+<div style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="flex:1"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ m.label }}</div><div style="font-size:11px;color:var(--s-mute)">{{ m.note }}</div></div>
+<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:4px 8px">{{ m.eta }}</span>
 </div>
 </sc-for>
 </div>
@@ -228,79 +307,215 @@
 
 <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-<div style="padding:8px 16px 12px;border-bottom:1px solid #333333;font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.account }}</div>
+<div style="padding:8px 16px 12px;border-bottom:1px solid var(--s-rule);font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.account }}</div>
 <div style="flex:1;overflow-y:auto">
-<div style="padding:14px 16px;border-bottom:1px solid #333333">
+<div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:17px">{{ accountName }}</div>
-<div style="font-size:11px;color:#A0A0A0">Google · {{ accountEmail }}</div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#333333;border:1px solid #333333;margin-top:12px">
-<div style="background:#121212;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.plan }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ planLabel }}</div></div>
-<div style="background:#121212;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.tickers }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ capLabel }}</div></div>
-<div style="background:#121212;padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ intervalLabel }}</div></div>
+<div style="font-size:11px;color:var(--s-mute)">{{ accountProvider }} · {{ accountEmail }}</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--s-rule);border:1px solid var(--s-rule);margin-top:12px">
+<div style="background:var(--s-bg);padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.plan }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ planLabel }}</div></div>
+<div style="background:var(--s-bg);padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tickers }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ capLabel }}</div></div>
+<div style="background:var(--s-bg);padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ intervalLabel }}</div></div>
 </div>
-<button onClick="{{ accountPlanAction }}" style="width:100%;min-height:44px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:#fff;font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ accountPlanLabel }}</button>
+<button onClick="{{ accountPlanAction }}" style="width:100%;min-height:44px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ accountPlanLabel }}</button>
 </div>
-<div style="padding:14px 16px;border-bottom:1px solid #333333">
-<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;margin-bottom:8px">{{ ui.appLang }}</div>
-<div style="display:flex;border:1px solid #333333">
-<button onClick="{{ setAppEn }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
-<sc-if value="{{ appEn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">English</span></sc-if>
+<div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:8px">{{ ui.appearance }}</div>
+<div style="display:flex;border:1px solid var(--s-rule)">
+<sc-for list="{{ themes }}" as="th" hint-placeholder-count="3">
+<button onClick="{{ th.set }}" style="flex:1;min-height:40px;padding:0 10px;text-align:left;background:{{ th.bg }};border:0;border-right:{{ th.edge }};color:{{ th.ink }};font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ th.label }}</button>
+</sc-for>
+</div>
+<div style="font-size:11px;color:var(--s-mute);margin-top:7px">{{ themeNote }}</div>
+</div>
+<div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:8px">{{ ui.appLang }}</div>
+<div style="display:flex;border:1px solid var(--s-rule)">
+<button onClick="{{ setAppEn }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ appEn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">English</span></sc-if>
 <sc-if value="{{ appEnOff }}" hint-placeholder-val="{{ false }}"><span>English</span></sc-if>
 </button>
-<button onClick="{{ setAppRo }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
-<sc-if value="{{ appRo }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Română</span></sc-if>
+<button onClick="{{ setAppRo }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ appRo }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">Română</span></sc-if>
 <sc-if value="{{ appRoOff }}" hint-placeholder-val="{{ true }}"><span>Română</span></sc-if>
 </button>
-<button onClick="{{ setAppDe }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
-<sc-if value="{{ appDe }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Deutsch</span></sc-if>
+<button onClick="{{ setAppDe }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ appDe }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">Deutsch</span></sc-if>
 <sc-if value="{{ appDeOff }}" hint-placeholder-val="{{ true }}"><span>Deutsch</span></sc-if>
 </button>
 </div>
-<div style="font-size:11px;color:#A0A0A0;margin-top:7px">{{ ui.appLangNote }}</div>
+<div style="font-size:11px;color:var(--s-mute);margin-top:7px">{{ ui.appLangNote }}</div>
 </div>
-<div style="padding:14px 16px;border-bottom:1px solid #333333">
-<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#A0A0A0;margin-bottom:8px">{{ ui.contentLang }}</div>
-<div style="display:flex;border:1px solid #333333">
-<button onClick="{{ setLangEn }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
-<sc-if value="{{ langEn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">English</span></sc-if>
+<div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:8px">{{ ui.contentLang }}</div>
+<div style="display:flex;border:1px solid var(--s-rule)">
+<button onClick="{{ setLangEn }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ langEn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">English</span></sc-if>
 <sc-if value="{{ langEnOff }}" hint-placeholder-val="{{ false }}"><span>English</span></sc-if>
 </button>
-<button onClick="{{ setLangRo }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
-<sc-if value="{{ langRo }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Română</span></sc-if>
+<button onClick="{{ setLangRo }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;border-right:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ langRo }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">Română</span></sc-if>
 <sc-if value="{{ langRoOff }}" hint-placeholder-val="{{ true }}"><span>Română</span></sc-if>
 </button>
-<button onClick="{{ setLangDe }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
-<sc-if value="{{ langDe }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:#fff">Deutsch</span></sc-if>
+<button onClick="{{ setLangDe }}" style="position:relative;overflow:hidden;flex:1;min-height:40px;padding:0 10px;text-align:left;background:transparent;border:0;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">
+<sc-if value="{{ langDe }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">Deutsch</span></sc-if>
 <sc-if value="{{ langDeOff }}" hint-placeholder-val="{{ true }}"><span>Deutsch</span></sc-if>
 </button>
 </div>
-<div style="font-size:11px;color:#A0A0A0;margin-top:7px">{{ langNote }}</div>
+<div style="font-size:11px;color:var(--s-mute);margin-top:7px">{{ langNote }}</div>
 </div>
 <sc-for list="{{ notifRows }}" as="s" hint-placeholder-count="3">
-<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #333333"><div style="flex:1"><div style="font-size:13px;font-weight:600">{{ s.label }}</div><div style="font-size:11px;color:#A0A0A0">{{ s.note }}</div></div><span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:#A0A0A0">{{ s.value }}</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--s-rule)"><div style="flex:1"><div style="font-size:13px;font-weight:600">{{ s.label }}</div><div style="font-size:11px;color:var(--s-mute)">{{ s.note }}</div></div><span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-mute)">{{ s.value }}</span></div>
 </sc-for>
 <div style="padding:14px 16px;display:flex;flex-direction:column;gap:8px">
-<button style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.quiet }}</button>
-<button style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:#F5F5F7;font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.manageSub }}</button>
-<button onClick="{{ signOut }}" style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid #333333;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.signOut }}</button>
+<button style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.quiet }}</button>
+<button style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.manageSub }}</button>
+<button onClick="{{ goSecurity }}" style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.manageSecurity }}</button>
+<button onClick="{{ signOut }}" style="width:100%;min-height:42px;text-align:left;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.signOut }}</button>
 </div>
 </div>
 </div>
 </sc-if>
 
+<sc-if value="{{ isSecurity }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:6px 16px 12px;border-bottom:1px solid var(--s-rule)">
+<button onClick="{{ backToAccount }}" style="padding:4px 0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.back }}</button>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;margin-top:2px">{{ ui.security }}</div>
+</div>
+<div style="flex:1;overflow-y:auto">
+
+<div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="display:flex;align-items:baseline;gap:8px">
+<div style="flex:1;font-family:var(--font-heading);font-weight:800;font-size:15px">{{ ui.twofaTitle }}</div>
+<span style="flex:none;font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:{{ twofaColor }}">{{ twofaStateLabel }}</span>
+</div>
+<div style="font-size:11px;color:var(--s-mute);margin-top:5px;line-height:1.4">{{ ui.twofaNote }}</div>
+<sc-if value="{{ twofaIdle }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ startTwofa }}" style="width:100%;min-height:42px;margin-top:11px;text-align:left;padding:0 12px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.twofaSetup }}</button>
+</sc-if>
+<sc-if value="{{ twofaSetting }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:11px;border:1px solid var(--s-rule);padding:12px">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.twofaKey }}</div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:15px;letter-spacing:0.12em;margin-top:5px;word-break:break-all">{{ twofaSecret }}</div>
+<div style="font-size:11px;color:var(--s-mute);margin-top:7px;line-height:1.4">{{ ui.twofaKeyNote }}</div>
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:12px">{{ ui.twofaCode }}</div>
+<input inputMode="numeric" autocomplete="one-time-code" placeholder="000000" value="{{ twofaCode }}" onChange="{{ onTwofaCode }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;margin-top:5px;font-family:var(--font-heading);font-weight:800;letter-spacing:0.3em;font-size:16px">
+<sc-if value="{{ twofaErr }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:8px;font-size:11px;color:var(--color-accent)">{{ twofaErr }}</div>
+</sc-if>
+<button onClick="{{ verifyTwofa }}" style="width:100%;min-height:44px;margin-top:11px;text-align:left;padding:0 12px;font-size:13px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.twofaVerify }}</button>
+<button onClick="{{ cancelTwofa }}" style="width:100%;min-height:40px;margin-top:7px;text-align:left;padding:0 12px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.twofaCancel }}</button>
+</div>
+</sc-if>
+<sc-if value="{{ twofaOn }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:11px;border:1px solid var(--s-rule);padding:12px">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.recoveryTitle }}</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+<sc-for list="{{ recoveryCodes }}" as="c" hint-placeholder-count="8">
+<span style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.06em;color:var(--s-ink)">{{ c.code }}</span>
+</sc-for>
+</div>
+<div style="font-size:11px;color:var(--s-mute);margin-top:9px;line-height:1.4">{{ ui.recoveryNote }}</div>
+<button onClick="{{ copyRecovery }}" style="width:100%;min-height:40px;margin-top:10px;text-align:left;padding:0 12px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.recoveryCopy }}</button>
+</div>
+<button onClick="{{ disableTwofa }}" style="width:100%;min-height:40px;margin-top:8px;text-align:left;padding:0 12px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--color-accent);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.twofaDisable }}</button>
+</sc-if>
+</div>
+
+<div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="display:flex;align-items:center;gap:12px">
+<div style="flex:1"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ ui.alertsTitle }}</div><div style="font-size:11px;color:var(--s-mute);margin-top:3px">{{ ui.alertsNote }}</div></div>
+<button onClick="{{ toggleAlerts }}" style="flex:none;min-width:64px;min-height:34px;padding:0 10px;text-align:left;background:{{ alertsBg }};border:1px solid {{ alertsEdge }};color:{{ alertsInk }};font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ alertsLabel }}</button>
+</div>
+</div>
+
+<div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ ui.timeoutTitle }}</div>
+<div style="font-size:11px;color:var(--s-mute);margin-top:4px;line-height:1.4">{{ ui.timeoutNote }}</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+<sc-for list="{{ timeouts }}" as="t" hint-placeholder-count="5">
+<button onClick="{{ t.set }}" style="min-height:34px;padding:0 10px;background:{{ t.bg }};border:1px solid {{ t.edge }};color:{{ t.ink }};font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ t.label }}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="padding:14px 16px 6px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ ui.sessionsTitle }}</div>
+</div>
+<sc-for list="{{ sessions }}" as="x" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="flex:1;min-width:0">
+<div style="font-size:13px;font-weight:600;color:var(--s-ink)">{{ x.device }}</div>
+<div style="font-size:11px;color:var(--s-mute);margin-top:2px">{{ x.meta }}</div>
+</div>
+<sc-if value="{{ x.canRevoke }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ x.revoke }}" style="flex:none;min-height:32px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.revoke }}</button>
+</sc-if>
+<sc-if value="{{ x.isCurrent }}" hint-placeholder-val="{{ false }}">
+<span style="flex:none;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent)">{{ ui.thisDevice }}</span>
+</sc-if>
+</div>
+</sc-for>
+<div style="padding:12px 16px;border-bottom:1px solid var(--s-rule)">
+<button onClick="{{ signOutAll }}" style="width:100%;min-height:42px;text-align:left;padding:0 12px;font-size:12px;background:transparent;border:1px solid var(--color-accent);color:var(--color-accent);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.signOutAll }}</button>
+</div>
+
+<div style="padding:14px 16px 6px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ ui.connectedTitle }}</div>
+</div>
+<sc-for list="{{ connected }}" as="c" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--s-rule)">
+<div style="flex:1;min-width:0">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ c.label }}</div>
+<div style="font-size:11px;color:var(--s-mute);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.detail }}</div>
+</div>
+<sc-if value="{{ c.isPrimary }}" hint-placeholder-val="{{ false }}">
+<span style="flex:none;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent)">{{ ui.primaryAcct }}</span>
+</sc-if>
+<sc-if value="{{ c.canToggle }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ c.toggle }}" style="flex:none;min-width:78px;min-height:32px;padding:0 10px;text-align:left;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ c.actionLabel }}</button>
+</sc-if>
+</div>
+</sc-for>
+<div style="height:20px"></div>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
-<div style="display:flex;border-top:1px solid #333333;background:#121212">
+<div style="display:flex;border-top:1px solid var(--s-rule);background:var(--s-bg)">
 <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
-<button onClick="{{ t.go }}" style="position:relative;flex:1;padding:12px 4px 14px;border:0;background:transparent;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#A0A0A0">
-<sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-1px;left:0;right:0;height:2px;background:var(--color-accent)"></span><span style="color:#F5F5F7">{{ t.label }}</span></sc-if>
+<button onClick="{{ t.go }}" style="position:relative;flex:1;padding:12px 4px 14px;border:0;background:transparent;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">
+<sc-if value="{{ t.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-1px;left:0;right:0;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ t.label }}</span></sc-if>
 <sc-if value="{{ t.off }}" hint-placeholder-val="{{ true }}"><span>{{ t.label }}</span></sc-if>
 </button>
 </sc-for>
 </div>
 </sc-if>
 
+<sc-if value="{{ isLocked }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:var(--s-bg);display:flex;flex-direction:column;padding:26px 22px;z-index:5">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px;letter-spacing:-0.02em">{{ brand }}</div>
+<div style="margin-top:auto">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:34px;letter-spacing:-0.035em;line-height:1">{{ ui.lockedTitle }}</div>
+<div style="height:2px;background:var(--color-accent);margin:12px 0 14px;width:44px"></div>
+<div style="font-size:13px;color:var(--s-mute);line-height:1.45;text-wrap:pretty">{{ ui.lockedNote }}</div>
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:18px">{{ ui.emailLabel }}</div>
+<div style="font-size:14px;color:var(--s-ink);margin-top:4px">{{ lockEmail }}</div>
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:14px">{{ ui.pwLabel }}</div>
+<input type="password" autocomplete="current-password" placeholder="••••••••" value="{{ lockPw }}" onChange="{{ onLockPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;margin-top:5px">
+<sc-if value="{{ lockErr }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:8px;font-size:11px;color:var(--color-accent)">{{ lockErr }}</div>
+</sc-if>
+<button onClick="{{ unlock }}" style="width:100%;min-height:48px;margin-top:14px;text-align:left;padding:0 14px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.unlockBtn }}</button>
+<button onClick="{{ lockSignOut }}" style="width:100%;min-height:42px;margin-top:8px;text-align:left;padding:0 14px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.notYou }}</button>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute;left:16px;right:16px;bottom:74px;padding:11px 13px;background:#F5F5F7;color:#121212;animation:hfin 0.2s ease-out">
+<div style="position:absolute;left:16px;right:16px;bottom:74px;padding:11px 13px;background:var(--s-ink);color:var(--s-bg);animation:hfin 0.2s ease-out">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.02em">{{ toast }}</div>
 </div>
 </sc-if>
@@ -316,8 +531,100 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Heard It First&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
 const { NEWS, FOLLOWS, UNIVERSE, UI } = window.HIF;
+const STORE_KEY = 'hif.dark.v2';
+// Keys that survive a reload. Transient input (passwords, codes, toasts) never persists.
+const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','smaOn',
+  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme'];
+function hydrate(defaults) {
+  const S = window.HIFStore, saved = S ? S.read(STORE_KEY) : null;
+  const out = Object.assign({}, defaults);
+  if (saved) PERSIST.forEach(k => { if (saved[k] !== undefined) out[k] = saved[k]; });
+  if (out.screen === 'auth') out.screen = 'feed';
+  return out;
+}
 class Component extends DCLogic {
-  state = { screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed' };
+  state = hydrate({ screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed', chartRange:'1d', smaOn:true, push:{}, screenFilter:'all',
+    session:null, onboarded:false, locked:false, authEmail:'', authPw:'', pwShow:false, authErr:'',
+    twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
+    loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'' });
+  componentDidMount() { this.startIdleWatch(); }
+  componentDidUpdate() { this.persist(); }
+  componentWillUnmount() { this.stopIdleWatch(); clearTimeout(this._t); }
+  persist() {
+    const S = window.HIFStore; if (!S) return;
+    const out = {};
+    PERSIST.forEach(k => { if (this.state[k] !== undefined) out[k] = this.state[k]; });
+    S.write(STORE_KEY, out);
+  }
+  get pal() {
+    const t = this.state.theme || 'system';
+    const light = t === 'light' || (t === 'system' && typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: light)').matches);
+    return light
+      ? { bg:'#F7F6F4', panel:'#EDEBE7', rule:'#C9C5BE', ink:'#1A1A1A', mute:'#5F5A54', faint:'#8E8880', accent:'#8A6A12', weak:'#C7A85F', onAccent:'#FFFFFF' }
+      : { bg:'#121212', panel:'#1A1A1A', rule:'#333333', ink:'#F5F5F7', mute:'#A0A0A0', faint:'#666666', accent:'#D4AF37', weak:'#8A6D1F', onAccent:'#121212' };
+  }
+  watchScheme() {
+    if (this._mq || typeof matchMedia !== 'function') return;
+    this._mq = matchMedia('(prefers-color-scheme: light)');
+    this._onScheme = () => { if ((this.state.theme || 'system') === 'system') this.forceUpdate(); };
+    if (this._mq.addEventListener) this._mq.addEventListener('change', this._onScheme);
+  }
+  touch() { this._lastAct = Date.now(); }
+  startIdleWatch() {
+    this.watchScheme();
+    this.touch();
+    this._onAct = () => this.touch();
+    this._events = ['pointerdown','keydown','wheel','touchstart'];
+    this._events.forEach(e => window.addEventListener(e, this._onAct, true));
+    this._idle = setInterval(() => {
+      this.setState(st => {
+        const mins = st.timeoutMin;
+        if (!mins || !st.session || st.locked) return null;
+        if (Date.now() - (this._lastAct || 0) <= mins * 60000) return null;
+        return { locked:true, lockPw:'', lockErr:'' };
+      });
+    }, 2000);
+  }
+  stopIdleWatch() {
+    clearInterval(this._idle);
+    (this._events || []).forEach(e => window.removeEventListener(e, this._onAct, true));
+  }
+  validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || '').trim()); }
+  signInWith(provider, email) {
+    const u = UI[this.appLang];
+    const mail = email || (provider === 'Google' ? 'alex@gmail.com' : 'alex@icloud.com');
+    const fresh = !this.state.onboarded;
+    this.setState({
+      session:{ provider, email:mail, since:Date.now() },
+      locked:false, authPw:'', authErr:'', pwShow:false,
+      screen: fresh ? 'feed' : (this.state.screen === 'auth' ? 'feed' : this.state.screen),
+      follows: fresh ? [] : this.state.follows
+    });
+    this.touch();
+    this.flash((u.toastSignedIn || 'Signed in').toUpperCase() + ' · ' + provider.toUpperCase());
+  }
+  submitEmailAuth() {
+    const u = UI[this.appLang], mail = this.state.authEmail || '', pw = this.state.authPw || '';
+    if (!this.validEmail(mail)) return this.setState({ authErr: u.authErrEmail });
+    if (pw.length < 8) return this.setState({ authErr: u.authErrPw });
+    this.signInWith('Email', mail.trim());
+  }
+  togglePick(t) {
+    const u = UI[this.appLang], free = this.plan === 'free';
+    const has = this.state.follows.indexOf(t) !== -1;
+    if (has) return this.setState(st => ({ follows: st.follows.filter(x => x !== t) }));
+    if (free && this.state.follows.length >= 3) return this.flash('3 / 3 — ' + (u.liftCap || '').toUpperCase());
+    this.setState(st => ({ follows: st.follows.concat(t) }));
+  }
+  sessionList() {
+    const rv = this.state.revoked || [];
+    return [
+      { id:'this', device:'iPhone · HIF 2.4', meta:'Zürich, CH · 09:41', current:true },
+      { id:'ipad', device:'iPad Pro · HIF 2.4', meta:'Zürich, CH · 04 Sep 21:12' },
+      { id:'mac', device:'MacBook Pro · Safari 18', meta:'Zug, CH · 04 Sep 18:04' },
+      { id:'win', device:'Windows 11 · Chrome 129', meta:'Frankfurt, DE · 03 Sep 09:12' }
+    ].filter(x => rv.indexOf(x.id) === -1);
+  }
   get plan() { return this.state.plan || this.props.plan || 'free'; }
   get lang() { return this.state.lang || this.props.lang || 'EN'; }
   get appLang() { return this.state.appLang || this.props.appLang || 'EN'; }
@@ -330,29 +637,147 @@ class Component extends DCLogic {
     const on = this.state.screen === key || (key === 'feed' && this.state.screen === 'detail');
     return { label, on, off: !on, go: () => this.go(key) };
   }
-  chartEl() {
-    const pts = [4,12,9,18,15,26,22,34,30,42,38,52,46,60,58,72,64,80,76,92,86,104,96,116];
-    const d = pts.map((v,i) => (i*14+4) + ',' + (110 - v * 0.85)).join(' ');
+  seriesFor(ticker, range, priceStr, moveStr) {
+    const cfg = { '1d':[78,300], '1w':[70,10800], '1m':[64,86400], '6m':[78,207360] }[range] || [78,300];
+    const n = cfg[0], step = cfg[1];
+    let seed = 7; for (let i = 0; i < ticker.length; i++) seed = (seed * 31 + ticker.charCodeAt(i)) % 9973;
+    const rnd = () => { seed = (seed * 1103515 + 12345) % 2147483648; return seed / 2147483648; };
+    const base = parseFloat(String(priceStr || '').replace(/[^0-9.]/g, '')) || 100;
+    const out = []; let v = base;
+    for (let i = 0; i < n; i++) { v += (Math.sin(i / 6) * 0.5 + rnd() - 0.48) * base * 0.009; out.push(v); }
+    const mv = parseFloat(String(moveStr || '').replace('−','-').replace(/[^0-9.\-]/g, ''));
+    const dayMove = isFinite(mv) ? mv / 100 : null;
+    const factor = { '1d':1, '1w':2.4, '1m':4.5, '6m':9 }[range] || 1;
+    const start = dayMove != null && (1 + dayMove * factor) !== 0 ? base / (1 + dayMove * factor) : out[0] + (base - out[out.length - 1]);
+    const first = out[0], span = out[out.length - 1] - first;
+    const t0 = Math.floor(Date.now() / 1000) - n * step;
+    return out.map((x,i) => {
+      const t = n > 1 ? i / (n - 1) : 1;
+      const residual = x - (first + span * t);
+      return { ts:t0 + i * step, close:+(start + (base - start) * t + residual).toFixed(2) };
+    });
+  }
+  movingAverage(values, period) {
+    return values.map((_, i) => i < period - 1 ? null : values.slice(i - period + 1, i + 1).reduce((a,b) => a + b, 0) / period);
+  }
+  rsiSeries(values, period) {
+    const out = values.map(() => null);
+    if (values.length <= period) return out;
+    for (let i = period; i < values.length; i++) {
+      let g = 0, l = 0;
+      for (let k = i - period + 1; k <= i; k++) { const d = values[k] - values[k-1]; if (d >= 0) g += d; else l -= d; }
+      out[i] = l === 0 ? 100 : 100 - (100 / (1 + g / l));
+    }
+    return out;
+  }
+  sentimentFor(pct) {
+    const n = parseFloat(String(pct).replace('%',''));
+    if (!isFinite(n)) return '—';
+    return n >= 80 ? 'STRONG BUY' : n >= 65 ? 'BUY' : n >= 45 ? 'HOLD' : n >= 30 ? 'REDUCE' : 'SELL';
+  }
+  analystSplit(detail) {
+    const m = String(detail || '').match(/^\s*(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*$/);
+    return m ? m[1] + ' buy · ' + m[2] + ' hold · ' + m[3] + ' sell' : (detail || '—');
+  }
+  chipStyle(on) {
+    return { padding:'5px 8px', border:'1px solid ' + (on ? this.pal.accent : this.pal.rule), background:on ? this.pal.accent : 'transparent',
+      color:on ? this.pal.bg : this.pal.mute, fontFamily:'var(--font-heading)', fontSize:9, fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer' };
+  }
+  fmtTime(ts, range) {
+    const dt = new Date(ts * 1000);
+    if (range === '1d' || range === '1w') return dt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    return dt.toLocaleDateString([], { month:'short', day:'numeric' });
+  }
+  sparkEl(ticker, priceStr, moveStr, up) {
+    const values = this.seriesFor(ticker, '1d', priceStr, moveStr).map(p => p.close);
+    const w = 120, h = 22, min = Math.min(...values), max = Math.max(...values), spread = Math.max(max - min, 0.01);
+    const d = values.map((v,i) => (i * w / (values.length - 1)).toFixed(1) + ',' + (h - 3 - ((v - min) / spread) * (h - 6)).toFixed(1)).join(' ');
+    return React.createElement('svg', { viewBox:'0 0 ' + w + ' ' + h, preserveAspectRatio:'none', style:{ width:'100%', height:h, display:'block' } },
+      React.createElement('polyline', { points:d, fill:'none', stroke:up === false ? this.pal.accent : this.pal.ink, strokeWidth:1.5 }));
+  }
+  chartEl(stock) {
+    const ranges = [['1d','1D'],['1w','1W'],['1m','1M'],['6m','6M']], gated = { '1y':1, '5y':1 };
+    const isFree = this.plan === 'free', range = this.state.chartRange || '1d', showSma = this.state.smaOn !== false;
+    const points = this.seriesFor(stock.ticker, range, stock.price, stock.move), values = points.map(p => p.close);
+    const w = 330, h = 150, gutter = 46;
+    const p20 = Math.min(20, Math.max(3, Math.floor(values.length/5))), p50 = Math.min(50, Math.max(5, Math.floor(values.length/2)));
+    const sma20 = this.movingAverage(values, p20), sma50 = this.movingAverage(values, p50);
+    const scale = showSma ? values.concat(sma20.filter(v => v != null), sma50.filter(v => v != null)) : values;
+    const min = Math.min(...scale), max = Math.max(...scale), spread = Math.max(max - min, 0.01);
+    const xOf = i => i * w / Math.max(values.length - 1, 1);
+    const yOf = v => h - 8 - ((v - min) / spread) * (h - 16);
+    const pathFor = arr => arr.map((v,i) => v == null ? null : xOf(i).toFixed(1) + ',' + yOf(v).toFixed(1)).filter(Boolean).join(' ');
+    const perf = ((values[values.length-1] / values[0] - 1) * 100);
+    const rsiS = this.rsiSeries(values, 14), rsiNow = rsiS.filter(v => v != null).slice(-1)[0];
+    const last = values[values.length-1], m20 = sma20[sma20.length-1], m50 = sma50[sma50.length-1];
+    const signal = (m20 && m50) ? (last > m20 && m20 > m50 ? 'BULLISH' : last < m20 && m20 < m50 ? 'BEARISH' : 'MIXED') : 'BUILDING';
+    const yTicks = [0,1,2,3].map(i => { const v = max - i * (max - min) / 3; return { label:v.toFixed(2), top:(yOf(v) / h * 100) }; });
+    const xIdx = [0, Math.round((values.length-1)/2), values.length-1];
+    const rh = 44, ry = v => rh - 3 - (v / 100) * (rh - 6);
+    const legend = [[this.pal.accent,'price','solid']];
+    if (showSma) legend.push([this.pal.ink,'sma ' + p20,'solid'],[this.pal.mute,'sma ' + p50,'dash']);
     return React.createElement('div', null,
-      React.createElement('div', { style:{ display:'flex', justifyContent:'space-between', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:'#A0A0A0', marginBottom:6 } },
-        React.createElement('span', null, '6M'), React.createElement('span', null, '+41.8%')),
-      React.createElement('svg', { viewBox:'0 0 330 115', style:{ width:'100%', height:115, display:'block' } },
-        React.createElement('line', { x1:0, y1:114, x2:330, y2:114, stroke:'#333333', strokeWidth:1 }),
-        React.createElement('line', { x1:0, y1:57, x2:330, y2:57, stroke:'#333333', strokeWidth:1, strokeDasharray:'2 5' }),
-        React.createElement('polyline', { points:d, fill:'none', stroke:'#D4AF37', strokeWidth:1.75 })
-      ));
+      React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:6, marginBottom:8 } },
+        React.createElement('span', { style:{ marginRight:'auto', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:this.pal.mute } }, stock.ticker + ' · PRICE'),
+        React.createElement('span', { style:{ fontSize:11, fontWeight:800, color:perf < 0 ? this.pal.accent : this.pal.ink } }, (perf < 0 ? '−' : '+') + Math.abs(perf).toFixed(1) + '%')),
+      React.createElement('div', { style:{ display:'flex', gap:5, marginBottom:8, flexWrap:'wrap' } },
+        ...ranges.map(r => React.createElement('button', { key:r[0], onClick:() => this.setState({ chartRange:r[0] }), style:this.chipStyle(range === r[0]) }, r[1])),
+        ...Object.keys(gated).map(g => React.createElement('button', { key:g, onClick:() => { this.flash('CHART HISTORY · PRO'); this.go('paywall'); },
+          style:Object.assign(this.chipStyle(false), { color:this.pal.mute }) }, g.toUpperCase()))),
+      React.createElement('div', { style:{ display:'flex', gap:6, alignItems:'center', marginBottom:8 } },
+        React.createElement('button', { onClick:() => this.setState({ smaOn: !showSma }), style:this.chipStyle(showSma) }, 'sma'),
+        React.createElement('span', { style:{ marginLeft:'auto', fontFamily:'var(--font-heading)', fontSize:11, fontWeight:800 } }, signal),
+        React.createElement('span', { style:{ fontSize:11, color:this.pal.mute } }, 'RSI ' + (rsiNow == null ? '—' : rsiNow.toFixed(1)))),
+      React.createElement('div', { style:{ display:'flex', gap:14, flexWrap:'wrap', marginBottom:8 } },
+        ...legend.map(it => React.createElement('span', { key:it[1], style:{ display:'flex', alignItems:'center', gap:5, fontSize:8, letterSpacing:'0.12em', textTransform:'uppercase', color:this.pal.mute } },
+          React.createElement('span', { style:{ width:16, height:0, borderTop:(it[2] === 'dash' ? '2px dashed ' : '2px solid ') + it[0] } }), it[1]))),
+      React.createElement('div', { style:{ display:'grid', gridTemplateColumns:gutter + 'px 1fr', columnGap:8 } },
+        React.createElement('div', { style:{ position:'relative', height:h } },
+          ...yTicks.map((t,i) => React.createElement('div', { key:i, style:{ position:'absolute', right:0, top:t.top + '%', transform:'translateY(-50%)', fontSize:9, color:this.pal.mute } }, t.label))),
+        React.createElement('svg', { viewBox:'0 0 ' + w + ' ' + h, preserveAspectRatio:'none', style:{ width:'100%', height:h, display:'block', background:this.pal.panel, borderLeft:'1px solid #333333' } },
+          React.createElement('line', { x1:0, y1:h*0.33, x2:w, y2:h*0.33, stroke:this.pal.rule, strokeWidth:1, strokeDasharray:'2 5' }),
+          React.createElement('line', { x1:0, y1:h*0.66, x2:w, y2:h*0.66, stroke:this.pal.rule, strokeWidth:1, strokeDasharray:'2 5' }),
+          showSma ? React.createElement('polyline', { points:pathFor(sma50), fill:'none', stroke:this.pal.mute, strokeWidth:1, strokeDasharray:'4 4' }) : null,
+          showSma ? React.createElement('polyline', { points:pathFor(sma20), fill:'none', stroke:this.pal.ink, strokeWidth:1.25 }) : null,
+          React.createElement('polyline', { points:pathFor(values), fill:'none', stroke:this.pal.accent, strokeWidth:1.75 })),
+        React.createElement('div', { style:{ fontSize:8, letterSpacing:'0.14em', color:this.pal.mute, textAlign:'right', paddingTop:5 } }, 'PRICE'),
+        React.createElement('div', { style:{ display:'flex', justifyContent:'space-between', paddingTop:5, fontSize:9, color:this.pal.mute } },
+          ...xIdx.map((i,k) => React.createElement('span', { key:k }, this.fmtTime(points[i].ts, range)))),
+        React.createElement('div', { style:{ fontSize:8, letterSpacing:'0.14em', color:this.pal.mute, textAlign:'right', paddingTop:8 } }, 'RSI'),
+        React.createElement('svg', { viewBox:'0 0 ' + w + ' ' + rh, preserveAspectRatio:'none', style:{ width:'100%', height:rh, marginTop:8, display:'block', background:this.pal.panel, borderLeft:'1px solid #333333' } },
+          React.createElement('line', { x1:0, y1:ry(70), x2:w, y2:ry(70), stroke:this.pal.rule, strokeWidth:1, strokeDasharray:'2 5' }),
+          React.createElement('line', { x1:0, y1:ry(30), x2:w, y2:ry(30), stroke:this.pal.rule, strokeWidth:1, strokeDasharray:'2 5' }),
+          React.createElement('polyline', { points:rsiS.map((v,i) => v == null ? null : xOf(i).toFixed(1) + ',' + ry(v).toFixed(1)).filter(Boolean).join(' '), fill:'none', stroke:this.pal.accent, strokeWidth:1.25 }))));
   }
   renderVals() {
     const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen;
     const L = this.lang, A = this.appLang, u = UI[A];
+    if (!this._idle) this.startIdleWatch();
+    const HS = window.HIFStore || null;
+    const signedIn = !!s.session, inApp = signedIn && !!s.onboarded && !s.locked;
+    const provider = (s.session && s.session.provider) || 'Email';
+    const sessionEmail = (s.session && s.session.email) || 'alex@email.com';
+    const links = Object.assign({ Google:true, iCloud:false, Email:true }, s.links || {});
+    const pw = HS ? HS.strength(s.authPw || '') : { score:0, breached:false, hints:[] };
+    const hintText = { len:u.hintLen, case:u.hintCase, digit:u.hintDigit, symbol:u.hintSymbol };
+    const timeoutMin = s.timeoutMin === undefined ? 30 : s.timeoutMin;
+    const volNum = v => { const m = /([\d.]+)x/.exec(String(v || '')); return m ? parseFloat(m[1]) : 0; };
     const feed = (s.feedTab === 'following' ? NEWS.filter(n => s.follows.includes(n.ticker)) : NEWS).map(n => Object.assign({}, n, {
       headline: n.headline[L], watch: n.watch[L],
       down: !n.up,
+      outlier: volNum(n.vol) >= 2,
+      volBadge: volNum(n.vol).toFixed(1) + '× volume',
       open: () => { this.setState({ selected:n.ticker }); this.go('detail'); },
       keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:n.ticker }); this.go('detail'); }, event)
-    }));
+    })).sort((a,b) => volNum(b.vol) - volNum(a.vol));
     const q = s.query.trim().toUpperCase();
-    const results = UNIVERSE.filter(x => !q || x.ticker.includes(q) || x.name.toUpperCase().includes(q)).map(x => {
+    const volOf = t => { let best = 0; NEWS.forEach(n => { if (n.ticker === t) { const m = /([\d.]+)x/.exec(String(n.vol || '')); if (m && parseFloat(m[1]) > best) best = parseFloat(m[1]); } }); return best; };
+    const daysOf = t => { const m = /(\d+)d/.exec(String((FOLLOWS[t] || {}).earnDays || '')); return m ? +m[1] : 999; };
+    let shown = UNIVERSE.filter(x => !q || x.ticker.includes(q) || x.name.toUpperCase().includes(q));
+    if (s.screenFilter === 'vol') shown = shown.filter(x => volOf(x.ticker) >= 2);
+    if (s.screenFilter === 'earn') shown = shown.filter(x => daysOf(x.ticker) <= 14);
+    if (s.screenFilter === 'stories') shown = shown.slice().sort((a,b) => (+b.stories || 0) - (+a.stories || 0));
+    const results = shown.map(x => {
       const on = s.follows.includes(x.ticker);
       return Object.assign({}, x, {
         following: on, notFollowing: !on,
@@ -366,18 +791,111 @@ class Component extends DCLogic {
     });
     const stock = FOLLOWS[s.selected] || FOLLOWS.NVDA;
     const following = s.follows.includes(stock.ticker);
+    const am = /^\s*(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*$/.exec(String(stock.analystDetail || ''));
+    const aTot = am ? ((+am[1] + +am[2] + +am[3]) || 1) : 1;
+    const analystBar = am ? [am[1], am[2], am[3]].map(v => (v / aTot * 100).toFixed(1) + '%') : ['0%','0%','0%'];
     return {
       ui: u,
       brand: this.props.brand || 'Heard It First',
       planLabel: isFree ? u.free : u.pro,
       planToggleLabel: isFree ? u.viewPro : u.viewFree,
       togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),
-      isAuth: screen === 'auth', isFeed: screen === 'feed', isWatch: screen === 'watchlist', isSearch: screen === 'search',
-      isDetail: screen === 'detail', isPaywall: screen === 'paywall', isMore: screen === 'more', isAccount: screen === 'account',
-      showNav: screen !== 'auth' && screen !== 'paywall',
+      isAuth: !signedIn, isOnboard: signedIn && !s.onboarded, isLocked: signedIn && !!s.locked,
+      isFeed: inApp && screen === 'feed', isWatch: inApp && screen === 'watchlist', isSearch: inApp && screen === 'search',
+      isDetail: inApp && screen === 'detail', isPaywall: inApp && screen === 'paywall', isMore: inApp && screen === 'more',
+      isAccount: inApp && screen === 'account', isSecurity: inApp && screen === 'security',
+      showNav: inApp && screen !== 'paywall',
+      authEmail: s.authEmail || '', authPw: s.authPw || '', authErr: s.authErr || '',
+      onAuthEmail: e => this.setState({ authEmail:e.target.value, authErr:'' }),
+      onAuthPw: e => this.setState({ authPw:e.target.value, authErr:'' }),
+      pwType: s.pwShow ? 'text' : 'password',
+      pwShowLabel: s.pwShow ? u.pwHide : u.pwShow,
+      togglePwShow: () => this.setState({ pwShow: !s.pwShow }),
+      pwTyped: (s.authPw || '').length > 0,
+      pwSegs: [0,1,2,3].map(i => ({ bg: i < pw.score ? (pw.breached ? this.pal.weak : this.pal.accent) : this.pal.rule })),
+      pwScoreLabel: (u.pwScores || [])[pw.score] || '',
+      pwHint: pw.hints.length ? (u.pwAdd + ' ' + pw.hints.map(h => hintText[h]).join(' · ')) : '',
+      pwBreached: pw.breached,
+      signInGoogle: () => this.signInWith('Google'),
+      signInICloud: () => this.signInWith('iCloud'),
+      submitAuth: () => this.submitEmailAuth(),
+      obCount: String(s.follows.length),
+      obPicks: UNIVERSE.slice(0, 10).map(x => {
+        const on = s.follows.indexOf(x.ticker) !== -1;
+        return { ticker:x.ticker, name:x.name, stories:x.stories, box: on ? this.pal.accent : 'transparent', boxEdge: on ? this.pal.accent : this.pal.rule,
+          toggle: () => this.togglePick(x.ticker) };
+      }),
+      finishOnboard: () => {
+        const picks = s.follows.length ? s.follows : ['NVDA','AAPL','TSLA'];
+        this.setState({ onboarded:true, follows:picks, screen:'feed' });
+        this.flash(picks.length + ' / 3 · ' + u.tabList.toUpperCase());
+      },
+      skipOnboard: () => this.setState({ onboarded:true, follows:['NVDA','AAPL','TSLA'], screen:'feed' }),
+      theme: s.theme || 'system',
+      themes: [['system', u.themeSystem], ['light', u.themeLight], ['dark', u.themeDark]].map((x, i) => {
+        const on = (s.theme || 'system') === x[0];
+        return { label:x[1], bg: on ? this.pal.accent : 'transparent', ink: on ? 'var(--s-on-accent)' : 'var(--s-ink)',
+          edge: i < 2 ? '1px solid var(--s-rule)' : '0', set: () => this.setState({ theme:x[0] }) };
+      }),
+      themeNote: (s.theme || 'system') === 'light' ? u.themeNoteLight : ((s.theme || 'system') === 'dark' ? u.themeNoteDark : u.themeNoteSystem),
+      goSecurity: () => this.go('security'),
+      backToAccount: () => this.go('account'),
+      twofaOn: !!s.twofa, twofaIdle: !s.twofa && !s.twofaSetup, twofaSetting: !!s.twofaSetup,
+      twofaStateLabel: s.twofa ? u.on : u.off,
+      twofaColor: s.twofa ? this.pal.accent : this.pal.mute,
+      twofaSecret: s.twofaSecret || '', twofaCode: s.twofaCode || '', twofaErr: s.twofaErr || '',
+      onTwofaCode: e => this.setState({ twofaCode: e.target.value.replace(/[^0-9]/g, '').slice(0, 6), twofaErr:'' }),
+      startTwofa: () => this.setState({ twofaSetup:true, twofaSecret: HS ? HS.secret() : 'ABCD EFGH JKLM NPQR', twofaCode:'', twofaErr:'' }),
+      cancelTwofa: () => this.setState({ twofaSetup:false, twofaCode:'', twofaErr:'' }),
+      verifyTwofa: () => {
+        if ((s.twofaCode || '').length !== 6) return this.setState({ twofaErr: u.twofaBadCode });
+        this.setState({ twofa:true, twofaSetup:false, twofaCode:'', twofaErr:'', recovery: HS ? HS.recoveryCodes(8) : [] });
+        this.flash(u.toastTwofaOn.toUpperCase());
+      },
+      disableTwofa: () => { this.setState({ twofa:false, recovery:null }); this.flash(u.toastTwofaOff.toUpperCase()); },
+      recoveryCodes: (s.recovery || []).map(c => ({ code:c })),
+      copyRecovery: () => {
+        try { navigator.clipboard.writeText((s.recovery || []).join('\n')); } catch (e) {}
+        this.flash(u.toastCopied.toUpperCase());
+      },
+      alertsLabel: s.loginAlerts === false ? u.off : u.on,
+      alertsBg: s.loginAlerts === false ? 'transparent' : this.pal.accent,
+      alertsEdge: s.loginAlerts === false ? this.pal.rule : this.pal.accent,
+      alertsInk: s.loginAlerts === false ? this.pal.mute : this.pal.bg,
+      toggleAlerts: () => this.setState({ loginAlerts: s.loginAlerts === false }),
+      timeouts: [[1.5, u.timeoutDemo], [15, '15 min'], [30, '30 min'], [60, '1 h'], [0, u.timeoutNever]].map(x => {
+        const on = timeoutMin === x[0];
+        return { label:x[1], bg: on ? this.pal.accent : 'transparent', edge: on ? this.pal.accent : this.pal.rule, ink: on ? this.pal.bg : this.pal.mute,
+          set: () => { this.setState({ timeoutMin:x[0] }); this.touch(); } };
+      }),
+      sessions: this.sessionList().map(x => Object.assign({}, x, {
+        isCurrent: !!x.current, canRevoke: !x.current,
+        revoke: () => { this.setState(st => ({ revoked:(st.revoked || []).concat(x.id) })); this.flash(u.toastRevoked.toUpperCase()); }
+      })),
+      signOutAll: () => {
+        this.setState({ revoked:['ipad','mac','win'], session:null, locked:false, screen:'feed', authPw:'', twofaSetup:false });
+        this.flash(u.toastSignedOutAll.toUpperCase());
+      },
+      connected: ['Google','iCloud','Email'].map(k => {
+        const isPrimary = k === provider, on = isPrimary || !!links[k];
+        return { label:k, isPrimary, canToggle: !isPrimary, actionLabel: on ? u.unlink : u.link,
+          detail: isPrimary ? sessionEmail : (on ? u.linked : '—'),
+          toggle: () => {
+            const next = Object.assign({}, links); next[k] = !on;
+            this.setState({ links: next });
+            this.flash((k + ' ' + (on ? u.toastUnlinked : u.toastLinked)).toUpperCase());
+          } };
+      }),
+      lockEmail: sessionEmail, lockPw: s.lockPw || '', lockErr: s.lockErr || '',
+      onLockPw: e => this.setState({ lockPw:e.target.value, lockErr:'' }),
+      unlock: () => {
+        if (!(s.lockPw || '').length) return this.setState({ lockErr: u.authErrPw });
+        this.setState({ locked:false, lockPw:'', lockErr:'' });
+        this.touch();
+      },
+      lockSignOut: () => this.setState({ session:null, locked:false, lockPw:'', lockErr:'' }),
       isFreeTier: isFree, isProTier: !isFree,
-      signIn: () => { this.go('feed'); this.flash(u.tabYou.toUpperCase() + ' · 3 / 3'); },
-      signOut: () => this.go('auth'),
+      signOut: () => { this.setState({ session:null, locked:false, screen:'feed', authPw:'', authErr:'', twofaSetup:false }); this.flash(u.signOut.toUpperCase()); },
       goPaywall: () => this.go('paywall'),
       goSearch: () => this.go('search'),
       back: () => this.go(s.prev || 'feed'),
@@ -391,9 +909,15 @@ class Component extends DCLogic {
       feed,
       follows: s.follows.map(t => Object.assign({}, FOLLOWS[t], {
         latest: FOLLOWS[t].latest[L],
-        scoreLabel: u.score + ' ' + FOLLOWS[t].score,
         down: !FOLLOWS[t].up,
-        alert: isFree ? u.pushOff : u.pushOn,
+        spark: this.sparkEl(t, FOLLOWS[t].price, FOLLOWS[t].move, FOLLOWS[t].up),
+        pushLabel: isFree ? (u.pro + ' · push') : (s.push[t] !== false ? u.pushOn : u.pushOff),
+        togglePush: event => {
+          if (event && event.stopPropagation) event.stopPropagation();
+          if (isFree) { this.flash(u.enablePush.toUpperCase()); return this.go('paywall'); }
+          this.setState(st => ({ push: Object.assign({}, st.push, { [t]: st.push[t] === false }) }));
+        },
+        alert: isFree ? u.pushOff : (s.push[t] !== false ? u.pushOn : u.pushOff),
         open: () => { this.setState({ selected:t }); this.go('detail'); },
         keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:t }); this.go('detail'); }, event)
       })),
@@ -403,10 +927,17 @@ class Component extends DCLogic {
       intervalLabel: isFree ? '24h' : '30m',
       query: s.query,
       onQuery: e => this.setState({ query: e.target.value }),
-      resultsLabel: q ? u.match + ' · ' + q : u.topVolume,
+      resultsLabel: (q ? u.match + ' · ' + q : u.topVolume) + ' · ' + results.length,
+      filters: [['all', u.filterAll], ['vol', u.filterVol], ['earn', u.filterEarn], ['stories', u.filterStories]]
+        .map(x => ({ key:x[0], label:x[1], on: s.screenFilter === x[0], off: s.screenFilter !== x[0], set: () => this.setState({ screenFilter:x[0] }) })),
+      analystFull: !isFree, analystLocked: isFree,
       results,
-      stock: Object.assign({}, stock, { down: !stock.up, call: stock.call[L] }),
-      chart: this.chartEl(),
+      stock: Object.assign({}, stock, { down: !stock.up, call: stock.call[L],
+        analystSentiment: this.sentimentFor(stock.buyPct),
+        analystDetail: this.analystSplit(stock.analystDetail),
+        buyW: analystBar[0], holdW: analystBar[1], sellW: analystBar[2],
+        lastEarn: stock.lastEarn || '—' }),
+      chart: this.chartEl(stock),
       stockNews: NEWS.filter(n => n.ticker === stock.ticker).concat(NEWS.slice(0,2)).slice(0,3).map(n => Object.assign({}, n, { headline: n.headline[L] })),
       freqNote: isFree ? u.freqFree : u.freqPro,
       detailActionLabel: following ? (isFree ? u.enablePush : u.pushEnabled.replace('%s', stock.ticker)) : u.addToList.replace('%s', stock.ticker),
@@ -448,7 +979,8 @@ class Component extends DCLogic {
         { label:u.broker, note:u.brokerNote, eta:'Q2' }
       ],
       accountName: this.props.accountName || 'A. Novak',
-      accountEmail: 'alex@email.com',
+      accountEmail: sessionEmail,
+      accountProvider: provider,
       accountPlanLabel: isFree ? u.upgradeBtn : u.managePro,
       accountPlanAction: isFree ? () => this.go('paywall') : () => this.flash(u.manageSub.toUpperCase()),
       desktopFeed: () => this.go('feed'),

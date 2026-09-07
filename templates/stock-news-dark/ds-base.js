@@ -2,7 +2,7 @@
 // base at the bound DS folder relative to this file (e.g. '_ds/<folder>' at
 // the project root, '../_ds/<folder>' one level down) — one line to edit.
 (() => {
-  const base = '../..';
+  const base = '../../_ds/modernist-a9cc4863-5c6f-4243-8321-e1618f3a965c';
   for (const p of ["styles.css"]) {
     const l = document.createElement('link');
     l.rel = 'stylesheet'; l.href = base + '/' + p;
