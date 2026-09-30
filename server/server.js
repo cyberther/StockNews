@@ -76,14 +76,17 @@ const CSP = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data:",
-  "font-src 'self' data:",
-  "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline'",
-  `connect-src 'self' ${SUPABASE_ORIGIN}`,
-  "worker-src 'self'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data: blob:",
+  "style-src 'self' 'unsafe-inline' blob:",
+  // The single-file bundle unpacks its assets into blob: URLs and the component
+  // runtime compiles its templates at load, so blob: and 'unsafe-eval' are required.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
+  `connect-src 'self' data: blob: ${SUPABASE_ORIGIN}`,
+  "worker-src 'self' blob:",
   "manifest-src 'self'",
-  "upgrade-insecure-requests"
+  // Only over TLS: on plain-http LAN this would rewrite /api calls to https and break them.
+  ...(PROD ? ["upgrade-insecure-requests"] : [])
 ].join('; ');
 
 app.use((req, res, next) => {

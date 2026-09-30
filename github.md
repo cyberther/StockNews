@@ -9,6 +9,8 @@ path: templates/
 date: 2026-09-30T00:00:00Z
 
 ### Updated in this project
+- New landing/sign-in page (hero, featured story, ticker strip, feature row, slide-in sign-in); AA logo; brand renamed to Market Pulse
+- CSP fixed so the bundled app runs (blob:, unsafe-eval; upgrade-insecure-requests prod-only)
 - The Stack: persistent bottom drawer + ⌘K command bar, pin up to 5 names as small multiples; J/K/P/X keys in Feed (EN/RO/DE)
 - Accuracy ledger and crowding panel shipped; dismissal-id and crowding-color bugs fixed
 - Server hardening: closed open Finnhub proxy, validated settings writes, security headers/CSP, rate limits, no error leakage; schema constraints + RLS

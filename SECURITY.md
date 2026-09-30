@@ -76,7 +76,10 @@ lock, the 2FA setup flow and the device list already existed.
    front-end inlines its scripts. This is the biggest remaining item: emit a
    per-response nonce and stamp it on each inline `<script>`, then drop
    `'unsafe-inline'`. Until then CSP mitigates injected *external* script, not
-   injected inline script.
+   injected inline script. The single-file bundle also needs `'unsafe-eval'`
+   and `blob:` (it unpacks assets to blob URLs and compiles templates at load);
+   serving unbundled files would remove both. `upgrade-insecure-requests` is
+   sent only in production (it breaks plain-http LAN use).
 2. **Rate limits and the response cache are per process.** Two instances mean
    double the limits; move both to Redis before scaling out.
 3. **2FA is a prototype flow.** The code is accepted without server-side TOTP

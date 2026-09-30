@@ -406,7 +406,36 @@ const AUTH = {
     themeNoteSystem:'Folgt der Einstellung des Betriebssystems.', themeNoteLight:'Helle Flächen, Tinte auf Papier.', themeNoteDark:'Dunkle Terminal-Flächen.'
   }
 };
-Object.keys(AUTH).forEach(k => Object.assign(UI[k], AUTH[k]));
+const LANDING = {
+  EN: { lpTag:'Investment news · Tickers · Market signals', lpKicker:'Scored news. Faster decisions.', lpH1a:'Hear the news', lpH1b:'before the market does',
+    lpSub:'Every ticker you follow, scanned on your interval. Each story scored for impact, with the one number to watch next.',
+    lpCta:'Create free account', lpCta2:'Sign in', lpSignIn:'Sign in', lpClose:'Close',
+    lpP1:'30-min scan|interval', lpP2:'840 news|sources', lpP3:'Public accuracy|ledger',
+    lpFeatured:'Top story now', lpRead:'Sign in to read', lpAll:'All markets',
+    lpF1t:'Scored feed', lpF1d:'Every story rated −100 to +100 for impact',
+    lpF2t:'Screener', lpF2d:'Filter by score, crowding and volume',
+    lpF3t:'Watchlist', lpF3d:'Alerts the moment a followed name moves',
+    lpF4t:'Accuracy ledger', lpF4d:'Every call we made, graded in public' },
+  RO: { lpTag:'Știri de investiții · Simboluri · Semnale de piață', lpKicker:'Știri evaluate. Decizii mai rapide.', lpH1a:'Află știrea', lpH1b:'înaintea pieței',
+    lpSub:'Fiecare simbol urmărit, scanat la intervalul tău. Fiecare știre evaluată după impact, cu cifra de urmărit în continuare.',
+    lpCta:'Creează cont gratuit', lpCta2:'Autentificare', lpSignIn:'Autentificare', lpClose:'Închide',
+    lpP1:'Scanare la|30 min', lpP2:'840 surse|de știri', lpP3:'Registru public|de acuratețe',
+    lpFeatured:'Știrea principală', lpRead:'Autentifică-te pentru a citi', lpAll:'Toate piețele',
+    lpF1t:'Flux evaluat', lpF1d:'Fiecare știre notată de la −100 la +100',
+    lpF2t:'Filtru', lpF2d:'Filtrează după scor, aglomerare și volum',
+    lpF3t:'Listă urmărire', lpF3d:'Alerte imediat ce un simbol se mișcă',
+    lpF4t:'Registru de acuratețe', lpF4d:'Fiecare predicție, evaluată public' },
+  DE: { lpTag:'Anlagenews · Ticker · Marktsignale', lpKicker:'Bewertete News. Schnellere Entscheidungen.', lpH1a:'Die Meldung kennen,', lpH1b:'bevor der Markt sie kennt',
+    lpSub:'Jeder verfolgte Ticker, gescannt in Ihrem Intervall. Jede Meldung nach Wirkung bewertet, mit der nächsten Kennzahl zum Beobachten.',
+    lpCta:'Kostenloses Konto', lpCta2:'Anmelden', lpSignIn:'Anmelden', lpClose:'Schließen',
+    lpP1:'30-Min-|Scan', lpP2:'840 News-|Quellen', lpP3:'Öffentliches|Trefferprotokoll',
+    lpFeatured:'Top-Meldung jetzt', lpRead:'Zum Lesen anmelden', lpAll:'Alle Märkte',
+    lpF1t:'Bewerteter Feed', lpF1d:'Jede Meldung von −100 bis +100 bewertet',
+    lpF2t:'Screener', lpF2d:'Filter nach Score, Crowding und Volumen',
+    lpF3t:'Watchlist', lpF3d:'Alerts, sobald sich ein Titel bewegt',
+    lpF4t:'Trefferprotokoll', lpF4d:'Jede Einschätzung, öffentlich benotet' }
+};
+Object.keys(AUTH).forEach(k => Object.assign(UI[k], AUTH[k], LANDING[k]));
 // Sector grouping. Used to tell a company-specific move apart from a sector-wide one.
 const SECTORS = {
   Semiconductors:['NVDA','AMD','AVGO','INTC','TSM','ASML','MU','QCOM','ARM','TXN','IFX','STM'],
