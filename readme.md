@@ -1,13 +1,13 @@
-# Modernist design system
+# Heard It First UI kit
 
-Modernist is flat, architectural and set entirely in Archivo: a near-mono red on white, a visible modular grid, zero corner radius and strong 2px rules. Nothing floats and nothing is decorated — alignment and the strength of the dividers do all the organising, labels sit flush left (even inside buttons), and photography prints in pure black and white.
+Heard It First is flat, architectural and set entirely in Archivo: a near-mono red on white, a visible modular grid, zero corner radius and strong 2px rules. Nothing floats and nothing is decorated — alignment and the strength of the dividers do all the organising, labels sit flush left (even inside buttons), and photography prints in pure black and white.
 
 ## How to use this
 
 - Link the one stylesheet from every page — `<link rel="stylesheet" href="styles.css">` (adjust the relative path) — and take every color, font, spacing, radius and shadow from its variables (`var(--color-*)`, `var(--font-*)`, `var(--space-*)`, `var(--radius-*)`, `var(--shadow-*)`). Never hard-code a hex, a font name or a px value the tokens already carry.
 - Build with the classes below rather than inventing parallel ones; the component pages are plain HTML, so view source and copy the markup.
-- `templates/` holds starting points a consuming project can copy whole.
-- The whole system was derived from `theme.json`. To change the look, edit the tokens at the top of `styles.css` — every page, the thumbnail and this guide read from them — and keep `theme.json` and the written guidance in step so they don't drift from what the CSS actually does.
+- `templates/` holds the product pages.
+- To change the look, edit the tokens at the top of `styles.css`; every page and this guide read from them.
 
 ## Direction
 
@@ -15,7 +15,7 @@ Modular grid layouts — content in equal-width cells, strong horizontal and ver
 
 ## Color
 
-A light ground (`--color-bg` #f3f2f2) with `--color-text` #201e1d and a single accent #ec3013 (this is a mono scheme: no second accent was chosen — the `--color-accent-2-*` variables carry a machine-derived stand-in kept only so both sets resolve; treat them as one role). Each role carries a 100–900 tonal ramp (`--color-neutral-100` … `--color-accent-2-900`) generated in OKLCH on a shared perceptual lightness scale, so the same step of any ramp has the same visual weight. Use the light steps (100–300) for tinted fills, hovers and subtle borders, 500 as the role's base, and the dark steps (700–900) for text on tinted fills and for pressed states; prefer ramp steps over ad-hoc `color-mix()`. For elevation use `--shadow-sm/md/lg` (already tuned to the ground) rather than ad-hoc box-shadows.
+A light ground (`--color-bg` #f3f2f2) with `--color-text` #201e1d and a single accent #ec3013 (single-accent scheme; the `--color-accent-2-*` variables mirror the accent). Each role carries a 100–900 tonal ramp (`--color-neutral-100` … `--color-accent-2-900`) built in OKLCH on a shared perceptual lightness scale, so the same step of any ramp has the same visual weight. Use the light steps (100–300) for tinted fills, hovers and subtle borders, 500 as the role's base, and the dark steps (700–900) for text on tinted fills and for pressed states; prefer ramp steps over ad-hoc `color-mix()`. For elevation use `--shadow-sm/md/lg` (already tuned to the ground) rather than ad-hoc box-shadows.
 
 ## Type
 
@@ -49,7 +49,7 @@ States are built in: hovers and pressed states come from the accent ramp, keyboa
 
 - Let the grid show: equal-width cells, strong horizontal rules between sections, visible structure.
 - Keep everything flush left — headings, copy, and the labels inside wide buttons.
-- Use the accent sparingly, for the primary action and small emphasis; the system is mostly ink on ground. The one place red runs as a field is the poster statement — the deck's section dividers and the landing's closing banner — where type stays display-grade and the accent carries the page.
+- Use the accent sparingly, for the primary action and small emphasis; the system is mostly ink on ground.
 - Print photographs in black and white with the `.grayscale` wrapper.
 
 ## Don't
@@ -63,8 +63,7 @@ States are built in: hovers and pressed states come from the accent ramp, keyboa
 
 - `styles.css` — the only stylesheet: the token sheet (`:root` variables, ramps, base type) plus the component layer. Link it from every page.
 - `readme.md` — this guide.
-- `theme.json` — the parameters these files were derived from (a machine-readable record of the theme).
-- `thumbnail.html` — the project cover (brand mark + swatches).
+- `thumbnail.html` — the project cover.
 - `foundations/type.html` — the type scale and the heading/body pairing at real sizes.
 - `foundations/color.html` — color roles and the 100-900 tonal ramps, with usage notes.
 - `foundations/layout.html` — the spacing scale, the grid and how edges are drawn.
@@ -76,6 +75,4 @@ States are built in: hovers and pressed states come from the accent ramp, keyboa
 - `components/navigation.html` — the header bar pattern.
 - `components/table.html` — a data table with the themed header and row rules.
 - `components/dialog.html` — a modal over its backdrop at the top elevation.
-- `theme.html` — the theme's parameters rendered as a reference sheet.
-- `templates/landing/` — a starter page consuming the system the intended way (`index.html`, its `ds-base.js` loader, and the vendored `image-slot.js` its photograph mounts).
 - `assets/photo.jpg` — the reference photograph the imagery page treats.

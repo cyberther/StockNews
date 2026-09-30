@@ -1,19 +1,11 @@
 [build]
-  command = "node scripts/build-netlify.mjs"
+  command = "node scripts/build-netlify.cjs"
   publish = "dist"
   functions = "netlify/functions"
 
 # The prototype pages are plain HTML — nothing to build.
 [build.environment]
   NODE_VERSION = "20"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://finnhub.io; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
 
 # Convenience: open the web app at the site root.
 [[redirects]]

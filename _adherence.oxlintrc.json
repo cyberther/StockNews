@@ -16,7 +16,8 @@
         "patterns": [
           {
             "group": [
-              "netlify/functions/**"
+              "netlify/functions/**",
+              "scripts/**"
             ],
             "message": "Import design-system components from 'index.js', not component internals."
           }

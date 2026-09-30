@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":4,"namespace":"Modernist_modern","components":[],"sourceHashes":{"netlify/functions/finnhub.js":"efab4f75e0d4"},"inlinedExternals":[],"unexposedExports":[{"name":"config","sourcePath":"netlify/functions/finnhub.js"}]} */
+/* @ds-bundle: {"format":4,"namespace":"Modernist_modern","components":[],"sourceHashes":{"netlify/functions/finnhub.js":"ed7b40c9b4a1","scripts/build-netlify.cjs":"293627db9fdc"},"inlinedExternals":[],"unexposedExports":[{"name":"config","sourcePath":"netlify/functions/finnhub.js"}]} */
 
 (() => {
 
@@ -17,8 +17,17 @@ try { (() => {
 // Call it as: /api/finnhub?path=/quote&symbol=NVDA
 //
 // Only the endpoints this prototype needs are allowed through.
-const ALLOWED = new Set(['/quote', '/company-news', '/search', '/stock/recommendation']);
+const ALLOWED = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/chart']);
 const BASE = 'https://finnhub.io/api/v1';
+const CHART_RANGES = {
+  '1d': '5m',
+  '5d': '15m',
+  '1mo': '60m',
+  '6mo': '1d',
+  ytd: '1d',
+  '1y': '1d',
+  '5y': '1wk'
+};
 let __ds_default_netlify_functions_finnhub_wqyy4h;
 try {
   __ds_default_netlify_functions_finnhub_wqyy4h = async request => {
@@ -33,6 +42,41 @@ try {
       });
     }
     const key = process.env.FINNHUB_KEY;
+    if (path === '/chart') {
+      const symbol = (url.searchParams.get('symbol') || '').toUpperCase().replace(/[^A-Z0-9.-]/g, '');
+      const range = url.searchParams.get('range') || '6mo';
+      if (!symbol || !CHART_RANGES[range]) return Response.json({
+        error: 'invalid chart request'
+      }, {
+        status: 400
+      });
+      const chartUrl = new URL(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`);
+      chartUrl.searchParams.set('range', range);
+      chartUrl.searchParams.set('interval', CHART_RANGES[range]);
+      chartUrl.searchParams.set('includePrePost', 'false');
+      try {
+        const res = await fetch(chartUrl, {
+          headers: {
+            accept: 'application/json',
+            'user-agent': 'Mozilla/5.0'
+          }
+        });
+        return new Response(await res.text(), {
+          status: res.status,
+          headers: {
+            'content-type': 'application/json',
+            'cache-control': 'public, max-age=300'
+          }
+        });
+      } catch (e) {
+        return Response.json({
+          error: 'chart upstream failed',
+          detail: String(e)
+        }, {
+          status: 502
+        });
+      }
+    }
     if (!key) {
       return Response.json({
         error: 'FINNHUB_KEY is not set on this site'
@@ -73,5 +117,28 @@ const config = {
 };
 Object.assign(__ds_scope, { __ds_default_netlify_functions_finnhub_wqyy4h, config });
 })(); } catch (e) { __ds_ns.__errors.push({ path: "netlify/functions/finnhub.js", error: String((e && e.message) || e) }); }
+
+// scripts/build-netlify.cjs
+try { (() => {
+const fs = require('fs');
+const path = require('path');
+const output = 'dist';
+const files = ['styles.css'];
+const directories = ['templates/shared', 'templates/stock-news-dark', 'templates/stock-news-web'];
+fs.rmSync(output, {
+  recursive: true,
+  force: true
+});
+fs.mkdirSync(output, {
+  recursive: true
+});
+for (const file of files) fs.cpSync(file, path.join(output, file));
+for (const directory of directories) {
+  fs.cpSync(directory, path.join(output, directory), {
+    recursive: true
+  });
+}
+console.log(`Built Netlify bundle in ${output}`);
+})(); } catch (e) { __ds_ns.__errors.push({ path: "scripts/build-netlify.cjs", error: String((e && e.message) || e) }); }
 
 })();
