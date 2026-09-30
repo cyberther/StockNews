@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="_ds/modernist-a9cc4863-5c6f-4243-8321-e1618f3a965c/styles.css">
+<script src="_ds/modernist-a9cc4863-5c6f-4243-8321-e1618f3a965c/_ds_bundle.js"></script>
+<script src="./doc-page.js"></script>
+<style>
+doc-page:not(:defined){visibility:hidden}
+body{background:var(--color-neutral-500)}
+h1,h2,h3{text-wrap:balance}
+p,li{orphans:3;widows:3}
+pre{break-inside:avoid}
+a{color:var(--color-accent-700)}
+a:hover{color:var(--color-accent-800)}
+</style>
+</helmet>
+
+<doc-page margin="0.8in">
+
+<h1 style="font-family:var(--font-heading);font-weight:800;font-size:40px;line-height:1.02;letter-spacing:-0.03em;color:var(--color-text);margin:0">Running Heard It First on your own machine</h1>
+
+<p style="font-family:var(--font-body);font-size:15.5px;line-height:1.6;color:var(--color-neutral-800);margin:14px 0 0;max-width:36em">A setup guide for Ubuntu or Debian: install the runtime, serve the app on your home network, add real Google and email sign-in, keep the market-data key off the browser, and store watchlists in a database instead of browser storage.</p>
+
+<div style="display:flex;flex-wrap:wrap;gap:0;margin-top:22px;border-top:2px solid var(--color-text);border-bottom:2px solid var(--color-text)">
+<div style="flex:1 1 150px;padding:12px 16px 12px 0"><div style="font-family:var(--font-heading);font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700)">Machine</div><div style="font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--color-text);margin-top:3px">Ubuntu / Debian</div></div>
+<div style="flex:1 1 150px;padding:12px 16px;border-left:1px solid var(--color-neutral-300)"><div style="font-family:var(--font-heading);font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700)">Reachable from</div><div style="font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--color-text);margin-top:3px">Home network only</div></div>
+<div style="flex:1 1 150px;padding:12px 16px;border-left:1px solid var(--color-neutral-300)"><div style="font-family:var(--font-heading);font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700)">Auth &amp; database</div><div style="font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--color-text);margin-top:3px">Supabase (hosted)</div></div>
+<div style="flex:1 1 150px;padding:12px 0 12px 16px;border-left:1px solid var(--color-neutral-300)"><div style="font-family:var(--font-heading);font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700)">Time to first run</div><div style="font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--color-text);margin-top:3px">About 20 minutes</div></div>
+</div>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--color-accent-700);margin:26px 0 0">Read this first</h2>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">Three decisions were made for you, and one thing is being deliberately left out.</p>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em"><strong style="font-weight:700">Supabase runs your accounts and your database.</strong> Auth and Postgres come from one dashboard on a free tier, which means nothing to install, patch or back up on your side beyond one dump file. It also solves a real problem: Google sign-in demands an HTTPS callback address, and your machine has no public address. Google sends users to Supabase's HTTPS domain, and Supabase hands them back to your local address — so real Google sign-in works on a home network with no domain, no port forwarding and no certificate.</p>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em"><strong style="font-weight:700">Apple sign-in is deferred.</strong> It requires a paid Apple Developer account, 99 USD a year, plus a real domain you control. There is no free or local path. Google and email/password cover you until you want one; the iCloud button stays in the interface, wired to the mock, and takes about an hour to make real once the domain exists.</p>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em"><strong style="font-weight:700">A small server sits in front of the market data.</strong> A Finnhub key in browser code is a key anyone can read and spend. Sections 04 and 06 put a Node process in between, so the token stays on the machine.</p>
+
+<div style="border-top:2px solid var(--color-text);margin-top:22px;padding-top:12px">
+<div style="font-family:var(--font-heading);font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent-700)">What runs where</div>
+<p style="font-family:var(--font-body);font-size:14.5px;line-height:1.6;color:var(--color-text);margin:8px 0 0;max-width:36em">Your machine serves the interface and holds the Finnhub token. Supabase holds accounts, passwords and per-user settings. Finnhub supplies prices. Nothing else is involved, and nothing is exposed to the internet.</p>
+</div>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;color:var(--color-text);margin:30px 0 0;padding-top:16px;border-top:2px solid var(--color-text)">01 · Base packages</h2>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">Node 22 is the current long-term-support release. Ubuntu's own repositories carry an older one, so this installs from NodeSource.</p>
+
+<pre style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.65;background:var(--color-neutral-200);border:1px solid var(--color-neutral-300);padding:13px 15px;margin:12px 0 0;overflow-x:auto;white-space:pre-wrap;color:var(--color-text)">sudo apt update &amp;&amp; sudo apt upgrade -y
+sudo apt install -y curl git ufw unzip postgresql-client
+
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt install -y nodejs
+
+node -v    # expect v22.x
+npm -v</pre>
+
+<p style="font-family:var(--font-body);font-size:14px;line-height:1.55;color:var(--color-neutral-700);margin:10px 0 0;max-width:36em"><code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">postgresql-client</code> is only for taking backups in section 08; the database itself is hosted.</p>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;color:var(--color-text);margin:26px 0 0;padding-top:16px;border-top:2px solid var(--color-text)">02 · Put the code in place</h2>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">Either clone your repository, or unzip the download. Both end at the same layout.</p>
+
+<pre style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.65;background:var(--color-neutral-200);border:1px solid var(--color-neutral-300);padding:13px 15px;margin:12px 0 0;overflow-x:auto;white-space:pre-wrap;color:var(--color-text)">sudo mkdir -p /srv/hif
+sudo chown "$USER":"$USER" /srv/hif
+cd /srv/hif
+
+git clone https://github.com/cyberther/StockNews.git .
+#   or: unzip ~/Downloads/project.zip -d /srv/hif
+
+mkdir -p server/public
+cp export/HIF-Web-Dark.html    server/public/index.html
+cp export/HIF-Mobile-Dark.html server/public/mobile.html</pre>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:12px 0 0;max-width:36em">Those two files in <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">public/</code> are the self-contained builds — every script, style and font inlined. They run with no build step, and at this stage they still keep settings in browser storage and use demo prices. Section 06 is where that changes.</p>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;color:var(--color-text);margin:26px 0 0;padding-top:16px;border-top:2px solid var(--color-text)">03 · Supabase project, Google and email sign-in</h2>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">This part is all in a browser. Find your machine's address on the network first, because several fields below need it.</p>
+
+<pre style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.65;background:var(--color-neutral-200);border:1px solid var(--color-neutral-300);padding:13px 15px;margin:12px 0 0;overflow-x:auto;white-space:pre-wrap;color:var(--color-text)">hostname -I | awk '{print $1}'    # e.g. 192.168.1.42</pre>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:14px 0 6px;max-width:36em"><strong style="font-weight:700">Create the project.</strong></p>
+
+<ol style="font-family:var(--font-body);font-size:15px;line-height:1.62;color:var(--color-text);margin:0;padding-left:22px;max-width:36em">
+<li style="margin-bottom:5px">At <strong style="font-weight:600">supabase.com</strong>, sign up and create a project. Pick the region closest to you and save the database password it generates — it is shown once.</li>
+<li style="margin-bottom:5px">Open <strong style="font-weight:600">Project Settings → API</strong>. Copy the <em>Project URL</em> and the <em>anon public</em> key; you need both in section 04.</li>
+<li style="margin-bottom:5px">Open <strong style="font-weight:600">SQL Editor</strong>, paste the contents of <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">server/schema.sql</code>, and run it. That creates the settings table and the row-level security policies that stop one account reading another's data.</li>
+</ol>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:14px 0 6px;max-width:36em"><strong style="font-weight:700">Tell Supabase where your app lives.</strong> Under <strong style="font-weight:600">Authentication → URL Configuration</strong>, set Site URL to <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">http://192.168.1.42:8080</code> using your own address, and add both of these to Redirect URLs:</p>
+
+<pre style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.65;background:var(--color-neutral-200);border:1px solid var(--color-neutral-300);padding:13px 15px;margin:0 0 0;overflow-x:auto;white-space:pre-wrap;color:var(--color-text)">http://192.168.1.42:8080/**
+http://localhost:8080/**</pre>
+
+<p style="font-family:var(--font-body);font-size:14px;line-height:1.55;color:var(--color-neutral-700);margin:9px 0 0;max-width:36em">The <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">localhost</code> entry is for browsing on the machine itself; the numeric one is for your phone and laptop. If your router hands out a new address later, sign-in breaks until you update this field — worth reserving a static lease for this machine.</p>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:14px 0 6px;max-width:36em"><strong style="font-weight:700">Email and password.</strong> Under <strong style="font-weight:600">Authentication → Providers → Email</strong>, make sure it is enabled. While testing on a home network, turn <em>Confirm email</em> off: confirmation links point at your local address and will not open from a phone that has left the house. Turn it back on before you let anyone else sign up.</p>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:14px 0 6px;max-width:36em"><strong style="font-weight:700">Google sign-in.</strong> In the Google Cloud Console:</p>
+
+<ol style="font-family:var(--font-body);font-size:15px;line-height:1.62;color:var(--color-text);margin:0;padding-left:22px;max-width:36em">
+<li style="margin-bottom:5px">Create a project, then open <strong style="font-weight:600">APIs &amp; Services → OAuth consent screen</strong>. Choose <em>External</em>, fill in the app name and your email, and add your own Google account under <em>Test users</em>. Leaving it in testing mode is correct here — it allows up to 100 named accounts with no review.</li>
+<li style="margin-bottom:5px">Go to <strong style="font-weight:600">Credentials → Create credentials → OAuth client ID</strong>, type <em>Web application</em>.</li>
+<li style="margin-bottom:5px">Under <em>Authorized redirect URIs</em> add exactly one entry, your Supabase callback: <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">https://YOUR-REF.supabase.co/auth/v1/callback</code></li>
+<li style="margin-bottom:5px">Copy the client ID and client secret into <strong style="font-weight:600">Supabase → Authentication → Providers → Google</strong>, and enable it.</li>
+</ol>
+
+<div style="border-top:2px solid var(--color-text);margin-top:18px;padding-top:11px">
+<div style="font-family:var(--font-heading);font-size:9.5px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent-700)">Why your local address never goes near Google</div>
+<p style="font-family:var(--font-body);font-size:14.5px;line-height:1.6;color:var(--color-text);margin:7px 0 0;max-width:36em">Google only ever redirects to Supabase, which is why one HTTPS entry is all it needs. Supabase then returns the user to whatever you listed in Redirect URLs, and it accepts plain <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">http</code> on a private network. That indirection is what makes a domainless setup work.</p>
+</div>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;color:var(--color-text);margin:26px 0 0;padding-top:16px;border-top:2px solid var(--color-text)">04 · Configure and start the server</h2>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">Get a free API key at <strong style="font-weight:600">finnhub.io</strong> first — the free tier allows 60 calls a minute, and the server caches for 30 seconds, which is comfortably inside it.</p>
+
+<pre style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.65;background:var(--color-neutral-200);border:1px solid var(--color-neutral-300);padding:13px 15px;margin:12px 0 0;overflow-x:auto;white-space:pre-wrap;color:var(--color-text)">cd /srv/hif/server
+cp .env.example .env
+chmod 600 .env        # only your user can read the keys
+nano .env             # fill in SUPABASE_URL, SUPABASE_ANON_KEY, FINNHUB_TOKEN
+
+npm install
+npm start</pre>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:12px 0 0;max-width:36em">Open <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">http://192.168.1.42:8080</code> from any device on your network. The web build is at the root, the phone build at <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">/mobile.html</code>. Stop it with Ctrl-C; section 07 makes it permanent.</p>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;color:var(--color-text);margin:26px 0 0;padding-top:16px;border-top:2px solid var(--color-text)">05 · Close the machine off</h2>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">Check your subnet with <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">ip -4 addr</code> — most home routers use <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">192.168.0.0/16</code>, some use <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">10.0.0.0/8</code>. Adjust the two rules to match.</p>
+
+<pre style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.65;background:var(--color-neutral-200);border:1px solid var(--color-neutral-300);padding:13px 15px;margin:12px 0 0;overflow-x:auto;white-space:pre-wrap;color:var(--color-text)">sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow from 192.168.0.0/16 to any port 22   proto tcp
+sudo ufw allow from 192.168.0.0/16 to any port 8080 proto tcp
+sudo ufw enable
+sudo ufw status verbose</pre>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:12px 0 0;max-width:36em">Nothing is forwarded at the router, so the site is unreachable from outside your house — which is what you asked for, and also why there is no HTTPS here. Traffic stays on your own network in the clear. That is an acceptable trade at home; it stops being acceptable the moment you forward a port, and section 09 covers what changes then.</p>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;color:var(--color-text);margin:26px 0 0;padding-top:16px;border-top:2px solid var(--color-text)">06 · Move accounts and settings onto the server</h2>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">Everything up to here serves the prototype as it stands: the sign-in screen is a convincing mock, and your watchlist lives in one browser. Making it real is a front-end change, and it is mine to make rather than yours — the server side is already built and waiting.</p>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">What the running server already offers:</p>
+
+<table style="width:100%;border-collapse:collapse;margin-top:12px;font-family:var(--font-body);font-size:14px">
+<thead>
+<tr>
+<th style="text-align:left;font-weight:700;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 7px 0;border-bottom:2px solid var(--color-text)">Endpoint</th>
+<th style="text-align:left;font-weight:700;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 0 7px 12px;border-bottom:2px solid var(--color-text)">What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--color-neutral-300);font-family:ui-monospace,monospace;font-size:12.5px;color:var(--color-text);vertical-align:top">GET /api/config</td>
+<td style="padding:9px 0 9px 12px;border-bottom:1px solid var(--color-neutral-300);line-height:1.5;color:var(--color-text)">Hands the browser its Supabase URL and public key, so no key is baked into the HTML</td>
+</tr>
+<tr>
+<td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--color-neutral-300);font-family:ui-monospace,monospace;font-size:12.5px;color:var(--color-text);vertical-align:top">GET /api/settings</td>
+<td style="padding:9px 0 9px 12px;border-bottom:1px solid var(--color-neutral-300);line-height:1.5;color:var(--color-text)">Returns the signed-in user's watchlist, theme, language and toggles</td>
+</tr>
+<tr>
+<td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--color-neutral-300);font-family:ui-monospace,monospace;font-size:12.5px;color:var(--color-text);vertical-align:top">PUT /api/settings</td>
+<td style="padding:9px 0 9px 12px;border-bottom:1px solid var(--color-neutral-300);line-height:1.5;color:var(--color-text)">Saves them, scoped to that account by row-level security</td>
+</tr>
+<tr>
+<td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--color-neutral-300);font-family:ui-monospace,monospace;font-size:12.5px;color:var(--color-text);vertical-align:top">GET /api/finnhub/:kind</td>
+<td style="padding:9px 0 9px 12px;border-bottom:1px solid var(--color-neutral-300);line-height:1.5;color:var(--color-text)">Proxies quotes, candles, news, earnings and recommendations, cached 30s, token never leaving the machine</td>
+</tr>
+</tbody>
+</table>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:14px 0 0;max-width:36em">When you want it wired up, the front-end work is: swap the mocked sign-in for the Supabase client, replace the browser-storage layer with those two settings calls, point the chart and feed at the proxy, and turn the security screen's real features on — Supabase provides genuine authenticator-app two-factor and session revoke, so those stop being mock and start working. Say the word and I will do it. Login alerts need an email service, and are the one item on that screen with no free path.</p>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;color:var(--color-text);margin:26px 0 0;padding-top:16px;border-top:2px solid var(--color-text)">07 · Keep it running after a reboot</h2>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">Replace <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">YOUR-USER</code> with the output of <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">whoami</code>, then paste the whole block.</p>
+
+<pre style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.65;background:var(--color-neutral-200);border:1px solid var(--color-neutral-300);padding:13px 15px;margin:12px 0 0;overflow-x:auto;white-space:pre-wrap;color:var(--color-text)">sudo tee /etc/systemd/system/hif.service &gt;/dev/null &lt;&lt;'EOF'
+[Unit]
+Description=Heard It First
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR-USER
+WorkingDirectory=/srv/hif/server
+EnvironmentFile=/srv/hif/server/.env
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/srv/hif
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now hif
+systemctl status hif --no-pager
+journalctl -u hif -f          # live log; Ctrl-C to stop watching</pre>
+
+<p style="font-family:var(--font-body);font-size:14px;line-height:1.55;color:var(--color-neutral-700);margin:10px 0 0;max-width:36em">The four <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">Protect</code> and <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">Private</code> lines are cheap insurance: the process gets a read-only view of the filesystem and can only write inside <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">/srv/hif</code>. After changing code: <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">sudo systemctl restart hif</code>.</p>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;color:var(--color-text);margin:26px 0 0;padding-top:16px;border-top:2px solid var(--color-text)">08 · Backups</h2>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">The free Supabase tier has no point-in-time recovery, so take your own dump. Get the connection string from <strong style="font-weight:600">Project Settings → Database</strong> and add it to <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">.env</code> as <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">SUPABASE_DB_URL</code>.</p>
+
+<pre style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.65;background:var(--color-neutral-200);border:1px solid var(--color-neutral-300);padding:13px 15px;margin:12px 0 0;overflow-x:auto;white-space:pre-wrap;color:var(--color-text)">mkdir -p /srv/hif/backups
+
+sudo tee /usr/local/bin/hif-backup &gt;/dev/null &lt;&lt;'EOF'
+#!/bin/bash
+set -euo pipefail
+source /srv/hif/server/.env
+pg_dump "$SUPABASE_DB_URL" | gzip &gt; "/srv/hif/backups/hif-$(date +%F).sql.gz"
+find /srv/hif/backups -name 'hif-*.sql.gz' -mtime +30 -delete
+EOF
+sudo chmod +x /usr/local/bin/hif-backup
+
+/usr/local/bin/hif-backup     # test it now
+( crontab -l 2&gt;/dev/null; echo "17 3 * * * /usr/local/bin/hif-backup" ) | crontab -</pre>
+
+<p style="font-family:var(--font-body);font-size:14px;line-height:1.55;color:var(--color-neutral-700);margin:10px 0 0;max-width:36em">Nightly at 03:17, keeping thirty days. A backup on the same machine as nothing else is only half a backup — copy the folder somewhere else periodically.</p>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;color:var(--color-text);margin:26px 0 0;padding-top:16px;border-top:2px solid var(--color-text)">09 · When you want it on the internet</h2>
+
+<p style="font-family:var(--font-body);font-size:15px;line-height:1.6;color:var(--color-text);margin:10px 0 0;max-width:36em">Do not forward port 8080 on your router. Forwarding puts an unencrypted login form on the public internet, and passwords would cross it in plain text. Use a tunnel instead: Cloudflare Tunnel or Tailscale Funnel give you an HTTPS address without opening a single port, and both have a free tier. Then update the Site URL and Redirect URLs in Supabase to the new address, and that same address is what unlocks Apple sign-in.</p>
+
+<table style="width:100%;border-collapse:collapse;margin-top:14px;font-family:var(--font-body);font-size:14px">
+<thead>
+<tr>
+<th style="text-align:left;font-weight:700;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 7px 0;border-bottom:2px solid var(--color-text)">Item</th>
+<th style="text-align:left;font-weight:700;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 12px 7px 12px;border-bottom:2px solid var(--color-text)">Cost</th>
+<th style="text-align:left;font-weight:700;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-neutral-700);padding:0 0 7px 12px;border-bottom:2px solid var(--color-text)">Needed for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--color-neutral-300);color:var(--color-text)">Supabase</td>
+<td style="padding:9px 12px 9px 12px;border-bottom:1px solid var(--color-neutral-300);color:var(--color-text)">Free tier</td>
+<td style="padding:9px 0 9px 12px;border-bottom:1px solid var(--color-neutral-300);line-height:1.5;color:var(--color-text)">Accounts, database — enough for personal use</td>
+</tr>
+<tr>
+<td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--color-neutral-300);color:var(--color-text)">Google sign-in</td>
+<td style="padding:9px 12px 9px 12px;border-bottom:1px solid var(--color-neutral-300);color:var(--color-text)">Free</td>
+<td style="padding:9px 0 9px 12px;border-bottom:1px solid var(--color-neutral-300);line-height:1.5;color:var(--color-text)">Works today, no domain</td>
+</tr>
+<tr>
+<td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--color-neutral-300);color:var(--color-text)">Finnhub</td>
+<td style="padding:9px 12px 9px 12px;border-bottom:1px solid var(--color-neutral-300);color:var(--color-text)">Free tier</td>
+<td style="padding:9px 0 9px 12px;border-bottom:1px solid var(--color-neutral-300);line-height:1.5;color:var(--color-text)">Live prices, 60 calls a minute</td>
+</tr>
+<tr>
+<td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--color-neutral-300);color:var(--color-text)">Domain</td>
+<td style="padding:9px 12px 9px 12px;border-bottom:1px solid var(--color-neutral-300);color:var(--color-text)">~12 USD / yr</td>
+<td style="padding:9px 0 9px 12px;border-bottom:1px solid var(--color-neutral-300);line-height:1.5;color:var(--color-text)">Public access, Apple sign-in</td>
+</tr>
+<tr>
+<td style="padding:9px 12px 9px 0;border-bottom:1px solid var(--color-neutral-300);color:var(--color-text)">Apple Developer</td>
+<td style="padding:9px 12px 9px 12px;border-bottom:1px solid var(--color-neutral-300);color:var(--color-text)">99 USD / yr</td>
+<td style="padding:9px 0 9px 12px;border-bottom:1px solid var(--color-neutral-300);line-height:1.5;color:var(--color-text)">iCloud sign-in, no free alternative</td>
+</tr>
+</tbody>
+</table>
+
+<h2 style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--color-accent-700);margin:26px 0 0;padding-top:16px;border-top:2px solid var(--color-text)">Four rules worth keeping</h2>
+
+<ol style="font-family:var(--font-body);font-size:15px;line-height:1.62;color:var(--color-text);margin:12px 0 0;padding-left:22px;max-width:36em">
+<li style="margin-bottom:7px">The <em>anon</em> key belongs in the browser; the <em>service_role</em> key never does. It bypasses every security policy in section 03 and would let any visitor read every account.</li>
+<li style="margin-bottom:7px">Row-level security stays on, on every table you add. It is the only thing separating one user's watchlist from another's.</li>
+<li style="margin-bottom:7px"><code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">.env</code> is <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">chmod 600</code> and in <code style="font-family:ui-monospace,monospace;font-size:12.5px;background:var(--color-neutral-200);padding:1px 4px">.gitignore</code>. A key in a commit is a key you must rotate, even in a private repository.</li>
+<li>No HTTPS means no public exposure. The two are one decision, not two.</li>
+</ol>
+
+</doc-page>
+</x-dc>
+</body>
+</html>

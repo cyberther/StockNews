@@ -6,9 +6,23 @@ path: templates/
 
 ## Last sync
 
-date: 2026-09-07T11:40:00Z
+date: 2026-09-30T00:00:00Z
 
 ### Updated in this project
+- The Stack: persistent bottom drawer + ⌘K command bar, pin up to 5 names as small multiples; J/K/P/X keys in Feed (EN/RO/DE)
+- Accuracy ledger and crowding panel shipped; dismissal-id and crowding-color bugs fixed
+- Server hardening: closed open Finnhub proxy, validated settings writes, security headers/CSP, rate limits, no error leakage; schema constraints + RLS
+- SECURITY.md: 20 findings, accepted risks, ordered auth-hardening plan
+- Local only — NOT yet on GitHub; push from a local clone
+
+## Sync history
+
+- 2026-09-07T14:05:00Z — server/, setup guide, appearance setting, accounts, security screen, persistence (local only)
+
+### Earlier (2026-09-07T14:05:00Z)
+- Added server/ — Node host, Finnhub proxy (token stays server-side), per-user settings API against Supabase Postgres, schema.sql with row-level security
+- Added "HIF Server Setup" — Ubuntu/Debian setup guide: Node 22, Supabase project, real Google + email sign-in with no domain, ufw, systemd unit, nightly pg_dump
+- Added .gitignore so server/.env is never committed
 - Appearance setting in Account: System (follows the OS), Light or Dark — surfaces, rules, type and charts all follow it; persisted with the rest of the settings
 - Light mobile template removed; the dark web + dark mobile pair now carries both schemes
 - Accounts: one-screen sign-in / sign-up with Google, iCloud and email + password (live strength meter and breach warning), on web and mobile dark
@@ -26,12 +40,13 @@ date: 2026-09-07T11:40:00Z
 | Mobile app — dark terminal (auth, onboarding, feed, watchlist, screener, detail, paywall, more, account, security, lock) | templates/stock-news-dark/StockNewsDark.dc.html |
 | Shared headlines, tickers, EN/RO/DE copy incl. auth + security strings | templates/shared/hif-data.js, templates/shared/hif-live.js |
 | Local persistence, password strength, 2FA key + recovery codes | templates/shared/hif-store.js |
+| Backend: static host, Finnhub proxy, settings API | server/server.js, server/schema.sql |
+| Machine setup guide (Ubuntu, Supabase, systemd, backups) | HIF Server Setup.dc.html |
 | Theme tokens (--s-bg / --s-ink / --s-rule / --color-accent per scheme) | inline in each .dc.html helmet |
 | Design-system loaders | templates/*/ds-base.js |
 | Tokens, type, color, components | _ds/modernist-a9cc4863-5c6f-4243-8321-e1618f3a965c/styles.css |
 
-## Sync history
-
+- 2026-09-07T11:40:00Z — appearance switch (system/light/dark), light template removed, contrast fixes (local only)
 - 2026-09-07T09:15:00Z — auth (Google / iCloud / email), onboarding, security screen, local persistence (local only)
 - 2026-09-04T11:20:00Z — chart unification, analyst sentiment bar, volume sorting, sparklines, screener chips (local only)
 - 2026-09-04T10:05:50Z — imported templates/ from cyberther/StockNews@main (web, mobile dark, light original, shared data)

@@ -1,0 +1,17 @@
+{
+  "name": "hif-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Heard It First — static host, Finnhub proxy and per-user settings store",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "express": "^4.21.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
