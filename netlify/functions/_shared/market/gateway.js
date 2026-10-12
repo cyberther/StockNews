@@ -15,11 +15,36 @@
 // keys, logs or responses.
 import { finnhub } from './providers/finnhub.js';
 import { yahoo, CHART_RANGES } from './providers/yahoo.js';
+import { twelvedata } from './providers/twelvedata.js';
+import { fmp } from './providers/fmp.js';
+import { alphavantage } from './providers/alphavantage.js';
 
+// Default order per capability. A provider without a key is skipped; Alpha Vantage's
+// 25 calls a day make it a last resort. Override with MARKET_ORDER_<CAPABILITY>, e.g.
+// MARKET_ORDER_CHART=twelvedata,yahoo.
 const PROVIDERS = {
-  quote: [finnhub], news: [finnhub], search: [finnhub], recommendation: [finnhub],
-  earnings: [finnhub], earningsCalendar: [finnhub], profile: [finnhub], chart: [yahoo]
+  quote: [finnhub, twelvedata, fmp, alphavantage],
+  profile: [finnhub, fmp, alphavantage],
+  earnings: [finnhub, fmp],
+  earningsHistory: [fmp],   // internal: past reports that enrich the earnings calendar
+  chart: [yahoo, twelvedata],
+  news: [finnhub], search: [finnhub], recommendation: [finnhub], earningsCalendar: [finnhub]
 };
+const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage].map(p => [p.name, p]));
+// Keys by provider, from the environment (never sent anywhere but the provider itself).
+export const keysFromEnv = env => ({ finnhub: env.FINNHUB_KEY, twelvedata: env.TWELVEDATA_KEY, fmp: env.FMP_KEY, alphavantage: env.ALPHAVANTAGE_KEY });
+const providersFor = (cap, ctx) => (ctx.order && ctx.order[cap]) || PROVIDERS[cap];
+// { CHART: 'twelvedata,yahoo' } (from env MARKET_ORDER_*) -> { chart: [twelvedata, yahoo] }
+export function orderFromEnv(env) {
+  const out = {};
+  Object.keys(PROVIDERS).forEach(cap => {
+    const raw = env['MARKET_ORDER_' + cap.replace(/[A-Z]/g, c => '_' + c).toUpperCase()];
+    if (!raw) return;
+    const list = String(raw).split(',').map(s => BY_NAME[s.trim().toLowerCase()]).filter(p => p && p.supports(cap));
+    if (list.length) out[cap] = list;
+  });
+  return out;
+}
 // The paths the apps already call, mapped to capabilities.
 const ROUTES = {
   '/quote': 'quote', '/quotes': 'quotes', '/company-news': 'news', '/search': 'search',
@@ -27,7 +52,7 @@ const ROUTES = {
   '/calendar/earnings': 'earningsCalendar', '/stock/profile2': 'profile', '/chart': 'chart'
 };
 // Seconds an answer is fresh. Quotes go stale fast; company names hardly change.
-const TTL = { quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, profile: 86400, chart: 300 };
+const TTL = { quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
 // How long past its TTL an answer may still be served when every provider is failing.
 const STALE_FOR = { quote: 600 };
 const STALE_DEFAULT = 86400;
@@ -201,10 +226,11 @@ async function fetchCapability(cap, params, ctx) {
     return r.cache === 'miss' ? { ...r, cache: 'coalesced' } : r;
   }
   const run = (async () => {
-    let fail = { status: 502, error: 'market data unavailable' };
-    for (const p of PROVIDERS[cap]) {
+    // The most telling failure wins: one from a provider that was tried beats "not configured".
+    let fail = null, unconfigured = false, emptyAnswer = null;
+    for (const p of providersFor(cap, ctx)) {
       const apiKey = p.needsKey ? ctx.keys[p.name] : null;
-      if (p.needsKey && !apiKey) { fail = { status: 503, error: 'market data is not configured' }; continue; }
+      if (p.needsKey && !apiKey) { unconfigured = true; continue; }
       if (breakerOpen(p.name) || !paceAllows(p)) { fail = { status: 429, error: 'rate limit exceeded' }; continue; }
       if (!(await dailyAllows(p, ctx))) { fail = { status: 429, error: 'daily quota reached' }; continue; }
       count(p.name, 'calls');
@@ -219,24 +245,50 @@ async function fetchCapability(cap, params, ctx) {
         fail = { status: 502, error: timeout ? 'market data timed out' : 'market data unavailable' };
         continue;
       }
+      if (p.status) res.status = p.status(res);
       ctx.log({ evt: 'market.upstream', provider: p.name, cap, status: res.status, ms: Date.now() - t0 });
       if (res.status === 429) { count(p.name, 'rate_limited'); tripRateLimit(p.name, res.retryAfter, ctx.log); fail = { status: 429, error: 'rate limit exceeded' }; continue; }
-      if (res.status >= 500 || res.parsed == null) { recordFailure(p.name, ctx.log); count(p.name, 'errors'); continue; }
-      // A client error (bad symbol, plan limit) is the answer; another provider won't differ.
+      if (res.status >= 500 || res.parsed == null) { recordFailure(p.name, ctx.log); count(p.name, 'errors'); fail = { status: 502, error: 'market data unavailable' }; continue; }
+      // A key or plan problem is this provider's; the next one may answer.
+      if (res.status === 401 || res.status === 402 || res.status === 403) { count(p.name, 'errors'); fail = { status: 502, error: 'market data unavailable' }; continue; }
+      // Any other client error (bad symbol) is the answer; another provider won't differ.
       if (res.status >= 400) return { status: res.status, data: res.parsed, source: p.name, cache: 'miss', ttl: 0 };
       recordSuccess(p.name);
       const data = await p.transform(cap, res.parsed, params, apiKey);
-      const ttl = ttlFor(cap, params);
-      cache.set(key, { data, at: Date.now(), ttl, source: p.name });
-      if (cache.size > 5000) cache.delete(cache.keys().next().value);
-      return { status: 200, data, source: p.name, cache: 'miss', ttl };
+      // An empty answer lets the next provider try; if none does better, it stands.
+      if (p.empty && p.empty(cap, data)) { if (!emptyAnswer) emptyAnswer = { data, source: p.name }; continue; }
+      return remember(key, cap, params, data, p.name);
     }
+    if (emptyAnswer) return remember(key, cap, params, emptyAnswer.data, emptyAnswer.source);
     const staleFor = STALE_FOR[cap] || STALE_DEFAULT;
     if (hit && Date.now() - hit.at < (hit.ttl + staleFor) * 1000) return { status: 200, data: hit.data, source: hit.source, cache: 'stale', ttl: 0 };
+    if (!fail) fail = unconfigured ? { status: 503, error: 'market data is not configured' } : { status: 502, error: 'market data unavailable' };
     return { status: fail.status, data: { error: fail.error }, source: null, cache: 'miss', ttl: 0 };
   })();
   inflight.set(key, run);
   try { return await run; } finally { inflight.delete(key); }
+}
+
+function remember(key, cap, params, data, source) {
+  const ttl = ttlFor(cap, params);
+  cache.set(key, { data, at: Date.now(), ttl, source });
+  if (cache.size > 5000) cache.delete(cache.keys().next().value);
+  return { status: 200, data, source, cache: 'miss', ttl };
+}
+
+// Finnhub's free earnings calendar lists only upcoming reports. When it has no past report
+// with a result, FMP's earnings history (cached 12 hours) adds the recent ones.
+async function fetchEarningsCalendar(params, ctx) {
+  const r = await fetchCapability('earningsCalendar', params, ctx);
+  const rows = r.status === 200 && r.data && Array.isArray(r.data.earningsCalendar) ? r.data.earningsCalendar : null;
+  if (!rows || rows.some(x => x && x.epsActual != null)) return r;
+  const h = await fetchCapability('earningsHistory', { symbol: params.symbol }, ctx);
+  if (h.status !== 200 || !Array.isArray(h.data) || !h.data.length) return r;
+  const have = new Set(rows.map(x => x.date));
+  const extra = h.data.filter(x => x.date >= params.from && x.date <= params.to && !have.has(x.date));
+  if (!extra.length) return r;
+  return { ...r, data: { ...r.data, earningsCalendar: rows.concat(extra) }, source: r.source + ',' + h.source,
+    cache: r.cache === 'hit' && h.cache === 'hit' ? 'hit' : 'miss' };
 }
 
 // Many quotes at once: each symbol goes through the same cache, a few upstream calls at a
@@ -286,7 +338,7 @@ function withinRateLimit(clientId, rawLimit) {
 
 const defaultLog = process.env.NODE_TEST_CONTEXT ? () => {} : e => console.log(JSON.stringify(e));
 
-// options: { apiKey (Finnhub), keys: { provider: key }, allowedOrigins, rateLimit, clientId, log,
+// options: { apiKey (Finnhub), keys: { provider: key }, order (orderFromEnv), allowedOrigins, rateLimit, clientId, log,
 //            usage (usage-store.js), waitUntil (keeps a flush alive after the response) }
 export async function handleMarketRequest(request, options = {}) {
   if (request.method !== 'GET') return json({ error: 'method not allowed' }, 405, { allow: 'GET' });
@@ -299,8 +351,10 @@ export async function handleMarketRequest(request, options = {}) {
   const parsed = parse(cap, url.searchParams);
   if (parsed.error) return json({ error: parsed.error }, 400);
 
-  const ctx = { keys: { finnhub: options.apiKey, ...(options.keys || {}) }, log: options.log || defaultLog, usage: options.usage || null };
-  const r = cap === 'quotes' ? await fetchQuotes(parsed.params.symbols, ctx) : await fetchCapability(cap, parsed.params, ctx);
+  const ctx = { keys: { finnhub: options.apiKey, ...(options.keys || {}) }, log: options.log || defaultLog, usage: options.usage || null, order: options.order || null };
+  const r = cap === 'quotes' ? await fetchQuotes(parsed.params.symbols, ctx)
+    : cap === 'earningsCalendar' ? await fetchEarningsCalendar(parsed.params, ctx)
+    : await fetchCapability(cap, parsed.params, ctx);
   const flush = maybeFlush(ctx);
   if (flush && options.waitUntil) options.waitUntil(flush);
   const headers = { 'x-market-cache': r.cache, 'netlify-vary': VARY };
@@ -337,10 +391,10 @@ export function gatewayStatus() {
 
 // Provider list for the health page: capabilities, limits and whether a key is set
 // (never the key).
-export function providerInfo(keys) {
+export function providerInfo(keys, order) {
   return allProviders().map(p => ({
     name: p.name,
-    capabilities: Object.keys(PROVIDERS).filter(c => PROVIDERS[c].includes(p)),
+    capabilities: Object.keys(PROVIDERS).filter(c => ((order && order[c]) || PROVIDERS[c]).includes(p)),
     limits: p.limits || {},
     configured: !p.needsKey || !!(keys && keys[p.name])
   }));
