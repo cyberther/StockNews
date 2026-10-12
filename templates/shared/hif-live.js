@@ -14,7 +14,7 @@ if (window.HIFLive) return;
 const DIRECT = 'https://finnhub.io/api/v1';
 const PROXY = '/api/finnhub';
 const cache = new Map();
-const TTL = { quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000 };
+const TTL = { quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000, edates: 6 * 3600000 };
 let proxyState = 'unknown'; // 'unknown' | 'yes' | 'no'
 
 function fresh(kind, arg){
@@ -144,6 +144,66 @@ async function earnings(symbol, token){
   return put('earnings', symbol, rows);
 }
 
+// The last and next earnings reports. next comes from Finnhub's earnings calendar (the
+// day results will be published). The free plan's calendar has no history, so last comes
+// from the calendar when it has a reported row, else from /stock/earnings, which knows the
+// fiscal quarter but not the publication day (date is then null).
+//   { last: { date|null, quarter, year, hour, epsActual, epsEstimate, surprisePct } | null,
+//     next: { date, hour, epsEstimate } | null }
+// hour: 'bmo' (before the open), 'amc' (after the close), 'dmh' (during market hours) or ''.
+async function earningsDates(symbol, token){
+  if (!available(token)) return null;
+  const key = 'edates:' + symbol, hit = cache.get(key);
+  if (hit && (Date.now() - hit.at) < TTL.edates) return hit.value;
+  let j;
+  try { j = await get('/calendar/earnings', { symbol: symbol, from: isoDay(-200), to: isoDay(200) }, token); }
+  catch (e) { return null; }
+  const rows = (j && Array.isArray(j.earningsCalendar) ? j.earningsCalendar : [])
+    .filter(r => r && /^\d{4}-\d{2}-\d{2}$/.test(r.date || '')).sort((a,b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+  const today = isoDay(0);
+  const reported = rows.filter(r => r.epsActual != null && r.date <= today);
+  const l = reported[reported.length - 1] || null;
+  const n = rows.find(r => r.date >= today && r.epsActual == null) || null;
+  const num = v => v == null || !isFinite(Number(v)) ? null : Number(v);
+  let last = l ? { date: l.date, quarter: l.quarter || null, year: l.year || null, hour: l.hour || '', epsActual: num(l.epsActual), epsEstimate: num(l.epsEstimate),
+    surprisePct: num(l.epsEstimate) ? (num(l.epsActual) - num(l.epsEstimate)) / Math.abs(num(l.epsEstimate)) * 100 : null } : null;
+  if (!last) {
+    let hist = [];
+    try { hist = await get('/stock/earnings', { symbol: symbol, limit: 4 }, token); } catch (e) {}
+    const h = (Array.isArray(hist) ? hist : []).filter(x => x && x.actual != null && x.period).sort((a,b) => a.period < b.period ? 1 : -1)[0];
+    if (h) last = { date: null, quarter: h.quarter || null, year: h.year || null, hour: '', epsActual: num(h.actual), epsEstimate: num(h.estimate),
+      surprisePct: num(h.surprisePercent) };
+  }
+  const next = n ? { date: n.date, hour: n.hour || '', epsEstimate: num(n.epsEstimate) } : null;
+  return put('edates', symbol, { last, next });
+}
+
+// Display strings for earningsDates() in the given UI copy (falls back to English):
+//   { days: '24d' | 'today' | '—', date: 'Nov 19 · after close', last: 'Last Aug 27 · beat by 3.8%' }
+function earningsText(ed, u){
+  const t = Object.assign({ edToday:'today', edBmo:'before open', edAmc:'after close', edDmh:'during market', edNext:'Next',
+    edLast:'Last', edBeat:'beat by', edMiss:'missed by', edInline:'in line', edTba:'next date not announced yet' }, u || {});
+  const day = iso => {
+    const d = new Date(iso + 'T12:00:00Z'), opts = { month:'short', day:'numeric', timeZone:'UTC' };
+    if (d.getUTCFullYear() !== new Date().getUTCFullYear()) opts.year = 'numeric';
+    return d.toLocaleDateString([], opts);
+  };
+  const when = h => ({ bmo:t.edBmo, amc:t.edAmc, dmh:t.edDmh })[h] || '';
+  const out = { days:'—', date: ed && ed.last ? t.edTba : '—', last:'' };
+  if (ed && ed.next) {
+    const n = Math.round((Date.parse(ed.next.date + 'T00:00:00Z') - Date.parse(isoDay(0) + 'T00:00:00Z')) / 86400000);
+    out.days = n <= 0 ? t.edToday : n + 'd';
+    out.date = t.edNext + ' ' + day(ed.next.date) + (when(ed.next.hour) ? ' · ' + when(ed.next.hour) : '');
+  }
+  if (ed && ed.last) {
+    const s = ed.last.surprisePct;
+    const res = s == null ? '' : Math.abs(s) < 0.5 ? t.edInline : (s > 0 ? t.edBeat : t.edMiss) + ' ' + Math.abs(s).toFixed(1) + '%';
+    const which = ed.last.date ? day(ed.last.date) : (ed.last.quarter && ed.last.year ? 'Q' + ed.last.quarter + ' FY' + ed.last.year : '');
+    out.last = (t.edLast + ' ' + which).trim() + (res ? ' · ' + res : '');
+  }
+  return out;
+}
+
 // { buyPct, detail } from the most recent recommendation period, or null when the plan blocks it.
 async function recommendation(symbol, token){
   if (!available(token)) return null;
@@ -191,7 +251,7 @@ async function load(symbols, token, opts){
   return out;
 }
 
-window.HIFLive = { quote, news, recommendation, search, chart, earnings, load,
+window.HIFLive = { quote, news, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();

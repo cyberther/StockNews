@@ -1009,7 +1009,7 @@ function hydrate(defaults) {
 }
 class Component extends DCLogic {
   state = hydrate({ screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed',
-    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
+    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, liveEarnDates:{}, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
     liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false, detailLoading:false,
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
     authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
@@ -1363,9 +1363,11 @@ class Component extends DCLogic {
     if (force) window.HIFLive.clearCache();
     const range = requestedRange || this.state.chartRange;
     this.setState({ detailLoading:true, chartHover:null, chartCursor:null });
-    Promise.all([window.HIFLive.chart(symbol, range), window.HIFLive.earnings(symbol, this.token)])
-      .then(([chart, earnings]) => this.setState({
+    Promise.all([window.HIFLive.chart(symbol, range), window.HIFLive.earnings(symbol, this.token),
+      window.HIFLive.earningsDates ? window.HIFLive.earningsDates(symbol, this.token).catch(() => null) : null])
+      .then(([chart, earnings, dates]) => this.setState({
         detailLoading:false,
+        liveEarnDates: dates ? Object.assign({}, this.state.liveEarnDates, { [symbol]: dates }) : this.state.liveEarnDates,
         charts: chart ? Object.assign({}, this.state.charts, { [symbol + ':' + range]: chart }) : this.state.charts,
         liveEarnings: earnings ? Object.assign({}, this.state.liveEarnings, { [symbol]: earnings }) : this.state.liveEarnings
       }))
@@ -1936,7 +1938,10 @@ class Component extends DCLogic {
     const earnRows = (s.liveEarnings[stock.ticker] || [])
       .filter(e => e.surprisePercent != null && Date.parse(e.date) <= Date.now())
       .sort((a,b) => Date.parse(b.date) - Date.parse(a.date));
-    const lastEarn = earnRows.length
+    // Report dates from the earnings calendar win over the demo dates and quarter ends.
+    const ED = (s.liveEarnDates || {})[stock.ticker];
+    const edText = ED && (ED.next || ED.last) && window.HIFLive && window.HIFLive.earningsText ? window.HIFLive.earningsText(ED, u) : null;
+    const lastEarn = edText && edText.last ? edText.last : earnRows.length
       ? ((Number(earnRows[0].surprisePercent) >= 0 ? 'Beat by ' : 'Missed by ') + Math.abs(Number(earnRows[0].surprisePercent)).toFixed(1) + '% · ' + earnRows[0].date)
       : (stock.lastEarn || '—');
     const AL = s.alerts || {};
@@ -2388,6 +2393,8 @@ class Component extends DCLogic {
         analystDetail: this.analystSplit((RC[stock.ticker] && RC[stock.ticker].detail) || stock.analystDetail),
         analystSentiment: this.sentimentFor((RC[stock.ticker] && RC[stock.ticker].buyPct) || stock.buyPct),
         lastEarn,
+        earnDays: edText ? edText.days : stock.earnDays,
+        earnDate: edText ? edText.date : stock.earnDate,
         buyW: am ? (am[1] / aTot * 100).toFixed(1) + '%' : '0%',
         holdW: am ? (am[2] / aTot * 100).toFixed(1) + '%' : '0%',
         sellW: am ? (am[3] / aTot * 100).toFixed(1) + '%' : '0%',
