@@ -56,7 +56,7 @@ const PUBLISHERS = {
   'gurufocus.com': 'GuruFocus', 'simplywall.st': 'Simply Wall St', 'tipranks.com': 'TipRanks',
   'globenewswire.com': 'GlobeNewswire', 'prnewswire.com': 'PR Newswire', 'businesswire.com': 'Business Wire',
   'accessnewswire.com': 'ACCESS Newswire', 'investing.com': 'Investing.com', 'nasdaq.com': 'Nasdaq',
-  'morningstar.com': 'Morningstar', 'kiplinger.com': 'Kiplinger', 'axios.com': 'Axios', 'theinformation.com': 'The Information'
+  'morningstar.com': 'Morningstar', 'tikr.com': 'TIKR', 'qz.com': 'Quartz', 'marketbeat.com': 'MarketBeat', 'kiplinger.com': 'Kiplinger', 'axios.com': 'Axios', 'theinformation.com': 'The Information'
 };
 export function publisherFor(href, fallback) {
   let host = '';
@@ -68,7 +68,7 @@ export function publisherFor(href, fallback) {
 
 // Module-level caches survive between calls on a warm function instance.
 const names = new Map();      // symbol -> { name, at }
-const resolved = new Map();   // finnhub link -> final article URL ('' when it couldn't be resolved)
+const resolved = new Map();   // finnhub link -> final article URL (successes only; misses are retried)
 const NAME_TTL = 24 * 3600 * 1000;
 
 async function companyName(symbol, apiKey, base) {
@@ -88,13 +88,20 @@ async function companyName(symbol, apiKey, base) {
 async function finalUrl(link) {
   if (resolved.has(link)) return resolved.get(link);
   let out = '';
-  try {
-    const res = await fetch(link, { redirect: 'manual', signal: AbortSignal.timeout(2500) });
-    const loc = res.headers.get('location') || '';
-    if (/^https:\/\//.test(loc)) out = loc;
-  } catch {}
-  resolved.set(link, out);
-  if (resolved.size > 5000) resolved.delete(resolved.keys().next().value);
+  // Finnhub answers 429 to bursts of these lookups; one short pause and a retry.
+  for (let attempt = 0; attempt < 2 && !out; attempt++) {
+    try {
+      const res = await fetch(link, { redirect: 'manual', signal: AbortSignal.timeout(2500) });
+      const loc = res.headers.get('location') || '';
+      if (/^https:\/\//.test(loc)) out = loc;
+      else if (res.status === 429 && attempt === 0) await new Promise(r => setTimeout(r, 400));
+      else break;
+    } catch { break; }
+  }
+  if (out) {
+    resolved.set(link, out);
+    if (resolved.size > 5000) resolved.delete(resolved.keys().next().value);
+  }
   return out;
 }
 
@@ -106,11 +113,13 @@ export async function cleanNews(rows, symbol, { apiKey, base = 'https://finnhub.
   const relevant = matcher(symbol, name);
   const kept = rows.filter(n => n && n.headline && relevant(n.headline + ' ' + (n.summary || '')))
     .sort((a, b) => (b.datetime || 0) - (a.datetime || 0)).slice(0, limit);
-  const started = Date.now();
-  await Promise.all(kept.map(async n => {
-    if (!/^https:\/\/finnhub\.io\/api\/news\?/.test(n.url || '') || Date.now() - started > 4000) return;
-    const url = await finalUrl(n.url);
-    if (url) { n.url = url; n.source = publisherFor(url, n.source); }
+  // Two at a time (Finnhub refuses bursts of these lookups); stops after 5 seconds.
+  const started = Date.now(), queue = kept.filter(n => /^https:\/\/finnhub\.io\/api\/news\?/.test(n.url || ''));
+  await Promise.all(Array.from({ length: 2 }, async () => {
+    while (queue.length && Date.now() - started < 5000) {
+      const n = queue.shift(), url = await finalUrl(n.url);
+      if (url) { n.url = url; n.source = publisherFor(url, n.source); }
+    }
   }));
   return kept;
 }

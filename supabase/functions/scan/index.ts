@@ -78,7 +78,7 @@ const PUBLISHERS: Record<string, string> = {
   'gurufocus.com': 'GuruFocus', 'simplywall.st': 'Simply Wall St', 'tipranks.com': 'TipRanks',
   'globenewswire.com': 'GlobeNewswire', 'prnewswire.com': 'PR Newswire', 'businesswire.com': 'Business Wire',
   'accessnewswire.com': 'ACCESS Newswire', 'investing.com': 'Investing.com', 'nasdaq.com': 'Nasdaq',
-  'morningstar.com': 'Morningstar', 'kiplinger.com': 'Kiplinger', 'axios.com': 'Axios', 'theinformation.com': 'The Information'
+  'morningstar.com': 'Morningstar', 'tikr.com': 'TIKR', 'qz.com': 'Quartz', 'marketbeat.com': 'MarketBeat', 'kiplinger.com': 'Kiplinger', 'axios.com': 'Axios', 'theinformation.com': 'The Information'
 };
 function publisherFor(href: string, fallback: string | null) {
   let host = '';
@@ -92,11 +92,16 @@ function publisherFor(href: string, fallback: string | null) {
 // The real article behind a finnhub.io/api/news redirect ('' when it doesn't resolve).
 async function finalUrl(link: string) {
   if (!/^https:\/\/finnhub\.io\/api\/news\?/.test(link)) return '';
-  try {
-    const res = await fetch(link, { redirect: 'manual', signal: AbortSignal.timeout(2500) });
-    const loc = res.headers.get('location') || '';
-    return /^https:\/\//.test(loc) ? loc : '';
-  } catch { return ''; }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(link, { redirect: 'manual', signal: AbortSignal.timeout(2500) });
+      const loc = res.headers.get('location') || '';
+      if (/^https:\/\//.test(loc)) return loc;
+      if (res.status !== 429 || attempt) return '';
+      await new Promise(r => setTimeout(r, 400));
+    } catch { return ''; }
+  }
+  return '';
 }
 
 function ymd(ms: number) { return new Date(ms).toISOString().slice(0, 10); }
@@ -197,7 +202,8 @@ Deno.serve(async (req) => {
   }
 
   // The real publisher and article link for the stories that are actually new.
-  await pool(fresh, 8, async s => {
+  // Two at a time: Finnhub refuses bursts of these lookups.
+  await pool(fresh, 2, async s => {
     const url = await finalUrl(s.url || '');
     if (!url) return;
     s.url = url; s.source = publisherFor(url, s.source);
