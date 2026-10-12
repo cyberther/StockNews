@@ -4,8 +4,10 @@
 // returning user as a new account. This loads both templates in Chromium against a
 // stubbed Supabase, with window.HIFStore deferred so the session wins the race.
 //
-// Needs Playwright with Chromium; skipped when it isn't installed. Point
-// PLAYWRIGHT_MODULE at a playwright package directory to use one outside node_modules.
+// Needs Playwright with Chromium (`npx playwright install chromium`). Locally it is
+// skipped when either is missing; under CI it fails instead, so it can't silently stop
+// running. Point PLAYWRIGHT_MODULE at a playwright package directory to use one outside
+// node_modules.
 import test, { describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
@@ -87,7 +89,9 @@ async function run(browser, base, tpl, { savedAccount, sessUser, storeDelay }) {
 
 const chromium = await loadPlaywright();
 let browser = null;
-if (chromium) { try { browser = await chromium.launch(); } catch (e) { browser = null; } }
+let launchError = chromium ? null : new Error('the playwright package is not installed');
+if (chromium) { try { browser = await chromium.launch(); } catch (e) { launchError = e; } }
+if (!browser && process.env.CI) throw launchError;
 const skip = browser ? false : 'Playwright with Chromium is not available';
 
 let server, base;
