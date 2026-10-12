@@ -169,6 +169,41 @@ function holdings(positions, quoteOf) {
   return { rows, totals, empty: !rows.length };
 }
 
+// --------------------------------------------------------- portfolio history
+// Value of today's holdings over a chart range: for each moment, shares x that ticker's
+// close (carried forward between its bars), summed. Quantities are taken as held for the
+// whole range (no trade history), so this is "what these positions were worth then".
+// P/L is against the cost of the positions that have an average price.
+// chartOf(t) -> [{ ts, close }] for the range; undefined while loading, null if unavailable
+// (that ticker is then left out and `partial` is set).
+function portfolioSeries(positions, chartOf, currencyOf, currency) {
+  const held = Object.keys(positions || {}).filter(t => num((positions[t] || {}).shares) > 0 && (currencyOf(t) || 'USD') === currency);
+  const lines = held.map(t => ({ t, shares: num(positions[t].shares), avg: num(positions[t].cost), pts: chartOf(t) }));
+  const ready = lines.filter(l => Array.isArray(l.pts) && l.pts.length);
+  const loading = lines.some(l => l.pts === undefined);
+  if (!ready.length || loading) return { points: [], loading, currency, cost: 0 };
+  const stamps = [];
+  ready.forEach(l => l.pts.forEach(p => stamps.push(p.ts)));
+  const times = Array.from(new Set(stamps)).sort((a, b) => a - b);
+  const cost = ready.reduce((a, l) => a + (l.avg == null ? 0 : l.avg * l.shares), 0);
+  const idx = ready.map(() => 0);
+  const points = times.map(ts => {
+    let value = 0, basisValue = 0;
+    ready.forEach((l, i) => {
+      while (idx[i] + 1 < l.pts.length && l.pts[idx[i] + 1].ts <= ts) idx[i]++;
+      const v = l.pts[idx[i]].close * l.shares;
+      value += v;
+      if (l.avg != null) basisValue += v;
+    });
+    const pl = cost ? basisValue - cost : null;
+    return { ts, value, pl, plPct: cost ? pl / cost * 100 : null };
+  });
+  return { points, loading: false, currency, cost, partial: ready.length < lines.length };
+}
+const portfolioLabels = (p, cur) => p ? {
+  valueLabel: amt(p.value, cur), plLabel: signedAmt(p.pl, cur), plPctLabel: pctL(p.plPct), plDown: p.pl != null && p.pl < 0
+} : null;
+
 // --------------------------------------------------------------- contradiction
 // Every app shows analysts, insiders and price in separate panels and lets you
 // miss the conflict between them. Making disagreement a first-class object is
@@ -294,5 +329,5 @@ function ledger(entries, priceOf, labels) {
   };
 }
 
-window.HIFInsight = { attribute, position, portfolio, holdings, conflicts, crowding, bookCrowding, ledger, money, signed, num };
+window.HIFInsight = { attribute, position, portfolio, holdings, portfolioSeries, portfolioLabels, amt, signedAmt, pctL, conflicts, crowding, bookCrowding, ledger, money, signed, num };
 })();
