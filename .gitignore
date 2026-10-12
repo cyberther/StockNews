@@ -10,3 +10,6 @@ dist
 !.env.example
 *.log
 admin.env
+
+# Dependencies
+node_modules
