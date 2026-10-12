@@ -231,6 +231,7 @@
 </div>
 <div data-m="smooth" style="flex:1;overflow-y:auto">
 <sc-for list="{{ feed }}" as="item" hint-placeholder-count="4">
+<sc-if value="{{ item.hasDayHead }}" hint-placeholder-val="{{ false }}"><h3 style="margin:0;padding:12px 16px 6px;border-bottom:1px solid var(--s-rule);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ item.dayHead }}</h3></sc-if>
 <article data-m="rise" role="button" tabIndex="0" onClick="{{ item.open }}" onKeyDown="{{ item.keyOpen }}" style="display:block;width:100%;padding:13px 16px;border-bottom:1px solid var(--s-rule);cursor:pointer">
 <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
 <span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.02em">{{ item.ticker }}</span>
@@ -268,19 +269,56 @@
 <div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)"><sc-if value="{{ capWarn }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ capLabel }}</span></sc-if><sc-if value="{{ capOk }}" hint-placeholder-val="{{ true }}"><span>{{ capLabel }}</span></sc-if></div>
 </div>
 <div data-m="smooth" style="flex:1;overflow-y:auto">
-<section aria-labelledby="hold-title-m" style="border-bottom:1px solid var(--s-rule);font-variant-numeric:tabular-nums">
+<div style="display:flex;padding:8px 16px;border-bottom:1px solid var(--s-rule);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">
+<div style="flex:1">{{ ui.ticker }}</div><div style="width:66px;text-align:right">{{ ui.last }}</div><div style="width:56px;text-align:right">{{ ui.chg }}</div><div style="width:62px;text-align:right">1D</div>
+</div>
+<sc-for list="{{ follows }}" as="row" hint-placeholder-count="3">
+<article data-m="rise" role="button" tabIndex="0" onClick="{{ row.open }}" onKeyDown="{{ row.keyOpen }}" style="display:block;width:100%;padding:12px 16px;border-bottom:1px solid var(--s-rule);cursor:pointer">
+<div style="display:flex;align-items:baseline">
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ row.ticker }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div></div>
+<div data-m-flash="1" style="width:66px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:15px">{{ row.price }}</div>
+<div style="width:56px;text-align:right;font-size:13px;font-weight:600"><sc-if value="{{ row.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ row.move }}</span></sc-if><sc-if value="{{ row.up }}" hint-placeholder-val="{{ true }}"><span>{{ row.move }}</span></sc-if></div>
+<div style="width:62px;align-self:center">{{ row.spark }}</div>
+</div>
+<div style="display:flex;gap:6px;align-items:baseline;margin-top:7px">
+<button onClick="{{ row.togglePush }}" style="flex:none;min-height:30px;padding:0 9px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ row.pushLabel }}</button>
+<span style="margin-left:auto;font-size:11px;color:var(--s-mute);text-align:right">{{ row.latest }}</span>
+</div>
+</article>
+</sc-for>
+<sc-if value="{{ atCap }}" hint-placeholder-val="{{ true }}">
+<div style="margin:14px 16px;border:1px solid var(--color-accent);padding:14px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:30px;line-height:1;letter-spacing:-0.03em">3 / 3</div>
+<div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ ui.capNote }}</div>
+<button onClick="{{ goPaywall }}" style="width:100%;min-height:42px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.liftCap }}</button>
+</div>
+</sc-if>
+<div style="padding:14px 16px"><button onClick="{{ goSearch }}" style="width:100%;min-height:44px;text-align:left;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.addTicker }}</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPortfolio }}" hint-placeholder-val="{{ false }}">
+<div data-m="fade" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:8px 16px 12px;border-bottom:1px solid var(--s-rule)">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.pfTitle }}</div>
+</div>
+<div data-m="smooth" style="flex:1;overflow-y:auto">
+<div style="padding:14px 16px 6px;border-bottom:1px solid var(--s-rule);font-variant-numeric:tabular-nums">
+<div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ pf.whenLabel }}</div>
+<div data-m-flash="1" style="font-family:var(--font-heading);font-weight:800;font-size:32px;letter-spacing:-0.03em;line-height:1.1;margin-top:2px">{{ pf.valueLabel }}</div>
+<div style="display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font-size:13px;font-weight:700">
+<span><sc-if value="{{ pf.plDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ pf.plLabel }} · {{ pf.plPctLabel }}</span></sc-if><sc-if value="{{ pf.plUp }}" hint-placeholder-val="{{ true }}"><span>{{ pf.plLabel }} · {{ pf.plPctLabel }}</span></sc-if></span>
+<sc-if value="{{ pf.hasChg }}" hint-placeholder-val="{{ true }}"><span style="font-weight:600;color:var(--s-mute)">{{ pf.rangeName }} <sc-if value="{{ pf.chgDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ pf.chgLabel }}</span></sc-if><sc-if value="{{ pf.chgUp }}" hint-placeholder-val="{{ true }}"><span>{{ pf.chgLabel }}</span></sc-if></span></sc-if>
+</div>
+<div style="margin-top:14px">{{ pf.chart }}</div>
+<div style="font-size:11px;color:var(--s-mute);padding:8px 0 8px;line-height:1.4">{{ pf.note }}</div>
+</div>
+<section aria-labelledby="hold-title-m" style="font-variant-numeric:tabular-nums">
 <div style="display:flex;align-items:center;gap:8px;padding:12px 16px 4px">
 <h2 id="hold-title-m" style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:16px">{{ ui.holdTitle }}</h2><span style="font-size:11px;color:var(--s-mute)">{{ holdCount }}</span>
 <button onClick="{{ holdAdd }}" style="margin-left:auto;min-height:34px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer">{{ ui.holdAdd }}</button>
 </div>
-<sc-if value="{{ hasHold }}" hint-placeholder-val="{{ true }}">
-<sc-for list="{{ holdTotals }}" as="t" hint-placeholder-count="1">
-<div style="display:flex;gap:14px;padding:6px 16px 10px">
-<div style="flex:1;min-width:0"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.hdValue }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;white-space:nowrap">{{ t.valueLabel }}</div></div>
-<div style="text-align:right"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.hdPL }}</div><div style="font-weight:700;font-size:13px;white-space:nowrap"><sc-if value="{{ t.plDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.plLabel }}</span></sc-if><sc-if value="{{ t.plUp }}" hint-placeholder-val="{{ true }}"><span>{{ t.plLabel }}</span></sc-if></div><div style="font-size:11px;white-space:nowrap"><sc-if value="{{ t.plDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.plPctLabel }}</span></sc-if><sc-if value="{{ t.plUp }}" hint-placeholder-val="{{ true }}"><span>{{ t.plPctLabel }}</span></sc-if> · {{ ui.hdToday }} <sc-if value="{{ t.dayDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.dayPctLabel }}</span></sc-if><sc-if value="{{ t.dayUp }}" hint-placeholder-val="{{ true }}"><span>{{ t.dayPctLabel }}</span></sc-if></div></div>
-</div>
-</sc-for>
-</sc-if>
 <div style="padding:0 16px 10px;font-size:11px;color:var(--s-mute);line-height:1.4">{{ holdWhere }}</div>
 <sc-if value="{{ holdAdding }}" hint-placeholder-val="{{ false }}">
 <div onKeyDown="{{ holdKey }}" style="margin:0 16px 12px;padding:12px;border:1px solid var(--color-accent);background:var(--s-panel)">
@@ -320,32 +358,7 @@
 </div>
 </sc-for>
 </section>
-<div style="padding:12px 16px 2px;font-family:var(--font-heading);font-weight:800;font-size:16px">{{ ui.watchlist }}</div>
-<div style="display:flex;padding:8px 16px;border-bottom:1px solid var(--s-rule);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">
-<div style="flex:1">{{ ui.ticker }}</div><div style="width:66px;text-align:right">{{ ui.last }}</div><div style="width:56px;text-align:right">{{ ui.chg }}</div><div style="width:62px;text-align:right">1D</div>
-</div>
-<sc-for list="{{ follows }}" as="row" hint-placeholder-count="3">
-<article data-m="rise" role="button" tabIndex="0" onClick="{{ row.open }}" onKeyDown="{{ row.keyOpen }}" style="display:block;width:100%;padding:12px 16px;border-bottom:1px solid var(--s-rule);cursor:pointer">
-<div style="display:flex;align-items:baseline">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ row.ticker }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div></div>
-<div data-m-flash="1" style="width:66px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:15px">{{ row.price }}</div>
-<div style="width:56px;text-align:right;font-size:13px;font-weight:600"><sc-if value="{{ row.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ row.move }}</span></sc-if><sc-if value="{{ row.up }}" hint-placeholder-val="{{ true }}"><span>{{ row.move }}</span></sc-if></div>
-<div style="width:62px;align-self:center">{{ row.spark }}</div>
-</div>
-<div style="display:flex;gap:6px;align-items:baseline;margin-top:7px">
-<button onClick="{{ row.togglePush }}" style="flex:none;min-height:30px;padding:0 9px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ row.pushLabel }}</button>
-<span style="margin-left:auto;font-size:11px;color:var(--s-mute);text-align:right">{{ row.latest }}</span>
-</div>
-</article>
-</sc-for>
-<sc-if value="{{ atCap }}" hint-placeholder-val="{{ true }}">
-<div style="margin:14px 16px;border:1px solid var(--color-accent);padding:14px">
-<div style="font-family:var(--font-heading);font-weight:800;font-size:30px;line-height:1;letter-spacing:-0.03em">3 / 3</div>
-<div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ ui.capNote }}</div>
-<button onClick="{{ goPaywall }}" style="width:100%;min-height:42px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.liftCap }}</button>
-</div>
-</sc-if>
-<div style="padding:14px 16px"><button onClick="{{ goSearch }}" style="width:100%;min-height:44px;text-align:left;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ ui.addTicker }}</button></div>
+<div style="height:20px"></div>
 </div>
 </div>
 </sc-if>
@@ -706,7 +719,7 @@ function bindShared() {
 const STORE_KEY = 'hif.dark.v2';
 // Keys that survive a reload. Transient input (passwords, codes, toasts) never persists.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','smaOn',
-  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme','liveNames','positions','profiles','accountId'];
+  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme','liveNames','positions','profiles','pfRange','accountId'];
 // hif-store.js can finish loading after this logic is evaluated. Until the saved
 // record has been read, nothing may be written, or a reload would overwrite the
 // stored session with these defaults; see restoreLate().
@@ -726,7 +739,7 @@ class Component extends DCLogic {
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
-    positions:{}, profiles:{}, posEdit:null, posShares:'', posCost:'', posTicker:'',
+    positions:{}, profiles:{}, pfRange:'1mo', pfHover:null, pfCharts:{}, posEdit:null, posShares:'', posCost:'', posTicker:'',
     liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{}, charts:{}, liveEarnDates:{} });
   componentDidMount() {
     this.startIdleWatch();
@@ -859,6 +872,61 @@ class Component extends DCLogic {
     });
     this.flash((remove ? (u.posCleared || 'Position removed') : (u.posSaved || 'Position saved')).toUpperCase());
   }
+  // Portfolio chart: price history for every held ticker over the chosen range (the
+  // adapter caches charts for 5 minutes). null marks a ticker without history.
+  syncPortfolioCharts() {
+    const L = window.HIFLive; if (!L) return;
+    const range = this.state.pfRange || '1mo';
+    const put = (key, v) => this.setState(st => ({ pfCharts: Object.assign({}, st.pfCharts, { [key]: v }) }));
+    Object.keys(this.state.positions || {}).forEach(t => {
+      const key = t + ':' + range;
+      L.chart(t, range).then(c => put(key, c && c.points && c.points.length ? c : null)).catch(() => put(key, null));
+    });
+  }
+  pfStamp(ts, range) {
+    const d = new Date(ts * 1000);
+    if (range === '1d') return d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    if (range === '5d') return d.toLocaleDateString([], { weekday:'short', day:'numeric' }) + ' ' + d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    return d.toLocaleDateString([], { day:'numeric', month:'short', year: range === '1y' || range === '6mo' ? '2-digit' : undefined });
+  }
+  // Value line with the cost basis as a dashed reference; hover or drag reads any point.
+  portfolioChartEl(series, range, compact) {
+    const pal = this.pal, h = React.createElement, ranges = [['1d','1D'],['5d','1W'],['1mo','1M'],['6mo','6M'],['1y','1Y']];
+    const chips = h('div', { role:'group', 'aria-label':'Chart range', style:{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:12 } },
+      ...ranges.map(([k, label]) => h('button', { key:k, 'aria-pressed': range === k, onClick: () => this.setState({ pfRange:k, pfHover:null }),
+        style:Object.assign(this.chipStyle(range === k), { minHeight:32, padding:'0 12px', fontSize:10 }) }, label)));
+    const pts = series.points || [], n = pts.length;
+    if (n < 2) return h('div', null, chips, h('div', { style:{ height: compact ? 160 : 220, display:'flex', alignItems:'center', justifyContent:'center', border:'1px dashed ' + pal.rule, color:pal.mute, fontSize:12, textAlign:'center', padding:16 } }, series.message || ''));
+    const W = 1000, H = compact ? 160 : 220;
+    const vals = pts.map(p => p.value), cost = series.cost;
+    let min = Math.min(...vals), max = Math.max(...vals);
+    const span0 = (max - min) || max * 0.02 || 1;
+    const showCost = cost > 0 && cost >= min - span0 && cost <= max + span0;
+    if (showCost) { min = Math.min(min, cost); max = Math.max(max, cost); }
+    const pad = (max - min) * 0.08 || 1; min -= pad; max += pad;
+    const x = i => i / (n - 1) * W, y = v => H - (v - min) / (max - min) * H;
+    const line = pts.map((p, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(p.value).toFixed(1)).join(' ');
+    const hv = this.state.pfHover != null && pts[this.state.pfHover] ? this.state.pfHover : null;
+    const svg = h('svg', { viewBox:'0 0 ' + W + ' ' + H, preserveAspectRatio:'none', 'aria-hidden':'true', style:{ display:'block', width:'100%', height:H } },
+      h('defs', null, h('linearGradient', { id:'pfFill', x1:0, y1:0, x2:0, y2:1 },
+        h('stop', { offset:'0%', stopColor:pal.accent, stopOpacity:0.22 }), h('stop', { offset:'100%', stopColor:pal.accent, stopOpacity:0 }))),
+      h('path', { d: line + ' L' + W + ' ' + H + ' L0 ' + H + ' Z', fill:'url(#pfFill)' }),
+      showCost ? h('line', { x1:0, x2:W, y1:y(cost), y2:y(cost), stroke:pal.faint, strokeDasharray:'5 5', strokeWidth:1, style:{ vectorEffect:'non-scaling-stroke' } }) : null,
+      h('path', { d:line, fill:'none', stroke:pal.accent, strokeWidth:2, strokeLinejoin:'round', style:{ vectorEffect:'non-scaling-stroke' } }),
+      hv != null ? h('line', { x1:x(hv), x2:x(hv), y1:0, y2:H, stroke:pal.mute, strokeWidth:1, style:{ vectorEffect:'non-scaling-stroke' } }) : null);
+    const pick = ev => {
+      const r = ev.currentTarget.getBoundingClientRect(), t = ev.touches && ev.touches[0];
+      const i = Math.round(Math.max(0, Math.min(1, ((t ? t.clientX : ev.clientX) - r.left) / r.width)) * (n - 1));
+      if (i !== this.state.pfHover) this.setState({ pfHover:i });
+    };
+    const clear = () => this.setState({ pfHover:null });
+    const dot = hv != null ? h('span', { style:{ position:'absolute', left:(hv / (n - 1) * 100) + '%', top:(y(pts[hv].value) / H * 100) + '%', width:9, height:9, marginLeft:-4.5, marginTop:-4.5, background:pal.accent, border:'2px solid ' + pal.bg, borderRadius:'50%', pointerEvents:'none' } }) : null;
+    const costTag = showCost ? h('span', { style:{ position:'absolute', right:0, top:(y(cost) / H * 100) + '%', transform:'translateY(-120%)', fontSize:10, letterSpacing:'0.08em', color:pal.mute, background:pal.bg, padding:'0 4px', pointerEvents:'none' } }, ((UI[this.appLang] || {}).hdCost || 'Cost') + ' ' + window.HIFInsight.amt(cost, series.currency)) : null;
+    return h('div', null, chips,
+      h('div', { style:{ position:'relative', touchAction:'pan-y' }, onMouseMove:pick, onMouseLeave:clear, onTouchStart:pick, onTouchMove:pick, onTouchEnd:clear }, svg, costTag, dot),
+      h('div', { style:{ display:'flex', justifyContent:'space-between', marginTop:6, fontSize:10, letterSpacing:'0.08em', color:pal.mute } },
+        h('span', null, this.pfStamp(pts[0].ts, range)), h('span', null, this.pfStamp(pts[n - 1].ts, range))));
+  }
   // Quantities and prices as typed: "4,1265" (comma decimals) becomes 4.1265.
   decimalInput(v) {
     const t = String(v || '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
@@ -903,6 +971,7 @@ class Component extends DCLogic {
       this._lastAuto = Date.now();
       this.liveTickers().forEach(t => this.syncTicker(t, true));
       this.syncPositions();
+      if (this.state.screen === 'portfolio') this.syncPortfolioCharts();
       if (this.state.feedTab === 'market') this.syncMarket();
     };
     this._auto = setInterval(tick, 5 * 60000);
@@ -972,6 +1041,9 @@ class Component extends DCLogic {
     const held = Object.keys(this.state.positions || {}).join(',');
     if (this._held !== undefined && held !== this._held && window.HIFLive) this.syncPositions();
     this._held = held;
+    const pfSig = this.state.screen === 'portfolio' && window.HIFLive ? (this.state.pfRange || '1mo') + '|' + held : '';
+    if (pfSig && pfSig !== this._pfSig) this.syncPortfolioCharts();
+    this._pfSig = pfSig;
     if (this.state.screen === 'detail' && this.state.selected) { this.ensureChart(this.state.selected, this.state.chartRange || '1d'); this.ensureEarnDates(this.state.selected); }
     // A ticker added from search, onboarding or the ticker page gets its live data now.
     if (this._synced && window.HIFLive) {
@@ -1295,14 +1367,14 @@ class Component extends DCLogic {
     // Market tab), newest first; demo stories only when nothing live has arrived.
     const LN = s.liveNews || {}, LQ = s.liveQuotes || {};
     const liveRows = [];
-    // Market: the newest two stories from each of the ten largest names.
+    // Strictly newest first across tickers; Market draws on the ten largest names.
     const market = s.feedTab !== 'following';
-    (market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows).forEach(t => (LN[t] || []).slice(0, market ? 2 : undefined).forEach(n => liveRows.push({
+    (market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows).forEach(t => (LN[t] || []).forEach(n => liveRows.push({
       ticker:t, headline:n.headline, watch:n.summary || ((n.source ? 'Read at ' + n.source : 'Read the story') + ' ↗'), source:n.source || '', stamp:n.stamp, ts:n.ts, url:n.url || '',
       delta:(LQ[t] || {}).move || '—', up:(LQ[t] || {}).up !== false, vol:'—', live:true })));
     const feedLive = liveRows.length > 0;
     const feed = feedLive
-      ? liveRows.sort((a,b) => b.ts - a.ts).slice(0, 20).map(n => Object.assign({}, n, {
+      ? liveRows.sort((a,b) => b.ts - a.ts).slice(0, 40).map(n => Object.assign({}, n, {
           down: !n.up, outlier:false, volBadge:'',
           open: () => this.openStory(n),
           keyOpen: event => this.activateFromKeyboard(() => this.openStory(n), event)
@@ -1314,7 +1386,12 @@ class Component extends DCLogic {
           volBadge: volNum(n.vol).toFixed(1) + '× volume',
           open: () => { this.setState({ selected:n.ticker }); this.go('detail'); },
           keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:n.ticker }); this.go('detail'); }, event)
-        })).sort((a,b) => volNum(b.vol) - volNum(a.vol));
+        })).sort((a,b) => String(b.stamp).localeCompare(String(a.stamp)));
+    feed.forEach((r, i) => {
+      const day = r.ts && window.HIFLive && window.HIFLive.dayHead ? window.HIFLive.dayHead(r.ts, u) : '';
+      r.dayHead = day && (i === 0 || day !== feed[i - 1].dayLabel) ? day : '';
+      r.dayLabel = day; r.hasDayHead = !!r.dayHead;
+    });
     const q = s.query.trim().toUpperCase();
     const obQ = String(s.obQuery || '').trim().toUpperCase(), obPool = (!s.onboarded && s.session) ? this.searchPool(obQ) : [];
     const volOf = t => { let best = 0; NEWS.forEach(n => { if (n.ticker === t) { const m = /([\d.]+)x/.exec(String(n.vol || '')); if (m && parseFloat(m[1]) > best) best = parseFloat(m[1]); } }); return best; };
@@ -1367,7 +1444,7 @@ class Component extends DCLogic {
       planToggleLabel: isFree ? u.viewPro : u.viewFree,
       togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),
       isAuth: !signedIn, isOnboard: signedIn && !s.onboarded, isLocked: signedIn && !!s.locked,
-      isFeed: inApp && screen === 'feed', isWatch: inApp && screen === 'watchlist', isSearch: inApp && screen === 'search',
+      isFeed: inApp && screen === 'feed', isWatch: inApp && screen === 'watchlist', isPortfolio: inApp && screen === 'portfolio', isSearch: inApp && screen === 'search',
       isDetail: inApp && screen === 'detail', isPaywall: inApp && screen === 'paywall', isMore: inApp && screen === 'more',
       isAccount: inApp && screen === 'account', isSecurity: inApp && screen === 'security',
       showNav: inApp && screen !== 'paywall',
@@ -1555,7 +1632,7 @@ class Component extends DCLogic {
       goSearch: () => this.go('search'),
       back: () => this.go(s.prev || 'feed'),
       upgrade: () => { if (s.authLive) return this.flash((u.payComing || 'Payments are coming soon').toUpperCase()); this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
-      tabs: [this.tab('feed',u.tabFeed), this.tab('watchlist',u.tabList), this.tab('search',u.tabAdd), this.tab('more',u.tabMore), this.tab('account',u.tabYou)],
+      tabs: [this.tab('feed',u.tabFeed), this.tab('watchlist',u.tabList), this.tab('portfolio',u.tabPortfolio), this.tab('more',u.tabMore), this.tab('account',u.tabYou)],
       scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '—'),
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
       setFeedMarket: () => { this.setState({ feedTab:'market' }); this.syncMarket(); },
@@ -1579,6 +1656,37 @@ class Component extends DCLogic {
       }); }),
       atCap: isFree && s.follows.length >= 3,
       capLabel: isFree ? s.follows.length + ' / 3' : s.follows.length + ' / ∞',
+      pf: (() => {
+        const range = s.pfRange || '1mo', byCur = {};
+        HB.rows.forEach(r => { byCur[r.currency] = (byCur[r.currency] || 0) + (r.value || 0); });
+        const cur = Object.keys(byCur).sort((a, b) => byCur[b] - byCur[a])[0] || 'USD';
+        const curOf = t => { const r = HB.rows.filter(x => x.ticker === t)[0]; return r ? r.currency : 'USD'; };
+        const chartOf = t => {
+          const c = (s.pfCharts || {})[t + ':' + range];
+          return c === undefined ? undefined : (c ? c.points : null);
+        };
+        const PS = IN && IN.portfolioSeries ? IN.portfolioSeries(posMap, chartOf, curOf, cur) : { points:[], cost:0, currency:cur };
+        const tot = HB.totals.filter(t => t.currency === cur)[0] || {};
+        const hp = s.pfHover != null ? PS.points[s.pfHover] : null, hl = hp ? IN.portfolioLabels(hp, cur) : null;
+        const first = PS.points[0], nowV = byCur[cur] || 0, endV = hp ? hp.value : nowV;
+        const chg = first ? endV - first.value : null, chgPct = first && first.value ? chg / first.value * 100 : null;
+        const plDown = hl ? hl.plDown : !!tot.plDown;
+        const notes = [u.pfChartNote];
+        if (PS.partial) notes.push(u.pfPartial);
+        if (Object.keys(byCur).length > 1) notes.push((u.pfOtherCcy || '').replace('{c}', cur));
+        PS.message = HB.empty ? u.pfNoChart : PS.loading ? u.pfLoading : '';
+        return {
+          whenLabel: hp ? this.pfStamp(hp.ts, range) : u.hdValue,
+          valueLabel: hl ? hl.valueLabel : (tot.valueLabel || '\u2014'),
+          plLabel: hl ? hl.plLabel : (tot.plLabel || '\u2014'), plPctLabel: hl ? hl.plPctLabel : (tot.plPctLabel || '\u2014'),
+          plDown, plUp: !plDown,
+          hasChg: chg != null, chgDown: chg != null && chg < 0, chgUp: !(chg != null && chg < 0),
+          chgLabel: chg == null ? '' : IN.signedAmt(chg, cur) + ' \u00b7 ' + IN.pctL(chgPct),
+          rangeName: ({ '1d':'1D', '5d':'1W', '1mo':'1M', '6mo':'6M', '1y':'1Y' })[range] || range,
+          note: HB.empty ? '' : notes.join(' '),
+          chart: this.portfolioChartEl(PS, range, true)
+        };
+      })(),
       holdRows: HB.rows.map(r => Object.assign({}, r, {
         plUp: !r.plDown, moveUp: !r.moveDown, showName: !!r.name && r.name !== r.ticker,
         editing: s.posEdit === r.ticker, editLabel: (u.posEdit || 'Edit') + ' ' + r.ticker,
@@ -1655,7 +1763,6 @@ class Component extends DCLogic {
         { label:u.rowDigest, free:'—', pro:'06:30' }
       ],
       moreItems: [
-        { label:u.portfolio, note:u.portfolioNote, eta:'Q4' },
         { label:u.screener, note:u.screenerNote, eta:'Q1' },
         { label:u.digests, note:u.digestsNote, eta:'Q1' },
         { label:u.broker, note:u.brokerNote, eta:'Q2' }
