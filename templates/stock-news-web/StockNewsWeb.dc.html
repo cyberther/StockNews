@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" style="height:100vh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -32,7 +32,7 @@
 <span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ scanLabel }}</span>
 <span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);border-left:1px solid var(--s-rule);padding-left:10px">{{ planLabel }}</span>
 <button onClick="{{ openCmd }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="display:flex;align-items:center;gap:8px;padding:8px 11px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer"><span>⌘K</span></button>
-<button onClick="{{ togglePlan }}" style="padding:8px 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ planToggleLabel }}</button>
+<sc-if value="{{ showPlanToggle }}" hint-placeholder-val="{{ true }}"><button onClick="{{ togglePlan }}" style="padding:8px 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ planToggleLabel }}</button></sc-if>
 <sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}">
 <button onClick="{{ goPaywall }}" style="padding:8px 14px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.goPro }}</button>
 </sc-if>
@@ -825,15 +825,38 @@
 </div>
 <div role="tablist" style="display:flex;border-bottom:1px solid var(--s-rule);margin-bottom:22px"><button role="tab" aria-selected="{{ authIsIn }}" onClick="{{ authToIn }}" style="flex:1;min-height:44px;padding:0;background:transparent;border:0;border-bottom:2px solid {{ authTabInLine }};color:{{ authTabInInk }};font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.04em;cursor:pointer">{{ ui.authTabIn }}</button><button role="tab" aria-selected="{{ authIsUp }}" onClick="{{ authToUp }}" style="flex:1;min-height:44px;padding:0;background:transparent;border:0;border-bottom:2px solid {{ authTabUpLine }};color:{{ authTabUpInk }};font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.04em;cursor:pointer">{{ ui.authTabUp }}</button></div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;line-height:1.1">{{ authKicker }}</div>
+<sc-if value="{{ authSentOn }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="margin-top:24px;border:1px solid var(--color-accent);padding:18px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px">{{ ui.authSentTitle }}</div>
+<div style="font-size:13px;color:var(--s-mute);margin-top:8px;line-height:1.5">{{ authSentBody }}</div>
+</div>
+<sc-if value="{{ authErr }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="margin-top:14px;font-size:12px;color:var(--color-accent)">{{ authErr }}</div>
+</sc-if>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+<button onClick="{{ authResend }}" style="min-height:44px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.authResend }}</button>
+<button onClick="{{ authUseOther }}" style="min-height:44px;padding:0 4px;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.authUseOther }}</button>
+</div>
+</sc-if>
+<sc-if value="{{ authFormOn }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ showProviders }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column;gap:9px;margin-top:24px">
+<sc-if value="{{ showGoogle }}" hint-placeholder-val="{{ true }}">
 <button onClick="{{ signInGoogle }}" style="min-height:50px;display:flex;align-items:center;gap:12px;text-align:left;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer"><span style="flex:none;width:22px;height:22px;border:1px solid var(--s-faint);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--s-mute)">G</span>{{ ui.contGoogle }}</button>
+</sc-if>
+<sc-if value="{{ showICloud }}" hint-placeholder-val="{{ true }}">
 <button onClick="{{ signInICloud }}" style="min-height:50px;display:flex;align-items:center;gap:12px;text-align:left;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer"><span style="flex:none;width:22px;height:22px;border:1px solid var(--s-faint);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--s-mute)">⌘</span>{{ ui.contICloud }}</button>
+</sc-if>
 </div>
 <div style="display:flex;align-items:center;gap:12px;margin:20px 0 16px">
 <span style="flex:1;height:1px;background:var(--s-rule)"></span>
 <span style="flex:none;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ authOrEmail }}</span>
 <span style="flex:1;height:1px;background:var(--s-rule)"></span>
 </div>
+</sc-if>
+<sc-if value="{{ noProviders }}" hint-placeholder-val="{{ false }}">
+<div style="height:22px"></div>
+</sc-if>
 <div style="display:flex;flex-direction:column;gap:12px">
 <sc-if value="{{ authIsUp }}" hint-placeholder-val="{{ false }}">
 <label style="display:block"><span style="display:block;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:6px">{{ ui.nameLabel }}</span>
@@ -867,10 +890,11 @@
 <sc-if value="{{ authErr }}" hint-placeholder-val="{{ false }}">
 <div role="alert" style="margin-top:14px;font-size:12px;color:var(--color-accent)">{{ authErr }}</div>
 </sc-if>
-<button onClick="{{ submitAuth }}" style="width:100%;min-height:50px;margin-top:18px;text-align:left;padding:0 16px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ authBtn }}</button>
+<button onClick="{{ submitAuth }}" style="width:100%;min-height:50px;margin-top:18px;text-align:left;padding:0 16px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer;opacity:{{ authBtnOpacity }}" aria-busy="{{ authBusyOn }}">{{ authBtn }}</button>
 <div style="font-size:12px;color:var(--s-mute);margin-top:16px;line-height:1.45">{{ authFootQ }} <button onClick="{{ authSwitch }}" style="padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-body);font-size:12px;text-decoration:underline;cursor:pointer">{{ authSwitchLabel }}</button></div>
 <sc-if value="{{ authIsUp }}" hint-placeholder-val="{{ false }}">
 <div style="font-size:12px;color:var(--s-faint);margin-top:8px;line-height:1.45">{{ ui.footUpNote }}</div>
+</sc-if>
 </sc-if>
 </div>
 </div>
@@ -949,7 +973,7 @@
 const STORE_KEY = 'hif.web.v2';
 // Keys that survive a reload. Live quotes and transient input (passwords, codes) never persist.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','overlays',
-  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme','alerts','positions','dismissed','stack','stackOpen','events'];
+  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme','alerts','positions','dismissed','stack','stackOpen','events','accountId'];
 // hif-store.js can finish loading after this logic is evaluated. Until the saved
 // record has been read, nothing may be written, or a reload would overwrite the
 // stored session with these defaults; see restoreLate().
@@ -966,6 +990,7 @@ class Component extends DCLogic {
     quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
     liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false, detailLoading:false,
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
+    authLive:false, authInfo:null, authBusy:false, authSent:'', serverPlan:null, accountId:null,
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
     alerts:{ news:true, insider:false, filings:false, rating:false, earnings:false, move:false },
@@ -1090,7 +1115,17 @@ class Component extends DCLogic {
       if (str.score < 2) return this.setState({ authErr: u.authErrWeak, authBad:'pw' });
     }
     const at = mail.lastIndexOf('@');
-    this.signInWith('Email', mail.slice(0, at + 1) + mail.slice(at + 1).toLowerCase(), up ? name : null);
+    const email = mail.slice(0, at + 1) + mail.slice(at + 1).toLowerCase();
+    if (!st.authLive) return this.signInWith('Email', email, up ? name : null);
+    if (st.authBusy) return;
+    this.setState({ authBusy:true, authErr:'' });
+    (up ? window.HIFAuth.signUp(email, pw, name) : window.HIFAuth.signIn(email, pw)).then(r => {
+      if (r.error) return this.setState({ authBusy:false, authErr:this.authMessage(r.error), authBad: r.error === 'bad_email' ? 'email' : r.error === 'weak_password' ? 'pw' : null });
+      if (r.confirm) return this.setState({ authBusy:false, authSent:email, authPw:'' });
+      this.setState({ authBusy:false });
+      this.logEvent('signin', 'Email · ' + email);
+      this.flash((u.toastSignedIn || 'Signed in').toUpperCase());
+    }).catch(() => this.setState({ authBusy:false, authErr:this.authMessage('failed') }));
   }
   toggleAlert(k, locked) {
     const u = this.copy;
@@ -1136,6 +1171,45 @@ class Component extends DCLogic {
     const ready = () => this.sharedReady() && !!window.HIFLive;
     const go = () => { if (this.restoreLate()) start(); else this._afterRestore = start; this.forceUpdate(); };
     if (ready()) go(); else this._poll = setInterval(() => { if (ready()) { clearInterval(this._poll); go(); } }, 60);
+    if (window.HIFAuth) this.bootAuth();
+    else this._authPoll = setInterval(() => { if (window.HIFAuth) { clearInterval(this._authPoll); this.bootAuth(); } }, 60);
+  }
+  // Real accounts when /api/config names a Supabase project; otherwise the demo sign-in.
+  bootAuth() {
+    const A = window.HIFAuth;
+    A.ready.then(info => {
+      if (!info || !info.enabled) return;
+      this.setState({ authLive:true, authInfo:info });
+      if (info.error) this.setState({ authOpen:true, authMode:'in', authErr:this.authMessage(info.error === 'otp_expired' ? 'link' : info.error) });
+      this.applyAuthSession(A.session());
+      this._authOff = A.onChange(sess => this.applyAuthSession(sess));
+    }).catch(() => {});
+  }
+  // Mirror the Supabase session into the app. A different account on this browser starts
+  // fresh: its own onboarding and watchlist, not the previous user's.
+  applyAuthSession(sess) {
+    if (!sess) { this.setState({ session:null, locked:false, serverPlan:null }); return; }
+    const fresh = this.state.accountId !== sess.userId;
+    this.setState(Object.assign({
+      session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
+      accountId: sess.userId, authOpen:false, authPw:'', authSent:'', authErr:''
+    }, fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, stack:[], events:[], selected:'', screen:'feed' } : {}));
+    this.loadPlan();
+  }
+  loadPlan() {
+    window.HIFAuth.plan().then(p => {
+      if (p.suspended) {
+        window.HIFAuth.signOut(false);
+        return this.setState({ authOpen:true, authMode:'in', authErr:this.copy.authErrSuspended || 'This account is suspended.' });
+      }
+      this.setState({ serverPlan:p.plan });
+    }).catch(() => {});
+  }
+  authMessage(code) {
+    const u = this.copy;
+    return ({ bad_credentials:u.authErrCreds, not_confirmed:u.authErrConfirm, exists:u.authErrExists, rate_limited:u.authErrRate,
+      weak_password:u.authErrWeak, signup_disabled:u.authErrClosed, bad_email:u.authErrEmail, link:u.authErrLink,
+      access_denied:u.authErrLink })[code] || u.authErrFailed || 'Something went wrong.';
   }
   componentDidUpdate(prevProps) {
     if (prevProps && prevProps.finnhubToken !== this.props.finnhubToken) this.syncLive();
@@ -1151,7 +1225,7 @@ class Component extends DCLogic {
     this.measureChart();
     this.persist();
   }
-  componentWillUnmount() { if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); window.removeEventListener('keydown', this._onKey); window.removeEventListener('hif:content', this._onContent); clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); this.stopIdleWatch(); }
+  componentWillUnmount() { if (this._authOff) this._authOff(); clearInterval(this._authPoll); if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); window.removeEventListener('keydown', this._onKey); window.removeEventListener('hif:content', this._onContent); clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); this.stopIdleWatch(); }
   get token() { return (this.props.finnhubToken || '').trim(); }
   // Manual / on-open only: the adapter caches (quotes 60s, news 5m, analysts 15m),
   // so an extra call on screen open is usually free.
@@ -1211,7 +1285,8 @@ class Component extends DCLogic {
     (this.state.liveHits || []).forEach(h => { if (!pool.some(x => x.ticker === h.ticker)) pool.push({ ticker:h.ticker, name:h.name, stories:'—' }); });
     return pool;
   }
-  get plan() { return this.state.plan || this.props.plan || 'free'; }
+  // With real accounts the plan is the server's (account_status); the demo keeps its toggle.
+  get plan() { return this.state.authLive ? (this.state.serverPlan || 'free') : (this.state.plan || this.props.plan || 'free'); }
   get lang() { return this.state.lang || this.props.lang || 'EN'; }
   get appLang() { return this.state.appLang || this.props.appLang || 'EN'; }
   go(screen) { this.setState(s => ({ screen, prev: (s.screen === 'paywall') ? s.prev : s.screen })); }
@@ -1403,17 +1478,24 @@ class Component extends DCLogic {
       nextTs: d == null ? null : Math.floor(Date.now()/1000) + d * 86400
     });
   }
-  // Identity of a story, independent of display language: ticker + source + stamp.
-  // The feed filters on this, so a skip removes the row and Undo brings it back.
+  // Identity of a story, independent of display language and display format. Live
+  // stories carry their publish time (ts), so the formatted stamp is left out of the
+  // key: reformatting how times are shown must never resurrect a skipped story. Demo
+  // stories have no ts and keep the stamp. The feed filters on this key.
   storyKey(item) {
     if (!item) return '';
-    return [item.ticker || '', item.source || '', item.stamp || '', item.ts || ''].join('|');
+    return this.normKey([item.ticker || '', item.source || '', item.stamp || '', item.ts || ''].join('|'));
+  }
+  // Saved skips from before this rule still hold the old stamp text; drop it the same way.
+  normKey(key) {
+    const p = String(key || '').split('|');
+    return p.length === 4 && p[3] ? p[0] + '|' + p[1] + '||' + p[3] : String(key || '');
   }
   // The ledger only means anything if the price at dismissal is captured at that moment.
   dismissStory(item, priceStr) {
     const u = (window.HIF.UI[this.state.appLang || 'EN'] || {});
     const key = this.storyKey(item);
-    if ((this.state.dismissed || []).some(d => d.key === key)) return;
+    if ((this.state.dismissed || []).some(d => this.normKey(d.key) === key)) return;
     this.setState(st => ({ dismissed: [{ ticker:item.ticker, headline:item.headline, source:item.source, stamp:item.stamp, key,
       id: Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
       up: item.up !== false, price: priceStr, ts: Date.now(),
@@ -1661,7 +1743,7 @@ class Component extends DCLogic {
         .map(n => Object.assign({}, n, { headline:n.headline[L], watch:n.watch[L] }));
     }
     const skipKeys = {};
-    (s.dismissed || []).forEach(d => { if (d.key) skipKeys[d.key] = 1; });
+    (s.dismissed || []).forEach(d => { if (d.key) skipKeys[this.normKey(d.key)] = 1; });
     baseFeed = baseFeed.filter(n => !skipKeys[this.storyKey(n)]);
     const volNum = v => { const m = /([\d.]+)x/.exec(String(v || '')); return m ? parseFloat(m[1]) : 0; };
     const stackList = (s.stack || []);
@@ -1938,7 +2020,7 @@ class Component extends DCLogic {
       authTabUpLine: authUp ? 'var(--color-accent)' : 'transparent', authTabUpInk: authUp ? 'var(--s-ink)' : 'var(--s-mute)',
       authKicker: authUp ? u.authKickerUp : u.authKickerIn,
       authOrEmail: authUp ? u.orEmailUp : u.orEmail,
-      authBtn: authUp ? u.btnSignUp : u.btnSignIn,
+      authBtn: s.authBusy ? (u.authBusy || '…') : (authUp ? u.btnSignUp : u.btnSignIn),
       authFootQ: authUp ? u.footUp : u.footIn,
       authSwitchLabel: authUp ? u.authTabIn : u.authTabUp,
       authEmailAc: authUp ? 'email' : 'username',
@@ -1958,8 +2040,18 @@ class Component extends DCLogic {
       pwScoreLabel: (u.pwScores || [])[pw.score] || '',
       pwHint: pw.hints.length ? (u.pwAdd + ' ' + pw.hints.map(h => hintText[h]).join(' · ')) : '',
       pwBreached: pw.breached,
-      signInGoogle: () => this.signInWith('Google'),
-      signInICloud: () => this.signInWith('iCloud'),
+      signInGoogle: () => s.authLive ? window.HIFAuth.oauth('google') : this.signInWith('Google'),
+      signInICloud: () => s.authLive ? window.HIFAuth.oauth('apple') : this.signInWith('iCloud'),
+      showGoogle: !s.authLive || !!(s.authInfo && s.authInfo.providers.google),
+      showICloud: !s.authLive || !!(s.authInfo && s.authInfo.providers.apple),
+      showProviders: !s.authLive || !!(s.authInfo && (s.authInfo.providers.google || s.authInfo.providers.apple)),
+      noProviders: !!s.authLive && !(s.authInfo && (s.authInfo.providers.google || s.authInfo.providers.apple)),
+      authSentOn: !!s.authSent, authFormOn: !s.authSent,
+      authSentBody: String(u.authSentBody || '').replace('%s', s.authSent || ''),
+      authResend: () => window.HIFAuth.resend(s.authSent).then(r => r.error ? this.setState({ authErr:this.authMessage(r.error) }) : this.flash((u.authResent || 'Sent').toUpperCase())),
+      authUseOther: () => this.setState({ authSent:'', authErr:'' }),
+      authBusyOn: !!s.authBusy, authBtnOpacity: s.authBusy ? 0.6 : 1,
+      showPlanToggle: !s.authLive,
       submitAuth: () => this.submitEmailAuth(),
       authOpen: !!s.authOpen,
       openAuth: () => this.setState({ authOpen:true, authMode:'up' }),
@@ -2054,6 +2146,7 @@ class Component extends DCLogic {
         revoke: () => { this.setState(st => ({ revoked:(st.revoked || []).concat(x.id) })); this.logEvent('device_revoked', x.device); this.flash(u.toastRevoked.toUpperCase()); }
       })),
       signOutAll: () => {
+        if (s.authLive) window.HIFAuth.signOut(true);
         this.setState({ revoked:['ios','mac','win'], session:null, locked:false, screen:'feed', authPw:'', twofaSetup:false });
         this.logEvent('signout_all');
         this.flash(u.toastSignedOutAll.toUpperCase());
@@ -2072,10 +2165,15 @@ class Component extends DCLogic {
       onLockPw: e => this.setState({ lockPw:e.target.value, lockErr:'' }),
       unlock: () => {
         if (!(s.lockPw || '').length) { this.logEvent('unlock_failed'); return this.setState({ lockErr: u.authErrPw }); }
-        this.setState({ locked:false, lockPw:'', lockErr:'' });
-        this.touch();
+        const done = () => { this.setState({ locked:false, lockPw:'', lockErr:'' }); this.touch(); };
+        if (!s.authLive) return done();
+        // A real account unlocks only with its real password, checked by Supabase.
+        window.HIFAuth.signIn(sessionEmail, s.lockPw).then(r => {
+          if (r.error) { this.logEvent('unlock_failed'); return this.setState({ lockErr:this.authMessage(r.error), lockPw:'' }); }
+          done();
+        });
       },
-      lockSignOut: () => { this.logEvent('signout'); this.setState({ session:null, locked:false, lockPw:'', lockErr:'' }); },
+      lockSignOut: () => { this.logEvent('signout'); if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, locked:false, lockPw:'', lockErr:'' }); },
       isFreeTier: isFree, isProTier: !isFree,
       nav: [
         this.navItem('feed', u.feed, String(feed.length)),
@@ -2094,11 +2192,11 @@ class Component extends DCLogic {
         : (s.refreshing ? 'FINNHUB …' : (s.liveStatus === 'error' ? 'FINNHUB · ' + (s.liveError || 'error').toUpperCase() : 'DEMO DATA')),
       refreshTicker: () => { this.syncLive([stock.ticker], true); this.syncDetail(stock.ticker, true); },
       refreshLabel: s.refreshing ? '…' : '↻',
-      signOut: () => { this.logEvent('signout'); this.setState({ session:null, locked:false, authPw:'', authErr:'', twofaSetup:false }); this.go('feed'); this.flash(u.signOut.toUpperCase()); },
+      signOut: () => { this.logEvent('signout'); if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, locked:false, authPw:'', authErr:'', twofaSetup:false }); this.go('feed'); this.flash(u.signOut.toUpperCase()); },
       goPaywall: () => this.go('paywall'),
       goSearch: () => this.go('search'),
       back: () => this.go(s.prev || 'feed'),
-      upgrade: () => { this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
+      upgrade: () => { if (s.authLive) return this.flash((u.payComing || 'Payments are coming soon').toUpperCase()); this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
       scanLabel: isFree ? u.delayLabel : u.lastScan,
       feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : u.topVolume,
       setFeedFollowing: () => this.setState({ feedTab:'following' }),

@@ -31,6 +31,7 @@ TARGETS = {
             '../shared/hif-insight.js': '9cf08d53-172d-43a0-9618-2b7d30215898',
             '../shared/hif-live.js': 'c3512b4d-940f-4c6c-be48-a62e195d9a3c',
             '../shared/hif-store.js': 'cbf22793-fdd7-4578-9f64-92a72296bdea',
+            '../shared/hif-auth.js': '52c9775c-5507-4644-883e-53d9f73850bc',
             './assets/aa-logo.png': '8f4d386c-5068-40fe-9b17-49e5c21ab630',
             './assets/hero-globe.png': 'f6717536-9b6d-44c4-b709-5a1f9fbe7642',
         },
@@ -44,6 +45,7 @@ TARGETS = {
             '../shared/hif-data.js': '579b1aee-3c99-4dcd-89f7-0266059cff28',
             '../shared/hif-store.js': 'fa1601de-b213-46b7-8267-9c64cee3176c',
             '../shared/hif-live.js': 'e89e04c7-f293-4933-aa4b-fb7445f878f8',
+            '../shared/hif-auth.js': '09f71f5f-3174-4584-a50c-bb5a128cef28',
         },
     },
 }

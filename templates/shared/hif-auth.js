@@ -1,0 +1,192 @@
+// Supabase Auth for the Heard It First / Market Pulse apps, without a client library.
+//
+// Talks to the project's GoTrue endpoints with the public anon key, which the page gets
+// from /api/config (the Node server, or the Netlify function of the same path). When no
+// config is available the apps keep their local demo sign-in, so a static preview still
+// works. Only the anon key ever reaches the browser; row-level security in schema.sql is
+// what limits each signed-in user to their own rows.
+//
+//   HIFAuth.ready            -> Promise<{ enabled, providers:{ google, apple }, confirmEmail }>
+//   HIFAuth.session()        -> { userId, email, name, provider, since } | null
+//   HIFAuth.signUp(email, password, name) -> { ok, confirm } | { error }
+//   HIFAuth.signIn(email, password)       -> { ok } | { error }
+//   HIFAuth.oauth('google' | 'apple')     -> leaves the page for the provider
+//   HIFAuth.signOut(everywhere)
+//   HIFAuth.plan()           -> Promise<{ plan, suspended }>
+//   HIFAuth.onChange(fn)     -> called with session() whenever it changes
+(function(){
+const KEY = 'hif.auth.v1';
+let cfg = null, info = null, current = null, refreshTimer = null;
+const listeners = [];
+
+function load() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+function save(s) { try { s ? localStorage.setItem(KEY, JSON.stringify(s)) : localStorage.removeItem(KEY); } catch (e) {} }
+function emit() { const s = session(); listeners.forEach(fn => { try { fn(s); } catch (e) {} }); }
+
+// The page the user should come back to after confirming an email or an OAuth hop.
+function here() { return location.origin + location.pathname; }
+
+async function call(path, opts) {
+  const o = opts || {};
+  const headers = Object.assign({ apikey: cfg.supabaseAnonKey, 'content-type': 'application/json' }, o.headers || {});
+  const res = await fetch(cfg.supabaseUrl.replace(/\/$/, '') + path, { method: o.method || 'GET', headers, body: o.body ? JSON.stringify(o.body) : undefined });
+  let body = null; try { body = await res.json(); } catch (e) {}
+  return { status: res.status, ok: res.ok, body };
+}
+
+// GoTrue's messages are developer-facing; map the common ones to stable codes the apps
+// translate. Anything unrecognised becomes 'failed' rather than leaking raw text.
+function errorCode(r) {
+  const b = r.body || {}, msg = String(b.msg || b.message || b.error_description || b.error || '').toLowerCase();
+  const code = String(b.error_code || b.code || '').toLowerCase();
+  if (r.status === 429 || code.indexOf('rate') >= 0) return 'rate_limited';
+  if (code === 'invalid_credentials' || msg.indexOf('invalid login') >= 0) return 'bad_credentials';
+  if (code === 'email_not_confirmed' || msg.indexOf('not confirmed') >= 0) return 'not_confirmed';
+  if (code === 'user_already_exists' || msg.indexOf('already registered') >= 0) return 'exists';
+  if (code === 'weak_password' || msg.indexOf('password') >= 0) return 'weak_password';
+  if (code === 'signup_disabled' || msg.indexOf('signups not allowed') >= 0) return 'signup_disabled';
+  if (code.indexOf('email') >= 0 || msg.indexOf('email') >= 0) return 'bad_email';
+  return 'failed';
+}
+
+function fromTokens(t) {
+  if (!t || !t.access_token || !t.refresh_token) return null;
+  const u = t.user || {};
+  return { access_token: t.access_token, refresh_token: t.refresh_token,
+    expires_at: t.expires_at || Math.floor(Date.now() / 1000) + (Number(t.expires_in) || 3600), user: u };
+}
+
+function setSession(s) {
+  current = s; save(s); schedule(); emit();
+}
+
+function schedule() {
+  clearTimeout(refreshTimer);
+  if (!current) return;
+  const ms = Math.max(5000, (current.expires_at - 60) * 1000 - Date.now());
+  refreshTimer = setTimeout(() => { refresh().catch(() => {}); }, ms);
+}
+
+async function refresh() {
+  if (!current) return false;
+  const r = await call('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: current.refresh_token } });
+  if (r.ok && r.body) { setSession(fromTokens(r.body)); return true; }
+  // A refresh token that the server rejects (revoked, expired, user deleted) ends the session.
+  if (r.status >= 400 && r.status < 500) setSession(null);
+  return false;
+}
+
+async function token() {
+  if (!current) return null;
+  if (current.expires_at * 1000 - Date.now() < 30000) await refresh();
+  return current ? current.access_token : null;
+}
+
+// Tokens arrive in the URL fragment after an email confirmation link or an OAuth redirect.
+function takeFragment() {
+  if (!location.hash || location.hash.indexOf('access_token=') < 0 && location.hash.indexOf('error=') < 0) return null;
+  const p = new URLSearchParams(location.hash.slice(1));
+  history.replaceState(null, '', location.pathname + location.search);
+  if (p.get('error')) return { error: p.get('error_code') || p.get('error') };
+  return { tokens: { access_token: p.get('access_token'), refresh_token: p.get('refresh_token'),
+    expires_at: Number(p.get('expires_at')) || 0, expires_in: Number(p.get('expires_in')) || 3600 } };
+}
+
+async function getConfig() {
+  for (const url of ['/api/config']) {
+    try {
+      const r = await fetch(url, { headers: { accept: 'application/json' }, credentials: 'same-origin' });
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (j && /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(j.supabaseUrl || '') && j.supabaseAnonKey) return j;
+    } catch (e) {}
+  }
+  return null;
+}
+
+const ready = (async () => {
+  cfg = await getConfig();
+  if (!cfg) { info = { enabled: false, providers: {}, confirmEmail: false }; return info; }
+  let settings = {};
+  try { const r = await call('/auth/v1/settings'); if (r.ok) settings = r.body || {}; } catch (e) {}
+  const ext = settings.external || {};
+  info = { enabled: true, providers: { google: !!ext.google, apple: !!ext.apple },
+    confirmEmail: !settings.mailer_autoconfirm, signupOpen: !settings.disable_signup, error: null };
+  const frag = takeFragment();
+  if (frag && frag.error) info.error = frag.error;
+  if (frag && frag.tokens) {
+    // The fragment carries no user object; fetch it with the new access token.
+    const r = await call('/auth/v1/user', { headers: { authorization: 'Bearer ' + frag.tokens.access_token } });
+    const s = fromTokens(Object.assign({}, frag.tokens, { user: r.ok ? r.body : {} }));
+    if (s && r.ok) { current = s; save(s); }
+  } else {
+    current = load();
+    if (current && current.expires_at * 1000 - Date.now() < 30000) await refresh();
+  }
+  schedule();
+  return info;
+})();
+
+function session() {
+  if (!current || !current.user || !current.user.id) return null;
+  const u = current.user, meta = u.user_metadata || {}, app = u.app_metadata || {};
+  const provider = app.provider === 'google' ? 'Google' : app.provider === 'apple' ? 'iCloud' : 'Email';
+  return { userId: u.id, email: u.email || '', name: meta.full_name || meta.name || null, provider,
+    since: Date.parse(u.last_sign_in_at || u.created_at || '') || Date.now() };
+}
+
+async function signUp(email, password, name) {
+  await ready; if (!cfg) return { error: 'unavailable' };
+  const r = await call('/auth/v1/signup?redirect_to=' + encodeURIComponent(here()), { method: 'POST',
+    body: { email, password, data: { full_name: name || null } } });
+  if (!r.ok) return { error: errorCode(r) };
+  const s = fromTokens(r.body);
+  if (s) { setSession(s); return { ok: true, confirm: false }; }
+  return { ok: true, confirm: true };
+}
+
+async function signIn(email, password) {
+  await ready; if (!cfg) return { error: 'unavailable' };
+  const r = await call('/auth/v1/token?grant_type=password', { method: 'POST', body: { email, password } });
+  if (!r.ok) return { error: errorCode(r) };
+  setSession(fromTokens(r.body));
+  return { ok: true };
+}
+
+async function resend(email) {
+  await ready; if (!cfg) return { error: 'unavailable' };
+  const r = await call('/auth/v1/resend?redirect_to=' + encodeURIComponent(here()), { method: 'POST', body: { type: 'signup', email } });
+  return r.ok ? { ok: true } : { error: errorCode(r) };
+}
+
+function oauth(provider) {
+  if (!cfg) return;
+  location.href = cfg.supabaseUrl.replace(/\/$/, '') + '/auth/v1/authorize?provider=' + encodeURIComponent(provider) +
+    '&redirect_to=' + encodeURIComponent(here());
+}
+
+async function signOut(everywhere) {
+  const t = current && current.access_token;
+  setSession(null);
+  if (cfg && t) {
+    try { await call('/auth/v1/logout?scope=' + (everywhere ? 'global' : 'local'), { method: 'POST', headers: { authorization: 'Bearer ' + t } }); } catch (e) {}
+  }
+}
+
+// The server-owned plan from account_status (readable only for the caller's own row).
+// No row, or the table not created yet, means the free plan.
+async function plan() {
+  await ready;
+  const t = await token(), s = session();
+  if (!cfg || !t || !s) return { plan: 'free', suspended: false };
+  const r = await call('/rest/v1/account_status?select=plan,suspended&user_id=eq.' + encodeURIComponent(s.userId),
+    { headers: { authorization: 'Bearer ' + t, accept: 'application/json' } });
+  const row = r.ok && Array.isArray(r.body) ? r.body[0] : null;
+  return { plan: row && row.plan === 'pro' ? 'pro' : 'free', suspended: !!(row && row.suspended) };
+}
+
+function onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; }
+
+window.HIFAuth = { ready, session, signUp, signIn, resend, oauth, signOut, plan, token, onChange,
+  enabled: () => !!(info && info.enabled), info: () => info };
+})();
