@@ -18,6 +18,10 @@
 //   HIFAuth.plan()           -> Promise<{ plan, suspended }>
 //   HIFAuth.onChange(fn)     -> called with session() whenever it changes
 (function(){
+// The page runtime can evaluate this file more than once. A second copy would have its
+// own session and listener list, so the app would listen to one copy while the buttons
+// call the other. Keep the first.
+if (window.HIFAuth) return;
 const KEY = 'hif.auth.v1';
 let cfg = null, info = null, current = null, refreshTimer = null;
 const listeners = [];
