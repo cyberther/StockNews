@@ -12,5 +12,8 @@
     "serve": "npm run build && npm start",
     "test": "node --test",
     "check": "node --check scripts/server.mjs && node --check netlify/functions/finnhub.js && node --check netlify/functions/_shared/market-proxy.js && node --check templates/shared/hif-live.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.0"
   }
 }
