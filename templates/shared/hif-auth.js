@@ -17,6 +17,7 @@
 //   HIFAuth.signOut(everywhere)
 //   HIFAuth.plan()           -> Promise<{ plan, suspended }>
 //   HIFAuth.onChange(fn)     -> called with session() whenever it changes
+//   HIFAuth.rest(path, opts) -> PostgREST call as the signed-in user ({ ok, status, body })
 (function(){
 // The page runtime can evaluate this file more than once. A second copy would have its
 // own session and listener list, so the app would listen to one copy while the buttons
@@ -194,6 +195,10 @@ function oauth(provider) {
 
 async function signOut(everywhere) {
   const t = current && current.access_token;
+  // This device stops receiving the account's alerts (needs the token, so before it goes).
+  if (t && window.HIFPush && window.HIFPush.forget) {
+    try { await Promise.race([window.HIFPush.forget(), new Promise(r => setTimeout(r, 3000))]); } catch (e) {}
+  }
   setSession(null);
   if (cfg && t) {
     try { await call('/auth/v1/logout?scope=' + (everywhere ? 'global' : 'local'), { method: 'POST', headers: { authorization: 'Bearer ' + t } }); } catch (e) {}
@@ -212,8 +217,18 @@ async function plan() {
   return { plan: row && row.plan === 'pro' ? 'pro' : 'free', suspended: !!(row && row.suspended) };
 }
 
+// PostgREST call as the signed-in user; row-level security limits it to their own rows.
+async function rest(path, opts) {
+  await ready;
+  const t = await token();
+  if (!cfg || !t) return { ok: false, status: 0, body: null };
+  const o = opts || {};
+  return call('/rest/v1/' + path, { method: o.method, body: o.body, headers: Object.assign({ authorization: 'Bearer ' + t }, o.headers || {}) });
+}
+
 function onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; }
 
-window.HIFAuth = { ready, session, signUp, signIn, resend, recover, updatePassword, oauth, signOut, plan, token, onChange,
-  enabled: () => !!(info && info.enabled), info: () => info };
+window.HIFAuth = { ready, session, signUp, signIn, resend, recover, updatePassword, oauth, signOut, plan, token, onChange, rest,
+  enabled: () => !!(info && info.enabled), info: () => info,
+  publicConfig: () => cfg ? { supabaseUrl: cfg.supabaseUrl, vapidPublicKey: cfg.vapidPublicKey || null } : null };
 })();

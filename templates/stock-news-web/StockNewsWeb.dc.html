@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" style="height:100vh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -539,6 +539,9 @@
 </div>
 </sc-for>
 <div style="height:22px"></div>
+<sc-if value="{{ pushRow.show }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ ui.pushDevice }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px;text-wrap:pretty">{{ pushRow.note }}</div></div><sc-if value="{{ pushRow.canAct }}" hint-placeholder-val="{{ true }}"><button onClick="{{ pushRow.act }}" style="flex:none;min-height:36px;padding:0 14px;background:{{ pushRow.bg }};border:1px solid var(--color-accent);color:{{ pushRow.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ pushRow.actionLabel }}</button></sc-if></div>
+</sc-if>
 <sc-for list="{{ notifRows }}" as="s" hint-placeholder-count="3">
 <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1"><div style="font-size:14px;font-weight:600">{{ s.label }}</div><div style="font-size:12px;color:var(--s-mute)">{{ s.note }}</div></div><span style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-mute)">{{ s.value }}</span></div>
 </sc-for>
@@ -760,11 +763,6 @@
 <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:32px">
 <button data-m="shimmer" onClick="{{ openSignUp }}" style="min-height:58px;padding:0 28px;display:flex;align-items:center;gap:14px;background:var(--color-accent);border:0;color:#121212;font-family:var(--font-heading);font-weight:800;font-size:16px;text-align:left;cursor:pointer" style-hover="background:#E2C35A">{{ ui.lpCta }}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
 <button onClick="{{ openSignIn }}" style="min-height:58px;padding:0 28px;background:transparent;border:1px solid #F5F5F7;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;text-align:left;cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--color-accent)">{{ ui.lpCta2 }}</button>
-</div>
-<div style="display:flex;flex-wrap:wrap;gap:16px 28px;margin-top:40px">
-<sc-for list="{{ lpProof }}" as="p" hint-placeholder-count="3">
-<div data-m="rise" style="padding:4px 0 4px 16px;border-left:1px solid var(--s-rule);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--s-mute);line-height:1.7"><div>{{ p.a }}</div><div>{{ p.b }}</div></div>
-</sc-for>
 </div>
 </div>
 <div style="position:relative;display:flex;justify-content:flex-end">
@@ -1193,6 +1191,7 @@ class Component extends DCLogic {
       this._synced = (this.state.follows || []).slice();
       this.syncLive();
       if (this.state.feedTab === 'market') this.syncMarket();
+      this.startAutoRefresh();
       this.syncDetail(this.state.selected);
       this.state.follows.forEach(t => this.syncSpark(t));
     };
@@ -1221,13 +1220,54 @@ class Component extends DCLogic {
   // Mirror the Supabase session into the app. A different account on this browser starts
   // fresh: its own onboarding and watchlist, not the previous user's.
   applyAuthSession(sess) {
-    if (!sess) { this.setState({ session:null, locked:false, serverPlan:null }); return; }
+    if (!sess) { this._wlUser = null; this._wlReady = false; this.setState({ session:null, locked:false, serverPlan:null, devicePush:'unavailable' }); return; }
     const fresh = this.state.accountId !== sess.userId;
     this.setState(Object.assign({
       session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
       accountId: sess.userId, authOpen:false, authPw:'', authPw2:'', authSent:'', authErr:''
     }, fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, stack:[], events:[], selected:'', screen:'feed' } : {}));
     this.loadPlan();
+    if (this._wlUser !== sess.userId) { this._wlUser = sess.userId; this.loadServerWatchlist(); }
+    this.refreshPush();
+  }
+  // Push alerts on this device (real accounts only; hidden until the server has a key).
+  refreshPush() {
+    if (!window.HIFPush) return;
+    window.HIFPush.status().then(st => { if (st !== this.state.devicePush) this.setState({ devicePush:st }); }).catch(() => {});
+  }
+  togglePushDevice() {
+    const P = window.HIFPush; if (!P || this.state.pushBusy) return;
+    const on = this.state.devicePush === 'on';
+    this.setState({ pushBusy:true });
+    (on ? P.disable() : P.enable()).then(r => {
+      this.setState({ pushBusy:false });
+      if (r && r.error && r.error !== 'dismissed') this.flash((this.copy.pushFailed || 'Could not turn on alerts').toUpperCase());
+      this.refreshPush();
+    }).catch(() => { this.setState({ pushBusy:false }); this.refreshPush(); });
+  }
+  // The watchlist also lives on the server, for the background scan and for the user's
+  // other devices. On sign-in the server copy wins (every change goes up within seconds);
+  // from then on, changes made here are mirrored up.
+  loadServerWatchlist() {
+    const P = window.HIFPush; if (!P) return;
+    this._wlReady = false;
+    P.loadWatchlist().then(rows => {
+      if (rows && rows.length) {
+        const push = {}; rows.forEach(r => { if (!r.push) push[r.ticker] = false; });
+        const follows = rows.map(r => r.ticker);
+        this.setState(st => ({ follows, push, onboarded:true, selected: st.selected && follows.indexOf(st.selected) >= 0 ? st.selected : follows[0] }));
+      }
+      this._wlReady = true; this._wlSig = ''; this.queueWatchlistSync();
+    }).catch(() => { this._wlReady = true; });
+  }
+  queueWatchlistSync() {
+    const s = this.state;
+    if (!this._wlReady || !s.authLive || !s.session || !window.HIFPush) return;
+    const sig = JSON.stringify([s.follows, s.push]);
+    if (sig === this._wlSig) return;
+    this._wlSig = sig;
+    clearTimeout(this._wlT);
+    this._wlT = setTimeout(() => window.HIFPush.syncWatchlist(this.state.follows, this.state.push).catch(() => {}), 1500);
   }
   loadPlan() {
     window.HIFAuth.plan().then(p => {
@@ -1246,6 +1286,7 @@ class Component extends DCLogic {
   }
   componentDidUpdate(prevProps) {
     if (prevProps && prevProps.finnhubToken !== this.props.finnhubToken) this.syncLive();
+    this.queueWatchlistSync();
     // Sign-up, onboarding and "add to watchlist" all change follows; fetch live
     // quotes and news for whatever was just added, or the feed stays on demo data.
     // Tracked here rather than via prevState, which this runtime does not pass.
@@ -1258,7 +1299,7 @@ class Component extends DCLogic {
     this.measureChart();
     this.persist();
   }
-  componentWillUnmount() { clearInterval(this._authPoll); if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); window.removeEventListener('keydown', this._onKey); window.removeEventListener('hif:content', this._onContent); clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); this.stopIdleWatch(); }
+  componentWillUnmount() { this.stopAutoRefresh(); clearInterval(this._authPoll); if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); window.removeEventListener('keydown', this._onKey); window.removeEventListener('hif:content', this._onContent); clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); this.stopIdleWatch(); }
   get token() { return (this.props.finnhubToken || '').trim(); }
   // Manual / on-open only: the adapter caches (quotes 60s, news 5m, analysts 15m),
   // so an extra call on screen open is usually free.
@@ -1281,9 +1322,29 @@ class Component extends DCLogic {
         liveRecs: Object.assign({}, this.state.liveRecs, res.recs),
         liveMode: res.mode,
         liveStatus: got ? 'live' : (res.mode === 'off' ? 'demo' : 'error'),
+        lastScan: got ? Date.now() : this.state.lastScan,
         liveError: got ? '' : (res.errors[0] || 'no data')
       });
     }).catch(e => this.setState({ refreshing:false, liveStatus:'error', liveError:e.message }));
+  }
+  // Keeps the open app current: every 5 minutes, and when the tab comes back into view
+  // after a minute or more away. Hidden tabs don't poll, and the adapter's caches
+  // (quotes 60s, news 5 min) mean each round only re-fetches what has expired.
+  startAutoRefresh() {
+    this.stopAutoRefresh();
+    const tick = () => {
+      if (document.hidden || !this.state.session) return;
+      this._lastAuto = Date.now();
+      this.syncLive();
+      if (this.state.feedTab === 'market') this.syncMarket();
+    };
+    this._auto = setInterval(tick, 5 * 60000);
+    this._onVis = () => { if (!document.hidden && Date.now() - (this._lastAuto || 0) > 60000) tick(); };
+    document.addEventListener('visibilitychange', this._onVis);
+  }
+  stopAutoRefresh() {
+    clearInterval(this._auto);
+    if (this._onVis) document.removeEventListener('visibilitychange', this._onVis);
   }
   // The Market tab's headlines come from a fixed list of the largest names rather than
   // the watchlist, so they load on their own (quotes and news, no analyst calls).
@@ -2166,8 +2227,6 @@ class Component extends DCLogic {
       openSignIn: () => this.setState({ authOpen:true, authMode:'in', authErr:'', authBad:null }),
       closeAuth: () => this.setState({ authOpen:false, authErr:'', authBad:null }),
       stopProp: e => e.stopPropagation(),
-      lpProof: [u.lpP1, H.SOURCES_COUNT != null ? String(u.lpP2 || '').replace(/\d[\d.,]*/, H.SOURCES_COUNT.toLocaleString()) : u.lpP2, u.lpP3]
-        .map(t => { const p = String(t || '').split('|'); return { a:p[0] || '', b:p[1] || '' }; }),
       // Admin-edited featured story when one is set (H.FEATURED), else the top demo story.
       lpFeat: (() => { const n = H.FEATURED || NEWS[0]; const loc = v => (v && (v[L] || v.EN)) || ''; return { ticker:n.ticker, source:n.source, stamp:n.stamp || '', score:n.score, delta:n.delta, headline:loc(n.headline), watch:loc(n.watch) }; })(),
       // A configured symbol with neither demo data nor a live quote is skipped, not drawn empty.
@@ -2303,7 +2362,7 @@ class Component extends DCLogic {
       goSearch: () => this.go('search'),
       back: () => this.go(s.prev || 'feed'),
       upgrade: () => { if (s.authLive) return this.flash((u.payComing || 'Payments are coming soon').toUpperCase()); this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
-      scanLabel: isFree ? u.delayLabel : u.lastScan,
+      scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '—'),
       feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : u.topVolume,
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
       setFeedMarket: () => { this.setState({ feedTab:'market' }); this.syncMarket(); },
@@ -2389,6 +2448,14 @@ class Component extends DCLogic {
       accountProvider: provider,
       accountPlanLabel: isFree ? u.upgradeBtn : u.managePro,
       accountPlanAction: isFree ? () => this.go('paywall') : () => this.flash(u.manageSub.toUpperCase()),
+      pushRow: (() => {
+        const dp = s.devicePush || 'unavailable';
+        return { show: !!s.authLive && !!s.session && dp !== 'unavailable',
+          note: ({ on:u.pushDeviceOn, off:u.pushDeviceOff, denied:u.pushDeviceDenied, 'ios-install':u.pushDeviceIos, unsupported:u.pushDeviceNo })[dp] || '',
+          canAct: dp === 'on' || dp === 'off', actionLabel: s.pushBusy ? '…' : (dp === 'on' ? u.pushTurnOff : u.pushTurnOn),
+          act: () => this.togglePushDevice(),
+          bg: dp === 'on' ? 'transparent' : 'var(--color-accent)', ink: dp === 'on' ? 'var(--color-accent)' : 'var(--s-on-accent)' };
+      })(),
       notifRows: [
         { label:u.notifTickers, note:u.notifTickersNote, value: isFree ? u.pro : '✓' },
         { label:u.notifMove, note:u.notifMoveNote, value: isFree ? u.pro : '5%' },
