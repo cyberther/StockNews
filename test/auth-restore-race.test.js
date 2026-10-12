@@ -45,7 +45,7 @@ function serveRepo() {
 }
 
 // One page load plus a reload; returns the persisted record after each, and every
-// watchlist DELETE filter the app sent to the stub.
+// watchlist/holdings DELETE the app sent to the stub.
 async function run(browser, base, tpl, { savedAccount, sessUser, storeDelay }) {
   const { path, key } = TEMPLATES[tpl];
   const ctx = await browser.newContext();
@@ -53,10 +53,11 @@ async function run(browser, base, tpl, { savedAccount, sessUser, storeDelay }) {
   await ctx.route('**/api/config', r => r.fulfill({ json: { supabaseUrl: 'https://stub.supabase.co', supabaseAnonKey: 'anon' } }));
   await ctx.route('https://stub.supabase.co/**', r => {
     const url = r.request().url(), method = r.request().method();
-    if (/\/watchlist/.test(url) && method === 'DELETE') deletes.push(decodeURIComponent(url.split('watchlist')[1]));
+    const table = (url.match(/\/rest\/v1\/(watchlist|holdings)\b/) || [])[1];
+    if (table && method === 'DELETE') deletes.push(table + decodeURIComponent(url.split(table)[1]));
     if (/\/auth\/v1\/settings/.test(url)) return r.fulfill({ json: {} });
     if (/account_status/.test(url)) return r.fulfill({ json: [{ plan: 'free', suspended: false }] });
-    if (method === 'GET') return r.fulfill({ json: [] }); // empty server watchlist: the worst case
+    if (method === 'GET') return r.fulfill({ json: [] }); // empty server watchlist and holdings: the worst case
     return r.fulfill({ status: 204, body: '' });
   });
   // Define window.HIFStore only after the logic has run and HIFAuth.ready has resolved.
@@ -117,9 +118,9 @@ describe('auth session vs. late restore', { concurrency: true }, () => {
           assert.equal(d.accountId, 'user-1');
           assert.equal(d.onboarded, true);
           assert.deepEqual(d.follows, ['MSFT', 'AMD']);
-          if (tpl === 'web') assert.deepEqual(Object.keys(d.positions), ['AMD']);
+          assert.deepEqual(Object.keys(d.positions), ['AMD']);
         }
-        // Rows are only pruned against the kept list, never wiped.
+        // Server rows are only pruned against the kept list, never wiped.
         for (const q of r.deletes) assert.match(q, /ticker=not\.in\./);
       });
 
@@ -130,7 +131,7 @@ describe('auth session vs. late restore', { concurrency: true }, () => {
           assert.equal(d.accountId, 'user-1');
           assert.equal(d.onboarded, false);
           assert.deepEqual(d.follows, []);
-          if (tpl === 'web') assert.deepEqual(d.positions, {});
+          assert.deepEqual(d.positions, {});
         }
       });
 

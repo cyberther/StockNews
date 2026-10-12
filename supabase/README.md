@@ -67,6 +67,13 @@ into Netlify or the app; they belong only in Supabase.
    Environment variables. It needs a deploy to take effect: a staging push is free, and the
    next production deploy picks it up.
 
+## Positions table (optional)
+
+The **Positions** table on the Watchlist screen saves each signed-in user's holdings
+(ticker, quantity, average price) to `public.holdings`, so they follow the user to other
+devices. Run all of `supabase/holdings.sql` in the SQL Editor once. Until then, positions
+are kept on the device only and the app says so.
+
 ## Checking it works
 
 - Run the scan by hand:

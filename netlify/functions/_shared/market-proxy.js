@@ -7,7 +7,7 @@ const WINDOW_MS = 60_000;
 const CHART_RANGES = {
   '1d': '5m', '5d': '15m', '1mo': '60m', '6mo': '1d', ytd: '1d', '1y': '1d', '5y': '1wk'
 };
-const ENDPOINTS = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/calendar/earnings', '/chart']);
+const ENDPOINTS = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/calendar/earnings', '/stock/profile2', '/chart']);
 const cache = new Map();
 const clients = new Map();
 
@@ -93,7 +93,7 @@ function validatedTarget(url, apiKey) {
   }
   if (path === '/stock/earnings') target.searchParams.set('limit', '24');
   target.searchParams.set('token', apiKey);
-  return { target, ttl: path === '/quote' ? 30 : 300 };
+  return { target, ttl: path === '/quote' ? 30 : path === '/stock/profile2' ? 86400 : 300 };
 }
 
 async function fetchJson(target) {
