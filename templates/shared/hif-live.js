@@ -8,6 +8,9 @@
 //
 // Free-tier endpoints only: /quote, /company-news, /search, /stock/recommendation.
 (function(){
+// The page runtime evaluates helmet scripts twice; a second copy would replace the
+// adapter and throw away its response cache (so every refresh refetched everything).
+if (window.HIFLive) return;
 const DIRECT = 'https://finnhub.io/api/v1';
 const PROXY = '/api/finnhub';
 const cache = new Map();
