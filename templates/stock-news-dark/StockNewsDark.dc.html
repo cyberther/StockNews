@@ -670,7 +670,7 @@ class Component extends DCLogic {
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
-    liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{} });
+    liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{}, charts:{} });
   componentDidMount() {
     this.startIdleWatch();
     if (!bindShared() || !window.HIFStore) { this._poll = setInterval(() => { if (bindShared() && window.HIFStore) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
@@ -678,7 +678,7 @@ class Component extends DCLogic {
     // and headlines from the server proxy; the feed falls back to demo stories without them.
     const startLive = () => {
       this.restoreLate();
-      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.liveTickers().forEach(t => this.syncTicker(t)); }, 0);
+      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.liveTickers().forEach(t => this.syncTicker(t)); if (this.state.feedTab === 'market') this.syncMarket(); }, 0);
     };
     if (window.HIFLive && window.HIFStore) startLive();
     else this._livePoll = setInterval(() => { if (window.HIFLive && window.HIFStore) { clearInterval(this._livePoll); startLive(); } }, 60);
@@ -733,12 +733,28 @@ class Component extends DCLogic {
     return out;
   }
   // Quote and headlines for any ticker; analysts only where the demo set has none.
-  syncTicker(t) {
+  syncTicker(t, light) {
     const L = window.HIFLive; if (!L || !t) return;
     const keep = (k, v) => this.setState(st => ({ [k]: Object.assign({}, st[k], { [t]: v }) }));
     L.quote(t).then(q => q && keep('liveQuotes', q)).catch(() => {});
-    if (!FOLLOWS[t]) L.recommendation(t).then(r => r && keep('liveRecs', r)).catch(() => {});
+    if (!FOLLOWS[t] && !light) L.recommendation(t).then(r => r && keep('liveRecs', r)).catch(() => {});
     L.news(t, null, 8).then(n => n && keep('liveNews', n)).catch(() => {});
+  }
+  // The Market tab's headlines: the ten largest names, independent of the watchlist.
+  syncMarket() {
+    ((window.HIF && window.HIF.MARKET_TOP) || []).forEach(t => this.syncTicker(t, true));
+  }
+  // Live price history for the open ticker, once per ticker and range (the adapter
+  // caches for 5 minutes). false marks a ticker the market feed has no history for.
+  ensureChart(t, range) {
+    const L = window.HIFLive; if (!L || !t) return;
+    const key = t + ':' + range;
+    this._chartReq = this._chartReq || {};
+    if (this._chartReq[key]) return;
+    this._chartReq[key] = true;
+    const r = { '1d':'1d', '1w':'5d', '1m':'1mo', '6m':'6mo' }[range] || '1d';
+    const keep = c => this.setState(st => ({ charts: Object.assign({}, st.charts, { [key]: c || false }) }));
+    L.chart(t, r).then(keep).catch(() => keep(false));
   }
   openStory(n) {
     if (n.url && /^https?:\/\//.test(n.url)) { window.open(n.url, '_blank', 'noopener,noreferrer'); return; }
@@ -770,6 +786,7 @@ class Component extends DCLogic {
       call:note, liveOnly:true };
   }
   componentDidUpdate() {
+    if (this.state.screen === 'detail' && this.state.selected) this.ensureChart(this.state.selected, this.state.chartRange || '1d');
     // A ticker added from search, onboarding or the ticker page gets its live data now.
     if (this._synced && window.HIFLive) {
       const added = (this.state.follows || []).filter(t => this._synced.indexOf(t) < 0);
@@ -990,7 +1007,7 @@ class Component extends DCLogic {
   }
   fmtTime(ts, range) {
     const dt = new Date(ts * 1000);
-    if (range === '1d' || range === '1w') return dt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    if (range === '1d') return dt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
     return dt.toLocaleDateString([], { month:'short', day:'numeric' });
   }
   sparkEl(ticker, priceStr, moveStr, up) {
@@ -1003,24 +1020,42 @@ class Component extends DCLogic {
   chartEl(stock) {
     const ranges = [['1d','1D'],['1w','1W'],['1m','1M'],['6m','6M']], gated = { '1y':1, '5y':1 };
     const isFree = this.plan === 'free', range = this.state.chartRange || '1d', showSma = this.state.smaOn !== false;
-    const points = this.seriesFor(stock.ticker, range, stock.price, stock.move), values = points.map(p => p.close);
+    // Live history when the market feed is connected (the demo series only without it).
+    // The live series carries up to 60 bars of lead-in, so the moving averages and RSI
+    // are already settled at the left edge; only the visible window is drawn.
+    const LV = window.HIFLive, liveOn = !!LV && LV.mode !== 'direct-or-off';
+    const data = (this.state.charts || {})[stock.ticker + ':' + range];
+    const livePts = data && data.points && data.points.length > 1 ? data.points : null;
+    const rangeChips = React.createElement('div', { style:{ display:'flex', gap:5, marginBottom:8, flexWrap:'wrap' } },
+      ...ranges.map(r => React.createElement('button', { key:r[0], onClick:() => this.setState({ chartRange:r[0] }), style:this.chipStyle(range === r[0]) }, r[1])));
+    if (liveOn && !livePts) {
+      return React.createElement('div', null, rangeChips,
+        React.createElement('div', { style:{ minHeight:150, display:'grid', placeItems:'center', border:'1px solid #333333', fontSize:10, letterSpacing:'0.12em', color:this.pal.mute, textAlign:'center', padding:16 } },
+          data === undefined ? 'LOADING MARKET HISTORY…' : 'NO MARKET HISTORY FOR ' + stock.ticker));
+    }
+    const points = livePts || this.seriesFor(stock.ticker, range, stock.price, stock.move), values = points.map(p => p.close);
+    const lead = livePts && Array.isArray(data.lead) ? data.lead.map(p => p.close) : [];
+    const full = lead.concat(values), tail = arr => arr.slice(lead.length);
     const w = 330, h = 150, gutter = 46;
-    const p20 = Math.min(20, Math.max(3, Math.floor(values.length/5))), p50 = Math.min(50, Math.max(5, Math.floor(values.length/2)));
-    const sma20 = this.movingAverage(values, p20), sma50 = this.movingAverage(values, p50);
+    const p20 = livePts ? (full.length >= 30 ? 20 : null) : Math.min(20, Math.max(3, Math.floor(values.length/5)));
+    const p50 = livePts ? (full.length >= 70 ? 50 : null) : Math.min(50, Math.max(5, Math.floor(values.length/2)));
+    const sma20 = p20 ? tail(this.movingAverage(full, p20)) : values.map(() => null);
+    const sma50 = p50 ? tail(this.movingAverage(full, p50)) : values.map(() => null);
     const scale = showSma ? values.concat(sma20.filter(v => v != null), sma50.filter(v => v != null)) : values;
     const min = Math.min(...scale), max = Math.max(...scale), spread = Math.max(max - min, 0.01);
     const xOf = i => i * w / Math.max(values.length - 1, 1);
     const yOf = v => h - 8 - ((v - min) / spread) * (h - 16);
     const pathFor = arr => arr.map((v,i) => v == null ? null : xOf(i).toFixed(1) + ',' + yOf(v).toFixed(1)).filter(Boolean).join(' ');
     const perf = ((values[values.length-1] / values[0] - 1) * 100);
-    const rsiS = this.rsiSeries(values, 14), rsiNow = rsiS.filter(v => v != null).slice(-1)[0];
+    const rsiS = tail(this.rsiSeries(full, 14)), rsiNow = rsiS.filter(v => v != null).slice(-1)[0];
     const last = values[values.length-1], m20 = sma20[sma20.length-1], m50 = sma50[sma50.length-1];
     const signal = (m20 && m50) ? (last > m20 && m20 > m50 ? 'BULLISH' : last < m20 && m20 < m50 ? 'BEARISH' : 'MIXED') : 'BUILDING';
     const yTicks = [0,1,2,3].map(i => { const v = max - i * (max - min) / 3; return { label:v.toFixed(2), top:(yOf(v) / h * 100) }; });
     const xIdx = [0, Math.round((values.length-1)/2), values.length-1];
     const rh = 44, ry = v => rh - 3 - (v / 100) * (rh - 6);
     const legend = [[this.pal.accent,'price','solid']];
-    if (showSma) legend.push([this.pal.ink,'sma ' + p20,'solid'],[this.pal.mute,'sma ' + p50,'dash']);
+    if (showSma && p20) legend.push([this.pal.ink,'sma ' + p20,'solid']);
+    if (showSma && p50) legend.push([this.pal.mute,'sma ' + p50,'dash']);
     return React.createElement('div', null,
       React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:6, marginBottom:8 } },
         React.createElement('span', { style:{ marginRight:'auto', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:this.pal.mute } }, stock.ticker + ' · PRICE'),
@@ -1074,7 +1109,9 @@ class Component extends DCLogic {
     // Market tab), newest first; demo stories only when nothing live has arrived.
     const LN = s.liveNews || {}, LQ = s.liveQuotes || {};
     const liveRows = [];
-    (s.feedTab === 'following' ? s.follows : Object.keys(LN)).forEach(t => (LN[t] || []).forEach(n => liveRows.push({
+    // Market: the newest two stories from each of the ten largest names.
+    const market = s.feedTab !== 'following';
+    (market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows).forEach(t => (LN[t] || []).slice(0, market ? 2 : undefined).forEach(n => liveRows.push({
       ticker:t, headline:n.headline, watch:n.summary || ((n.source ? 'Read at ' + n.source : 'Read the story') + ' ↗'), source:n.source || '', stamp:n.stamp, ts:n.ts, url:n.url || '',
       delta:(LQ[t] || {}).move || '—', up:(LQ[t] || {}).up !== false, vol:'—', live:true })));
     const feedLive = liveRows.length > 0;
@@ -1327,7 +1364,7 @@ class Component extends DCLogic {
       tabs: [this.tab('feed',u.tabFeed), this.tab('watchlist',u.tabList), this.tab('search',u.tabAdd), this.tab('more',u.tabMore), this.tab('account',u.tabYou)],
       scanLabel: isFree ? u.delayLabel : u.lastScan,
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
-      setFeedMarket: () => this.setState({ feedTab:'market' }),
+      setFeedMarket: () => { this.setState({ feedTab:'market' }); this.syncMarket(); },
       feedFollowingOn: s.feedTab === 'following', feedFollowingOff: s.feedTab !== 'following',
       feedMarketOn: s.feedTab === 'market', feedMarketOff: s.feedTab !== 'market',
       feed,

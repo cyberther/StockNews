@@ -8,8 +8,19 @@ function read(key) {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const o = JSON.parse(raw);
-    return (o && o.v === VERSION && o.d && typeof o.d === 'object') ? o.d : null;
+    return (o && o.v === VERSION && o.d && typeof o.d === 'object') ? migrate(o.d) : null;
   } catch (e) { return null; }
+}
+// Demo tickers that were renamed to their real US listing (NOVO was never a US symbol;
+// Novo Nordisk trades as NVO). Saved watchlists move over on the next read.
+const RENAMED = { NOVO:'NVO' };
+function migrate(d) {
+  const re = t => RENAMED[t] || t;
+  if (Array.isArray(d.follows)) d.follows = d.follows.map(re).filter((t, i, a) => a.indexOf(t) === i);
+  if (Array.isArray(d.stack)) d.stack = d.stack.map(re).filter((t, i, a) => a.indexOf(t) === i);
+  if (typeof d.selected === 'string') d.selected = re(d.selected);
+  if (d.push && typeof d.push === 'object') Object.keys(d.push).forEach(t => { if (RENAMED[t]) { d.push[RENAMED[t]] = d.push[t]; delete d.push[t]; } });
+  return d;
 }
 function write(key, data) {
   try { localStorage.setItem(key, JSON.stringify({ v:VERSION, d:data })); } catch (e) {}
