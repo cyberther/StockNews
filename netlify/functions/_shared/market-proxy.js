@@ -7,7 +7,7 @@ const WINDOW_MS = 60_000;
 const CHART_RANGES = {
   '1d': '5m', '5d': '15m', '1mo': '60m', '6mo': '1d', ytd: '1d', '1y': '1d', '5y': '1wk'
 };
-const ENDPOINTS = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/chart']);
+const ENDPOINTS = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/calendar/earnings', '/chart']);
 const cache = new Map();
 const clients = new Map();
 
@@ -81,12 +81,13 @@ function validatedTarget(url, apiKey) {
     target.searchParams.set('symbol', symbol);
   }
 
-  if (path === '/company-news') {
+  if (path === '/company-news' || path === '/calendar/earnings') {
     const from = url.searchParams.get('from') || '';
     const to = url.searchParams.get('to') || '';
     if (!isoDate(from) || !isoDate(to) || from > to) return { error: 'invalid date range' };
     const days = (Date.parse(to + 'T00:00:00Z') - Date.parse(from + 'T00:00:00Z')) / 86400000;
-    if (days > 31) return { error: 'date range too large' };
+    // News is fetched a month at a time; the earnings calendar spans the last and next report.
+    if (days > (path === '/company-news' ? 31 : 400)) return { error: 'date range too large' };
     target.searchParams.set('from', from);
     target.searchParams.set('to', to);
   }
