@@ -144,9 +144,11 @@ async function earnings(symbol, token){
   return put('earnings', symbol, rows);
 }
 
-// The last and next earnings reports from Finnhub's earnings calendar. These are the days
-// results were (or will be) published, not fiscal quarter ends.
-//   { last: { date, hour, epsActual, epsEstimate, surprisePct } | null,
+// The last and next earnings reports. next comes from Finnhub's earnings calendar (the
+// day results will be published). The free plan's calendar has no history, so last comes
+// from the calendar when it has a reported row, else from /stock/earnings, which knows the
+// fiscal quarter but not the publication day (date is then null).
+//   { last: { date|null, quarter, year, hour, epsActual, epsEstimate, surprisePct } | null,
 //     next: { date, hour, epsEstimate } | null }
 // hour: 'bmo' (before the open), 'amc' (after the close), 'dmh' (during market hours) or ''.
 async function earningsDates(symbol, token){
@@ -163,8 +165,15 @@ async function earningsDates(symbol, token){
   const l = reported[reported.length - 1] || null;
   const n = rows.find(r => r.date >= today && r.epsActual == null) || null;
   const num = v => v == null || !isFinite(Number(v)) ? null : Number(v);
-  const last = l ? { date: l.date, hour: l.hour || '', epsActual: num(l.epsActual), epsEstimate: num(l.epsEstimate),
+  let last = l ? { date: l.date, quarter: l.quarter || null, year: l.year || null, hour: l.hour || '', epsActual: num(l.epsActual), epsEstimate: num(l.epsEstimate),
     surprisePct: num(l.epsEstimate) ? (num(l.epsActual) - num(l.epsEstimate)) / Math.abs(num(l.epsEstimate)) * 100 : null } : null;
+  if (!last) {
+    let hist = [];
+    try { hist = await get('/stock/earnings', { symbol: symbol, limit: 4 }, token); } catch (e) {}
+    const h = (Array.isArray(hist) ? hist : []).filter(x => x && x.actual != null && x.period).sort((a,b) => a.period < b.period ? 1 : -1)[0];
+    if (h) last = { date: null, quarter: h.quarter || null, year: h.year || null, hour: '', epsActual: num(h.actual), epsEstimate: num(h.estimate),
+      surprisePct: num(h.surprisePercent) };
+  }
   const next = n ? { date: n.date, hour: n.hour || '', epsEstimate: num(n.epsEstimate) } : null;
   return put('edates', symbol, { last, next });
 }
@@ -189,7 +198,8 @@ function earningsText(ed, u){
   if (ed && ed.last) {
     const s = ed.last.surprisePct;
     const res = s == null ? '' : Math.abs(s) < 0.5 ? t.edInline : (s > 0 ? t.edBeat : t.edMiss) + ' ' + Math.abs(s).toFixed(1) + '%';
-    out.last = t.edLast + ' ' + day(ed.last.date) + (res ? ' · ' + res : '');
+    const which = ed.last.date ? day(ed.last.date) : (ed.last.quarter && ed.last.year ? 'Q' + ed.last.quarter + ' FY' + ed.last.year : '');
+    out.last = (t.edLast + ' ' + which).trim() + (res ? ' · ' + res : '');
   }
   return out;
 }
