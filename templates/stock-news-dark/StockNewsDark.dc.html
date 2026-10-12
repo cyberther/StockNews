@@ -9,7 +9,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news app — dark terminal" description="Executive/terminal variant of the stock news product: dark surfaces, numbers-forward rows, one decision per screen, separate app and content languages." -->
-<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
+<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">TERMINAL</text></svg></template>
 <div data-theme="{{ theme }}" style="min-height:100vh;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums">
 <div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid var(--s-rule)">
@@ -471,6 +471,9 @@
 </div>
 <div style="font-size:11px;color:var(--s-mute);margin-top:7px">{{ langNote }}</div>
 </div>
+<sc-if value="{{ pushRow.show }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--s-rule)"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">{{ ui.pushDevice }}</div><div style="font-size:11px;color:var(--s-mute);margin-top:2px;line-height:1.4">{{ pushRow.note }}</div></div><sc-if value="{{ pushRow.canAct }}" hint-placeholder-val="{{ true }}"><button onClick="{{ pushRow.act }}" style="flex:none;min-height:34px;padding:0 12px;background:{{ pushRow.bg }};border:1px solid var(--color-accent);color:{{ pushRow.ink }};font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ pushRow.actionLabel }}</button></sc-if></div>
+</sc-if>
 <sc-for list="{{ notifRows }}" as="s" hint-placeholder-count="3">
 <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--s-rule)"><div style="flex:1"><div style="font-size:13px;font-weight:600">{{ s.label }}</div><div style="font-size:11px;color:var(--s-mute)">{{ s.note }}</div></div><span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-mute)">{{ s.value }}</span></div>
 </sc-for>
@@ -704,13 +707,54 @@ class Component extends DCLogic {
   // Mirror the Supabase session into the app. A different account on this device starts
   // fresh: its own onboarding and watchlist, not the previous user's.
   applyAuthSession(sess) {
-    if (!sess) { this.setState({ session:null, locked:false, serverPlan:null }); return; }
+    if (!sess) { this._wlUser = null; this._wlReady = false; this.setState({ session:null, locked:false, serverPlan:null, devicePush:'unavailable' }); return; }
     const fresh = this.state.accountId !== sess.userId;
     this.setState(Object.assign({
       session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
       accountId: sess.userId, authPw:'', authPw2:'', authSent:'', authErr:''
     }, fresh ? { onboarded:false, follows:[], selected:'', screen:'feed', liveNames:{} } : {}));
     this.loadPlan();
+    if (this._wlUser !== sess.userId) { this._wlUser = sess.userId; this.loadServerWatchlist(); }
+    this.refreshPush();
+  }
+  // Push alerts on this device (real accounts only; hidden until the server has a key).
+  refreshPush() {
+    if (!window.HIFPush) return;
+    window.HIFPush.status().then(st => { if (st !== this.state.devicePush) this.setState({ devicePush:st }); }).catch(() => {});
+  }
+  togglePushDevice() {
+    const P = window.HIFPush; if (!P || this.state.pushBusy) return;
+    const on = this.state.devicePush === 'on';
+    this.setState({ pushBusy:true });
+    (on ? P.disable() : P.enable()).then(r => {
+      this.setState({ pushBusy:false });
+      if (r && r.error && r.error !== 'dismissed') this.flash(((UI[this.appLang] || {}).pushFailed || 'Could not turn on alerts').toUpperCase());
+      this.refreshPush();
+    }).catch(() => { this.setState({ pushBusy:false }); this.refreshPush(); });
+  }
+  // The watchlist also lives on the server, for the background scan and for the user's
+  // other devices. On sign-in the server copy wins (every change goes up within seconds);
+  // from then on, changes made here are mirrored up.
+  loadServerWatchlist() {
+    const P = window.HIFPush; if (!P) return;
+    this._wlReady = false;
+    P.loadWatchlist().then(rows => {
+      if (rows && rows.length) {
+        const push = {}; rows.forEach(r => { if (!r.push) push[r.ticker] = false; });
+        const follows = rows.map(r => r.ticker);
+        this.setState(st => ({ follows, push, onboarded:true, selected: st.selected && follows.indexOf(st.selected) >= 0 ? st.selected : follows[0] }));
+      }
+      this._wlReady = true; this._wlSig = ''; this.queueWatchlistSync();
+    }).catch(() => { this._wlReady = true; });
+  }
+  queueWatchlistSync() {
+    const s = this.state;
+    if (!this._wlReady || !s.authLive || !s.session || !window.HIFPush) return;
+    const sig = JSON.stringify([s.follows, s.push]);
+    if (sig === this._wlSig) return;
+    this._wlSig = sig;
+    clearTimeout(this._wlT);
+    this._wlT = setTimeout(() => window.HIFPush.syncWatchlist(this.state.follows, this.state.push).catch(() => {}), 1500);
   }
   loadPlan() {
     window.HIFAuth.plan().then(p => {
@@ -805,6 +849,7 @@ class Component extends DCLogic {
       call:note, liveOnly:true };
   }
   componentDidUpdate() {
+    this.queueWatchlistSync();
     if (this.state.screen === 'detail' && this.state.selected) this.ensureChart(this.state.selected, this.state.chartRange || '1d');
     // A ticker added from search, onboarding or the ticker page gets its live data now.
     if (this._synced && window.HIFLive) {
@@ -1470,6 +1515,14 @@ class Component extends DCLogic {
       desktopFeed: () => this.go('feed'),
       desktopWatchlist: () => this.go('watchlist'),
       desktopScreener: () => this.go('more'),
+      pushRow: (() => {
+        const dp = s.devicePush || 'unavailable';
+        return { show: !!s.authLive && !!s.session && dp !== 'unavailable',
+          note: ({ on:u.pushDeviceOn, off:u.pushDeviceOff, denied:u.pushDeviceDenied, 'ios-install':u.pushDeviceIos, unsupported:u.pushDeviceNo })[dp] || '',
+          canAct: dp === 'on' || dp === 'off', actionLabel: s.pushBusy ? '…' : (dp === 'on' ? u.pushTurnOff : u.pushTurnOn),
+          act: () => this.togglePushDevice(),
+          bg: dp === 'on' ? 'transparent' : 'var(--color-accent)', ink: dp === 'on' ? 'var(--color-accent)' : 'var(--s-on-accent)' };
+      })(),
       notifRows: [
         { label:u.notifTickers, note:u.notifTickersNote, value: isFree ? u.pro : '✓' },
         { label:u.notifMove, note:u.notifMoveNote, value: isFree ? u.pro : '5%' },

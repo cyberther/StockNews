@@ -210,7 +210,9 @@ function fail(res, status, code, detail) {
 // The browser needs these two values to talk to Supabase directly for sign-in.
 // Both are public by design; the anon key is safe here, the service_role key never is.
 app.get('/api/config', limit('config', 60), (_req, res) => {
-  res.json({ supabaseUrl: SUPABASE_URL, supabaseAnonKey: SUPABASE_ANON_KEY, liveData: !!FINNHUB_TOKEN });
+  const vapid = process.env.VAPID_PUBLIC_KEY || '';
+  res.json({ supabaseUrl: SUPABASE_URL, supabaseAnonKey: SUPABASE_ANON_KEY, liveData: !!FINNHUB_TOKEN,
+    vapidPublicKey: /^[A-Za-z0-9_-]{87}$/.test(vapid) ? vapid : null });
 });
 
 app.get('/api/health', limit('health', 60), (_req, res) => res.json({ ok: true }));

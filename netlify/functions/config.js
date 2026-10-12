@@ -6,6 +6,8 @@
 //   SUPABASE_ANON_KEY = the project's anon (public) key
 // Both are designed to be public. Never set the service_role key here: it bypasses
 // row-level security. Without these two, the apps fall back to their demo sign-in.
+//   VAPID_PUBLIC_KEY  = the public half of the web-push key pair (supabase/README.md);
+//                       without it the apps hide the push-alert switch.
 const URL_RE = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i;
 
 // Publish a key only if it is provably the public one: a legacy JWT whose role is
@@ -23,8 +25,11 @@ export default async () => {
   const url = process.env.SUPABASE_URL || '';
   const key = process.env.SUPABASE_ANON_KEY || '';
   const ok = URL_RE.test(url) && isPublicKey(key);
+  // A P-256 public key is 65 bytes: 87 base64url characters.
+  const vapid = process.env.VAPID_PUBLIC_KEY || '';
   return Response.json(
-    { supabaseUrl: ok ? url : null, supabaseAnonKey: ok ? key : null, liveData: !!process.env.FINNHUB_KEY },
+    { supabaseUrl: ok ? url : null, supabaseAnonKey: ok ? key : null, liveData: !!process.env.FINNHUB_KEY,
+      vapidPublicKey: /^[A-Za-z0-9_-]{87}$/.test(vapid) ? vapid : null },
     { headers: { 'cache-control': 'public, max-age=300' } }
   );
 };
