@@ -473,7 +473,7 @@
 <div style="background:var(--s-bg);padding:14px 16px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tickers }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:20px;margin-top:2px">{{ capLabel }}</div></div>
 <div style="background:var(--s-bg);padding:14px 16px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:20px;margin-top:2px">{{ intervalLabel }}</div></div>
 </div>
-<button onClick="{{ accountPlanAction }}" style="min-height:46px;margin-top:14px;padding:0 18px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ accountPlanLabel }}</button>
+<sc-if value="{{ notAllAccess }}" hint-placeholder-val="{{ true }}"><button onClick="{{ accountPlanAction }}" style="min-height:46px;margin-top:14px;padding:0 18px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ accountPlanLabel }}</button></sc-if><sc-if value="{{ allAccess }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);margin-top:12px;line-height:1.45">{{ ui.earlyAccessNote }}</div></sc-if>
 <div style="margin-top:26px;max-width:420px">
 <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:8px">{{ ui.appearance }}</div>
 <div style="display:flex;border:1px solid var(--s-rule)">
@@ -1286,7 +1286,7 @@ class Component extends DCLogic {
     return pool;
   }
   // With real accounts the plan is the server's (account_status); the demo keeps its toggle.
-  get plan() { return this.state.authLive ? (this.state.serverPlan || 'free') : (this.state.plan || this.props.plan || 'free'); }
+  get plan() { if ((window.HIF || {}).ALL_ACCESS) return 'pro'; return this.state.authLive ? (this.state.serverPlan || 'free') : (this.state.plan || this.props.plan || 'free'); }
   get lang() { return this.state.lang || this.props.lang || 'EN'; }
   get appLang() { return this.state.appLang || this.props.appLang || 'EN'; }
   go(screen) { this.setState(s => ({ screen, prev: (s.screen === 'paywall') ? s.prev : s.screen })); }
@@ -1702,6 +1702,7 @@ class Component extends DCLogic {
     const NEWS = H.NEWS, FOLLOWS = H.FOLLOWS, UNIVERSE = H.UNIVERSE, UI = H.UI;
     const EVENTS = H.EVENTS || {}, SIGNALS = H.SIGNALS || {};
     const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen;
+    const H_ALL = !!(window.HIF || {}).ALL_ACCESS;
     const vw = s.vw || (typeof window !== 'undefined' && window.innerWidth) || 1440;
     const L = this.lang, A = this.appLang, u = UI[A];
     if (!this._idle) this.startIdleWatch();
@@ -2000,7 +2001,8 @@ class Component extends DCLogic {
       calRows, noCal: !calRows.length && !dataless(stock.ticker),
       sigRows, noSig: !sigRows.length && !dataless(stock.ticker),
       brand: this.props.brand || 'Market Pulse',
-      planLabel: isFree ? u.free : u.pro,
+      planLabel: H_ALL ? (u.earlyAccess || 'Early access') : (isFree ? u.free : u.pro),
+      allAccess: H_ALL, notAllAccess: !H_ALL,
       planToggleLabel: isFree ? u.viewPro : u.viewFree,
       togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),
       isFeed: screen === 'feed', isWatch: screen === 'watchlist', isSearch: screen === 'search',
@@ -2051,7 +2053,7 @@ class Component extends DCLogic {
       authResend: () => window.HIFAuth.resend(s.authSent).then(r => r.error ? this.setState({ authErr:this.authMessage(r.error) }) : this.flash((u.authResent || 'Sent').toUpperCase())),
       authUseOther: () => this.setState({ authSent:'', authErr:'' }),
       authBusyOn: !!s.authBusy, authBtnOpacity: s.authBusy ? 0.6 : 1,
-      showPlanToggle: !s.authLive,
+      showPlanToggle: !s.authLive && !H_ALL,
       submitAuth: () => this.submitEmailAuth(),
       authOpen: !!s.authOpen,
       openAuth: () => this.setState({ authOpen:true, authMode:'up' }),

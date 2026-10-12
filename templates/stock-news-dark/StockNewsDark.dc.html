@@ -369,7 +369,7 @@
 <div style="background:var(--s-bg);padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tickers }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ capLabel }}</div></div>
 <div style="background:var(--s-bg);padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ intervalLabel }}</div></div>
 </div>
-<button onClick="{{ accountPlanAction }}" style="width:100%;min-height:44px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ accountPlanLabel }}</button>
+<sc-if value="{{ notAllAccess }}" hint-placeholder-val="{{ true }}"><button onClick="{{ accountPlanAction }}" style="width:100%;min-height:44px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ accountPlanLabel }}</button></sc-if><sc-if value="{{ allAccess }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:var(--s-mute);margin-top:10px;line-height:1.45">{{ ui.earlyAccessNote }}</div></sc-if>
 </div>
 <div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
 <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:8px">{{ ui.appearance }}</div>
@@ -867,7 +867,7 @@ class Component extends DCLogic {
     ].filter(x => rv.indexOf(x.id) === -1);
   }
   // With real accounts the plan is the server's (account_status); the demo keeps its toggle.
-  get plan() { return this.state.authLive ? (this.state.serverPlan || 'free') : (this.state.plan || this.props.plan || 'free'); }
+  get plan() { if ((window.HIF || {}).ALL_ACCESS) return 'pro'; return this.state.authLive ? (this.state.serverPlan || 'free') : (this.state.plan || this.props.plan || 'free'); }
   get lang() { return this.state.lang || this.props.lang || 'EN'; }
   get appLang() { return this.state.appLang || this.props.appLang || 'EN'; }
   go(screen) { this.setState(s => ({ screen, prev: (s.screen === 'paywall' || s.screen === 'detail') ? s.prev : s.screen })); }
@@ -994,6 +994,7 @@ class Component extends DCLogic {
   renderVals() {
     if (!bindShared()) return {};
     const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen;
+    const H_ALL = !!(window.HIF || {}).ALL_ACCESS;
     const L = this.lang, A = this.appLang, u = UI[A];
     if (!this._idle) this.startIdleWatch();
     const HS = window.HIFStore || null;
@@ -1067,7 +1068,8 @@ class Component extends DCLogic {
     return {
       ui: u,
       brand: this.props.brand || 'Market Pulse',
-      planLabel: isFree ? u.free : u.pro,
+      planLabel: H_ALL ? (u.earlyAccess || 'Early access') : (isFree ? u.free : u.pro),
+      allAccess: H_ALL, notAllAccess: !H_ALL,
       planToggleLabel: isFree ? u.viewPro : u.viewFree,
       togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),
       isAuth: !signedIn, isOnboard: signedIn && !s.onboarded, isLocked: signedIn && !!s.locked,
@@ -1118,7 +1120,7 @@ class Component extends DCLogic {
       authResend: () => window.HIFAuth.resend(s.authSent).then(r => r.error ? this.setState({ authErr:this.authMessage(r.error) }) : this.flash((u.authResent || 'Sent').toUpperCase())),
       authUseOther: () => this.setState({ authSent:'', authErr:'' }),
       authBusyOn: !!s.authBusy, authBtnOpacity: s.authBusy ? 0.6 : 1,
-      showPlanToggle: !s.authLive,
+      showPlanToggle: !s.authLive && !H_ALL,
       submitAuth: () => this.submitEmailAuth(),
       obCount: String(s.follows.length),
       obQuery: s.obQuery || '',
