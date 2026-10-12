@@ -174,6 +174,9 @@
 </div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:20px;line-height:1.2;letter-spacing:-0.02em;margin-top:6px;color:{{ whyTone }}">{{ whyLabel }}</div>
 <div style="font-size:14px;line-height:1.45;margin-top:6px;max-width:56ch;text-wrap:pretty">{{ whyDetail }}</div>
+<sc-if value="{{ whyHasLink }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ openWhy }}" style-hover="color:var(--s-ink)" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 0;min-height:32px;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.04em;cursor:pointer">{{ whyLinkLabel }}<span aria-hidden="true">↗</span></button>
+</sc-if>
 <div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ whyNote }}</div>
 </div>
 </sc-if>
@@ -201,7 +204,7 @@
 <sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
 <article role="button" tabIndex="0" onClick="{{ n.open }}" onKeyDown="{{ n.keyOpen }}" style-hover="background:var(--s-panel)" style="display:grid;grid-template-columns:96px 1fr;gap:16px;padding:14px 28px;border-top:1px solid var(--s-rule);align-items:baseline;cursor:pointer">
 <span style="font-size:11px;letter-spacing:0.06em;color:var(--s-mute)">{{ n.stamp }}</span>
-<div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.25;text-wrap:pretty">{{ n.headline }}</div><div style="font-size:11px;color:var(--s-mute);margin-top:3px">{{ n.source }}</div></div>
+<div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.25;text-wrap:pretty">{{ n.headline }}</div><div style="font-size:11px;color:var(--s-mute);margin-top:3px">{{ n.source }}<sc-if value="{{ n.hasUrl }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent);margin-left:6px" aria-hidden="true">↗</span></sc-if></div></div>
 </article>
 </sc-for>
 <sc-if value="{{ noStockNews }}" hint-placeholder-val="{{ false }}">
@@ -1120,7 +1123,11 @@ class Component extends DCLogic {
       if (opened) opened.opener = null;
       return;
     }
-    if (item && item.ticker) this.openTicker(item.ticker);
+    if (!item || !item.ticker) return;
+    // Demo stories carry no source article. On their own ticker page, re-opening
+    // the ticker looks like a dead click, so say why there is nothing to open.
+    if (this.state.screen === 'detail' && this.state.selected === item.ticker) return this.flash(this.copy.demoNoSource || 'Demo story · no source article');
+    this.openTicker(item.ticker);
   }
   openTicker(ticker) {
     this.setState({ selected:ticker, screen:'detail', prev:this.state.screen });
@@ -1632,7 +1639,7 @@ class Component extends DCLogic {
     const peerList = ((H.SECTORS || {})[sector] || []).filter(t => t !== stock.ticker);
     const peers = peerList.map(t => ({ ticker:t, move:(rec(t) || {}).move })).filter(p => p.move);
     const dayNews = ((live && LN[stock.ticker]) ? LN[stock.ticker] : NEWS.filter(n => n.ticker === stock.ticker))
-      .slice(0, 3).map(n => ({ headline: typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN, source:n.source }));
+      .slice(0, 3).map(n => ({ headline: typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN, source:n.source, url:n.url || '' }));
     const why = IN ? IN.attribute({ ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
     const whyTone = why && (why.kind === 'none' || why.kind === 'quiet') ? 'var(--s-mute)' : 'var(--color-accent)';
     const trend = window.HIFChart.seriesFor(stock.ticker, '1mo', stock.price, stock.move, 60).map(p => p.close);
@@ -1749,6 +1756,8 @@ class Component extends DCLogic {
       tabOverview: dTab === 'overview', tabNews: dTab === 'news', tabResearch: dTab === 'research',
       why, hasWhy: !!why, whyLabel: why ? why.label : '', whyDetail: why ? why.detail : '',
       whyNote: why ? (why.note || '') : '', whyTone,
+      whyHasLink: !!(why && why.url), whyLinkLabel: why && why.url ? (u.readAt || 'Read at %s').replace('%s', why.source || 'source') : '',
+      openWhy: () => { if (why && why.url) this.openNews({ url: why.url, ticker: stock.ticker }); },
       whyConf: why && why.confidence ? why.confidence.toUpperCase() + ' ' + u.whyConfidence.toUpperCase() : '',
       clashes, hasClash: !!clashes.length, noClash: !clashes.length,
       clashRows: clashes.map(c => ({ title:c.title, detail:c.detail, accent: c.tone === 'warn' ? 'var(--color-accent)' : 'var(--s-mute)' })),
@@ -1961,6 +1970,7 @@ class Component extends DCLogic {
         ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, headline:n.headline, source:n.source, stamp:n.stamp, score:'', url:n.url || '' }))
         : NEWS.filter(n => n.ticker === stock.ticker).slice(0,5).map(n => Object.assign({}, n, { headline: n.headline[L] })))
         .map(n => Object.assign({}, n, {
+          hasUrl: /^https?:\/\//i.test(n.url || ''),
           open: () => this.openNews(n),
           keyOpen: event => this.activateFromKeyboard(() => this.openNews(n), event)
         })),
