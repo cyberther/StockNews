@@ -55,7 +55,8 @@ test('a 429 cools the provider down instead of calling it again', async () => {
   assert.equal((await handleMarketRequest(req('path=/quote&symbol=NVDA'), { apiKey: 'k' })).status, 429);
   assert.equal((await handleMarketRequest(req('path=/quote&symbol=AAPL'), { apiKey: 'k' })).status, 429);
   assert.equal(calls, 1);
-  assert.equal(gatewayStatus().providers.finnhub.open, true);
+  assert.equal(gatewayStatus().providers.finnhub.breaker.open, true);
+  assert.equal(gatewayStatus().providers.finnhub.thisInstance.rate_limited, 1);
 });
 
 test('serves the last good answer, marked stale, when the provider fails', async () => {
@@ -101,4 +102,61 @@ test('earnings honours a smaller limit; the key never appears in replies or logs
   const text = JSON.stringify([...r.headers]) + (await r.text()) + logs.join('');
   assert.equal(text.includes('sekret-key'), false);
   assert.equal(logs.length, 1);
+});
+
+test('paces a provider under its per-minute limit on this instance', async () => {
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; return ok({ c: 1 }); };
+  const results = [];
+  for (let i = 0; i < 60; i++) results.push((await handleMarketRequest(req('path=/quote&symbol=S' + i), { apiKey: 'k' })).status);
+  assert.equal(calls, 54); // 90% of Finnhub's 60 a minute
+  assert.equal(results.filter(s => s === 429).length, 6);
+});
+
+test('counts go to the shared store in batches, and come back if the store fails', async () => {
+  globalThis.fetch = async () => ok({ c: 1 });
+  const sent = [];
+  let fail = true;
+  const usage = { bump: async rows => { if (fail) throw new Error('down'); sent.push(...rows); }, read: async () => [] };
+  for (let i = 0; i < 25; i++) await handleMarketRequest(req('path=/quote&symbol=T' + i), { apiKey: 'k', usage });
+  // The 25th call triggered a flush that failed; the counts were kept for the next one.
+  fail = false;
+  const { flushUsage } = await import('../netlify/functions/_shared/market/gateway.js');
+  await flushUsage(usage);
+  assert.deepEqual(sent, [{ provider: 'finnhub', calls: 25, rate_limited: 0, errors: 0 }]);
+});
+
+test('a provider over its daily cap is skipped, using the shared count', async () => {
+  const { finnhub } = await import('../netlify/functions/_shared/market/providers/finnhub.js');
+  const saved = finnhub.limits;
+  finnhub.limits = { perDay: 100 };
+  try {
+    let calls = 0;
+    globalThis.fetch = async () => { calls++; return ok({ c: 1 }); };
+    const day = new Date().toISOString().slice(0, 10);
+    const usage = { bump: async () => {}, read: async () => [{ provider: 'finnhub', day, calls: 95 }] };
+    const r = await handleMarketRequest(req('path=/quote&symbol=NVDA'), { apiKey: 'k', usage });
+    assert.equal(r.status, 429);
+    assert.deepEqual(await r.json(), { error: 'daily quota reached' });
+    assert.equal(calls, 0);
+  } finally { finnhub.limits = saved; }
+});
+
+test('health endpoint: hidden without a token, refuses a wrong one, never shows keys', async () => {
+  const env = { ...process.env };
+  try {
+    process.env.FINNHUB_KEY = 'finnhub-secret-value';
+    delete process.env.HEALTH_TOKEN;
+    const mod = await import('../netlify/functions/market-health.js?a');
+    assert.equal((await mod.default(new Request('http://x/api/market/health'))).status, 404);
+    process.env.HEALTH_TOKEN = 'h'.repeat(40);
+    const wrong = await mod.default(new Request('http://x/api/market/health', { headers: { authorization: 'Bearer nope' } }));
+    assert.equal(wrong.status, 401);
+    const good = await mod.default(new Request('http://x/api/market/health', { headers: { authorization: 'Bearer ' + 'h'.repeat(40) } }));
+    assert.equal(good.status, 200);
+    const text = await good.text();
+    assert.equal(text.includes('finnhub-secret-value'), false);
+    const body = JSON.parse(text);
+    assert.deepEqual(body.providers.map(p => [p.name, p.configured]), [['finnhub', true], ['yahoo', true]]);
+  } finally { process.env = env; }
 });
