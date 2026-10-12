@@ -30,6 +30,75 @@ const TICKER_RE = /^[A-Z0-9][A-Z0-9.\-]{0,11}$/;
 type Story = { id: string; ticker: string; headline: string; source: string | null; url: string | null;
   summary: string | null; published_at: string };
 
+// ---- relevance and publisher: the same rules as netlify/functions/_shared/news-clean.js
+// (keep the two in step). Finnhub tags tickers onto general market articles, and
+// syndicated stories arrive as "Yahoo" behind a finnhub.io redirect.
+const SUFFIX = /\b(incorporated|inc|corporation|corp|company|co|ltd|limited|plc|holdings?|group|n\.?v|s\.?a|ag|se|a\/s|asa|ab|oyj|spa|ADR|class [a-c]|the)\b\.?/gi;
+const GENERIC = new Set(['international', 'technologies', 'technology', 'systems', 'global', 'american',
+  'america', 'financial', 'capital', 'energy', 'pharmaceuticals', 'therapeutics', 'motors', 'platforms',
+  'semiconductor', 'manufacturing', 'industries', 'services', 'solutions', 'communications', 'networks',
+  'resources', 'brands', 'enterprises', 'partners', 'trust', 'bank', 'bancorp', 'chase', 'and']);
+// Names the press uses that the registered name doesn't contain.
+const ALIASES: Record<string, string[]> = {
+  GOOGL: ['Google', 'Alphabet'], GOOG: ['Google', 'Alphabet'], META: ['Meta', 'Facebook', 'Instagram', 'WhatsApp'],
+  TSM: ['TSMC', 'Taiwan Semiconductor'], NVO: ['Novo Nordisk', 'Novo', 'Wegovy', 'Ozempic'], LLY: ['Eli Lilly', 'Lilly'],
+  JPM: ['JPMorgan', 'JP Morgan'], BRK: ['Berkshire'], 'BRK.B': ['Berkshire'], 'BRK.A': ['Berkshire'],
+  AMZN: ['Amazon', 'AWS'], MSFT: ['Microsoft', 'Azure'], AAPL: ['Apple', 'iPhone'], NVDA: ['Nvidia'],
+  TSLA: ['Tesla'], AVGO: ['Broadcom'], AMD: ['AMD', 'Advanced Micro Devices'], ASTS: ['AST SpaceMobile', 'SpaceMobile']
+};
+
+function keywordsFor(symbol: string, companyName: string) {
+  const words = new Set(ALIASES[symbol] || []);
+  const clean = String(companyName || '').replace(SUFFIX, ' ').replace(/[,()]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (clean) {
+    words.add(clean);
+    clean.split(' ').forEach(w => { if (w.length >= 4 && !GENERIC.has(w.toLowerCase())) words.add(w); });
+  }
+  return [...words];
+}
+
+const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function matcher(symbol: string, companyName: string) {
+  const words = keywordsFor(symbol, companyName);
+  const nameRe = words.length ? new RegExp('\\b(' + words.map(esc).join('|') + ')\\b', 'i') : null;
+  // The bare ticker only counts in capitals ("AMD", "$NVDA"), and not for one- or
+  // two-letter tickers, which collide with ordinary words.
+  const tickerRe = symbol.length >= 3 ? new RegExp('(^|[^A-Za-z])\\$?' + esc(symbol) + '(?![A-Za-z])') : null;
+  return (text: string) => (nameRe && nameRe.test(text)) || (tickerRe && tickerRe.test(text));
+}
+
+const PUBLISHERS: Record<string, string> = {
+  'fool.com': 'Motley Fool', '247wallst.com': '24/7 Wall St.', 'finance.yahoo.com': 'Yahoo Finance',
+  'yahoo.com': 'Yahoo Finance', 'reuters.com': 'Reuters', 'bloomberg.com': 'Bloomberg', 'cnbc.com': 'CNBC',
+  'marketwatch.com': 'MarketWatch', 'barrons.com': "Barron's", 'wsj.com': 'WSJ', 'ft.com': 'FT',
+  'seekingalpha.com': 'Seeking Alpha', 'benzinga.com': 'Benzinga', 'investors.com': "Investor's Business Daily",
+  'zacks.com': 'Zacks', 'thestreet.com': 'TheStreet', 'forbes.com': 'Forbes', 'businessinsider.com': 'Business Insider',
+  'insidermonkey.com': 'Insider Monkey', 'investopedia.com': 'Investopedia', 'techcrunch.com': 'TechCrunch',
+  'theverge.com': 'The Verge', 'fortune.com': 'Fortune', 'apnews.com': 'AP', 'nytimes.com': 'New York Times',
+  'gurufocus.com': 'GuruFocus', 'simplywall.st': 'Simply Wall St', 'tipranks.com': 'TipRanks',
+  'globenewswire.com': 'GlobeNewswire', 'prnewswire.com': 'PR Newswire', 'businesswire.com': 'Business Wire',
+  'accessnewswire.com': 'ACCESS Newswire', 'investing.com': 'Investing.com', 'nasdaq.com': 'Nasdaq',
+  'morningstar.com': 'Morningstar', 'kiplinger.com': 'Kiplinger', 'axios.com': 'Axios', 'theinformation.com': 'The Information'
+};
+function publisherFor(href: string, fallback: string | null) {
+  let host = '';
+  try { host = new URL(href).hostname.replace(/^www\./, ''); } catch { return fallback; }
+  if (PUBLISHERS[host]) return PUBLISHERS[host];
+  const parent = host.split('.').slice(-2).join('.');
+  return PUBLISHERS[parent] || parent || fallback;
+}
+
+
+// The real article behind a finnhub.io/api/news redirect ('' when it doesn't resolve).
+async function finalUrl(link: string) {
+  if (!/^https:\/\/finnhub\.io\/api\/news\?/.test(link)) return '';
+  try {
+    const res = await fetch(link, { redirect: 'manual', signal: AbortSignal.timeout(2500) });
+    const loc = res.headers.get('location') || '';
+    return /^https:\/\//.test(loc) ? loc : '';
+  } catch { return ''; }
+}
+
 function ymd(ms: number) { return new Date(ms).toISOString().slice(0, 10); }
 
 // Constant-time comparison for the bearer secret.
@@ -47,7 +116,7 @@ async function pool<T, R>(items: T[], n: number, fn: (x: T) => Promise<R>): Prom
   return out;
 }
 
-async function companyNews(ticker: string, errors: string[]): Promise<Story[]> {
+async function companyNews(ticker: string, name: string, errors: string[]): Promise<Story[]> {
   const now = Date.now();
   const url = `${env('FINNHUB_BASE') || 'https://finnhub.io/api/v1'}/company-news?symbol=${encodeURIComponent(ticker)}&from=${ymd(now - 2 * 86400000)}&to=${ymd(now + 86400000)}`;
   try {
@@ -55,7 +124,9 @@ async function companyNews(ticker: string, errors: string[]): Promise<Story[]> {
     if (!res.ok) { errors.push(`${ticker}: finnhub ${res.status}`); return []; }
     const rows = await res.json();
     if (!Array.isArray(rows)) return [];
-    return rows.filter(n => n && n.id && n.headline && n.datetime).slice(0, 40).map(n => ({
+    const relevant = matcher(ticker, name);
+    return rows.filter(n => n && n.id && n.headline && n.datetime && relevant(n.headline + ' ' + (n.summary || '')))
+      .sort((a, b) => b.datetime - a.datetime).slice(0, 25).map(n => ({
       id: `${ticker}:${n.id}`,
       ticker,
       headline: String(n.headline).slice(0, 500),
@@ -99,7 +170,21 @@ Deno.serve(async (req) => {
     tickers = tickers.slice(slot * MAX_TICKERS, (slot + 1) * MAX_TICKERS);
   }
 
-  const found = (await pool(tickers, CONCURRENCY, t => companyNews(t, errors))).flat();
+  // Company names (for the relevance check), cached in public.ticker_names.
+  const names = new Map<string, string>();
+  const { data: nameRows } = await db.from('ticker_names').select('ticker,name').in('ticker', tickers);
+  (nameRows || []).forEach(r => names.set(r.ticker, r.name || ''));
+  const unnamed = tickers.filter(t => !names.has(t)).slice(0, 10);
+  for (const t of unnamed) {
+    try {
+      const res = await fetch(`${env('FINNHUB_BASE') || 'https://finnhub.io/api/v1'}/stock/profile2?symbol=${encodeURIComponent(t)}`, { headers: { 'X-Finnhub-Token': env('FINNHUB_KEY') } });
+      const name = res.ok ? String((await res.json()).name || '') : '';
+      names.set(t, name);
+      await db.from('ticker_names').upsert({ ticker: t, name, updated_at: new Date().toISOString() });
+    } catch { names.set(t, ''); }
+  }
+
+  const found = (await pool(tickers, CONCURRENCY, t => companyNews(t, names.get(t) || '', errors))).flat();
 
   // Insert what is new; ON CONFLICT DO NOTHING returns only the rows actually inserted.
   const fresh: Story[] = [];
@@ -110,6 +195,14 @@ Deno.serve(async (req) => {
     if (error) errors.push('stories: ' + error.message);
     else fresh.push(...(data || []));
   }
+
+  // The real publisher and article link for the stories that are actually new.
+  await pool(fresh, 8, async s => {
+    const url = await finalUrl(s.url || '');
+    if (!url) return;
+    s.url = url; s.source = publisherFor(url, s.source);
+    await db.from('stories').update({ url, source: s.source }).eq('id', s.id);
+  });
 
   // Alerts: recent new stories, for users with push on for that ticker.
   const recent = fresh.filter(s => Date.now() - Date.parse(s.published_at) < FRESH_MS);
