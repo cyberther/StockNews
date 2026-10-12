@@ -1147,10 +1147,12 @@ function hydrate(defaults) {
   hydrated = !!S;
   const out = Object.assign({}, defaults);
   if (saved) PERSIST.forEach(k => { if (saved[k] !== undefined) out[k] = saved[k]; });
+  // Opening the app while signed in always lands on the portfolio.
+  if (saved && saved.session) out.screen = 'portfolio';
   return out;
 }
 class Component extends DCLogic {
-  state = hydrate({ screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed',
+  state = hydrate({ screen:'portfolio', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed',
     quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, liveEarnDates:{}, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
     liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false, detailLoading:false,
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
@@ -1178,6 +1180,7 @@ class Component extends DCLogic {
     if (!saved) { setTimeout(() => this.runAfterRestore(), 0); return true; }
     const patch = {};
     PERSIST.forEach(k => { if (saved[k] !== undefined) patch[k] = saved[k]; });
+    if (patch.session) patch.screen = 'portfolio';
     restoring = true;
     this.setState(patch, () => { restoring = false; this.runAfterRestore(); });
     return false;
@@ -1272,7 +1275,7 @@ class Component extends DCLogic {
     this.setState({
       session:{ provider, email:mail, name: name || null, since:Date.now() },
       locked:false, authOpen:false, authPw:'', authPw2:'', authErr:'', authBad:null, pwShow:false,
-      follows: fresh ? [] : this.state.follows
+      follows: fresh ? [] : this.state.follows, screen:'portfolio'
     });
     this.touch();
     this.logEvent('signin', provider + ' · ' + mail);
@@ -1379,10 +1382,12 @@ class Component extends DCLogic {
     pendingAuth = null;
     if (!sess) { this._wlUser = null; this._wlReady = false; this._hdReady = false; this.setState({ holdServer:false, session:null, locked:false, serverPlan:null, devicePush:'unavailable' }); return; }
     const fresh = this.state.accountId !== sess.userId;
-    this.setState(Object.assign({
+    // Signing in (rather than a token refresh) lands on the portfolio.
+    const landing = !this.state.session ? { screen:'portfolio' } : {};
+    this.setState(Object.assign(landing, {
       session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
       accountId: sess.userId, authOpen:false, authPw:'', authPw2:'', authSent:'', authErr:''
-    }, fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, stack:[], events:[], selected:'', screen:'feed' } : {}));
+    }, fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, stack:[], events:[], selected:'', screen:'portfolio' } : {}));
     this.loadPlan();
     if (this._wlUser !== sess.userId) { this._wlUser = sess.userId; this.loadServerWatchlist(); this.loadServerHoldings(); }
     this.refreshPush();
@@ -1647,7 +1652,7 @@ class Component extends DCLogic {
       .forEach(h => out.push(pin
         ? { kind:'pin', label:(u.cmdPinHint || 'Pin') + ' · ' + h.ticker, detail:h.name, run: () => this.togglePin(h.ticker) }
         : { kind:'open', label:(u.cmdOpenHint || 'Open') + ' · ' + h.ticker, detail:h.name, run: () => this.openTicker(h.ticker) }));
-    [['feed', u.feed], ['watchlist', u.watchlist], ['portfolio', u.pfTitle], ['search', u.addTicker], ['ledger', u.ledger], ['account', u.account], ['security', u.security]]
+    [['portfolio', u.pfTitle], ['feed', u.feed], ['watchlist', u.watchlist], ['search', u.addTicker], ['ledger', u.ledger], ['account', u.account], ['security', u.security]]
       .forEach(sc => {
         const label = String(sc[1] || '');
         if (label.toLowerCase().indexOf(body) === 0 || sc[0].indexOf(body) === 0)
@@ -2287,9 +2292,9 @@ class Component extends DCLogic {
       edit: ev => { stopEv(ev); this.setState({ posEdit:r.ticker, posShares:String(r.shares), posCost: r.avg == null ? '' : String(r.avg) }); }
     }));
     const navList = [
+      this.navItem('portfolio', u.pfTitle, String(Object.keys(s.positions || {}).length)),
       this.navItem('feed', u.feed, String(feed.length)),
       this.navItem('watchlist', u.watchlist, isFree ? s.follows.length + '/3' : String(s.follows.length)),
-      this.navItem('portfolio', u.pfTitle, String(Object.keys(s.positions || {}).length)),
       this.navItem('search', u.addTicker),
       this.navItem('ledger', u.ledger, String((s.dismissed || []).length)),
       this.navItem('account', u.account, ''),
@@ -2605,11 +2610,11 @@ class Component extends DCLogic {
       obChosen: s.follows.map(t => ({ ticker:t, removeLabel:'Remove ' + t, remove: () => this.togglePick(t) })),
       finishOnboard: () => {
         if (!s.follows.length) return this.flash((u.obNeedOne || 'Pick at least one ticker').toUpperCase());
-        this.setState({ onboarded:true, screen:'feed', obQuery:'', liveHits:null });
+        this.setState({ onboarded:true, screen:'portfolio', obQuery:'', liveHits:null });
         s.follows.forEach(t => this.syncSpark(t));
         this.flash(s.follows.length + ' · ' + u.watchlist.toUpperCase());
       },
-      skipOnboard: () => this.setState({ onboarded:true, screen:'feed', obQuery:'', liveHits:null }),
+      skipOnboard: () => this.setState({ onboarded:true, screen:'portfolio', obQuery:'', liveHits:null }),
       theme: s.theme || 'system',
       themes: [['system', u.themeSystem], ['light', u.themeLight], ['dark', u.themeDark]].map((x, i) => {
         const on = (s.theme || 'system') === x[0];
@@ -2666,7 +2671,7 @@ class Component extends DCLogic {
       })),
       signOutAll: () => {
         if (s.authLive) window.HIFAuth.signOut(true);
-        this.setState({ revoked:['ios','mac','win'], session:null, locked:false, screen:'feed', authPw:'', twofaSetup:false });
+        this.setState({ revoked:['ios','mac','win'], session:null, locked:false, screen:'portfolio', authPw:'', twofaSetup:false });
         this.logEvent('signout_all');
         this.flash(u.toastSignedOutAll.toUpperCase());
       },
@@ -2711,7 +2716,7 @@ class Component extends DCLogic {
         : (s.refreshing ? 'FINNHUB …' : (s.liveStatus === 'error' ? 'FINNHUB · ' + (s.liveError || 'error').toUpperCase() : 'DEMO DATA')),
       refreshTicker: () => { this.syncLive([stock.ticker], true); this.syncDetail(stock.ticker, true); },
       refreshLabel: s.refreshing ? '…' : '↻',
-      signOut: () => { this.logEvent('signout'); if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, locked:false, authPw:'', authErr:'', twofaSetup:false }); this.go('feed'); this.flash(u.signOut.toUpperCase()); },
+      signOut: () => { this.logEvent('signout'); if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, locked:false, authPw:'', authErr:'', twofaSetup:false }); this.go('portfolio'); this.flash(u.signOut.toUpperCase()); },
       goPaywall: () => this.go('paywall'),
       goSearch: () => this.go('search'),
       back: () => this.go(s.prev || 'feed'),
