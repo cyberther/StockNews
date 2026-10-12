@@ -45,6 +45,36 @@ Sanity check: `https://<site>/api/finnhub?path=/quote&symbol=NVDA` should return
 News score, volume versus average and the forward earnings countdown remain demo values.
 Price history, technical averages, RSI and available historical earnings are live.
 
+## 2b. Backup providers (optional)
+
+`/api/finnhub` is a gateway (`netlify/functions/_shared/market/`). Each kind of data has an
+ordered list of providers; a provider without a key is skipped, and one that rate-limits,
+fails, or has no answer hands over to the next. Replies keep the shapes above whichever
+provider answered, and the `x-market-source` header names it.
+
+| Data | Order | Free tier (check the provider's current terms) |
+| --- | --- | --- |
+| Quotes | Finnhub → Twelve Data → FMP → Alpha Vantage | Finnhub 60/min; Twelve Data ~8/min, 800/day; FMP 250/day; Alpha Vantage ~25/day |
+| Company profile | Finnhub → FMP → Alpha Vantage | an empty Finnhub profile (some ETFs, ADRs) also falls through |
+| Earnings history | Finnhub → FMP | FMP also adds past reports to the earnings calendar |
+| Price charts | Yahoo → Twelve Data | Twelve Data's ~8/min can't carry charts alone |
+
+Add the keys in Netlify → Environment variables (scope: Functions), then redeploy:
+
+```
+TWELVEDATA_KEY = <key from twelvedata.com>
+FMP_KEY        = <key from financialmodelingprep.com>
+ALPHAVANTAGE_KEY = <key from alphavantage.co>
+```
+
+To change an order, set `MARKET_ORDER_<DATA>`, e.g. `MARKET_ORDER_CHART=twelvedata,yahoo`
+(names: finnhub, twelvedata, fmp, alphavantage, yahoo; capabilities: QUOTE, PROFILE,
+EARNINGS, CHART). Daily caps are tracked across instances when `USAGE_SECRET` is set
+(supabase/README.md); `/api/market/health` shows which providers have a key and their usage.
+
+Several free tiers are for personal or non-commercial use: check each provider's terms
+before showing its data in a public app, and use one account per provider.
+
 ## 3. When to refresh
 
 The detail page loads automatically — no polling:
@@ -64,7 +94,9 @@ Don't ship a published page that way — the key is readable in the source.
 
 ## 5. Files
 
-- `netlify/functions/finnhub.js` — the proxy (endpoint allowlist + env key)
+- `netlify/functions/finnhub.js` — the gateway's Netlify entry point (keys from env)
+- `netlify/functions/_shared/market/` — gateway: providers, caching, failover, usage
+- `netlify/functions/market-health.js` — `/api/market/health` (needs `HEALTH_TOKEN`)
 - `netlify.toml` — functions dir, publish dir, root redirects
 - `templates/shared/hif-live.js` — client adapter (proxy → direct → demo), caching, formatting
 - `templates/shared/hif-data.js` — demo content and all EN/RO/DE copy

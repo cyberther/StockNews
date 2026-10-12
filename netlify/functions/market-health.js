@@ -7,7 +7,7 @@
 // errors and when the last 429 / error happened. Without HEALTH_TOKEN the endpoint does
 // not exist (404).
 import { timingSafeEqual } from 'node:crypto';
-import { providerInfo, gatewayStatus } from './_shared/market/gateway.js';
+import { providerInfo, gatewayStatus, keysFromEnv, orderFromEnv } from './_shared/market/gateway.js';
 import { usageStoreFromEnv } from './_shared/market/usage-store.js';
 
 const usage = usageStoreFromEnv(process.env);
@@ -24,7 +24,7 @@ export default async request => {
   if (token.length < 24) return new Response('Not found', { status: 404, headers });
   if (!authorized(request, token)) return Response.json({ error: 'unauthorized' }, { status: 401, headers: { ...headers, 'www-authenticate': 'Bearer' } });
 
-  const keys = { finnhub: process.env.FINNHUB_KEY };
+  const keys = keysFromEnv(process.env);
   let shared = { configured: !!usage };
   if (usage) {
     try {
@@ -36,7 +36,7 @@ export default async request => {
   }
   return Response.json({
     generatedAt: new Date().toISOString(),
-    providers: providerInfo(keys),
+    providers: providerInfo(keys, orderFromEnv(process.env)),
     usage: shared,
     // One function instance's view only; instances don't share memory.
     instance: gatewayStatus()

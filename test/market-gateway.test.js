@@ -157,6 +157,8 @@ test('health endpoint: hidden without a token, refuses a wrong one, never shows 
     const text = await good.text();
     assert.equal(text.includes('finnhub-secret-value'), false);
     const body = JSON.parse(text);
-    assert.deepEqual(body.providers.map(p => [p.name, p.configured]), [['finnhub', true], ['yahoo', true]]);
+    const conf = Object.fromEntries(body.providers.map(p => [p.name, p.configured]));
+    assert.equal(conf.finnhub, true);
+    assert.equal(conf.yahoo, true);
   } finally { process.env = env; }
 });

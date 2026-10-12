@@ -30,7 +30,10 @@ export const finnhub = {
     u.searchParams.set('token', key);
     return u;
   },
-  // Finnhub answers an unknown symbol with an empty object or c: 0 rather than an error.
+  // An empty profile (some ETFs and ADRs) or earnings list lets the next provider try.
+  // An empty quote (c: 0) is kept: it usually means an unknown symbol, and asking every
+  // other provider about it would only spend their small daily quotas.
+  empty: (cap, d) => cap === 'profile' ? !(d && d.name) : cap === 'earnings' ? !(Array.isArray(d) && d.length) : false,
   async transform(cap, data, p, key) {
     if (cap === 'news') return cleanNews(data, p.symbol, { apiKey: key });
     return data;
