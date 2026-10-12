@@ -249,7 +249,7 @@ async function load(symbols, token, opts){
     try {
       const [q, n, r] = await Promise.all([
         quote(sym, token),
-        o.news === false ? null : news(sym, token, 5),
+        o.news === false ? null : news(sym, token, o.newsLimit || 10),
         o.recs === false ? null : recommendation(sym, token)
       ]);
       if (q) out.quotes[sym] = q;
@@ -261,7 +261,18 @@ async function load(symbols, token, opts){
   return out;
 }
 
-window.HIFLive = { quote, profile, news, recommendation, search, chart, earnings, earningsDates, earningsText, load,
+// Feed day headers: "Today", "Yesterday", or "Fri, 10 Oct" (with the year outside this one).
+function dayHead(sec, u){
+  const d = new Date(sec * 1000), now = new Date(), day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day(now) - day(d)) / 86400000);
+  if (diff === 0) return (u && u.dayToday) || 'Today';
+  if (diff === 1) return (u && u.dayYesterday) || 'Yesterday';
+  const opts = { weekday:'short', day:'numeric', month:'short' };
+  if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
+  return d.toLocaleDateString([], opts);
+}
+
+window.HIFLive = { quote, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();
