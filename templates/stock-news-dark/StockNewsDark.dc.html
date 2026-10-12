@@ -53,7 +53,7 @@
 <sc-if value="{{ authResetOn }}" hint-placeholder-val="{{ false }}">
 <div style="font-size:12px;color:var(--s-mute);margin-top:8px;line-height:1.5">{{ ui.resetSub }}</div>
 <label style="display:block;margin-top:18px"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.emailLabel }}</span>
-<input type="email" name="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="you@email.com" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px"></label>
+<input type="email" name="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="you@email.com" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" onKeyDown="{{ authKey }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px"></label>
 <sc-if value="{{ authErr }}" hint-placeholder-val="{{ false }}">
 <div role="alert" style="margin-top:14px;font-size:12px;color:var(--color-accent)">{{ authErr }}</div>
 </sc-if>
@@ -83,24 +83,24 @@
 <sc-if value="{{ authIsUp }}" hint-placeholder-val="{{ false }}">
 <label style="display:block">
 <span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.nameLabel }}</span>
-<input type="text" name="name" autocomplete="name" maxlength="60" placeholder="{{ ui.namePh }}" value="{{ authName }}" onChange="{{ onAuthName }}" aria-invalid="{{ authNameBad }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;border-color:{{ authNameLine }}">
+<input type="text" name="name" autocomplete="name" maxlength="60" placeholder="{{ ui.namePh }}" value="{{ authName }}" onChange="{{ onAuthName }}" onKeyDown="{{ authKey }}" aria-invalid="{{ authNameBad }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;border-color:{{ authNameLine }}">
 </label>
 </sc-if>
 <label style="display:block">
 <span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.emailLabel }}</span>
-<input type="email" name="email" inputmode="email" autocomplete="{{ authEmailAc }}" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="you@email.com" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" aria-invalid="{{ authEmailBad }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;border-color:{{ authEmailLine }}">
+<input type="email" name="email" inputmode="email" autocomplete="{{ authEmailAc }}" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="you@email.com" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" onKeyDown="{{ authKey }}" aria-invalid="{{ authEmailBad }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;border-color:{{ authEmailLine }}">
 </label>
 <sc-if value="{{ emailSuggest }}" hint-placeholder-val="{{ false }}">
 <button onClick="{{ useEmailSuggest }}" style="align-self:flex-start;margin-top:-4px;padding:0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-body);font-size:12px;text-align:left;cursor:pointer">{{ ui.emailTypo }} <span style="color:var(--color-accent);text-decoration:underline">{{ emailSuggest }}</span>?</button>
 </sc-if>
 <label style="display:block">
 <span style="display:flex;align-items:baseline;gap:8px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.pwLabel }}</span>
-<input type="{{ pwType }}" name="password" autocomplete="{{ authPwAc }}" placeholder="••••••••" value="{{ authPw }}" onChange="{{ onAuthPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px">
+<input type="{{ pwType }}" name="password" autocomplete="{{ authPwAc }}" placeholder="••••••••" value="{{ authPw }}" onChange="{{ onAuthPw }}" onKeyDown="{{ authKey }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px">
 </label>
 <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><button onClick="{{ togglePwShow }}" style="align-self:flex-start;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">{{ pwShowLabel }}</button><sc-if value="{{ showForgot }}" hint-placeholder-val="{{ false }}"><button onClick="{{ goForgot }}" style="padding:0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-body);font-size:12px;text-decoration:underline;cursor:pointer">{{ ui.forgotPw }}</button></sc-if></div>
 <sc-if value="{{ authIsUp }}" hint-placeholder-val="{{ false }}">
 <label style="display:block"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.confirmPwLabel }}</span>
-<input type="{{ pwType }}" name="confirm-password" autocomplete="new-password" placeholder="••••••••" value="{{ authPw2 }}" onChange="{{ onAuthPw2 }}" aria-invalid="{{ pw2Bad }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;border-color:{{ pw2Line }}"></label>
+<input type="{{ pwType }}" name="confirm-password" autocomplete="new-password" placeholder="••••••••" value="{{ authPw2 }}" onChange="{{ onAuthPw2 }}" onKeyDown="{{ authKey }}" aria-invalid="{{ pw2Bad }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;border-color:{{ pw2Line }}"></label>
 <sc-if value="{{ pw2Typed }}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size:12px;color:{{ pw2Ink }};margin-top:-4px">{{ pw2Msg }}</div></sc-if>
 </sc-if>
 </div>
@@ -140,10 +140,10 @@
 <div style="height:2px;background:var(--color-accent);margin:14px 0;width:56px"></div>
 <div style="font-size:12px;color:var(--s-mute);margin-top:8px;line-height:1.5;margin-top:0">{{ ui.newPwSub }}</div>
 <label style="display:block;margin-top:18px"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.pwLabel }}</span>
-<input type="{{ pwType }}" name="new-password" autocomplete="new-password" placeholder="••••••••" value="{{ newPw }}" onChange="{{ onNewPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px"></label>
+<input type="{{ pwType }}" name="new-password" autocomplete="new-password" placeholder="••••••••" value="{{ newPw }}" onChange="{{ onNewPw }}" onKeyDown="{{ newPwKey }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px"></label>
 <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px"><button onClick="{{ togglePwShow }}" style="padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">{{ pwShowLabel }}</button><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">{{ newPwScore }}</span></div>
 <label style="display:block;margin-top:14px"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.confirmPwLabel }}</span>
-<input type="{{ pwType }}" name="confirm-new-password" autocomplete="new-password" placeholder="••••••••" value="{{ newPw2 }}" onChange="{{ onNewPw2 }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px"></label>
+<input type="{{ pwType }}" name="confirm-new-password" autocomplete="new-password" placeholder="••••••••" value="{{ newPw2 }}" onChange="{{ onNewPw2 }}" onKeyDown="{{ newPwKey }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px"></label>
 <sc-if value="{{ newPw2Typed }}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size:12px;color:{{ newPw2Ink }};margin-top:6px">{{ newPw2Msg }}</div></sc-if>
 <sc-if value="{{ newPwErr }}" hint-placeholder-val="{{ false }}">
 <div role="alert" style="margin-top:12px;font-size:12px;color:var(--color-accent)">{{ newPwErr }}</div>
@@ -592,7 +592,7 @@
 <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:18px">{{ ui.emailLabel }}</div>
 <div style="font-size:14px;color:var(--s-ink);margin-top:4px">{{ lockEmail }}</div>
 <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:14px">{{ ui.pwLabel }}</div>
-<input type="password" autocomplete="current-password" placeholder="••••••••" value="{{ lockPw }}" onChange="{{ onLockPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;margin-top:5px">
+<input type="password" autocomplete="current-password" placeholder="••••••••" value="{{ lockPw }}" onChange="{{ onLockPw }}" onKeyDown="{{ lockKey }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;margin-top:5px">
 <sc-if value="{{ lockErr }}" hint-placeholder-val="{{ false }}">
 <div style="margin-top:8px;font-size:11px;color:var(--color-accent)">{{ lockErr }}</div>
 </sc-if>
@@ -663,6 +663,7 @@ class Component extends DCLogic {
     };
     if (window.HIFLive && window.HIFStore) startLive();
     else this._livePoll = setInterval(() => { if (window.HIFLive && window.HIFStore) { clearInterval(this._livePoll); startLive(); } }, 60);
+    window.__hifAuthApp = this;
     if (window.HIFAuth) this.bootAuth();
     else this._authPoll = setInterval(() => { if (window.HIFAuth) { clearInterval(this._authPoll); this.bootAuth(); } }, 60);
   }
@@ -674,7 +675,11 @@ class Component extends DCLogic {
       this.setState({ authLive:true, authInfo:info, pwRecovery: !!info.recovery });
       if (info.error) this.setState({ authMode:'in', authErr:this.authMessage(info.error === 'otp_expired' ? 'link' : info.error) });
       this.applyAuthSession(A.session());
-      this._authOff = A.onChange(sess => this.applyAuthSession(sess));
+      // The page runtime swaps logic instances while it loads (and runs the old one's
+      // componentWillUnmount), so a per-instance subscription can be dropped while the
+      // app keeps running. Subscribe once per page and route to the live instance.
+      window.__hifAuthApp = this;
+      if (!window.__hifAuthSub) window.__hifAuthSub = A.onChange(sess => window.__hifAuthApp && window.__hifAuthApp.applyAuthSession(sess));
     }).catch(() => {});
   }
   // Mirror the Supabase session into the app. A different account on this device starts
@@ -754,7 +759,7 @@ class Component extends DCLogic {
     }
     this.persist();
   }
-  componentWillUnmount() { if (this._authOff) this._authOff(); clearInterval(this._authPoll); this._synced = null; this.stopIdleWatch(); clearTimeout(this._t); clearTimeout(this._search); clearInterval(this._poll); clearInterval(this._livePoll); }
+  componentWillUnmount() { clearInterval(this._authPoll); this._synced = null; this.stopIdleWatch(); clearTimeout(this._t); clearTimeout(this._search); clearInterval(this._poll); clearInterval(this._livePoll); }
   // Returns true once the saved record has been read; restores it if the store
   // loaded only after the initial state was built.
   restoreLate() {
@@ -877,6 +882,7 @@ class Component extends DCLogic {
       if (r.error) return this.setState({ authBusy:false, authErr:this.authMessage(r.error), authBad: r.error === 'bad_email' ? 'email' : r.error === 'weak_password' ? 'pw' : null });
       if (r.confirm) return this.setState({ authBusy:false, authSent:email, authSentKind:'signup', authPw:'', authPw2:'' });
       this.setState({ authBusy:false });
+      this.applyAuthSession(window.HIFAuth.session());
       this.flash((u.toastSignedIn || 'Signed in').toUpperCase());
     }).catch(() => this.setState({ authBusy:false, authErr:this.authMessage('failed') }));
   }
@@ -1165,6 +1171,10 @@ class Component extends DCLogic {
       authResend: () => (s.authSentKind === 'reset' ? window.HIFAuth.recover(s.authSent) : window.HIFAuth.resend(s.authSent)).then(r => r.error ? this.setState({ authErr:this.authMessage(r.error) }) : this.flash((u.authResent || 'Sent').toUpperCase())),
       authUseOther: () => this.setState({ authSent:'', authSentKind:'', authErr:'' }),
       showForgot: !!s.authLive && s.authMode === 'in',
+      // Enter submits whichever auth form is showing (the fields are not in a <form>).
+      authKey: e => { if (e.key !== 'Enter') return; e.preventDefault(); if (s.authMode === 'reset') this.renderVals().sendReset(); else this.submitEmailAuth(); },
+      newPwKey: e => { if (e.key !== 'Enter') return; e.preventDefault(); this.renderVals().saveNewPw(); },
+      lockKey: e => { if (e.key !== 'Enter') return; e.preventDefault(); this.renderVals().unlock(); },
       goForgot: () => this.setState({ authMode:'reset', authErr:'', authBad:null, authPw:'' }),
       backToSignIn: () => this.setState({ authMode:'in', authErr:'' }),
       resetBtn: s.authBusy ? (u.authBusy || '…') : u.resetSend,
@@ -1198,6 +1208,7 @@ class Component extends DCLogic {
         window.HIFAuth.updatePassword(v).then(r => {
           if (r.error) return this.setState({ authBusy:false, newPwErr: r.error === 'same_password' ? u.authErrSamePw : this.authMessage(r.error) });
           this.setState({ authBusy:false, pwRecovery:false, newPw:'', newPw2:'' });
+          this.applyAuthSession(window.HIFAuth.session());
           this.flash((u.toastPwUpdated || 'Password updated').toUpperCase());
         });
       },
