@@ -105,6 +105,70 @@ function portfolio(positions, priceOf, moveOf, currency) {
   };
 }
 
+// ------------------------------------------------------------- holdings table
+// A broker-style positions table: one row per position, each in its listing's own
+// currency (no conversion), so totals are kept per currency. quoteOf(t) returns
+// { price, move, name, currency } with price/move as the app displays them.
+const fmt = (v, d) => v.toLocaleString('en-US', { minimumFractionDigits:d, maximumFractionDigits:d });
+const NONE = '—';
+const sgn = v => v > 0 ? '+' : v < 0 ? '−' : '';
+const amt = (v, cur) => v == null ? NONE : (v < 0 ? '−' : '') + fmt(Math.abs(v), 2) + ' ' + cur;
+const signedAmt = (v, cur) => v == null ? NONE : sgn(v) + fmt(Math.abs(v), 2) + ' ' + cur;
+const pctL = v => v == null ? NONE : sgn(v) + Math.abs(v).toFixed(2) + '%';
+const priceL = v => v == null ? NONE : fmt(v, v < 10 ? 4 : 2);
+const qtyL = v => v.toLocaleString('en-US', { maximumFractionDigits:4 });
+
+function holdings(positions, quoteOf) {
+  const rows = [];
+  Object.keys(positions || {}).forEach(t => {
+    const p = positions[t] || {}, shares = num(p.shares), avg = num(p.cost);
+    if (!shares || shares <= 0) return;
+    const q = quoteOf(t) || {}, cur = q.currency || 'USD';
+    const price = num(q.price), move = pctNum(q.move);
+    const value = price == null ? null : price * shares;
+    const cost = avg == null ? null : avg * shares;
+    const pl = value != null && cost != null ? value - cost : null;
+    const plPct = pl != null && cost ? pl / cost * 100 : null;
+    const dayPL = value != null && move != null ? value - value / (1 + move / 100) : null;
+    rows.push({ ticker:t, name:q.name || '', currency:cur, shares, avg, price, move, value, cost, pl, plPct, dayPL });
+  });
+  const groups = {};
+  rows.forEach(r => {
+    const g = groups[r.currency] || (groups[r.currency] = { currency:r.currency, value:0, cost:0, pl:0, dayPL:0, n:0 });
+    if (r.value != null) g.value += r.value;
+    if (r.pl != null) { g.pl += r.pl; g.cost += r.cost; }
+    if (r.dayPL != null) g.dayPL += r.dayPL;
+    g.n++;
+  });
+  rows.sort((a, b) => (b.value || 0) - (a.value || 0) || a.ticker.localeCompare(b.ticker));
+  rows.forEach(r => {
+    const g = groups[r.currency], weight = r.value != null && g.value ? r.value / g.value * 100 : null;
+    Object.assign(r, {
+      weight,
+      qtyLabel: qtyL(r.shares),
+      avgLabel: priceL(r.avg),
+      priceLabel: r.price == null ? NONE : priceL(r.price) + ' ' + r.currency,
+      valueLabel: amt(r.value, r.currency),
+      costLabel: amt(r.cost, r.currency),
+      plLabel: signedAmt(r.pl, r.currency),
+      plPctLabel: pctL(r.plPct),
+      moveLabel: pctL(r.move),
+      dayLabel: signedAmt(r.dayPL, r.currency),
+      weightLabel: weight == null ? NONE : weight.toFixed(2) + '%',
+      plDown: r.pl != null && r.pl < 0, moveDown: r.move != null && r.move < 0
+    });
+  });
+  const totals = Object.keys(groups).sort().map(k => {
+    const g = groups[k], plPct = g.cost ? g.pl / g.cost * 100 : null;
+    return { currency:k, count:g.n,
+      valueLabel: amt(g.value, k), costLabel: g.cost ? amt(g.cost, k) : NONE,
+      plLabel: g.cost ? signedAmt(g.pl, k) : NONE, plPctLabel: pctL(plPct), plDown: g.pl < 0,
+      dayLabel: signedAmt(g.dayPL, k), dayDown: g.dayPL < 0,
+      dayPctLabel: pctL(g.value - g.dayPL ? g.dayPL / (g.value - g.dayPL) * 100 : null) };
+  });
+  return { rows, totals, empty: !rows.length };
+}
+
 // --------------------------------------------------------------- contradiction
 // Every app shows analysts, insiders and price in separate panels and lets you
 // miss the conflict between them. Making disagreement a first-class object is
@@ -230,5 +294,5 @@ function ledger(entries, priceOf, labels) {
   };
 }
 
-window.HIFInsight = { attribute, position, portfolio, conflicts, crowding, bookCrowding, ledger, money, signed, num };
+window.HIFInsight = { attribute, position, portfolio, holdings, conflicts, crowding, bookCrowding, ledger, money, signed, num };
 })();

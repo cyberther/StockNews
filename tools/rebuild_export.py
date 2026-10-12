@@ -48,6 +48,7 @@ TARGETS = {
             './ds-base.js': '1a23418a-47b6-4488-b543-86c6c76bc75d',
             '../shared/hif-data.js': '579b1aee-3c99-4dcd-89f7-0266059cff28',
             '../shared/hif-store.js': 'fa1601de-b213-46b7-8267-9c64cee3176c',
+            '../shared/hif-insight.js': 'a8872688-4b69-40c6-b492-83017adf7b93',
             '../shared/hif-live.js': 'e89e04c7-f293-4933-aa4b-fb7445f878f8',
             '../shared/hif-auth.js': '09f71f5f-3174-4584-a50c-bb5a128cef28',
             '../shared/hif-push.js': '883d7821-2751-409a-a751-a210271d846d',

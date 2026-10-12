@@ -14,7 +14,7 @@ if (window.HIFLive) return;
 const DIRECT = 'https://finnhub.io/api/v1';
 const PROXY = '/api/finnhub';
 const cache = new Map();
-const TTL = { quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000, edates: 6 * 3600000 };
+const TTL = { profile: 24 * 3600000, quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000, edates: 6 * 3600000 };
 let proxyState = 'unknown'; // 'unknown' | 'yes' | 'no'
 
 function fresh(kind, arg){
@@ -70,7 +70,17 @@ async function quote(symbol, token){
   const hit = fresh('quote', symbol); if (hit) return hit;
   const j = await get('/quote', { symbol: symbol }, token);
   if (!j || j.c == null || j.c === 0) return put('quote', symbol, null);
-  return put('quote', symbol, { price: fmtPrice(j.c), move: fmtPct(j.dp), up: Number(j.dp) >= 0, changeAbs: fmtPrice(j.d) });
+  // last/dp keep full precision for position maths; price/move are the display strings.
+  return put('quote', symbol, { price: fmtPrice(j.c), move: fmtPct(j.dp), up: Number(j.dp) >= 0, changeAbs: fmtPrice(j.d),
+    last: Number(j.c), dp: j.dp == null ? null : Number(j.dp) });
+}
+
+// { name, currency } from /stock/profile2, for positions and tickers missing from the demo data.
+async function profile(symbol, token){
+  if (!available(token)) return null;
+  const hit = fresh('profile', symbol); if (hit) return hit;
+  const j = await get('/stock/profile2', { symbol: symbol }, token);
+  return put('profile', symbol, j && j.name ? { name: String(j.name), currency: String(j.currency || 'USD').toUpperCase() } : null);
 }
 
 async function news(symbol, token, limit){
@@ -251,7 +261,7 @@ async function load(symbols, token, opts){
   return out;
 }
 
-window.HIFLive = { quote, news, recommendation, search, chart, earnings, earningsDates, earningsText, load,
+window.HIFLive = { quote, profile, news, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();
