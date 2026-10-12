@@ -50,6 +50,16 @@
 <button onClick="{{ authUseOther }}" style="min-height:40px;text-align:left;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.authUseOther }}</button>
 </div>
 </sc-if>
+<sc-if value="{{ authResetOn }}" hint-placeholder-val="{{ false }}">
+<div style="font-size:12px;color:var(--s-mute);margin-top:8px;line-height:1.5">{{ ui.resetSub }}</div>
+<label style="display:block;margin-top:18px"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.emailLabel }}</span>
+<input type="email" name="email" inputmode="email" autocomplete="username" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="you@email.com" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px"></label>
+<sc-if value="{{ authErr }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="margin-top:14px;font-size:12px;color:var(--color-accent)">{{ authErr }}</div>
+</sc-if>
+<button onClick="{{ sendReset }}" aria-busy="{{ authBusyOn }}" style="width:100%;min-height:48px;margin-top:16px;text-align:left;padding:0 14px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer;opacity:{{ authBtnOpacity }}">{{ resetBtn }}</button>
+<button onClick="{{ backToSignIn }}" style="margin-top:14px;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-body);font-size:12px;text-decoration:underline;cursor:pointer">{{ ui.resetBack }}</button>
+</sc-if>
 <sc-if value="{{ authFormOn }}" hint-placeholder-val="{{ true }}">
 <sc-if value="{{ showProviders }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
@@ -87,7 +97,7 @@
 <span style="display:flex;align-items:baseline;gap:8px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.pwLabel }}</span>
 <input type="{{ pwType }}" name="password" autocomplete="{{ authPwAc }}" placeholder="••••••••" value="{{ authPw }}" onChange="{{ onAuthPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px">
 </label>
-<button onClick="{{ togglePwShow }}" style="align-self:flex-start;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">{{ pwShowLabel }}</button>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><button onClick="{{ togglePwShow }}" style="align-self:flex-start;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">{{ pwShowLabel }}</button><sc-if value="{{ showForgot }}" hint-placeholder-val="{{ false }}"><button onClick="{{ goForgot }}" style="padding:0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-body);font-size:12px;text-decoration:underline;cursor:pointer">{{ ui.forgotPw }}</button></sc-if></div>
 </div>
 <sc-if value="{{ pwMeter }}" hint-placeholder-val="{{ false }}">
 <div style="margin-top:12px">
@@ -114,6 +124,24 @@
 <div style="font-size:11px;color:var(--s-faint);margin-top:4px;line-height:1.45">{{ ui.footUpNote }}</div>
 </sc-if>
 </sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ pwRecoveryOn }}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-modal="true" aria-label="{{ ui.newPwTitle }}" style="position:fixed;inset:0;z-index:70;background:var(--s-bg);display:flex;align-items:center;justify-content:center;padding:24px">
+<div style="width:100%;max-width:420px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px;letter-spacing:-0.02em">{{ brand }}</div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:26px;letter-spacing:-0.03em;line-height:1.05;margin-top:20px">{{ ui.newPwTitle }}</div>
+<div style="height:2px;background:var(--color-accent);margin:14px 0;width:56px"></div>
+<div style="font-size:12px;color:var(--s-mute);margin-top:8px;line-height:1.5;margin-top:0">{{ ui.newPwSub }}</div>
+<label style="display:block;margin-top:18px"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.pwLabel }}</span>
+<input type="{{ pwType }}" name="new-password" autocomplete="new-password" placeholder="••••••••" value="{{ newPw }}" onChange="{{ onNewPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px"></label>
+<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px"><button onClick="{{ togglePwShow }}" style="padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">{{ pwShowLabel }}</button><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">{{ newPwScore }}</span></div>
+<sc-if value="{{ newPwErr }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="margin-top:12px;font-size:12px;color:var(--color-accent)">{{ newPwErr }}</div>
+</sc-if>
+<button onClick="{{ saveNewPw }}" aria-busy="{{ authBusyOn }}" style="width:100%;min-height:48px;margin-top:16px;text-align:left;padding:0 14px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer;opacity:{{ authBtnOpacity }}">{{ newPwBtn }}</button>
+</div>
 </div>
 </sc-if>
 
@@ -369,7 +397,7 @@
 <div style="background:var(--s-bg);padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tickers }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ capLabel }}</div></div>
 <div style="background:var(--s-bg);padding:10px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ intervalLabel }}</div></div>
 </div>
-<button onClick="{{ accountPlanAction }}" style="width:100%;min-height:44px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ accountPlanLabel }}</button>
+<sc-if value="{{ notAllAccess }}" hint-placeholder-val="{{ true }}"><button onClick="{{ accountPlanAction }}" style="width:100%;min-height:44px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ accountPlanLabel }}</button></sc-if><sc-if value="{{ allAccess }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:var(--s-mute);margin-top:10px;line-height:1.45">{{ ui.earlyAccessNote }}</div></sc-if>
 </div>
 <div style="padding:14px 16px;border-bottom:1px solid var(--s-rule)">
 <div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:8px">{{ ui.appearance }}</div>
@@ -611,7 +639,8 @@ function hydrate(defaults) {
 class Component extends DCLogic {
   state = hydrate({ screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed', chartRange:'1d', smaOn:true, push:{}, screenFilter:'all',
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
-    authLive:false, authInfo:null, authBusy:false, authSent:'', serverPlan:null, accountId:null,
+    authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
+    pwRecovery:false, newPw:'', newPwErr:'',
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
     liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{} });
@@ -634,7 +663,7 @@ class Component extends DCLogic {
     const A = window.HIFAuth;
     A.ready.then(info => {
       if (!info || !info.enabled) return;
-      this.setState({ authLive:true, authInfo:info });
+      this.setState({ authLive:true, authInfo:info, pwRecovery: !!info.recovery });
       if (info.error) this.setState({ authMode:'in', authErr:this.authMessage(info.error === 'otp_expired' ? 'link' : info.error) });
       this.applyAuthSession(A.session());
       this._authOff = A.onChange(sess => this.applyAuthSession(sess));
@@ -819,7 +848,7 @@ class Component extends DCLogic {
     this.flash((u.toastSignedIn || 'Signed in').toUpperCase() + ' · ' + provider.toUpperCase());
   }
   submitEmailAuth() {
-    const u = UI[this.appLang], st = this.state, up = st.authMode !== 'in';
+    const u = UI[this.appLang], st = this.state, up = st.authMode === 'up';
     const mail = String(st.authEmail || '').trim(), pw = st.authPw || '';
     const name = String(st.authName || '').trim().replace(/\s+/g, ' ');
     if (up && !this.validName(name)) return this.setState({ authErr: u.authErrName, authBad:'name' });
@@ -837,7 +866,7 @@ class Component extends DCLogic {
     this.setState({ authBusy:true, authErr:'' });
     (up ? window.HIFAuth.signUp(email, pw, name) : window.HIFAuth.signIn(email, pw)).then(r => {
       if (r.error) return this.setState({ authBusy:false, authErr:this.authMessage(r.error), authBad: r.error === 'bad_email' ? 'email' : r.error === 'weak_password' ? 'pw' : null });
-      if (r.confirm) return this.setState({ authBusy:false, authSent:email, authPw:'' });
+      if (r.confirm) return this.setState({ authBusy:false, authSent:email, authSentKind:'signup', authPw:'' });
       this.setState({ authBusy:false });
       this.flash((u.toastSignedIn || 'Signed in').toUpperCase());
     }).catch(() => this.setState({ authBusy:false, authErr:this.authMessage('failed') }));
@@ -867,7 +896,7 @@ class Component extends DCLogic {
     ].filter(x => rv.indexOf(x.id) === -1);
   }
   // With real accounts the plan is the server's (account_status); the demo keeps its toggle.
-  get plan() { return this.state.authLive ? (this.state.serverPlan || 'free') : (this.state.plan || this.props.plan || 'free'); }
+  get plan() { if ((window.HIF || {}).ALL_ACCESS) return 'pro'; return this.state.authLive ? (this.state.serverPlan || 'free') : (this.state.plan || this.props.plan || 'free'); }
   get lang() { return this.state.lang || this.props.lang || 'EN'; }
   get appLang() { return this.state.appLang || this.props.appLang || 'EN'; }
   go(screen) { this.setState(s => ({ screen, prev: (s.screen === 'paywall' || s.screen === 'detail') ? s.prev : s.screen })); }
@@ -994,6 +1023,7 @@ class Component extends DCLogic {
   renderVals() {
     if (!bindShared()) return {};
     const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen;
+    const H_ALL = !!(window.HIF || {}).ALL_ACCESS;
     const L = this.lang, A = this.appLang, u = UI[A];
     if (!this._idle) this.startIdleWatch();
     const HS = window.HIFStore || null;
@@ -1002,7 +1032,7 @@ class Component extends DCLogic {
     const sessionEmail = (s.session && s.session.email) || 'alex@email.com';
     const links = Object.assign({ Google:true, iCloud:false, Email:true }, s.links || {});
     const pw = HS ? HS.strength(s.authPw || '') : { score:0, breached:false, hints:[] };
-    const authUp = s.authMode !== 'in';
+    const authUp = s.authMode === 'up';
     const hintText = { len:u.hintLen, case:u.hintCase, digit:u.hintDigit, symbol:u.hintSymbol };
     const timeoutMin = s.timeoutMin === undefined ? 30 : s.timeoutMin;
     const volNum = v => { const m = /([\d.]+)x/.exec(String(v || '')); return m ? parseFloat(m[1]) : 0; };
@@ -1067,7 +1097,8 @@ class Component extends DCLogic {
     return {
       ui: u,
       brand: this.props.brand || 'Market Pulse',
-      planLabel: isFree ? u.free : u.pro,
+      planLabel: H_ALL ? (u.earlyAccess || 'Early access') : (isFree ? u.free : u.pro),
+      allAccess: H_ALL, notAllAccess: !H_ALL,
       planToggleLabel: isFree ? u.viewPro : u.viewFree,
       togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),
       isAuth: !signedIn, isOnboard: signedIn && !s.onboarded, isLocked: signedIn && !!s.locked,
@@ -1085,7 +1116,7 @@ class Component extends DCLogic {
       authSwitch: () => this.setState({ authMode: authUp ? 'in' : 'up', authErr:'', authBad:null }),
       authTabInLine: authUp ? 'transparent' : 'var(--color-accent)', authTabInInk: authUp ? 'var(--s-mute)' : 'var(--s-ink)',
       authTabUpLine: authUp ? 'var(--color-accent)' : 'transparent', authTabUpInk: authUp ? 'var(--s-ink)' : 'var(--s-mute)',
-      authKicker: authUp ? u.authKickerUp : u.authKickerIn,
+      authKicker: s.authMode === 'reset' ? u.resetTitle : (authUp ? u.authKickerUp : u.authKickerIn),
       authOrEmail: authUp ? u.orEmailUp : u.orEmail,
       authBtn: s.authBusy ? (u.authBusy || '…') : (authUp ? u.btnSignUp : u.btnSignIn),
       authFootQ: authUp ? u.footUp : u.footIn,
@@ -1113,12 +1144,43 @@ class Component extends DCLogic {
       showICloud: !s.authLive || !!(s.authInfo && s.authInfo.providers.apple),
       showProviders: !s.authLive || !!(s.authInfo && (s.authInfo.providers.google || s.authInfo.providers.apple)),
       noProviders: !!s.authLive && !(s.authInfo && (s.authInfo.providers.google || s.authInfo.providers.apple)),
-      authSentOn: !!s.authSent, authFormOn: !s.authSent,
-      authSentBody: String(u.authSentBody || '').replace('%s', s.authSent || ''),
-      authResend: () => window.HIFAuth.resend(s.authSent).then(r => r.error ? this.setState({ authErr:this.authMessage(r.error) }) : this.flash((u.authResent || 'Sent').toUpperCase())),
-      authUseOther: () => this.setState({ authSent:'', authErr:'' }),
+      authSentOn: !!s.authSent, authFormOn: !s.authSent && s.authMode !== 'reset', authResetOn: !s.authSent && s.authMode === 'reset',
+      authSentBody: String((s.authSentKind === 'reset' ? u.resetSentBody : u.authSentBody) || '').replace('%s', s.authSent || ''),
+      authResend: () => (s.authSentKind === 'reset' ? window.HIFAuth.recover(s.authSent) : window.HIFAuth.resend(s.authSent)).then(r => r.error ? this.setState({ authErr:this.authMessage(r.error) }) : this.flash((u.authResent || 'Sent').toUpperCase())),
+      authUseOther: () => this.setState({ authSent:'', authSentKind:'', authErr:'' }),
+      showForgot: !!s.authLive && s.authMode === 'in',
+      goForgot: () => this.setState({ authMode:'reset', authErr:'', authBad:null, authPw:'' }),
+      backToSignIn: () => this.setState({ authMode:'in', authErr:'' }),
+      resetBtn: s.authBusy ? (u.authBusy || '…') : u.resetSend,
+      sendReset: () => {
+        const mail = String(s.authEmail || '').trim();
+        if (!this.validEmail(mail)) return this.setState({ authErr:u.authErrEmail });
+        if (s.authBusy) return;
+        this.setState({ authBusy:true, authErr:'' });
+        window.HIFAuth.recover(mail.toLowerCase()).then(r => r.error
+          ? this.setState({ authBusy:false, authErr:this.authMessage(r.error) })
+          : this.setState({ authBusy:false, authSent:mail.toLowerCase(), authSentKind:'reset' }));
+      },
+      pwRecoveryOn: !!s.pwRecovery && !!s.session,
+      newPw: s.newPw || '', newPwErr: s.newPwErr || '',
+      onNewPw: e => this.setState({ newPw:e.target.value, newPwErr:'' }),
+      newPwScore: (s.newPw || '').length ? ((u.pwScores || [])[(window.HIFStore ? window.HIFStore.strength(s.newPw).score : 0)] || '') : '',
+      newPwBtn: s.authBusy ? (u.authBusy || '…') : u.newPwSave,
+      saveNewPw: () => {
+        const v = s.newPw || '', str = window.HIFStore ? window.HIFStore.strength(v) : { score:4, breached:false };
+        if (v.length < 8) return this.setState({ newPwErr:u.authErrPw });
+        if (str.breached) return this.setState({ newPwErr:u.authErrBreach });
+        if (str.score < 2) return this.setState({ newPwErr:u.authErrWeak });
+        if (s.authBusy) return;
+        this.setState({ authBusy:true, newPwErr:'' });
+        window.HIFAuth.updatePassword(v).then(r => {
+          if (r.error) return this.setState({ authBusy:false, newPwErr: r.error === 'same_password' ? u.authErrSamePw : this.authMessage(r.error) });
+          this.setState({ authBusy:false, pwRecovery:false, newPw:'' });
+          this.flash((u.toastPwUpdated || 'Password updated').toUpperCase());
+        });
+      },
       authBusyOn: !!s.authBusy, authBtnOpacity: s.authBusy ? 0.6 : 1,
-      showPlanToggle: !s.authLive,
+      showPlanToggle: !s.authLive && !H_ALL,
       submitAuth: () => this.submitEmailAuth(),
       obCount: String(s.follows.length),
       obQuery: s.obQuery || '',

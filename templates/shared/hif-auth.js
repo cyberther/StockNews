@@ -11,6 +11,9 @@
 //   HIFAuth.signUp(email, password, name) -> { ok, confirm } | { error }
 //   HIFAuth.signIn(email, password)       -> { ok } | { error }
 //   HIFAuth.oauth('google' | 'apple')     -> leaves the page for the provider
+//   HIFAuth.recover(email)  -> sends a password-reset link (always { ok } unless rate limited)
+//   HIFAuth.updatePassword(password) -> { ok } | { error }, for the signed-in user
+//   HIFAuth.info().recovery  -> true when the page was opened from a reset link
 //   HIFAuth.signOut(everywhere)
 //   HIFAuth.plan()           -> Promise<{ plan, suspended }>
 //   HIFAuth.onChange(fn)     -> called with session() whenever it changes
@@ -43,6 +46,7 @@ function errorCode(r) {
   if (code === 'invalid_credentials' || msg.indexOf('invalid login') >= 0) return 'bad_credentials';
   if (code === 'email_not_confirmed' || msg.indexOf('not confirmed') >= 0) return 'not_confirmed';
   if (code === 'user_already_exists' || msg.indexOf('already registered') >= 0) return 'exists';
+  if (code === 'same_password' || msg.indexOf('different from the old') >= 0) return 'same_password';
   if (code === 'weak_password' || msg.indexOf('password') >= 0) return 'weak_password';
   if (code === 'signup_disabled' || msg.indexOf('signups not allowed') >= 0) return 'signup_disabled';
   if (code.indexOf('email') >= 0 || msg.indexOf('email') >= 0) return 'bad_email';
@@ -88,7 +92,7 @@ function takeFragment() {
   const p = new URLSearchParams(location.hash.slice(1));
   history.replaceState(null, '', location.pathname + location.search);
   if (p.get('error')) return { error: p.get('error_code') || p.get('error') };
-  return { tokens: { access_token: p.get('access_token'), refresh_token: p.get('refresh_token'),
+  return { type: p.get('type') || '', tokens: { access_token: p.get('access_token'), refresh_token: p.get('refresh_token'),
     expires_at: Number(p.get('expires_at')) || 0, expires_in: Number(p.get('expires_in')) || 3600 } };
 }
 
@@ -119,6 +123,8 @@ const ready = (async () => {
     const r = await call('/auth/v1/user', { headers: { authorization: 'Bearer ' + frag.tokens.access_token } });
     const s = fromTokens(Object.assign({}, frag.tokens, { user: r.ok ? r.body : {} }));
     if (s && r.ok) { current = s; save(s); }
+    // A password-reset link signs the user in so they can choose a new password.
+    if (s && r.ok && frag.type === 'recovery') info.recovery = true;
   } else {
     current = load();
     if (current && current.expires_at * 1000 - Date.now() < 30000) await refresh();
@@ -159,6 +165,23 @@ async function resend(email) {
   return r.ok ? { ok: true } : { error: errorCode(r) };
 }
 
+// Supabase answers the same way whether or not the address has an account, so the
+// UI never reveals who is registered.
+async function recover(email) {
+  await ready; if (!cfg) return { error: 'unavailable' };
+  const r = await call('/auth/v1/recover?redirect_to=' + encodeURIComponent(here()), { method: 'POST', body: { email } });
+  return r.ok ? { ok: true } : { error: errorCode(r) };
+}
+
+async function updatePassword(password) {
+  const t = await token(); if (!t) return { error: 'failed' };
+  const r = await call('/auth/v1/user', { method: 'PUT', headers: { authorization: 'Bearer ' + t }, body: { password } });
+  if (!r.ok) return { error: errorCode(r) };
+  if (info) info.recovery = false;
+  if (r.body && r.body.id && current) { current.user = r.body; save(current); emit(); }
+  return { ok: true };
+}
+
 function oauth(provider) {
   if (!cfg) return;
   location.href = cfg.supabaseUrl.replace(/\/$/, '') + '/auth/v1/authorize?provider=' + encodeURIComponent(provider) +
@@ -187,6 +210,6 @@ async function plan() {
 
 function onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; }
 
-window.HIFAuth = { ready, session, signUp, signIn, resend, oauth, signOut, plan, token, onChange,
+window.HIFAuth = { ready, session, signUp, signIn, resend, recover, updatePassword, oauth, signOut, plan, token, onChange,
   enabled: () => !!(info && info.enabled), info: () => info };
 })();

@@ -336,6 +336,11 @@ const AUTH = {
     footIn:'New here?', footUp:'Already have an account?', footUpNote:'Free to start. No card until you go Pro.',
     emailTypo:'Did you mean', authErrName:'Enter your full name (2–60 letters)', authErrBreach:'That password appears in known breaches — choose another',
     authErrWeak:'Choose a stronger password',
+    forgotPw:'Forgot password?', resetTitle:'Reset your password', resetSub:'Enter your account email and we will send you a link to choose a new password.',
+    resetSend:'Send reset link', resetBack:'Back to sign in', resetSentBody:'If an account exists for %s, a password reset link is on its way.',
+    newPwTitle:'Choose a new password', newPwSub:'At least 8 characters. You stay signed in on this device.', newPwSave:'Save password',
+    toastPwUpdated:'Password updated', authErrSamePw:'Choose a password different from your old one.',
+    earlyAccess:'Early access', earlyAccessNote:'Every feature is free while paid plans are being set up.',
     authErrCreds:'Wrong email or password.', authErrConfirm:'Confirm your email first — check your inbox for the link.',
     authErrExists:'An account with this email already exists. Sign in instead.', authErrRate:'Too many attempts. Wait a minute and try again.',
     authErrClosed:'New sign-ups are closed right now.', authErrFailed:'Something went wrong. Try again in a moment.',
@@ -375,6 +380,11 @@ const AUTH = {
     footIn:'Ești nou aici?', footUp:'Ai deja cont?', footUpNote:'Gratuit la început. Card doar când treci pe Pro.',
     emailTypo:'Ai vrut să scrii', authErrName:'Introdu numele complet (2–60 litere)', authErrBreach:'Parola apare în scurgeri de date cunoscute — alege alta',
     authErrWeak:'Alege o parolă mai puternică',
+    forgotPw:'Ai uitat parola?', resetTitle:'Resetează parola', resetSub:'Introdu e-mailul contului și îți trimitem un link pentru a alege o parolă nouă.',
+    resetSend:'Trimite linkul de resetare', resetBack:'Înapoi la autentificare', resetSentBody:'Dacă există un cont pentru %s, linkul de resetare este pe drum.',
+    newPwTitle:'Alege o parolă nouă', newPwSub:'Cel puțin 8 caractere. Rămâi autentificat pe acest dispozitiv.', newPwSave:'Salvează parola',
+    toastPwUpdated:'Parolă actualizată', authErrSamePw:'Alege o parolă diferită de cea veche.',
+    earlyAccess:'Acces anticipat', earlyAccessNote:'Toate funcțiile sunt gratuite până la lansarea planurilor plătite.',
     authErrCreds:'E-mail sau parolă greșită.', authErrConfirm:'Confirmă mai întâi adresa de e-mail — verifică linkul din inbox.',
     authErrExists:'Există deja un cont cu acest e-mail. Autentifică-te.', authErrRate:'Prea multe încercări. Așteaptă un minut și încearcă din nou.',
     authErrClosed:'Înregistrările noi sunt închise momentan.', authErrFailed:'Ceva n-a mers. Încearcă din nou peste puțin timp.',
@@ -414,6 +424,11 @@ const AUTH = {
     footIn:'Neu hier?', footUp:'Schon ein Konto?', footUpNote:'Kostenlos starten. Karte erst bei Pro.',
     emailTypo:'Meintest du', authErrName:'Vollständigen Namen eingeben (2–60 Buchstaben)', authErrBreach:'Dieses Passwort ist aus Leaks bekannt — bitte anderes wählen',
     authErrWeak:'Bitte ein stärkeres Passwort wählen',
+    forgotPw:'Passwort vergessen?', resetTitle:'Passwort zurücksetzen', resetSub:'Gib die E-Mail deines Kontos ein, und wir senden dir einen Link für ein neues Passwort.',
+    resetSend:'Link senden', resetBack:'Zurück zur Anmeldung', resetSentBody:'Falls es ein Konto für %s gibt, ist der Link zum Zurücksetzen unterwegs.',
+    newPwTitle:'Neues Passwort wählen', newPwSub:'Mindestens 8 Zeichen. Du bleibst auf diesem Gerät angemeldet.', newPwSave:'Passwort speichern',
+    toastPwUpdated:'Passwort aktualisiert', authErrSamePw:'Wähle ein anderes Passwort als das alte.',
+    earlyAccess:'Früher Zugang', earlyAccessNote:'Alle Funktionen sind kostenlos, bis die Bezahlpläne starten.',
     authErrCreds:'E-Mail oder Passwort ist falsch.', authErrConfirm:'Bestätige zuerst deine E-Mail — der Link ist in deinem Posteingang.',
     authErrExists:'Zu dieser E-Mail gibt es schon ein Konto. Melde dich an.', authErrRate:'Zu viele Versuche. Warte eine Minute und versuche es erneut.',
     authErrClosed:'Neue Registrierungen sind gerade geschlossen.', authErrFailed:'Etwas ist schiefgelaufen. Versuche es gleich noch einmal.',
@@ -491,7 +506,10 @@ const CROWD = {
   ASML:22, NOVO:17, SAP:12, SIE:9, RHM:14, BMW:8, SHEL:7, BABA:19, INTC:26, MU:18,
   JPM:15, GS:9, LLY:21, PFE:11, XOM:10, TSM:24, ARM:16, NFLX:31, ORCL:20, CRM:13
 };
-window.HIF = { NEWS, FOLLOWS, UNIVERSE, EVENTS, SIGNALS, SECTORS, SECTOR_OF, CROWD, UI };
+// Until paid plans launch, every account gets every feature. Set to false when the
+// payment integration is in; the apps then use the server-owned plan (account_status).
+const ALL_ACCESS = true;
+window.HIF = { NEWS, FOLLOWS, UNIVERSE, EVENTS, SIGNALS, SECTORS, SECTOR_OF, CROWD, UI, ALL_ACCESS };
 
 // Content edited in the admin panel (GET /api/content). Everything above stays
 // the fallback: offline, in the design tool, or if the request fails, the page
