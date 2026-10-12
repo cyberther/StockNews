@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { handleMarketRequest } from '../netlify/functions/_shared/market-proxy.js';
+import { keysFromEnv, orderFromEnv } from '../netlify/functions/_shared/market/gateway.js';
 
 const root = resolve(fileURLToPath(new URL('../dist', import.meta.url)));
 
@@ -68,7 +69,8 @@ const server = createServer(async (req, res) => {
       for (const [key, value] of Object.entries(req.headers)) if (value !== undefined) headers.set(key, Array.isArray(value) ? value.join(', ') : value);
       const request = new Request(url, { method: req.method, headers });
       const response = await handleMarketRequest(request, {
-        apiKey: process.env.FINNHUB_KEY,
+        keys: keysFromEnv(process.env),
+        order: orderFromEnv(process.env),
         allowedOrigins: process.env.ALLOWED_ORIGINS,
         rateLimit: process.env.API_RATE_LIMIT,
         clientId: clientId(req)
