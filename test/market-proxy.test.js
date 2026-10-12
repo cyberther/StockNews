@@ -40,7 +40,8 @@ test('forwards only validated fields and caches successful data', async () => {
   const first = await handleMarketRequest(request(query), { apiKey:'secret', clientId:'one' });
   const second = await handleMarketRequest(request(query), { apiKey:'secret', clientId:'one' });
   assert.equal(first.status, 200);
-  assert.equal(second.headers.get('x-stocknews-cache'), 'hit');
+  assert.equal(second.headers.get('x-market-cache'), 'hit');
+  assert.equal(second.headers.get('x-market-source'), 'finnhub');
   assert.equal(calls, 1);
 });
 

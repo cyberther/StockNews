@@ -756,7 +756,7 @@ class Component extends DCLogic {
     // and headlines from the server proxy; the feed falls back to demo stories without them.
     const startLive = () => {
       this.restoreLate();
-      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.liveTickers().forEach(t => this.syncTicker(t)); this.syncPositions(); if (this.state.feedTab === 'market') this.syncMarket(); this.startAutoRefresh(); }, 0);
+      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.syncTickers(this.liveTickers()); this.syncPositions(); if (this.state.feedTab === 'market') this.syncMarket(); this.startAutoRefresh(); }, 0);
     };
     if (window.HIFLive && window.HIFStore) startLive();
     else this._livePoll = setInterval(() => { if (window.HIFLive && window.HIFStore) { clearInterval(this._livePoll); startLive(); } }, 60);
@@ -866,7 +866,8 @@ class Component extends DCLogic {
     const L = window.HIFLive; if (!L) return;
     const held = Object.keys(this.state.positions || {});
     const keep = (t, q) => this.setState(st => ({ liveQuotes: Object.assign({}, st.liveQuotes, { [t]: q }) }));
-    held.filter(t => this.liveTickers().indexOf(t) < 0).forEach(t => L.quote(t).then(q => q && keep(t, q)).catch(() => {}));
+    const extra = held.filter(t => this.liveTickers().indexOf(t) < 0);
+    if (extra.length) (L.quotes ? L.quotes(extra) : Promise.resolve({})).then(qs => Object.keys(qs).forEach(t => keep(t, qs[t]))).catch(() => {});
     if (!L.profile) return;
     const WEEK = 7 * 86400000, P = this.state.profiles || {};
     held.filter(t => !P[t] || Date.now() - (P[t].at || 0) > WEEK).reduce((chain, t) => chain.then(() => L.profile(t).then(pr => {
@@ -967,6 +968,11 @@ class Component extends DCLogic {
     return out;
   }
   // Quote and headlines for any ticker; analysts only where the demo set has none.
+  // Every quote in one request (the adapter caches them), then each ticker's headlines.
+  syncTickers(list, light) {
+    const L = window.HIFLive; if (!L || !list.length) return;
+    (L.quotes ? L.quotes(list).catch(() => ({})) : Promise.resolve({})).then(() => list.forEach(t => this.syncTicker(t, light)));
+  }
   syncTicker(t, light) {
     const L = window.HIFLive; if (!L || !t) return;
     const keep = (k, v) => this.setState(st => ({ [k]: Object.assign({}, st[k], { [t]: v }) }));
@@ -982,7 +988,7 @@ class Component extends DCLogic {
     const tick = () => {
       if (document.hidden || !this.state.session) return;
       this._lastAuto = Date.now();
-      this.liveTickers().forEach(t => this.syncTicker(t, true));
+      this.syncTickers(this.liveTickers(), true);
       this.syncPositions();
       if (this.state.screen === 'portfolio') this.syncPortfolioCharts();
       if (this.state.feedTab === 'market') this.syncMarket();
@@ -997,7 +1003,7 @@ class Component extends DCLogic {
   }
   // The Market tab's headlines: the ten largest names, independent of the watchlist.
   syncMarket() {
-    ((window.HIF && window.HIF.MARKET_TOP) || []).forEach(t => this.syncTicker(t, true));
+    this.syncTickers((window.HIF && window.HIF.MARKET_TOP) || [], true);
   }
   // Live price history for the open ticker, once per ticker and range (the adapter
   // caches for 5 minutes). false marks a ticker the market feed has no history for.

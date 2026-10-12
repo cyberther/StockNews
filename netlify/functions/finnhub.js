@@ -1,74 +1,16 @@
-// Netlify Function: server-side proxy for Finnhub.
-// The API key lives in the site env (FINNHUB_KEY) and never reaches the browser.
+// Netlify Function: the market data gateway at /api/finnhub (see _shared/market/gateway.js).
+// Keys live in the site env and never reach the browser.
 //
-// Setup: Netlify → Site configuration → Environment variables → FINNHUB_KEY = <your 20-char Finnhub key>
-// Call it as: /api/finnhub?path=/quote&symbol=NVDA
-//
-// Only the endpoints this prototype needs are allowed through.
-import { cleanNews } from './_shared/news-clean.js';
+// Setup: Netlify → Site configuration → Environment variables → FINNHUB_KEY.
+// Call it as /api/finnhub?path=/quote&symbol=NVDA, or /api/finnhub?path=/quotes&symbols=AAPL,NVDA.
+import { handleMarketRequest } from './_shared/market/gateway.js';
 
-const ALLOWED = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/calendar/earnings', '/stock/profile2', '/chart']);
-const BASE = 'https://finnhub.io/api/v1';
-
-const CHART_RANGES = {
-  '1d': '5m', '5d': '15m', '1mo': '60m', '6mo': '1d', ytd: '1d', '1y': '1d', '5y': '1wk'
-};
-// With warm=1 the same bar size is fetched over a longer range, so moving averages
-// and RSI have history before the first visible bar instead of starting mid-chart.
-const CHART_WARM = {
-  '1d': '5d', '5d': '1mo', '1mo': '3mo', '6mo': '1y', ytd: '2y', '1y': '2y', '5y': '10y'
-};
-
-export default async (request) => {
-  const url = new URL(request.url);
-  const path = url.searchParams.get('path') || '';
-  if (!ALLOWED.has(path)) {
-    return Response.json({ error: 'path not allowed', path }, { status: 400 });
-  }
-  const key = process.env.FINNHUB_KEY;
-  if (path === '/chart') {
-    const symbol = (url.searchParams.get('symbol') || '').toUpperCase().replace(/[^A-Z0-9.-]/g, '');
-    const range = url.searchParams.get('range') || '6mo';
-    if (!symbol || !CHART_RANGES[range]) return Response.json({ error: 'invalid chart request' }, { status: 400 });
-    const chartUrl = new URL(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`);
-    chartUrl.searchParams.set('range', url.searchParams.get('warm') === '1' ? CHART_WARM[range] : range);
-    chartUrl.searchParams.set('interval', CHART_RANGES[range]);
-    chartUrl.searchParams.set('includePrePost', 'false');
-    try {
-      const res = await fetch(chartUrl, { headers: { accept: 'application/json', 'user-agent': 'Mozilla/5.0' } });
-      return new Response(await res.text(), {
-        status: res.status,
-        headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300' }
-      });
-    } catch (e) {
-      return Response.json({ error: 'chart upstream failed', detail: String(e) }, { status: 502 });
-    }
-  }
-  if (!key) {
-    return Response.json({ error: 'FINNHUB_KEY is not set on this site' }, { status: 500 });
-  }
-  const out = new URL(BASE + path);
-  for (const [k, v] of url.searchParams) if (k !== 'path') out.searchParams.set(k, v);
-  out.searchParams.set('token', key);
-
-  try {
-    const res = await fetch(out, { headers: { accept: 'application/json' } });
-    let body = await res.text();
-    // Company news: only stories that name the company, linked to the real publisher.
-    if (path === '/company-news' && res.ok) {
-      try { body = JSON.stringify(await cleanNews(JSON.parse(body), out.searchParams.get('symbol'), { apiKey: key })); } catch {}
-    }
-    return new Response(body, {
-      status: res.status,
-      headers: {
-        'content-type': 'application/json',
-        // quotes go stale fast; news and analyst trends do not; company names hardly change
-        'cache-control': path === '/quote' ? 'public, max-age=30' : path === '/stock/profile2' ? 'public, max-age=86400' : 'public, max-age=300'
-      }
-    });
-  } catch (e) {
-    return Response.json({ error: 'upstream failed', detail: String(e) }, { status: 502 });
-  }
-};
+export default async (request, context) => handleMarketRequest(request, {
+  apiKey: process.env.FINNHUB_KEY,
+  allowedOrigins: process.env.ALLOWED_ORIGINS,
+  // One page load asks for news, analysts and earnings per ticker; this only stops abuse.
+  rateLimit: process.env.API_RATE_LIMIT || 600,
+  clientId: context && context.ip
+});
 
 export const config = { path: '/api/finnhub' };
