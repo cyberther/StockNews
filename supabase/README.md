@@ -74,6 +74,45 @@ The **Positions** table on the Watchlist screen saves each signed-in user's hold
 devices. Run all of `supabase/holdings.sql` in the SQL Editor once. Until then, positions
 are kept on the device only and the app says so.
 
+## Usage counters and the health endpoint (optional)
+
+The market data gateway (`netlify/functions/_shared/market/`) can share its call counts
+across function instances, so providers with a daily cap are never pushed past it, and
+`/api/market/health` can show usage. Netlify gets a narrow secret that can only add to and
+read these counters, never the service-role key.
+
+1. **Make two secrets** on your computer (each a long random string):
+
+   ```bash
+   openssl rand -hex 32
+   ```
+
+   One is the usage secret, the other the health token.
+
+2. **Supabase SQL Editor:** run all of `supabase/usage.sql`, then store the usage secret:
+
+   ```sql
+   select vault.create_secret('<usage secret>', 'usage_secret');
+   ```
+
+3. **Netlify environment variables** (scope: Functions, all deploy contexts):
+
+   | Name | Value |
+   |---|---|
+   | `USAGE_SECRET` | the usage secret |
+   | `HEALTH_TOKEN` | the health token |
+
+   `SUPABASE_URL` and `SUPABASE_ANON_KEY` are already set for sign-in. A deploy picks the
+   new variables up.
+
+4. **Check it:**
+
+   ```bash
+   curl -H "Authorization: Bearer <health token>" https://<site>/api/market/health
+   ```
+
+   Without `HEALTH_TOKEN` the endpoint answers 404; with a wrong token, 401.
+
 ## Checking it works
 
 - Run the scan by hand:

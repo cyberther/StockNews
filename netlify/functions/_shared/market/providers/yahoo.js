@@ -10,6 +10,7 @@ export const CHART_RANGES = Object.keys(RANGES);
 export const yahoo = {
   name: 'yahoo',
   needsKey: false,
+  limits: {},
   supports: cap => cap === 'chart',
   url(cap, p) {
     const u = new URL(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(p.symbol)}`);
