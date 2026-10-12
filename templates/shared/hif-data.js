@@ -23,7 +23,7 @@ const NEWS = [
   { ticker:'ASML', source:'FT', stamp:'07:52:05', score:'+44', delta:'+1.7%', up:true, vol:'1.6x',
     headline:{ EN:'High-NA bookings from two more logic customers', RO:'Comenzi High-NA de la încă doi clienți din segmentul logic', DE:'High-NA-Bestellungen von zwei weiteren Logik-Kunden' },
     watch:{ EN:'Backlog converts slowly — recognition is 2027 revenue.', RO:'Portofoliul se convertește lent — recunoașterea e venit de 2027.', DE:'Der Auftragsbestand wandelt sich langsam — Umsatz erst 2027.' } },
-  { ticker:'NOVO', source:'Reuters', stamp:'07:21:44', score:'−28', delta:'−2.6%', up:false, vol:'2.0x',
+  { ticker:'NVO', source:'Reuters', stamp:'07:21:44', score:'−28', delta:'−2.6%', up:false, vol:'2.0x',
     headline:{ EN:'US payer drops obesity drug from two formularies', RO:'Un asigurător american scoate medicamentul pentru obezitate din două liste', DE:'US-Kostenträger nimmt Abnehmmittel aus zwei Listen' },
     watch:{ EN:'Net price, not volume — rebates are where the story is.', RO:'Prețul net, nu volumul — povestea e la reduceri.', DE:'Der Nettopreis, nicht das Volumen — die Story steckt in den Rabatten.' } },
   { ticker:'NVDA', source:'The Verge', stamp:'07:40:22', score:'+9', delta:'+2.4%', up:true, vol:'1.8x',
@@ -58,7 +58,7 @@ const FOLLOWS = {
   ASML: { ticker:'ASML', name:'ASML Holding NV', price:'892.10', move:'+1.7%', up:true, score:'+44', buyPct:'74%', analystDetail:'26 / 8 / 1', earnDays:'41d', earnDate:'13 Oct', perf6m:'+24.5%', lastEarn:'Missed by 1.4% · 16 Jul',
     latest:{ EN:'1 story · 5h', RO:'1 știre · 5h', DE:'1 Meldung · 5h' },
     call:{ EN:'Bookings are 2027 revenue — good news, slow money.', RO:'Comenzile sunt venit de 2027 — știre bună, bani lenți.', DE:'Bestellungen sind Umsatz für 2027 — gute Nachricht, langsames Geld.' } },
-  NOVO: { ticker:'NOVO', name:'Novo Nordisk A/S', price:'61.83', move:'−2.6%', up:false, score:'−28', buyPct:'55%', analystDetail:'17 / 13 / 4', earnDays:'9d', earnDate:'11 Sep', perf6m:'−19.3%', lastEarn:'Missed by 5.2% · 06 Aug',
+  NVO: { ticker:'NVO', name:'Novo Nordisk A/S', price:'61.83', move:'−2.6%', up:false, score:'−28', buyPct:'55%', analystDetail:'17 / 13 / 4', earnDays:'9d', earnDate:'11 Sep', perf6m:'−19.3%', lastEarn:'Missed by 5.2% · 06 Aug',
     latest:{ EN:'1 story · 6h', RO:'1 știre · 6h', DE:'1 Meldung · 6h' },
     call:{ EN:'Formulary losses hit net price before they hit volume.', RO:'Pierderea listelor de rambursare lovește prețul net înainte de volum.', DE:'Listenverluste treffen den Nettopreis vor dem Volumen.' } }
 };
@@ -69,7 +69,7 @@ const UNIVERSE = [
   { ticker:'MSFT', name:'Microsoft Corp', stories:'14' },
   { ticker:'AMZN', name:'Amazon.com Inc', stories:'22' },
   { ticker:'ASML', name:'ASML Holding NV', stories:'6' },
-  { ticker:'NOVO', name:'Novo Nordisk A/S', stories:'11' },
+  { ticker:'NVO', name:'Novo Nordisk A/S', stories:'11' },
   { ticker:'GOOGL', name:'Alphabet Inc', stories:'17' },
   { ticker:'META',  name:'Meta Platforms Inc', stories:'15' },
   { ticker:'AMD',   name:'Advanced Micro Devices', stories:'13' },
@@ -119,7 +119,7 @@ const EVENTS = {
   ASML: [ { date:'Oct 15', dow:'WED', kind:'evEarnings', detail:'Q3 · 07:00 CET' },
           { date:'Oct 23', dow:'THU', kind:'evExDiv',    detail:'€1.60' },
           { date:'Nov 06', dow:'THU', kind:'evPay',      detail:'€1.60' } ],
-  NOVO: [ { date:'Nov 05', dow:'WED', kind:'evEarnings', detail:'Q3 · 08:00 CET' },
+  NVO: [ { date:'Nov 05', dow:'WED', kind:'evEarnings', detail:'Q3 · 08:00 CET' },
           { date:'Nov 21', dow:'FRI', kind:'evGuide',    detail:'FY guidance update' } ]
 };
 // Insider transactions and regulatory filings. Names, forms and figures are
@@ -141,7 +141,7 @@ const SIGNALS = {
           { type:'filing',  stamp:'5d',  form:'10-Q',      item:'Q3' } ],
   ASML: [ { type:'filing',  stamp:'2d',  form:'6-K',       item:'Q3 release' },
           { type:'insider', stamp:'7d',  who:'R. Dassen',  role:'CFO',      act:'buy',  shares:'2,000',  value:'€1.42M' } ],
-  NOVO: [ { type:'filing',  stamp:'1d',  form:'6-K',       item:'Company announcement' },
+  NVO: [ { type:'filing',  stamp:'1d',  form:'6-K',       item:'Company announcement' },
           { type:'insider', stamp:'4d',  who:'K. Dyekjær', role:'Director', act:'buy',  shares:'1,500',  value:'kr 0.71M' } ]
 };
 const UI = {
@@ -496,7 +496,7 @@ const SECTORS = {
   'Big tech':['AAPL','MSFT','GOOGL','AMZN','META','NFLX','ORCL','CRM','ADBE','SAP','IBM','BABA'],
   Autos:['TSLA','F','GM','BMW','MBG','VOW3','RIVN','LCID','STLA'],
   Banks:['JPM','BAC','GS','MS','C','WFC','DB','HSBC','UBS','BNP'],
-  Pharma:['LLY','PFE','MRK','JNJ','ABBV','NOVO','AZN','GSK','SAN','BAYN'],
+  Pharma:['LLY','PFE','MRK','JNJ','ABBV','NVO','AZN','GSK','SAN','BAYN'],
   Energy:['XOM','CVX','SHEL','BP','TTE','COP','ENI'],
   Industrials:['SIE','RHM','BA','CAT','GE','HON','AIR','MMM']
 };
@@ -506,13 +506,15 @@ Object.keys(SECTORS).forEach(s => SECTORS[s].forEach(t => { SECTOR_OF[t] = s; })
 // positions anonymously). Crowding is a risk signal retail products never surface.
 const CROWD = {
   NVDA:84, AAPL:79, TSLA:71, MSFT:64, AMZN:58, GOOGL:52, META:44, AMD:41, AVGO:29, PLTR:38,
-  ASML:22, NOVO:17, SAP:12, SIE:9, RHM:14, BMW:8, SHEL:7, BABA:19, INTC:26, MU:18,
+  ASML:22, NVO:17, SAP:12, SIE:9, RHM:14, BMW:8, SHEL:7, BABA:19, INTC:26, MU:18,
   JPM:15, GS:9, LLY:21, PFE:11, XOM:10, TSM:24, ARM:16, NFLX:31, ORCL:20, CRM:13
 };
 // Until paid plans launch, every account gets every feature. Set to false when the
 // payment integration is in; the apps then use the server-owned plan (account_status).
 const ALL_ACCESS = true;
-window.HIF = { NEWS, FOLLOWS, UNIVERSE, EVENTS, SIGNALS, SECTORS, SECTOR_OF, CROWD, UI, ALL_ACCESS };
+// The Market tab's headlines: the ten largest US-listed names by market value.
+const MARKET_TOP = ['NVDA','AAPL','MSFT','GOOGL','AMZN','META','AVGO','TSLA','TSM','JPM'];
+window.HIF = { NEWS, FOLLOWS, UNIVERSE, EVENTS, SIGNALS, SECTORS, SECTOR_OF, CROWD, UI, ALL_ACCESS, MARKET_TOP };
 
 // Content edited in the admin panel (GET /api/content). Everything above stays
 // the fallback: offline, in the design tool, or if the request fails, the page

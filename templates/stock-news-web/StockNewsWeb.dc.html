@@ -1192,6 +1192,7 @@ class Component extends DCLogic {
     const start = () => {
       this._synced = (this.state.follows || []).slice();
       this.syncLive();
+      if (this.state.feedTab === 'market') this.syncMarket();
       this.syncDetail(this.state.selected);
       this.state.follows.forEach(t => this.syncSpark(t));
     };
@@ -1283,6 +1284,18 @@ class Component extends DCLogic {
         liveError: got ? '' : (res.errors[0] || 'no data')
       });
     }).catch(e => this.setState({ refreshing:false, liveStatus:'error', liveError:e.message }));
+  }
+  // The Market tab's headlines come from a fixed list of the largest names rather than
+  // the watchlist, so they load on their own (quotes and news, no analyst calls).
+  syncMarket() {
+    const top = (window.HIF && window.HIF.MARKET_TOP) || [];
+    if (!window.HIFLive || !top.length) return;
+    window.HIFLive.load(top, this.token, { recs:false }).then(res => {
+      const got = Object.keys(res.quotes).length;
+      if (!got && !Object.keys(res.news).length) return;
+      this.setState(st => ({ quotes: Object.assign({}, st.quotes, res.quotes), liveNews: Object.assign({}, st.liveNews, res.news),
+        liveMode: res.mode, liveStatus: got ? 'live' : st.liveStatus }));
+    }).catch(() => {});
   }
   syncDetail(symbol, force, requestedRange) {
     if (!window.HIFLive || !symbol) return;
@@ -1621,7 +1634,10 @@ class Component extends DCLogic {
         style:Object.assign(this.chipStyle(range === r[0]), (isFree && gated[r[0]] && range !== r[0]) ? { color:this.pal.mute } : null) }, r[1])),
       React.createElement('span', { style:{ minWidth:68, textAlign:'right', fontSize:11, fontWeight:800, color:perf < 0 ? this.pal.accent : this.pal.ink } },
         values.length ? (perf < 0 ? '−' : '+') + Math.abs(perf).toFixed(1) + '%' : '—'));
-    if (values.length < 2 || loading || (this.state.liveStatus === 'live' && livePts.length < 2)) {
+    // With live data on, a ticker the market feed doesn't cover gets "no history", never
+    // the demo series (whose SMA would be drawn over made-up prices).
+    const liveOn = this.state.liveStatus === 'live' || (this.state.liveMode && this.state.liveMode !== 'off');
+    if (values.length < 2 || loading || (liveOn && livePts.length < 2)) {
       return React.createElement('div', null, header,
         React.createElement('div', { style:{ minHeight:h, display:'grid', placeItems:'center', alignContent:'center', gap:12, border:'1px solid #333333', padding:20, textAlign:'center' } },
           React.createElement('div', { style:{ fontSize:11, letterSpacing:'0.12em', color:this.pal.mute } }, loading ? 'LOADING MARKET HISTORY…' : 'NO MARKET HISTORY FOR THIS RANGE'),
@@ -1763,13 +1779,16 @@ class Component extends DCLogic {
     const storyCount = t => (LN[t] && LN[t].length) || 0;
     let baseFeed;
     if (live) {
-      const syms = s.feedTab === 'following' ? s.follows : Object.keys(LN);
+      // Market: the newest two stories from each of the ten largest names, so one busy
+      // ticker can't fill the tab.
+      const market = s.feedTab !== 'following';
+      const syms = market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows;
       const rows = [];
-      syms.forEach(t => (LN[t] || []).forEach(n => rows.push({
+      syms.forEach(t => (LN[t] || []).slice(0, market ? 2 : undefined).forEach(n => rows.push({
         ticker:t, source:n.source, stamp:n.stamp, ts:n.ts, headline:n.headline, watch:n.summary || '', url:n.url || '',
         score:'#' + storyCount(t), vol:'—', delta:(Q[t] || {}).move || '—', up:(Q[t] || {}).up !== false
       })));
-      baseFeed = rows.sort((a,b) => b.ts - a.ts).slice(0, 14);
+      baseFeed = rows.sort((a,b) => b.ts - a.ts).slice(0, market ? 20 : 14);
     }
     if (!baseFeed || !baseFeed.length) {
       baseFeed = (s.feedTab === 'following' ? NEWS.filter(n => s.follows.includes(n.ticker)) : NEWS)
@@ -1895,7 +1914,12 @@ class Component extends DCLogic {
       .slice(0, 3).map(n => ({ headline: typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN, source:n.source, url:n.url || '' }));
     const why = IN ? IN.attribute({ ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
     const whyTone = why && (why.kind === 'none' || why.kind === 'quiet') ? 'var(--s-mute)' : 'var(--color-accent)';
-    const trend = window.HIFChart.seriesFor(stock.ticker, '1mo', stock.price, stock.move, 60).map(p => p.close);
+    // RSI for the conflict check: the loaded live series when there is one; the demo
+    // series only in demo mode, so live tickers are never judged on made-up prices.
+    const liveSeries = (s.charts || {})[stock.ticker + ':' + s.chartRange];
+    const trend = liveSeries && liveSeries.points && liveSeries.points.length > 15
+      ? (liveSeries.lead || []).concat(liveSeries.points).map(p => p.close)
+      : live ? [] : window.HIFChart.seriesFor(stock.ticker, '1mo', stock.price, stock.move, 60).map(p => p.close);
     const rsiArr = window.HIFChart.rsiSeries(trend, 14).filter(v => v != null);
     const rsiNow = rsiArr.length ? rsiArr[rsiArr.length - 1] : null;
     const clashes = IN ? IN.conflicts({ analystDetail: stock.analystDetail, signals: SIGNALS[stock.ticker] || [], movePct: stock.move, rsi: rsiNow }) : [];
@@ -2282,7 +2306,7 @@ class Component extends DCLogic {
       scanLabel: isFree ? u.delayLabel : u.lastScan,
       feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : u.topVolume,
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
-      setFeedMarket: () => this.setState({ feedTab:'market' }),
+      setFeedMarket: () => { this.setState({ feedTab:'market' }); this.syncMarket(); },
       feedFollowingOn: s.feedTab === 'following', feedFollowingOff: s.feedTab !== 'following',
       feedMarketOn: s.feedTab === 'market', feedMarketOff: s.feedTab !== 'market',
       feed, follows,
