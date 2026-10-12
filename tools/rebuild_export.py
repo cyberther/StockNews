@@ -1,33 +1,50 @@
 #!/usr/bin/env python3
-"""Rebuild export/HIF-Web-Dark.html from templates/stock-news-web/StockNewsWeb.dc.html.
+"""Rebuild the self-unpacking exports from their templates:
+export/HIF-Web-Dark.html from templates/stock-news-web/StockNewsWeb.dc.html and
+export/HIF-Mobile-Dark.html from templates/stock-news-dark/StockNewsDark.dc.html.
 
 The export is a self-unpacking bundle: a JSON-encoded copy of the page whose
 asset paths are replaced by manifest uuids, plus a manifest of base64 (gzip)
 assets. This keeps the bundle's runtime and uuids, and swaps in the current
 page markup and the current asset bytes.
 
-    python3 tools/rebuild_export.py            # writes export/HIF-Web-Dark.html
-    python3 tools/rebuild_export.py --check    # exit 1 if the export is stale
+    python3 tools/rebuild_export.py                  # writes both exports
+    python3 tools/rebuild_export.py web|mobile       # writes one
+    python3 tools/rebuild_export.py --check          # exit 1 if any export is stale
 """
 import base64, gzip, json, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGE_DIR = ROOT / 'templates/stock-news-web'
-PAGE = PAGE_DIR / 'StockNewsWeb.dc.html'
-OUT = ROOT / 'export/HIF-Web-Dark.html'
 
-# page-relative src -> manifest uuid (stable across rebuilds)
-ASSETS = {
-    './support.js': '0063a956-78e8-41de-b840-36b3c7c986f8',
-    './ds-base.js': 'e28c8dbf-cca6-4619-a20e-28e41cc2e168',
-    '../shared/hif-data.js': '51260e3d-ca06-4f11-8bb4-255f8df7487d',
-    '../shared/hif-chart.js': 'c2cb1d5a-7eb5-4f7b-ae9b-20657e2ba262',
-    '../shared/hif-insight.js': '9cf08d53-172d-43a0-9618-2b7d30215898',
-    '../shared/hif-live.js': 'c3512b4d-940f-4c6c-be48-a62e195d9a3c',
-    '../shared/hif-store.js': 'cbf22793-fdd7-4578-9f64-92a72296bdea',
-    './assets/aa-logo.png': '8f4d386c-5068-40fe-9b17-49e5c21ab630',
-    './assets/hero-globe.png': 'f6717536-9b6d-44c4-b709-5a1f9fbe7642',
+# Per export: the page, the output, and page-relative src -> manifest uuid
+# (stable across rebuilds).
+TARGETS = {
+    'web': {
+        'page': ROOT / 'templates/stock-news-web/StockNewsWeb.dc.html',
+        'out': ROOT / 'export/HIF-Web-Dark.html',
+        'assets': {
+            './support.js': '0063a956-78e8-41de-b840-36b3c7c986f8',
+            './ds-base.js': 'e28c8dbf-cca6-4619-a20e-28e41cc2e168',
+            '../shared/hif-data.js': '51260e3d-ca06-4f11-8bb4-255f8df7487d',
+            '../shared/hif-chart.js': 'c2cb1d5a-7eb5-4f7b-ae9b-20657e2ba262',
+            '../shared/hif-insight.js': '9cf08d53-172d-43a0-9618-2b7d30215898',
+            '../shared/hif-live.js': 'c3512b4d-940f-4c6c-be48-a62e195d9a3c',
+            '../shared/hif-store.js': 'cbf22793-fdd7-4578-9f64-92a72296bdea',
+            './assets/aa-logo.png': '8f4d386c-5068-40fe-9b17-49e5c21ab630',
+            './assets/hero-globe.png': 'f6717536-9b6d-44c4-b709-5a1f9fbe7642',
+        },
+    },
+    'mobile': {
+        'page': ROOT / 'templates/stock-news-dark/StockNewsDark.dc.html',
+        'out': ROOT / 'export/HIF-Mobile-Dark.html',
+        'assets': {
+            './support.js': '5f546fba-2a1a-4253-b6d5-6d499367d292',
+            './ds-base.js': '1a23418a-47b6-4488-b543-86c6c76bc75d',
+            '../shared/hif-data.js': '579b1aee-3c99-4dcd-89f7-0266059cff28',
+            '../shared/hif-store.js': 'fa1601de-b213-46b7-8267-9c64cee3176c',
+        },
+    },
 }
 
 # The exporter rewrites ds-base.js to load the design system from bundle
@@ -58,15 +75,15 @@ def fix_tag(tag):
     tag = re.sub(r'(\s)([a-z]+[A-Z][A-Za-z]*)(?==)', lambda m: m.group(1) + camel_to_sc(m.group(2)), tag)
     return re.sub(r'(\s)data-dc-script(?=[\s>])', r'\1data-dc-script=""', tag)
 
-def build_template():
-    html = PAGE.read_text()
+def build_template(t):
+    html = t['page'].read_text()
     html = re.sub(r'<template id="__bundler_thumbnail">.*?</template>', '', html, flags=re.S)
-    for path, uuid in ASSETS.items():
+    for path, uuid in t['assets'].items():
         html = html.replace('src="%s"' % path, 'src="%s"' % uuid)
     html = encode_markup(html)
     # Match the DOM serializer the bundle was first exported with.
     html = re.sub(r'(<(?:input|img|br|hr|meta|link)\b[^<>]*?)\s*/>', r'\1>', html)
-    html = html.replace('<html>\n<head>', '<html><head>', 1)
+    html = re.sub(r'(<html\b[^>]*>)\n<head>', r'\1<head>', html, count=1)
     return re.sub(r'\n*</body>\s*</html>\s*$', '\n\n\n</body></html>', html)
 
 def decoded(s):
@@ -78,26 +95,38 @@ def decoded(s):
     return assets, json.loads(block_span(s, 'template')[2]), re.sub(
         r'(<script type="__bundler/(?:manifest|template)">).*?</script>', r'\1', s, flags=re.S)
 
-def main():
-    s = OUT.read_text()
+def rebuild(t, check):
+    s = t['out'].read_text()
     man_a, man_b, man_raw = block_span(s, 'manifest')
     manifest = json.loads(man_raw)
-    for path, uuid in ASSETS.items():
+    for path, uuid in t['assets'].items():
         if path in KEEP_BUNDLED:
             continue
-        data = (PAGE_DIR / path).resolve().read_bytes()
+        data = (t['page'].parent / path).resolve().read_bytes()
         entry = manifest[uuid]
         if entry.get('compressed'):
             data = gzip.compress(data, mtime=0)
         entry['data'] = base64.b64encode(data).decode()
     new = s[:man_a] + json.dumps(manifest, separators=(',', ':')) + s[man_b:]
     tpl_a, tpl_b, _ = block_span(new, 'template')
-    tpl = json.dumps(build_template()).replace('</', '<\\/')
+    tpl = json.dumps(build_template(t)).replace('</', '<\\/')
     new = new[:tpl_a] + tpl + new[tpl_b:]
-    if '--check' in sys.argv:
-        sys.exit(0 if decoded(new) == decoded(s) else 1)
-    OUT.write_text(new)
-    print('wrote', OUT.relative_to(ROOT), len(new), 'bytes')
+    if check:
+        fresh = decoded(new) == decoded(s)
+        print(t['out'].relative_to(ROOT), 'up to date' if fresh else 'STALE')
+        return fresh
+    t['out'].write_text(new)
+    print('wrote', t['out'].relative_to(ROOT), len(new), 'bytes')
+    return True
+
+def main():
+    names = [a for a in sys.argv[1:] if not a.startswith('-')] or list(TARGETS)
+    bad = [n for n in names if n not in TARGETS]
+    if bad:
+        sys.exit('unknown target: %s (choose from %s)' % (', '.join(bad), ', '.join(TARGETS)))
+    check = '--check' in sys.argv
+    ok = [rebuild(TARGETS[n], check) for n in names]
+    sys.exit(0 if all(ok) else 1)
 
 if __name__ == '__main__':
     main()

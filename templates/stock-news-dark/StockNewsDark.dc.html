@@ -35,28 +35,38 @@
 <div style="background:var(--s-bg);padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">30<span style="font-size:12px;color:var(--s-mute)"> min</span></div></div>
 <div style="background:var(--s-bg);padding:12px"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.sources }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:22px;margin-top:2px">840</div></div>
 </div>
-<p style="font-size:13px;line-height:1.45;color:var(--s-mute);margin:0">{{ ui.authKicker }}</p>
+<div role="tablist" style="display:flex;border-bottom:1px solid var(--s-rule);margin-bottom:16px"><button role="tab" aria-selected="{{ authIsIn }}" onClick="{{ authToIn }}" style="flex:1;min-height:44px;padding:0;background:transparent;border:0;border-bottom:2px solid {{ authTabInLine }};color:{{ authTabInInk }};font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.04em;cursor:pointer">{{ ui.authTabIn }}</button><button role="tab" aria-selected="{{ authIsUp }}" onClick="{{ authToUp }}" style="flex:1;min-height:44px;padding:0;background:transparent;border:0;border-bottom:2px solid {{ authTabUpLine }};color:{{ authTabUpInk }};font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.04em;cursor:pointer">{{ ui.authTabUp }}</button></div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:20px;letter-spacing:-0.02em;line-height:1.1">{{ authKicker }}</div>
 <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
 <button onClick="{{ signInGoogle }}" style="min-height:48px;display:flex;align-items:center;gap:11px;text-align:left;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer"><span style="flex:none;width:20px;height:20px;border:1px solid var(--s-faint);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--s-mute)">G</span>{{ ui.contGoogle }}</button>
 <button onClick="{{ signInICloud }}" style="min-height:48px;display:flex;align-items:center;gap:11px;text-align:left;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer"><span style="flex:none;width:20px;height:20px;border:1px solid var(--s-faint);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--s-mute)">⌘</span>{{ ui.contICloud }}</button>
 </div>
 <div style="display:flex;align-items:center;gap:10px;margin:16px 0 14px">
 <span style="flex:1;height:1px;background:var(--s-rule)"></span>
-<span style="flex:none;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.orEmail }}</span>
+<span style="flex:none;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ authOrEmail }}</span>
 <span style="flex:1;height:1px;background:var(--s-rule)"></span>
 </div>
 <div style="display:flex;flex-direction:column;gap:11px">
+<sc-if value="{{ authIsUp }}" hint-placeholder-val="{{ false }}">
+<label style="display:block">
+<span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.nameLabel }}</span>
+<input type="text" name="name" autocomplete="name" maxlength="60" placeholder="{{ ui.namePh }}" value="{{ authName }}" onChange="{{ onAuthName }}" aria-invalid="{{ authNameBad }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;border-color:{{ authNameLine }}">
+</label>
+</sc-if>
 <label style="display:block">
 <span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.emailLabel }}</span>
-<input type="email" autocomplete="email" placeholder="you@email.com" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px">
+<input type="email" name="email" inputmode="email" autocomplete="{{ authEmailAc }}" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="you@email.com" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" aria-invalid="{{ authEmailBad }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;border-color:{{ authEmailLine }}">
 </label>
+<sc-if value="{{ emailSuggest }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ useEmailSuggest }}" style="align-self:flex-start;margin-top:-4px;padding:0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-body);font-size:12px;text-align:left;cursor:pointer">{{ ui.emailTypo }} <span style="color:var(--color-accent);text-decoration:underline">{{ emailSuggest }}</span>?</button>
+</sc-if>
 <label style="display:block">
 <span style="display:flex;align-items:baseline;gap:8px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.pwLabel }}</span>
-<input type="{{ pwType }}" autocomplete="current-password" placeholder="••••••••" value="{{ authPw }}" onChange="{{ onAuthPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px">
+<input type="{{ pwType }}" name="password" autocomplete="{{ authPwAc }}" placeholder="••••••••" value="{{ authPw }}" onChange="{{ onAuthPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px">
 </label>
 <button onClick="{{ togglePwShow }}" style="align-self:flex-start;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">{{ pwShowLabel }}</button>
 </div>
-<sc-if value="{{ pwTyped }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ pwMeter }}" hint-placeholder-val="{{ false }}">
 <div style="margin-top:12px">
 <div style="display:flex;gap:3px">
 <sc-for list="{{ pwSegs }}" as="g" hint-placeholder-count="4">
@@ -73,10 +83,13 @@
 </div>
 </sc-if>
 <sc-if value="{{ authErr }}" hint-placeholder-val="{{ false }}">
-<div style="margin-top:12px;font-size:11px;color:var(--color-accent)">{{ authErr }}</div>
+<div role="alert" style="margin-top:12px;font-size:12px;color:var(--color-accent)">{{ authErr }}</div>
 </sc-if>
-<button onClick="{{ submitAuth }}" style="min-height:48px;margin-top:16px;text-align:left;padding:0 14px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.contBtn }}</button>
-<div style="font-size:11px;color:var(--s-mute);margin-top:14px;line-height:1.45">{{ ui.authFoot }}</div>
+<button onClick="{{ submitAuth }}" style="min-height:48px;margin-top:16px;text-align:left;padding:0 14px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ authBtn }}</button>
+<div style="font-size:12px;color:var(--s-mute);margin-top:14px;line-height:1.45">{{ authFootQ }} <button onClick="{{ authSwitch }}" style="min-height:32px;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-body);font-size:12px;text-decoration:underline;cursor:pointer">{{ authSwitchLabel }}</button></div>
+<sc-if value="{{ authIsUp }}" hint-placeholder-val="{{ false }}">
+<div style="font-size:11px;color:var(--s-faint);margin-top:4px;line-height:1.45">{{ ui.footUpNote }}</div>
+</sc-if>
 </div>
 </sc-if>
 
@@ -530,7 +543,16 @@
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Heard It First&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
-const { NEWS, FOLLOWS, UNIVERSE, UI } = window.HIF;
+// The shared scripts can finish loading after this logic is evaluated, so the
+// content globals are bound lazily; until then the component renders empty.
+let NEWS, FOLLOWS, UNIVERSE, UI;
+function bindShared() {
+  if (UI) return true;
+  const H = window.HIF;
+  if (!H) return false;
+  ({ NEWS, FOLLOWS, UNIVERSE, UI } = H);
+  return true;
+}
 const STORE_KEY = 'hif.dark.v2';
 // Keys that survive a reload. Transient input (passwords, codes, toasts) never persists.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','smaOn',
@@ -544,12 +566,15 @@ function hydrate(defaults) {
 }
 class Component extends DCLogic {
   state = hydrate({ screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed', chartRange:'1d', smaOn:true, push:{}, screenFilter:'all',
-    session:null, onboarded:false, locked:false, authEmail:'', authPw:'', pwShow:false, authErr:'',
+    session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'' });
-  componentDidMount() { this.startIdleWatch(); }
+  componentDidMount() {
+    this.startIdleWatch();
+    if (!bindShared()) { this._poll = setInterval(() => { if (bindShared()) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
+  }
   componentDidUpdate() { this.persist(); }
-  componentWillUnmount() { this.stopIdleWatch(); clearTimeout(this._t); }
+  componentWillUnmount() { this.stopIdleWatch(); clearTimeout(this._t); clearInterval(this._poll); }
   persist() {
     const S = window.HIFStore; if (!S) return;
     const out = {};
@@ -589,14 +614,46 @@ class Component extends DCLogic {
     clearInterval(this._idle);
     (this._events || []).forEach(e => window.removeEventListener(e, this._onAct, true));
   }
-  validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || '').trim()); }
-  signInWith(provider, email) {
+  // Syntax per RFC 5321 limits (dot-atom local part, LDH domain labels, alphabetic
+  // TLD). Quoted local parts and IP literals are legal but never real sign-ups.
+  validEmail(v) {
+    const mail = String(v || '').trim();
+    if (mail.length > 254) return false;
+    const at = mail.lastIndexOf('@');
+    if (at < 1) return false;
+    const local = mail.slice(0, at), domain = mail.slice(at + 1).toLowerCase();
+    if (local.length > 64 || !/^[A-Za-z0-9!#$%&'*+\/=?^_`{|}~-]+(\.[A-Za-z0-9!#$%&'*+\/=?^_`{|}~-]+)*$/.test(local)) return false;
+    const labels = domain.split('.');
+    return labels.length >= 2 && domain.length <= 253
+      && labels.every(l => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(l))
+      && /^[a-z]{2,63}$/.test(labels[labels.length - 1]);
+  }
+  // "Did you mean …?" for the usual slips on the big mail providers.
+  emailSuggestion(v) {
+    const mail = String(v || '').trim(), at = mail.lastIndexOf('@');
+    if (at < 1) return '';
+    const domain = mail.slice(at + 1).toLowerCase();
+    const fix = {
+      'gmial.com':'gmail.com', 'gamil.com':'gmail.com', 'gmai.com':'gmail.com', 'gmal.com':'gmail.com', 'gmaill.com':'gmail.com',
+      'gmail.co':'gmail.com', 'gmail.con':'gmail.com', 'gmail.cm':'gmail.com', 'gnail.com':'gmail.com',
+      'yaho.com':'yahoo.com', 'yahooo.com':'yahoo.com', 'yhoo.com':'yahoo.com', 'yahoo.con':'yahoo.com', 'yahoo.cm':'yahoo.com', 'tahoo.com':'yahoo.com',
+      'hotmial.com':'hotmail.com', 'hotmal.com':'hotmail.com', 'hotmail.con':'hotmail.com', 'hotmai.com':'hotmail.com',
+      'outlok.com':'outlook.com', 'outlook.con':'outlook.com', 'outloo.com':'outlook.com',
+      'iclod.com':'icloud.com', 'icoud.com':'icloud.com', 'icloud.con':'icloud.com'
+    }[domain];
+    return fix ? mail.slice(0, at + 1) + fix : '';
+  }
+  validName(v) {
+    const name = String(v || '').trim().replace(/\s+/g, ' ');
+    return name.length >= 2 && name.length <= 60 && /\p{L}/u.test(name) && /^[\p{L}\p{M} .'’-]+$/u.test(name);
+  }
+  signInWith(provider, email, name) {
     const u = UI[this.appLang];
     const mail = email || (provider === 'Google' ? 'alex@gmail.com' : 'alex@icloud.com');
     const fresh = !this.state.onboarded;
     this.setState({
-      session:{ provider, email:mail, since:Date.now() },
-      locked:false, authPw:'', authErr:'', pwShow:false,
+      session:{ provider, email:mail, name: name || null, since:Date.now() },
+      locked:false, authPw:'', authErr:'', authBad:null, pwShow:false,
       screen: fresh ? 'feed' : (this.state.screen === 'auth' ? 'feed' : this.state.screen),
       follows: fresh ? [] : this.state.follows
     });
@@ -604,10 +661,19 @@ class Component extends DCLogic {
     this.flash((u.toastSignedIn || 'Signed in').toUpperCase() + ' · ' + provider.toUpperCase());
   }
   submitEmailAuth() {
-    const u = UI[this.appLang], mail = this.state.authEmail || '', pw = this.state.authPw || '';
-    if (!this.validEmail(mail)) return this.setState({ authErr: u.authErrEmail });
-    if (pw.length < 8) return this.setState({ authErr: u.authErrPw });
-    this.signInWith('Email', mail.trim());
+    const u = UI[this.appLang], st = this.state, up = st.authMode !== 'in';
+    const mail = String(st.authEmail || '').trim(), pw = st.authPw || '';
+    const name = String(st.authName || '').trim().replace(/\s+/g, ' ');
+    if (up && !this.validName(name)) return this.setState({ authErr: u.authErrName, authBad:'name' });
+    if (!this.validEmail(mail)) return this.setState({ authErr: u.authErrEmail, authBad:'email' });
+    if (pw.length < 8) return this.setState({ authErr: u.authErrPw, authBad:'pw' });
+    if (up) {
+      const HS = window.HIFStore, str = HS ? HS.strength(pw) : { score:4, breached:false };
+      if (str.breached) return this.setState({ authErr: u.authErrBreach, authBad:'pw' });
+      if (str.score < 2) return this.setState({ authErr: u.authErrWeak, authBad:'pw' });
+    }
+    const at = mail.lastIndexOf('@');
+    this.signInWith('Email', mail.slice(0, at + 1) + mail.slice(at + 1).toLowerCase(), up ? name : null);
   }
   togglePick(t) {
     const u = UI[this.appLang], free = this.plan === 'free';
@@ -750,6 +816,7 @@ class Component extends DCLogic {
           React.createElement('polyline', { points:rsiS.map((v,i) => v == null ? null : xOf(i).toFixed(1) + ',' + ry(v).toFixed(1)).filter(Boolean).join(' '), fill:'none', stroke:this.pal.accent, strokeWidth:1.25 }))));
   }
   renderVals() {
+    if (!bindShared()) return {};
     const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen;
     const L = this.lang, A = this.appLang, u = UI[A];
     if (!this._idle) this.startIdleWatch();
@@ -759,6 +826,7 @@ class Component extends DCLogic {
     const sessionEmail = (s.session && s.session.email) || 'alex@email.com';
     const links = Object.assign({ Google:true, iCloud:false, Email:true }, s.links || {});
     const pw = HS ? HS.strength(s.authPw || '') : { score:0, breached:false, hints:[] };
+    const authUp = s.authMode !== 'in';
     const hintText = { len:u.hintLen, case:u.hintCase, digit:u.hintDigit, symbol:u.hintSymbol };
     const timeoutMin = s.timeoutMin === undefined ? 30 : s.timeoutMin;
     const volNum = v => { const m = /([\d.]+)x/.exec(String(v || '')); return m ? parseFloat(m[1]) : 0; };
@@ -806,7 +874,28 @@ class Component extends DCLogic {
       isAccount: inApp && screen === 'account', isSecurity: inApp && screen === 'security',
       showNav: inApp && screen !== 'paywall',
       authEmail: s.authEmail || '', authPw: s.authPw || '', authErr: s.authErr || '',
-      onAuthEmail: e => this.setState({ authEmail:e.target.value, authErr:'' }),
+      onAuthEmail: e => this.setState({ authEmail:e.target.value, authErr:'', authBad:null }),
+      onAuthName: e => this.setState({ authName:e.target.value, authErr:'', authBad:null }),
+      authName: s.authName || '',
+      authIsUp: authUp, authIsIn: !authUp,
+      authToIn: () => this.setState({ authMode:'in', authErr:'', authBad:null }),
+      authToUp: () => this.setState({ authMode:'up', authErr:'', authBad:null }),
+      authSwitch: () => this.setState({ authMode: authUp ? 'in' : 'up', authErr:'', authBad:null }),
+      authTabInLine: authUp ? 'transparent' : 'var(--color-accent)', authTabInInk: authUp ? 'var(--s-mute)' : 'var(--s-ink)',
+      authTabUpLine: authUp ? 'var(--color-accent)' : 'transparent', authTabUpInk: authUp ? 'var(--s-ink)' : 'var(--s-mute)',
+      authKicker: authUp ? u.authKickerUp : u.authKickerIn,
+      authOrEmail: authUp ? u.orEmailUp : u.orEmail,
+      authBtn: authUp ? u.btnSignUp : u.btnSignIn,
+      authFootQ: authUp ? u.footUp : u.footIn,
+      authSwitchLabel: authUp ? u.authTabIn : u.authTabUp,
+      authEmailAc: authUp ? 'email' : 'username',
+      authPwAc: authUp ? 'new-password' : 'current-password',
+      authNameBad: s.authBad === 'name', authEmailBad: s.authBad === 'email',
+      authNameLine: s.authBad === 'name' ? 'var(--color-accent)' : 'var(--s-rule)',
+      authEmailLine: s.authBad === 'email' ? 'var(--color-accent)' : 'var(--s-rule)',
+      emailSuggest: this.emailSuggestion(s.authEmail),
+      useEmailSuggest: () => this.setState({ authEmail: this.emailSuggestion(s.authEmail), authErr:'', authBad:null }),
+      pwMeter: authUp && (s.authPw || '').length > 0,
       onAuthPw: e => this.setState({ authPw:e.target.value, authErr:'' }),
       pwType: s.pwShow ? 'text' : 'password',
       pwShowLabel: s.pwShow ? u.pwHide : u.pwShow,
@@ -977,7 +1066,7 @@ class Component extends DCLogic {
         { label:u.digests, note:u.digestsNote, eta:'Q1' },
         { label:u.broker, note:u.brokerNote, eta:'Q2' }
       ],
-      accountName: this.props.accountName || 'A. Novak',
+      accountName: (s.session && s.session.name) || this.props.accountName || 'A. Novak',
       accountEmail: sessionEmail,
       accountProvider: provider,
       accountPlanLabel: isFree ? u.upgradeBtn : u.managePro,
