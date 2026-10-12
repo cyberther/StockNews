@@ -75,10 +75,39 @@ async function news(symbol, token, limit){
   return rows.slice(0, limit || 5);
 }
 
+// First visible bar of a warm (longer) series: the window the plain range would
+// have returned, computed in the exchange's own timezone.
+function windowStart(rows, range, gmtoffset){
+  if (!rows.length) return 0;
+  const off = (gmtoffset || 0) * 1000;
+  const day = r => new Date(r.ts * 1000 + off).toISOString().slice(0, 10);
+  const lastMs = rows[rows.length - 1].ts * 1000 + off;
+  let cutoff;
+  if (range === '1d' || range === '5d') {
+    const days = range === '1d' ? 1 : 5, seen = [];
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const d = day(rows[i]);
+      if (seen.indexOf(d) < 0) { if (seen.length === days) return i + 1; seen.push(d); }
+    }
+    return 0;
+  }
+  const d = new Date(lastMs);
+  if (range === 'ytd') cutoff = Date.UTC(d.getUTCFullYear(), 0, 1);
+  else {
+    const months = { '1mo': 1, '6mo': 6, '1y': 12, '5y': 60 }[range];
+    if (!months) return 0;
+    cutoff = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - months, d.getUTCDate());
+  }
+  for (let i = 0; i < rows.length; i++) if (rows[i].ts * 1000 + off >= cutoff) return i;
+  return rows.length;
+}
+
+// { points, lead, currency }: points is the visible range; lead holds the bars just
+// before it, for indicators only. An older proxy ignores warm=1 and lead stays short.
 async function chart(symbol, range){
   const key = symbol + ':' + range;
   const hit = fresh('chart', key); if (hit) return hit;
-  const j = await callProxy('/chart', { symbol: symbol, range: range });
+  const j = await callProxy('/chart', { symbol: symbol, range: range, warm: 1 });
   const result = j && j.chart && j.chart.result && j.chart.result[0];
   if (!result) return put('chart', key, null);
   const timestamps = result.timestamp || [];
@@ -87,7 +116,9 @@ async function chart(symbol, range){
   // Yahoo marks missing bars with null, and Number(null) is 0 — drop them before converting.
   const rows = timestamps.map((ts, i) => ({ ts: ts, close: closes[i] == null ? NaN : Number(closes[i]) }))
     .filter(p => Number.isFinite(p.close) && p.close > 0);
-  return put('chart', key, { points: rows, currency: result.meta && result.meta.currency || 'USD' });
+  const meta = result.meta || {};
+  const start = Math.min(windowStart(rows, range, meta.gmtoffset), Math.max(rows.length - 2, 0));
+  return put('chart', key, { points: rows.slice(start), lead: rows.slice(Math.max(0, start - 60), start), currency: meta.currency || 'USD' });
 }
 
 async function earnings(symbol, token){

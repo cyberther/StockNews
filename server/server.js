@@ -408,6 +408,9 @@ const PATH_KINDS = {
 // Price history comes from Yahoo's public chart endpoint (Finnhub's candles are
 // not on the free tier). Range -> bar interval, same table as the Netlify function.
 const CHART_RANGES = { '1d': '5m', '5d': '15m', '1mo': '60m', '6mo': '1d', ytd: '1d', '1y': '1d', '5y': '1wk' };
+// With warm=1 the same bar size is fetched over a longer range, so moving averages
+// and RSI have history before the first visible bar instead of starting mid-chart.
+const CHART_WARM = { '1d': '5d', '5d': '1mo', '1mo': '3mo', '6mo': '1y', ytd: '2y', '1y': '2y', '5y': '10y' };
 const SYMBOL_RE = /^[A-Z0-9][A-Z0-9.\-]{0,11}$/;
 const RESOLUTIONS = new Set(['1', '5', '15', '30', '60', 'D', 'W', 'M']);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -471,8 +474,9 @@ function validateChart(query) {
   const range = typeof query.range === 'string' ? query.range : '6mo';
   if (!SYMBOL_RE.test(sym)) return { error: 'bad_symbol' };
   if (!CHART_RANGES[range]) return { error: 'bad_range' };
-  const params = new URLSearchParams({ range, interval: CHART_RANGES[range], includePrePost: 'false' });
-  return { url: `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?${params}`, key: 'chart?' + sym + '&' + range };
+  const warm = query.warm === '1';
+  const params = new URLSearchParams({ range: warm ? CHART_WARM[range] : range, interval: CHART_RANGES[range], includePrePost: 'false' });
+  return { url: `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?${params}`, key: 'chart?' + sym + '&' + range + (warm ? '&warm' : '') };
 }
 
 async function proxyMarket(kind, query, res) {

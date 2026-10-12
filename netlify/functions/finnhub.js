@@ -11,6 +11,11 @@ const BASE = 'https://finnhub.io/api/v1';
 const CHART_RANGES = {
   '1d': '5m', '5d': '15m', '1mo': '60m', '6mo': '1d', ytd: '1d', '1y': '1d', '5y': '1wk'
 };
+// With warm=1 the same bar size is fetched over a longer range, so moving averages
+// and RSI have history before the first visible bar instead of starting mid-chart.
+const CHART_WARM = {
+  '1d': '5d', '5d': '1mo', '1mo': '3mo', '6mo': '1y', ytd: '2y', '1y': '2y', '5y': '10y'
+};
 
 export default async (request) => {
   const url = new URL(request.url);
@@ -24,7 +29,7 @@ export default async (request) => {
     const range = url.searchParams.get('range') || '6mo';
     if (!symbol || !CHART_RANGES[range]) return Response.json({ error: 'invalid chart request' }, { status: 400 });
     const chartUrl = new URL(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`);
-    chartUrl.searchParams.set('range', range);
+    chartUrl.searchParams.set('range', url.searchParams.get('warm') === '1' ? CHART_WARM[range] : range);
     chartUrl.searchParams.set('interval', CHART_RANGES[range]);
     chartUrl.searchParams.set('includePrePost', 'false');
     try {

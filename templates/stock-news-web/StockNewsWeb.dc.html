@@ -422,7 +422,7 @@
 <div style="padding:12px 28px 8px;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ resultsLabel }}</div>
 <sc-for list="{{ results }}" as="r" hint-placeholder-count="6">
 <div style="display:grid;grid-template-columns:1fr 140px 96px 120px;gap:20px;padding:14px 28px;border-top:1px solid var(--s-rule);align-items:center">
-<div><div style="display:flex;align-items:center;gap:8px"><span style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ r.ticker }}</span><sc-if value="{{ r.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:2px 6px">{{ ui.liveReq }}</span></sc-if></div><div style="font-size:12px;color:var(--s-mute)">{{ r.name }}</div></div>
+<div role="button" tabIndex="0" aria-label="{{ r.openLabel }}" onClick="{{ r.open }}" onKeyDown="{{ r.keyOpen }}" style="min-width:0;cursor:pointer" style-hover="color:var(--color-accent)"><div style="display:flex;align-items:center;gap:8px"><span style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ r.ticker }}</span><sc-if value="{{ r.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:2px 6px">{{ ui.liveReq }}</span></sc-if></div><div style="font-size:12px;color:var(--s-mute)">{{ r.name }}</div></div>
 <div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ r.stories }}</div><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stories24 }}</div></div>
 <button onClick="{{ r.pin }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="display:flex;align-items:center;gap:7px;min-height:40px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
 <sc-if value="{{ r.pinned }}" hint-placeholder-val="{{ false }}"><span style="width:7px;height:7px;flex:none;background:var(--color-accent)"></span></sc-if>
@@ -940,15 +940,20 @@ const STORE_KEY = 'hif.web.v2';
 // Keys that survive a reload. Live quotes and transient input (passwords, codes) never persist.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','overlays',
   'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme','alerts','positions','dismissed','stack','stackOpen','events'];
+// hif-store.js can finish loading after this logic is evaluated. Until the saved
+// record has been read, nothing may be written, or a reload would overwrite the
+// stored session with these defaults; see restoreLate().
+let hydrated = false;
 function hydrate(defaults) {
   const S = window.HIFStore, saved = S ? S.read(STORE_KEY) : null;
+  hydrated = !!S;
   const out = Object.assign({}, defaults);
   if (saved) PERSIST.forEach(k => { if (saved[k] !== undefined) out[k] = saved[k]; });
   return out;
 }
 class Component extends DCLogic {
   state = hydrate({ screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed',
-    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, chartRange:'1d', chartHover:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
+    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
     liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false, detailLoading:false,
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
@@ -963,8 +968,22 @@ class Component extends DCLogic {
   logEvent(kind, detail) {
     this.setState(st => ({ events: [{ kind, detail: detail || '', ts: Date.now() }].concat(st.events || []).slice(0, 50) }));
   }
+  // Returns true once the saved record has been read; restores it if the store
+  // loaded only after the initial state was built.
+  restoreLate() {
+    if (hydrated) return true;
+    const S = window.HIFStore; if (!S) return false;
+    hydrated = true;
+    const saved = S.read(STORE_KEY);
+    if (!saved) return true;
+    const patch = {};
+    PERSIST.forEach(k => { if (saved[k] !== undefined) patch[k] = saved[k]; });
+    this.setState(patch, () => { const f = this._afterRestore; this._afterRestore = null; if (f) f(); });
+    return false;
+  }
   persist() {
-    const S = window.HIFStore; if (!S) return;
+    if (!this.restoreLate()) return;
+    const S = window.HIFStore;
     const out = {};
     PERSIST.forEach(k => { if (this.state[k] !== undefined) out[k] = this.state[k]; });
     S.write(STORE_KEY, out);
@@ -1083,7 +1102,7 @@ class Component extends DCLogic {
       { id:'win', device:'Windows 11 · Edge 129', meta:'Frankfurt, DE · 03 Sep 09:12' }
     ].filter(x => rv.indexOf(x.id) === -1);
   }
-  sharedReady() { return !!(window.HIF && window.HIFChart); }
+  sharedReady() { return !!(window.HIF && window.HIFChart && window.HIFStore); }
   componentDidMount() {
     this.plotRef = this.plotRef || React.createRef();
     this._ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => this.measureChart()) : null;
@@ -1095,12 +1114,18 @@ class Component extends DCLogic {
     this._onContent = () => this.forceUpdate();
     window.addEventListener('hif:content', this._onContent);
     this._onResize();
-    // The shared scripts load independently; render only once every one renderVals needs is in.
-    if (!this.sharedReady()) { this._poll = setInterval(() => { if (this.sharedReady()) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
-    this._synced = (this.state.follows || []).slice();
-    this.syncLive();
-    this.syncDetail(this.state.selected);
-    this.state.follows.forEach(t => this.syncSpark(t));
+    // The shared scripts load independently. Render once every one renderVals needs is in,
+    // and fetch live data only once the adapter is loaded and the saved record (follows,
+    // selected ticker) has been restored; fetching earlier silently stays on demo data.
+    const start = () => {
+      this._synced = (this.state.follows || []).slice();
+      this.syncLive();
+      this.syncDetail(this.state.selected);
+      this.state.follows.forEach(t => this.syncSpark(t));
+    };
+    const ready = () => this.sharedReady() && !!window.HIFLive;
+    const go = () => { if (this.restoreLate()) start(); else this._afterRestore = start; this.forceUpdate(); };
+    if (ready()) go(); else this._poll = setInterval(() => { if (ready()) { clearInterval(this._poll); go(); } }, 60);
   }
   componentDidUpdate(prevProps) {
     if (prevProps && prevProps.finnhubToken !== this.props.finnhubToken) this.syncLive();
@@ -1147,7 +1172,7 @@ class Component extends DCLogic {
     if (!window.HIFLive || !symbol) return;
     if (force) window.HIFLive.clearCache();
     const range = requestedRange || this.state.chartRange;
-    this.setState({ detailLoading:true, chartHover:null });
+    this.setState({ detailLoading:true, chartHover:null, chartCursor:null });
     Promise.all([window.HIFLive.chart(symbol, range), window.HIFLive.earnings(symbol, this.token)])
       .then(([chart, earnings]) => this.setState({
         detailLoading:false,
@@ -1158,7 +1183,9 @@ class Component extends DCLogic {
   }
   liveSearch(q) {
     clearTimeout(this._search);
-    if (!this.token || !window.HIFLive || q.trim().length < 1) { this.setState({ liveHits:null }); return; }
+    // No token check: the adapter goes through the server proxy (key held server-side)
+    // and only needs a page token when no proxy is deployed.
+    if (!window.HIFLive || q.trim().length < 1) { this.setState({ liveHits:null }); return; }
     this._search = setTimeout(() => {
       window.HIFLive.search(q.trim(), this.token).then(rows => this.setState({ liveHits: rows || null })).catch(() => this.setState({ liveHits:null }));
     }, 350);
@@ -1316,6 +1343,14 @@ class Component extends DCLogic {
     if (r === '5y') return dt.toLocaleDateString([], { month:'short', year:'2-digit' });
     return dt.toLocaleDateString([], { month:'short', day:'numeric' });
   }
+  // Full timestamp for the hover readout: time of day on intraday ranges, the date otherwise.
+  fmtCursor(ts) {
+    const dt = new Date(ts * 1000), r = this.state.chartRange;
+    const day = dt.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
+    if (r === '1d' || r === '5d' || r === '1mo') return day + ' · ' + dt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    if (r === '5y') return 'Week of ' + dt.toLocaleDateString([], { month:'short', day:'numeric', year:'numeric' });
+    return dt.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+  }
   legendEl(items) {
     return React.createElement('div', { style:{ display:'flex', gap:18, alignItems:'center', flexWrap:'wrap', marginBottom:10 } },
       ...items.map(it => React.createElement('span', { key:it[1], style:{ display:'flex', alignItems:'center', gap:7, fontSize:9, letterSpacing:'0.12em', textTransform:'uppercase', color:this.pal.mute } },
@@ -1436,11 +1471,15 @@ class Component extends DCLogic {
     const rawPoints = livePts.length > 1 ? livePts : this.seriesFor(stock.ticker, range, stock.price, stock.move, this.sampleCap());
     // Thin to the plot width for drawing, but keep the indices: indicators below are
     // computed on every bar and sampled at these same positions.
+    // Live series carry up to 60 bars of lead-in before the visible window; indicators
+    // run over lead + window so they start at the left edge, then only the window is drawn.
+    const lead = livePts.length > 1 && data && Array.isArray(data.lead) ? data.lead : [];
     const keep = window.HIFChart.downsampleIndex(rawPoints.length, this.sampleCap());
     const points = keep.map(i => rawPoints[i]);
     const values = points.map(p => p.close);
     const rawValues = rawPoints.map(p => p.close);
-    const atKeep = arr => keep.map(i => arr[i]);
+    const fullValues = lead.map(p => p.close).concat(rawValues);
+    const atKeep = arr => keep.map(i => arr[i + lead.length]);
     const w = Math.max(220, Math.round(this.state.chartW || 640)), h = 250, loading = this.state.detailLoading;
     const perf = values.length > 1 ? ((values[values.length-1] / values[0] - 1) * 100) : 0;
     const pickRange = r => {
@@ -1463,10 +1502,10 @@ class Component extends DCLogic {
             this.state.liveStatus === 'live' ? 'LIVE FEED CONNECTED' : 'SHOWING DEMO PRICES AND HEADLINES')));
     }
     // Periods are in bars of the loaded series (days from 6M up), not in thinned samples.
-    const p20 = rawValues.length >= 30 ? 20 : null;
-    const p50 = rawValues.length >= 70 ? 50 : null;
-    const sma20 = p20 ? atKeep(this.movingAverage(rawValues, p20)) : values.map(() => null);
-    const sma50 = p50 ? atKeep(this.movingAverage(rawValues, p50)) : values.map(() => null);
+    const p20 = fullValues.length >= 30 ? 20 : null;
+    const p50 = fullValues.length >= 70 ? 50 : null;
+    const sma20 = p20 ? atKeep(this.movingAverage(fullValues, p20)) : values.map(() => null);
+    const sma50 = p50 ? atKeep(this.movingAverage(fullValues, p50)) : values.map(() => null);
     const smaOn = ov.sma && !!p20;
     const scale = smaOn ? values.concat(sma20.filter(v => v != null), sma50.filter(v => v != null)) : values;
     const min = Math.min(...scale), max = Math.max(...scale), spread = Math.max(max - min, 0.01);
@@ -1476,12 +1515,42 @@ class Component extends DCLogic {
     // Earnings read as bars against the time axis, and only where a quarter boundary is actually visible.
     const barRange = window.HIFChart.supportsEarningsBars(range);
     const markers = (ov.earn && barRange) ? this.earningsMarks(stock.ticker, points) : [];
-    const rsiP = 14, rsiOk = rawValues.length > rsiP + 4;
-    const rsiS = rsiOk ? atKeep(this.rsiSeries(rawValues, rsiP)) : values.map(() => null);
+    const rsiP = 14, rsiOk = fullValues.length > rsiP + 4;
+    const rsiS = rsiOk ? atKeep(this.rsiSeries(fullValues, rsiP)) : values.map(() => null);
     const rsiNow = rsiS.filter(v => v != null).slice(-1)[0];
     const last = values[values.length-1], m20 = sma20[sma20.length-1], m50 = sma50[sma50.length-1];
     const signal = (smaOn && m20 && m50) ? (last > m20 && m20 > m50 ? 'BULLISH' : last < m20 && m20 < m50 ? 'BEARISH' : 'MIXED') : 'BUILDING';
     const hover = this.state.chartHover;
+    // Crosshair: the bar nearest the pointer, in drawn-sample indices.
+    const n = values.length;
+    const cur = this.state.chartCursor != null && this.state.chartCursor < n ? this.state.chartCursor : null;
+    const track = clientX => (el) => {
+      const r = el.getBoundingClientRect(); if (!r.width) return;
+      const i = Math.round(Math.min(Math.max((clientX - r.left) / r.width, 0), 1) * (n - 1));
+      if (i !== this.state.chartCursor) this.setState({ chartCursor:i });
+    };
+    const onMove = e => track(e.clientX)(e.currentTarget);
+    const onTouch = e => { const t = e.touches && e.touches[0]; if (t) track(t.clientX)(e.currentTarget); };
+    const curX = cur == null ? 0 : xOf(cur), curV = cur == null ? null : values[cur];
+    const money = v => v == null ? '—' : v.toFixed(v < 10 ? 3 : 2);
+    const curChg = cur == null || !values[0] ? null : (curV / values[0] - 1) * 100;
+    const crosshair = cur == null ? [] : [
+      React.createElement('line', { key:'cx', x1:curX, y1:0, x2:curX, y2:h, stroke:this.pal.ink, strokeOpacity:0.55, strokeWidth:1, strokeDasharray:'3 3', style:this.nss }),
+      React.createElement('line', { key:'cy', x1:0, y1:yOf(curV), x2:w, y2:yOf(curV), stroke:this.pal.ink, strokeOpacity:0.25, strokeWidth:1, strokeDasharray:'3 3', style:this.nss }),
+      React.createElement('circle', { key:'cd', cx:curX, cy:yOf(curV), r:4.5, fill:this.pal.accent, stroke:this.pal.panel, strokeWidth:2, style:this.nss })
+    ];
+    const leftPct = cur == null ? 0 : (n > 1 ? cur / (n - 1) * 100 : 0);
+    const curRow = (label, v, color) => React.createElement('div', { style:{ display:'flex', justifyContent:'space-between', gap:14, color:color || this.pal.mute } },
+      React.createElement('span', null, label), React.createElement('span', { style:{ color:this.pal.ink, fontVariantNumeric:'tabular-nums' } }, v));
+    const readout = (cur == null || hover) ? null : React.createElement('div', { role:'status', 'aria-live':'polite', style:{
+        position:'absolute', top:8, left:leftPct + '%', transform: leftPct > 55 ? 'translateX(calc(-100% - 12px))' : 'translateX(12px)',
+        minWidth:150, padding:'9px 11px', background:this.pal.bg, border:'1px solid ' + this.pal.rule, fontSize:11, lineHeight:1.55, pointerEvents:'none', whiteSpace:'nowrap', zIndex:2 } },
+      React.createElement('div', { style:{ fontFamily:'var(--font-heading)', fontWeight:800, fontSize:16, color:this.pal.ink, fontVariantNumeric:'tabular-nums' } }, money(curV)),
+      React.createElement('div', { style:{ fontSize:10, letterSpacing:'0.04em', color:this.pal.mute, marginBottom:4 } }, points[cur] && points[cur].ts ? this.fmtCursor(points[cur].ts) : ''),
+      curChg == null ? null : curRow('vs range start', (curChg < 0 ? '−' : '+') + Math.abs(curChg).toFixed(2) + '%', curChg < 0 ? this.pal.accent : null),
+      smaOn && sma20[cur] != null ? curRow('SMA ' + p20, money(sma20[cur])) : null,
+      smaOn && p50 && sma50[cur] != null ? curRow('SMA ' + p50, money(sma50[cur])) : null,
+      rsiS[cur] != null ? curRow('RSI ' + rsiP, rsiS[cur].toFixed(1)) : null);
     const legend = [[this.pal.accent,'price','solid']];
     if (smaOn) { legend.push([this.pal.ink,'sma ' + p20,'solid']); if (p50) legend.push([this.pal.mute,'sma ' + p50,'dash']); }
     if (markers.length) legend.push([this.pal.accent,'earnings','dash']);
@@ -1492,8 +1561,10 @@ class Component extends DCLogic {
         style:Object.assign(this.chipStyle(!!ov.earn && !!barRange), barRange ? null : { opacity:0.45 }) }, 'earnings'),
       React.createElement('span', { style:{ marginLeft:'auto', fontFamily:'var(--font-heading)', fontSize:11, fontWeight:800 } }, signal),
       React.createElement('span', { style:{ fontSize:11, color:this.pal.mute } }, 'RSI ' + (rsiNow == null ? '—' : rsiNow.toFixed(1))));    const plot = React.createElement('div', { style:{ position:'relative' } },
-      React.createElement('svg', { viewBox:'0 0 ' + w + ' ' + h, preserveAspectRatio:'none', onMouseLeave:() => this.setState({ chartHover:null }),
-        style:{ width:'100%', height:h, display:'block', background:this.pal.panel, borderLeft:'1px solid #333333' } },
+      React.createElement('svg', { viewBox:'0 0 ' + w + ' ' + h, preserveAspectRatio:'none',
+        onMouseMove:onMove, onTouchStart:onTouch, onTouchMove:onTouch,
+        onMouseLeave:() => this.setState({ chartHover:null, chartCursor:null }), onTouchEnd:() => this.setState({ chartCursor:null }),
+        style:{ width:'100%', height:h, display:'block', background:this.pal.panel, borderLeft:'1px solid #333333', cursor:'crosshair', touchAction:'pan-y' } },
         ...[0.25,0.5,0.75].map(f => React.createElement('line', { key:f, x1:0, y1:h*f, x2:w, y2:h*f, stroke:this.pal.rule, strokeWidth:1, strokeDasharray:'2 6', style:this.nss })),
         smaOn && p50 ? React.createElement('polyline', { points:pathFor(sma50), fill:'none', stroke:this.pal.mute, strokeWidth:1, strokeDasharray:'5 5', style:this.nss }) : null,
         smaOn ? React.createElement('polyline', { points:pathFor(sma20), fill:'none', stroke:this.pal.ink, strokeWidth:1.5, strokeLinejoin:'round', style:this.nss }) : null,
@@ -1501,7 +1572,9 @@ class Component extends DCLogic {
         ...markers.map(e => React.createElement('g', { key:e.date, onMouseEnter:() => this.setState({ chartHover:e }), style:{ cursor:'pointer' } },
           React.createElement('rect', { x:xOf(e.idx) - 3, y:12, width:6, height:h - 24, fill:this.pal.accent, opacity:0.22 }),
           React.createElement('line', { x1:xOf(e.idx), y1:12, x2:xOf(e.idx), y2:h - 12, stroke:this.pal.accent, strokeWidth:1, style:this.nss }),
-          React.createElement('rect', { x:xOf(e.idx) - 4, y:2, width:8, height:8, fill:this.pal.accent })))),
+          React.createElement('rect', { x:xOf(e.idx) - 4, y:2, width:8, height:8, fill:this.pal.accent }))),
+        ...crosshair),
+      readout,
       hover ? React.createElement('div', { style:{ position:'absolute', right:10, top:10, padding:'10px 12px', background:this.pal.bg, border:'1px solid #D4AF37', fontSize:11, lineHeight:1.5 } },
         React.createElement('div', { style:{ fontWeight:800, color:this.pal.accent } }, 'EARNINGS · ' + hover.date),
         hover.estimated
@@ -1520,7 +1593,8 @@ class Component extends DCLogic {
         React.createElement('rect', { x:0, y:ry(70), width:w, height:Math.max(ry(30) - ry(70), 0), fill:this.pal.ink, opacity:0.06 }),
         React.createElement('line', { x1:0, y1:ry(70), x2:w, y2:ry(70), stroke:this.pal.rule, strokeWidth:1, strokeDasharray:'2 6', style:this.nss }),
         React.createElement('line', { x1:0, y1:ry(30), x2:w, y2:ry(30), stroke:this.pal.rule, strokeWidth:1, strokeDasharray:'2 6', style:this.nss }),
-        rsiOk ? React.createElement('polyline', { points:rsiPath, fill:'none', stroke:this.pal.accent, strokeWidth:1.5, strokeLinejoin:'round', style:this.nss }) : null),
+        rsiOk ? React.createElement('polyline', { points:rsiPath, fill:'none', stroke:this.pal.accent, strokeWidth:1.5, strokeLinejoin:'round', style:this.nss }) : null,
+        cur == null ? null : React.createElement('line', { x1:curX, y1:0, x2:curX, y2:rh, stroke:this.pal.ink, strokeOpacity:0.55, strokeWidth:1, strokeDasharray:'3 3', style:this.nss })),
       React.createElement('div', { style:{ fontSize:8, letterSpacing:'0.14em', color:this.pal.mute, textAlign:'right', paddingTop:6 } }, rsiOk ? 'RSI ' + rsiP : 'RSI —'),
       React.createElement('div', null));
     return React.createElement('div', { ref:this.plotRef }, header, controls, this.chartFrame({ points, min, max, h, legend, svg:plot }), rsiBand);
@@ -1605,6 +1679,9 @@ class Component extends DCLogic {
       const on = s.follows.includes(x.ticker);
       return Object.assign({}, x, {
         following: on, notFollowing: !on, liveOnly: !FOLLOWS[x.ticker],
+        open: () => this.openTicker(x.ticker),
+        keyOpen: event => this.activateFromKeyboard(() => this.openTicker(x.ticker), event),
+        openLabel: (u.cmdOpenHint || 'Open') + ' ' + x.ticker + ' · ' + x.name,
         pinned: pinned(x.ticker), notPinned: !pinned(x.ticker),
         pinLabel: pinned(x.ticker) ? u.stackUnpin : u.stackPin,
         pin: event => { if (event && event.stopPropagation) event.stopPropagation(); this.togglePin(x.ticker); },
