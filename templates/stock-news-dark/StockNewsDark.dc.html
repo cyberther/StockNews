@@ -98,6 +98,11 @@
 <input type="{{ pwType }}" name="password" autocomplete="{{ authPwAc }}" placeholder="••••••••" value="{{ authPw }}" onChange="{{ onAuthPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px">
 </label>
 <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><button onClick="{{ togglePwShow }}" style="align-self:flex-start;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">{{ pwShowLabel }}</button><sc-if value="{{ showForgot }}" hint-placeholder-val="{{ false }}"><button onClick="{{ goForgot }}" style="padding:0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-body);font-size:12px;text-decoration:underline;cursor:pointer">{{ ui.forgotPw }}</button></sc-if></div>
+<sc-if value="{{ authIsUp }}" hint-placeholder-val="{{ false }}">
+<label style="display:block"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.confirmPwLabel }}</span>
+<input type="{{ pwType }}" name="confirm-password" autocomplete="new-password" placeholder="••••••••" value="{{ authPw2 }}" onChange="{{ onAuthPw2 }}" aria-invalid="{{ pw2Bad }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;border-color:{{ pw2Line }}"></label>
+<sc-if value="{{ pw2Typed }}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size:12px;color:{{ pw2Ink }};margin-top:-4px">{{ pw2Msg }}</div></sc-if>
+</sc-if>
 </div>
 <sc-if value="{{ pwMeter }}" hint-placeholder-val="{{ false }}">
 <div style="margin-top:12px">
@@ -137,6 +142,9 @@
 <label style="display:block;margin-top:18px"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.pwLabel }}</span>
 <input type="{{ pwType }}" name="new-password" autocomplete="new-password" placeholder="••••••••" value="{{ newPw }}" onChange="{{ onNewPw }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px"></label>
 <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:8px"><button onClick="{{ togglePwShow }}" style="padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">{{ pwShowLabel }}</button><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">{{ newPwScore }}</span></div>
+<label style="display:block;margin-top:14px"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:5px">{{ ui.confirmPwLabel }}</span>
+<input type="{{ pwType }}" name="confirm-new-password" autocomplete="new-password" placeholder="••••••••" value="{{ newPw2 }}" onChange="{{ onNewPw2 }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px"></label>
+<sc-if value="{{ newPw2Typed }}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size:12px;color:{{ newPw2Ink }};margin-top:6px">{{ newPw2Msg }}</div></sc-if>
 <sc-if value="{{ newPwErr }}" hint-placeholder-val="{{ false }}">
 <div role="alert" style="margin-top:12px;font-size:12px;color:var(--color-accent)">{{ newPwErr }}</div>
 </sc-if>
@@ -640,7 +648,7 @@ class Component extends DCLogic {
   state = hydrate({ screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed', chartRange:'1d', smaOn:true, push:{}, screenFilter:'all',
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
     authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
-    pwRecovery:false, newPw:'', newPwErr:'',
+    pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
     liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{} });
@@ -676,7 +684,7 @@ class Component extends DCLogic {
     const fresh = this.state.accountId !== sess.userId;
     this.setState(Object.assign({
       session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
-      accountId: sess.userId, authPw:'', authSent:'', authErr:''
+      accountId: sess.userId, authPw:'', authPw2:'', authSent:'', authErr:''
     }, fresh ? { onboarded:false, follows:[], selected:'', screen:'feed', liveNames:{} } : {}));
     this.loadPlan();
   }
@@ -840,7 +848,7 @@ class Component extends DCLogic {
     const fresh = !this.state.onboarded;
     this.setState({
       session:{ provider, email:mail, name: name || null, since:Date.now() },
-      locked:false, authPw:'', authErr:'', authBad:null, pwShow:false,
+      locked:false, authPw:'', authPw2:'', authErr:'', authBad:null, pwShow:false,
       screen: fresh ? 'feed' : (this.state.screen === 'auth' ? 'feed' : this.state.screen),
       follows: fresh ? [] : this.state.follows
     });
@@ -854,6 +862,7 @@ class Component extends DCLogic {
     if (up && !this.validName(name)) return this.setState({ authErr: u.authErrName, authBad:'name' });
     if (!this.validEmail(mail)) return this.setState({ authErr: u.authErrEmail, authBad:'email' });
     if (pw.length < 8) return this.setState({ authErr: u.authErrPw, authBad:'pw' });
+    if (up && pw !== (st.authPw2 || '')) return this.setState({ authErr: u.authErrMatch, authBad:'pw2' });
     if (up) {
       const HS = window.HIFStore, str = HS ? HS.strength(pw) : { score:4, breached:false };
       if (str.breached) return this.setState({ authErr: u.authErrBreach, authBad:'pw' });
@@ -866,7 +875,7 @@ class Component extends DCLogic {
     this.setState({ authBusy:true, authErr:'' });
     (up ? window.HIFAuth.signUp(email, pw, name) : window.HIFAuth.signIn(email, pw)).then(r => {
       if (r.error) return this.setState({ authBusy:false, authErr:this.authMessage(r.error), authBad: r.error === 'bad_email' ? 'email' : r.error === 'weak_password' ? 'pw' : null });
-      if (r.confirm) return this.setState({ authBusy:false, authSent:email, authSentKind:'signup', authPw:'' });
+      if (r.confirm) return this.setState({ authBusy:false, authSent:email, authSentKind:'signup', authPw:'', authPw2:'' });
       this.setState({ authBusy:false });
       this.flash((u.toastSignedIn || 'Signed in').toUpperCase());
     }).catch(() => this.setState({ authBusy:false, authErr:this.authMessage('failed') }));
@@ -1109,6 +1118,13 @@ class Component extends DCLogic {
       authEmail: s.authEmail || '', authPw: s.authPw || '', authErr: s.authErr || '',
       onAuthEmail: e => this.setState({ authEmail:e.target.value, authErr:'', authBad:null }),
       onAuthName: e => this.setState({ authName:e.target.value, authErr:'', authBad:null }),
+      authPw2: s.authPw2 || '',
+      onAuthPw2: e => this.setState({ authPw2:e.target.value, authErr:'', authBad:null }),
+      pw2Typed: (s.authPw2 || '').length > 0,
+      pw2Msg: (s.authPw2 || '') === (s.authPw || '') ? u.pwMatchOk : u.pwMatchNo,
+      pw2Ink: (s.authPw2 || '') === (s.authPw || '') ? 'var(--s-mute)' : 'var(--color-accent)',
+      pw2Bad: s.authBad === 'pw2' || ((s.authPw2 || '').length > 0 && s.authPw2 !== s.authPw),
+      pw2Line: s.authBad === 'pw2' || ((s.authPw2 || '').length > 0 && s.authPw2 !== s.authPw) ? 'var(--color-accent)' : 'var(--s-rule)',
       authName: s.authName || '',
       authIsUp: authUp, authIsIn: !authUp,
       authToIn: () => this.setState({ authMode:'in', authErr:'', authBad:null }),
@@ -1164,18 +1180,24 @@ class Component extends DCLogic {
       pwRecoveryOn: !!s.pwRecovery && !!s.session,
       newPw: s.newPw || '', newPwErr: s.newPwErr || '',
       onNewPw: e => this.setState({ newPw:e.target.value, newPwErr:'' }),
+      newPw2: s.newPw2 || '',
+      onNewPw2: e => this.setState({ newPw2:e.target.value, newPwErr:'' }),
+      newPw2Typed: (s.newPw2 || '').length > 0,
+      newPw2Msg: (s.newPw2 || '') === (s.newPw || '') ? u.pwMatchOk : u.pwMatchNo,
+      newPw2Ink: (s.newPw2 || '') === (s.newPw || '') ? 'var(--s-mute)' : 'var(--color-accent)',
       newPwScore: (s.newPw || '').length ? ((u.pwScores || [])[(window.HIFStore ? window.HIFStore.strength(s.newPw).score : 0)] || '') : '',
       newPwBtn: s.authBusy ? (u.authBusy || '…') : u.newPwSave,
       saveNewPw: () => {
         const v = s.newPw || '', str = window.HIFStore ? window.HIFStore.strength(v) : { score:4, breached:false };
         if (v.length < 8) return this.setState({ newPwErr:u.authErrPw });
+        if (v !== (s.newPw2 || '')) return this.setState({ newPwErr:u.authErrMatch });
         if (str.breached) return this.setState({ newPwErr:u.authErrBreach });
         if (str.score < 2) return this.setState({ newPwErr:u.authErrWeak });
         if (s.authBusy) return;
         this.setState({ authBusy:true, newPwErr:'' });
         window.HIFAuth.updatePassword(v).then(r => {
           if (r.error) return this.setState({ authBusy:false, newPwErr: r.error === 'same_password' ? u.authErrSamePw : this.authMessage(r.error) });
-          this.setState({ authBusy:false, pwRecovery:false, newPw:'' });
+          this.setState({ authBusy:false, pwRecovery:false, newPw:'', newPw2:'' });
           this.flash((u.toastPwUpdated || 'Password updated').toUpperCase());
         });
       },
