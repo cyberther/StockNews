@@ -63,7 +63,7 @@ systemd unit — the sandboxing directives matter as much as the app code:
     RestrictAddressFamilies=AF_INET AF_INET6
     RestrictNamespaces=yes
     LockPersonality=yes
-    MemoryDenyWriteExecute=yes
+    # No MemoryDenyWriteExecute: Node's JIT needs writable+executable memory.
     SystemCallFilter=@system-service
     CapabilityBoundingSet=
     UMask=0077
@@ -134,7 +134,7 @@ systemd unit for the admin process — same sandboxing as the app, plus loopback
     RestrictAddressFamilies=AF_INET AF_INET6
     RestrictNamespaces=yes
     LockPersonality=yes
-    MemoryDenyWriteExecute=yes
+    # No MemoryDenyWriteExecute: Node's JIT needs writable+executable memory.
     SystemCallFilter=@system-service
     CapabilityBoundingSet=
     UMask=0077
