@@ -407,19 +407,16 @@
 <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
 <div>
 <div style="padding:22px 28px 18px;border-bottom:1px solid var(--s-rule)">
-<div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.screener }}</div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.addTicker }}</div>
 <div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ ui.screenerNote }}</div>
-<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="NVDA" value="{{ query }}" onChange="{{ onQuery }}" style="width:340px;min-height:44px;margin-top:14px;padding:0 14px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
-<div style="display:flex;gap:8px;margin-top:14px">
-<sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
-<button onClick="{{ f.set }}" style="position:relative;overflow:hidden;min-height:34px;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">
-<sc-if value="{{ f.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">{{ f.label }}</span></sc-if>
-<sc-if value="{{ f.off }}" hint-placeholder-val="{{ true }}"><span>{{ f.label }}</span></sc-if>
-</button>
-</sc-for>
+<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="Symbol or company" value="{{ query }}" onChange="{{ onQuery }}" style="width:min(100%,380px);min-height:44px;margin-top:14px;padding:0 14px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
 </div>
-</div>
+<sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
 <div style="padding:12px 28px 8px;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ resultsLabel }}</div>
+</sc-if>
+<sc-if value="{{ noQuery }}" hint-placeholder-val="{{ true }}">
+<div style="padding:22px 28px;font-size:13px;color:var(--s-mute);max-width:52ch">{{ ui.searchEmpty }}</div>
+</sc-if>
 <sc-for list="{{ results }}" as="r" hint-placeholder-count="6">
 <div style="display:grid;grid-template-columns:1fr 140px 96px 120px;gap:20px;padding:14px 28px;border-top:1px solid var(--s-rule);align-items:center">
 <div role="button" tabIndex="0" aria-label="{{ r.openLabel }}" onClick="{{ r.open }}" onKeyDown="{{ r.keyOpen }}" style="min-width:0;cursor:pointer" style-hover="color:var(--color-accent)"><div style="display:flex;align-items:center;gap:8px"><span style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ r.ticker }}</span><sc-if value="{{ r.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:2px 6px">{{ ui.liveReq }}</span></sc-if></div><div style="font-size:12px;color:var(--s-mute)">{{ r.name }}</div></div>
@@ -890,15 +887,28 @@
 <span style="flex:none;font-family:var(--font-heading);font-weight:800;font-size:30px;line-height:1">{{ obCount }}</span>
 <span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.obCount }}</span>
 </div>
-<div style="margin-top:22px;border-top:2px solid var(--s-rule)">
-<sc-for list="{{ obPicks }}" as="p" hint-placeholder-count="10">
-<button onClick="{{ p.toggle }}" style="display:flex;width:100%;align-items:center;gap:14px;padding:14px 0;border:0;border-bottom:1px solid var(--s-rule);background:transparent;text-align:left;cursor:pointer">
-<span style="flex:none;width:18px;height:18px;background:{{ p.box }};border:1px solid {{ p.boxEdge }}"></span>
-<span style="flex:1;min-width:0"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:16px;color:var(--s-ink)">{{ p.ticker }}</span><span style="display:block;font-size:12px;color:var(--s-mute);margin-top:2px">{{ p.name }}</span></span>
-<span style="flex:none;text-align:right"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:14px;color:var(--s-ink)">{{ p.stories }}</span><span style="display:block;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stories24 }}</span></span>
-</button>
+<input type="search" aria-label="Search ticker or company" autocomplete="off" autofocus placeholder="Symbol or company" value="{{ obQuery }}" onChange="{{ onObQuery }}" style="width:100%;box-sizing:border-box;min-height:48px;margin-top:22px;padding:0 14px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.04em">
+<sc-if value="{{ obHasPicks }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+<sc-for list="{{ obChosen }}" as="c" hint-placeholder-count="2">
+<button onClick="{{ c.remove }}" aria-label="{{ c.removeLabel }}" style="display:flex;align-items:center;gap:8px;min-height:36px;padding:0 10px 0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.06em;cursor:pointer">{{ c.ticker }}<span aria-hidden="true" style="font-size:14px;line-height:1">×</span></button>
 </sc-for>
 </div>
+</sc-if>
+<sc-if value="{{ obNoQuery }}" hint-placeholder-val="{{ true }}">
+<div style="font-size:13px;color:var(--s-mute);margin-top:14px">{{ ui.searchEmpty }}</div>
+</sc-if>
+<sc-if value="{{ obHasQuery }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:14px;border-top:2px solid var(--s-rule)">
+<sc-for list="{{ obResults }}" as="p" hint-placeholder-count="4">
+<button onClick="{{ p.toggle }}" style="display:flex;width:100%;align-items:center;gap:14px;padding:14px 0;border:0;border-bottom:1px solid var(--s-rule);background:transparent;text-align:left;cursor:pointer">
+<span style="flex:none;width:18px;height:18px;background:{{ p.box }};border:1px solid {{ p.boxEdge }}"></span>
+<span style="flex:1;min-width:0"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:16px;color:var(--s-ink)">{{ p.ticker }}</span><span style="display:block;font-size:12px;color:var(--s-mute);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span></span>
+</button>
+</sc-for>
+<div style="padding:12px 0;font-size:12px;color:var(--s-mute)">{{ obStatus }}</div>
+</div>
+</sc-if>
 <div style="display:flex;gap:10px;margin-top:22px">
 <button onClick="{{ finishOnboard }}" style="min-height:48px;padding:0 18px;font-size:13px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.obGo }}</button>
 <button onClick="{{ skipOnboard }}" style="min-height:48px;padding:0 18px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.obSkip }}</button>
@@ -1185,10 +1195,21 @@ class Component extends DCLogic {
     clearTimeout(this._search);
     // No token check: the adapter goes through the server proxy (key held server-side)
     // and only needs a page token when no proxy is deployed.
-    if (!window.HIFLive || q.trim().length < 1) { this.setState({ liveHits:null }); return; }
+    if (!window.HIFLive || q.trim().length < 1) { this.setState({ liveHits:null, liveBusy:false }); return; }
+    this.setState({ liveBusy:true });
     this._search = setTimeout(() => {
-      window.HIFLive.search(q.trim(), this.token).then(rows => this.setState({ liveHits: rows || null })).catch(() => this.setState({ liveHits:null }));
+      window.HIFLive.search(q.trim(), this.token)
+        .then(rows => this.setState({ liveHits: rows || null, liveBusy:false }))
+        .catch(() => this.setState({ liveHits:null, liveBusy:false }));
     }, 350);
+  }
+  // Demo-universe matches first, then live search hits; empty for an empty query.
+  searchPool(q) {
+    const H = window.HIF || {}, U = H.UNIVERSE || [];
+    if (!q) return [];
+    const pool = U.filter(x => x.ticker.includes(q) || x.name.toUpperCase().includes(q));
+    (this.state.liveHits || []).forEach(h => { if (!pool.some(x => x.ticker === h.ticker)) pool.push({ ticker:h.ticker, name:h.name, stories:'—' }); });
+    return pool;
   }
   get plan() { return this.state.plan || this.props.plan || 'free'; }
   get lang() { return this.state.lang || this.props.lang || 'EN'; }
@@ -1230,12 +1251,6 @@ class Component extends DCLogic {
     const q = String(raw || '').trim();
     if (!q) return [];
     const out = [];
-    const expr = /^(vol|earn|crowd|stories)\s*([<>])\s*(\d+(?:\.\d+)?)$/i.exec(q);
-    if (expr) {
-      const key = expr[1].toLowerCase(), chip = key === 'earn' ? 'earn' : key === 'vol' ? 'vol' : 'stories';
-      out.push({ kind:'expr', label:(u.cmdScreenHint || 'Screen') + ' · ' + q.toUpperCase(), detail:u.screener || '',
-        run: () => this.setState({ screen:'search', screenFilter:chip, query:'' }) });
-    }
     const pin = /^\+\s*([a-z.\-]{1,6})$/i.exec(q);
     const body = (pin ? pin[1] : q).toLowerCase();
     U.filter(x => x.ticker.toLowerCase().indexOf(body) === 0 || x.name.toLowerCase().indexOf(body) !== -1)
@@ -1243,7 +1258,7 @@ class Component extends DCLogic {
       .forEach(h => out.push(pin
         ? { kind:'pin', label:(u.cmdPinHint || 'Pin') + ' · ' + h.ticker, detail:h.name, run: () => this.togglePin(h.ticker) }
         : { kind:'open', label:(u.cmdOpenHint || 'Open') + ' · ' + h.ticker, detail:h.name, run: () => this.openTicker(h.ticker) }));
-    [['feed', u.feed], ['watchlist', u.watchlist], ['search', u.screener], ['ledger', u.ledger], ['account', u.account], ['security', u.security]]
+    [['feed', u.feed], ['watchlist', u.watchlist], ['search', u.addTicker], ['ledger', u.ledger], ['account', u.account], ['security', u.security]]
       .forEach(sc => {
         const label = String(sc[1] || '');
         if (label.toLowerCase().indexOf(body) === 0 || sc[0].indexOf(body) === 0)
@@ -1615,6 +1630,7 @@ class Component extends DCLogic {
     const links = Object.assign({ Google:true, iCloud:false, Email:true }, s.links || {});
     const pw = HS ? HS.strength(s.authPw || '') : { score:0, breached:false, hints:[] };
     const authUp = s.authMode !== 'in';
+    const obQ = String(s.obQuery || '').trim().toUpperCase(), obPool = (!s.onboarded && s.session) ? this.searchPool(obQ) : [];
     const hintText = { len:u.hintLen, case:u.hintCase, digit:u.hintDigit, symbol:u.hintSymbol };
     const timeoutMin = s.timeoutMin === undefined ? 30 : s.timeoutMin;
     const Q = s.quotes, LN = s.liveNews, RC = s.liveRecs, live = s.liveStatus === 'live';
@@ -1665,16 +1681,8 @@ class Component extends DCLogic {
     const cursorIx = Math.min(s.cursor || 0, Math.max(0, feed.length - 1));
     feed.forEach((r, i) => { r.onCursor = i === cursorIx; r.offCursor = i !== cursorIx; });
     const q = s.query.trim().toUpperCase();
-    const pool = UNIVERSE.filter(x => !q || x.ticker.includes(q) || x.name.toUpperCase().includes(q));
-    if (s.liveHits) s.liveHits.forEach(h => { if (!pool.some(x => x.ticker === h.ticker)) pool.push({ ticker:h.ticker, name:h.name, stories:'—' }); });
-    const volOf = t => { let best = 0; NEWS.forEach(n => { if (n.ticker === t) { const m = /([\d.]+)x/.exec(String(n.vol || '')); if (m && parseFloat(m[1]) > best) best = parseFloat(m[1]); } }); return best; };
-    const daysOf = t => { const ev = (EVENTS[t] || []).filter(e => e.kind === 'evEarnings')[0]; const d = ev ? this.daysUntil(ev.date) : null; if (d != null) return d; const m = /(\d+)d/.exec(String((FOLLOWS[t] || {}).earnDays || '')); return m ? +m[1] : 999; };
-    const sf = s.screenFilter;
-    let shown = pool.slice();
-    if (q) { /* an explicit search ignores the chips so a match is never hidden */ }
-    else if (sf === 'vol') shown = shown.filter(x => volOf(x.ticker) >= 2);
-    else if (sf === 'earn') shown = shown.filter(x => daysOf(x.ticker) <= 14);
-    if (!q && sf === 'stories') shown = shown.sort((a,b) => (+b.stories || 0) - (+a.stories || 0));
+    // Search-only: nothing is listed until the user types (no suggested tickers).
+    const shown = this.searchPool(q);
     const results = shown.map(x => {
       const on = s.follows.includes(x.ticker);
       return Object.assign({}, x, {
@@ -1973,18 +1981,24 @@ class Component extends DCLogic {
       sourcesLabel: H.SOURCES_COUNT != null ? H.SOURCES_COUNT.toLocaleString() : '840',
       lpFeatures: [['lpF1t','lpF1d','M4 6h16M4 12h16M4 18h10'],['lpF2t','lpF2d','M3 5h18l-7 8v6l-4 2v-8z'],['lpF3t','lpF3d','M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'],['lpF4t','lpF4d','M4 20V10M10 20V4M16 20v-7M22 20H2']].map(r => ({ t:u[r[0]], d:u[r[1]], path:r[2] })),
       obCount: String(s.follows.length),
-      obPicks: UNIVERSE.slice(0, 10).map(x => {
+      obQuery: s.obQuery || '',
+      onObQuery: e => { const v = e.target.value; this.setState({ obQuery: v }); this.liveSearch(v); },
+      obHasQuery: !!obQ, obNoQuery: !obQ,
+      obResults: obPool.map(x => {
         const on = s.follows.indexOf(x.ticker) !== -1;
-        return { ticker:x.ticker, name:x.name, stories:x.stories, box: on ? this.pal.accent : 'transparent', boxEdge: on ? this.pal.accent : this.pal.rule,
+        return { ticker:x.ticker, name:x.name, box: on ? this.pal.accent : 'transparent', boxEdge: on ? this.pal.accent : this.pal.rule,
           toggle: () => this.togglePick(x.ticker) };
       }),
+      obStatus: s.liveBusy && !obPool.length ? (u.searching || 'Searching…') : (!obPool.length ? u.noMatch : ''),
+      obHasPicks: s.follows.length > 0,
+      obChosen: s.follows.map(t => ({ ticker:t, removeLabel:'Remove ' + t, remove: () => this.togglePick(t) })),
       finishOnboard: () => {
-        const picks = s.follows.length ? s.follows : ['NVDA','AAPL','TSLA'];
-        this.setState({ onboarded:true, follows:picks, screen:'feed' });
-        picks.forEach(t => this.syncSpark(t));
-        this.flash(picks.length + ' · ' + u.watchlist.toUpperCase());
+        if (!s.follows.length) return this.flash((u.obNeedOne || 'Pick at least one ticker').toUpperCase());
+        this.setState({ onboarded:true, screen:'feed', obQuery:'', liveHits:null });
+        s.follows.forEach(t => this.syncSpark(t));
+        this.flash(s.follows.length + ' · ' + u.watchlist.toUpperCase());
       },
-      skipOnboard: () => this.setState({ onboarded:true, follows:['NVDA','AAPL','TSLA'], screen:'feed' }),
+      skipOnboard: () => this.setState({ onboarded:true, screen:'feed', obQuery:'', liveHits:null }),
       theme: s.theme || 'system',
       themes: [['system', u.themeSystem], ['light', u.themeLight], ['dark', u.themeDark]].map((x, i) => {
         const on = (s.theme || 'system') === x[0];
@@ -2066,7 +2080,7 @@ class Component extends DCLogic {
       nav: [
         this.navItem('feed', u.feed, String(feed.length)),
         this.navItem('watchlist', u.watchlist, isFree ? s.follows.length + '/3' : String(s.follows.length)),
-        this.navItem('search', u.screener, String(UNIVERSE.length)),
+        this.navItem('search', u.addTicker),
         this.navItem('ledger', u.ledger, String((s.dismissed || []).length)),
         this.navItem('account', u.account, ''),
         this.navItem('security', u.security, '')
@@ -2098,11 +2112,12 @@ class Component extends DCLogic {
       intervalLabel: isFree ? '24h' : '30m',
       query: s.query,
       onQuery: e => { const v = e.target.value; this.setState({ query: v }); this.liveSearch(v); },
-      resultsLabel: (q ? u.match + ' · ' + q : u.topVolume) + ' · ' + results.length,
+      resultsLabel: s.liveBusy && !results.length ? (u.searching || 'Searching…') : u.match + ' · ' + q + ' · ' + results.length,
+      hasQuery: !!q, noQuery: !q,
       filters: [['all', u.filterAll], ['vol', u.filterVol], ['earn', u.filterEarn], ['stories', u.filterStories]]
         .map(x => ({ key:x[0], label:x[1], on: s.screenFilter === x[0], off: s.screenFilter !== x[0], set: () => this.setState({ screenFilter:x[0] }) })),
       analystFull: !isFree, analystLocked: isFree,
-      results, noResults: !results.length,
+      results, noResults: !!q && !results.length && !s.liveBusy,
       hasAnalyst: live ? !!RC[stock.ticker] : stock.buyPct !== '—',
       stock: Object.assign({}, stock, {
         down: !stock.up,

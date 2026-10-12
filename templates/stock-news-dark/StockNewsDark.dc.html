@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Heard It First — Stock News</title>
+<title>Market Pulse — Stock News</title>
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
 <!-- @template name="Stock news app — dark terminal" description="Executive/terminal variant of the stock news product: dark surfaces, numbers-forward rows, one decision per screen, separate app and content languages." -->
-<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-store.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
+<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-live.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">TERMINAL</text></svg></template>
 <div data-theme="{{ theme }}" style="min-height:100vh;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums">
 <div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid var(--s-rule)">
@@ -103,14 +103,29 @@
 <span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.obCount }}</span>
 </div>
 </div>
+<div style="padding:12px 20px 0">
+<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="Symbol or company" value="{{ obQuery }}" onChange="{{ onObQuery }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.04em">
+<sc-if value="{{ obHasPicks }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+<sc-for list="{{ obChosen }}" as="c" hint-placeholder-count="2">
+<button onClick="{{ c.remove }}" aria-label="{{ c.removeLabel }}" style="display:flex;align-items:center;gap:7px;min-height:34px;padding:0 9px 0 11px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.06em;cursor:pointer">{{ c.ticker }}<span aria-hidden="true" style="font-size:14px;line-height:1">×</span></button>
+</sc-for>
+</div>
+</sc-if>
+</div>
 <div style="flex:1;overflow-y:auto">
-<sc-for list="{{ obPicks }}" as="p" hint-placeholder-count="8">
+<sc-if value="{{ obNoQuery }}" hint-placeholder-val="{{ true }}">
+<div style="padding:14px 20px;font-size:12px;color:var(--s-mute);line-height:1.45">{{ ui.searchEmpty }}</div>
+</sc-if>
+<sc-for list="{{ obResults }}" as="p" hint-placeholder-count="4">
 <button onClick="{{ p.toggle }}" style="display:flex;width:100%;align-items:center;gap:12px;padding:13px 20px;border:0;border-bottom:1px solid var(--s-rule);background:transparent;text-align:left;cursor:pointer">
 <span style="flex:none;width:16px;height:16px;background:{{ p.box }};border:1px solid {{ p.boxEdge }}"></span>
 <span style="flex:1;min-width:0"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:15px;color:var(--s-ink)">{{ p.ticker }}</span><span style="display:block;font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span></span>
-<span style="flex:none;text-align:right"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:13px;color:var(--s-ink)">{{ p.stories }}</span><span style="display:block;font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stories24 }}</span></span>
 </button>
 </sc-for>
+<sc-if value="{{ obHasQuery }}" hint-placeholder-val="{{ false }}">
+<div style="padding:12px 20px;font-size:11px;color:var(--s-mute)">{{ obStatus }}</div>
+</sc-if>
 <div style="height:12px"></div>
 </div>
 <div style="padding:12px 20px;border-top:1px solid var(--s-rule);display:flex;flex-direction:column;gap:8px">
@@ -207,21 +222,21 @@
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
 <div style="padding:8px 16px 12px;border-bottom:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;margin-bottom:10px">{{ ui.addTicker }}</div>
-<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="NVDA" value="{{ query }}" onChange="{{ onQuery }}" style="width:100%;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
-<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-<sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
-<button onClick="{{ f.set }}" style="position:relative;overflow:hidden;min-height:32px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">
-<sc-if value="{{ f.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">{{ f.label }}</span></sc-if>
-<sc-if value="{{ f.off }}" hint-placeholder-val="{{ true }}"><span>{{ f.label }}</span></sc-if>
-</button>
-</sc-for>
-</div>
+<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="Symbol or company" value="{{ query }}" onChange="{{ onQuery }}" style="width:100%;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
 </div>
 <div style="flex:1;overflow-y:auto">
+<sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
 <div style="padding:10px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ resultsLabel }}</div>
+</sc-if>
+<sc-if value="{{ noQuery }}" hint-placeholder-val="{{ true }}">
+<div style="padding:16px;font-size:12px;color:var(--s-mute);line-height:1.45">{{ ui.searchEmpty }}</div>
+</sc-if>
+<sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ ui.noMatch }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:6px;line-height:1.45">{{ ui.noMatchNote }}</div></div>
+</sc-if>
 <sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
 <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--s-rule)">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.ticker }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
+<div role="button" tabIndex="0" aria-label="{{ r.openLabel }}" onClick="{{ r.open }}" onKeyDown="{{ r.keyOpen }}" style="flex:1;min-width:0;cursor:pointer"><div style="display:flex;align-items:center;gap:7px"><span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.ticker }}</span><sc-if value="{{ r.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:1px 5px">{{ ui.liveReq }}</span></sc-if></div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
 <div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ r.stories }}</div><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stories24 }}</div></div>
 <button onClick="{{ r.toggle }}" style="position:relative;overflow:hidden;min-width:84px;min-height:38px;padding:0 12px;text-align:left;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
 <sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">{{ ui.add }}</span></sc-if>
@@ -542,7 +557,7 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Heard It First&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Market Pulse&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
 // The shared scripts can finish loading after this logic is evaluated, so the
 // content globals are bound lazily; until then the component renders empty.
 let NEWS, FOLLOWS, UNIVERSE, UI;
@@ -556,7 +571,7 @@ function bindShared() {
 const STORE_KEY = 'hif.dark.v2';
 // Keys that survive a reload. Transient input (passwords, codes, toasts) never persists.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','smaOn',
-  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme'];
+  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme','liveNames'];
 // hif-store.js can finish loading after this logic is evaluated. Until the saved
 // record has been read, nothing may be written, or a reload would overwrite the
 // stored session with these defaults; see restoreLate().
@@ -573,13 +588,55 @@ class Component extends DCLogic {
   state = hydrate({ screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed', chartRange:'1d', smaOn:true, push:{}, screenFilter:'all',
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
-    loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'' });
+    loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
+    liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{} });
   componentDidMount() {
     this.startIdleWatch();
     if (!bindShared() || !window.HIFStore) { this._poll = setInterval(() => { if (bindShared() && window.HIFStore) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
+    // Tickers outside the demo set (added from live search) get their quote, analysts
+    // and headlines from the server proxy once the adapter is in.
+    const startLive = () => { this.restoreLate(); setTimeout(() => this.liveOnlyTickers().forEach(t => this.syncLiveOnly(t)), 0); };
+    if (window.HIFLive && window.HIFStore) startLive();
+    else this._livePoll = setInterval(() => { if (window.HIFLive && window.HIFStore) { clearInterval(this._livePoll); startLive(); } }, 60);
+  }
+  liveOnlyTickers() {
+    const s = this.state, out = (s.follows || []).slice();
+    if (s.selected && out.indexOf(s.selected) < 0) out.push(s.selected);
+    return out.filter(t => !(FOLLOWS || {})[t]);
+  }
+  syncLiveOnly(t) {
+    const L = window.HIFLive; if (!L || !t) return;
+    const keep = (k, v) => this.setState(st => ({ [k]: Object.assign({}, st[k], { [t]: v }) }));
+    L.quote(t).then(q => q && keep('liveQuotes', q)).catch(() => {});
+    L.recommendation(t).then(r => r && keep('liveRecs', r)).catch(() => {});
+    L.news(t, null, 3).then(n => n && keep('liveNews', n)).catch(() => {});
+  }
+  liveSearch(q) {
+    clearTimeout(this._search);
+    if (!window.HIFLive || q.trim().length < 1) { this.setState({ liveHits:null, liveBusy:false }); return; }
+    this.setState({ liveBusy:true });
+    this._search = setTimeout(() => {
+      window.HIFLive.search(q.trim())
+        .then(rows => this.setState({ liveHits: rows || null, liveBusy:false }))
+        .catch(() => this.setState({ liveHits:null, liveBusy:false }));
+    }, 350);
+  }
+  openTicker(t, name) {
+    if (!FOLLOWS[t] && name) this.setState(st => ({ liveNames: Object.assign({}, st.liveNames, { [t]: name }) }));
+    this.setState({ selected:t });
+    this.go('detail');
+    if (!FOLLOWS[t]) this.syncLiveOnly(t);
+  }
+  // FOLLOWS-shaped record for a ticker outside the demo set, filled from live data.
+  liveRecord(t) {
+    const s = this.state, q = (s.liveQuotes || {})[t], r = (s.liveRecs || {})[t], u = UI[this.appLang] || {};
+    const note = { EN:'Live quote only — no scored stories for this ticker yet.', RO:'Doar cotație live — încă nu există știri evaluate pentru acest simbol.', DE:'Nur Live-Kurs — für diesen Ticker gibt es noch keine bewerteten Meldungen.' };
+    return { ticker:t, name:(s.liveNames || {})[t] || t, price: q ? q.price : '—', move: q ? q.move : '—', up: q ? q.up : true,
+      score:'—', buyPct: r ? r.buyPct : '—', analystDetail: r ? r.detail : '—', earnDays:'—', earnDate:'—', perf6m:'—', lastEarn:'—',
+      latest:{ EN:u.liveReq || 'Live', RO:u.liveReq || 'Live', DE:u.liveReq || 'Live' }, call:note, liveOnly:true };
   }
   componentDidUpdate() { this.persist(); }
-  componentWillUnmount() { this.stopIdleWatch(); clearTimeout(this._t); clearInterval(this._poll); }
+  componentWillUnmount() { this.stopIdleWatch(); clearTimeout(this._t); clearTimeout(this._search); clearInterval(this._poll); clearInterval(this._livePoll); }
   // Returns true once the saved record has been read; restores it if the store
   // loaded only after the initial state was built.
   restoreLate() {
@@ -695,12 +752,20 @@ class Component extends DCLogic {
     const at = mail.lastIndexOf('@');
     this.signInWith('Email', mail.slice(0, at + 1) + mail.slice(at + 1).toLowerCase(), up ? name : null);
   }
-  togglePick(t) {
+  togglePick(t, name) {
     const u = UI[this.appLang], free = this.plan === 'free';
     const has = this.state.follows.indexOf(t) !== -1;
     if (has) return this.setState(st => ({ follows: st.follows.filter(x => x !== t) }));
     if (free && this.state.follows.length >= 3) return this.flash('3 / 3 — ' + (u.liftCap || '').toUpperCase());
+    if (!FOLLOWS[t]) { this.setState(st => ({ liveNames: Object.assign({}, st.liveNames, { [t]: name || t }) })); this.syncLiveOnly(t); }
     this.setState(st => ({ follows: st.follows.concat(t) }));
+  }
+  // Demo-universe matches first, then live search hits; empty for an empty query.
+  searchPool(q) {
+    if (!q) return [];
+    const pool = UNIVERSE.filter(x => x.ticker.includes(q) || x.name.toUpperCase().includes(q));
+    (this.state.liveHits || []).forEach(h => { if (!pool.some(x => x.ticker === h.ticker)) pool.push({ ticker:h.ticker, name:h.name, stories:'—' }); });
+    return pool;
   }
   sessionList() {
     const rv = this.state.revoked || [];
@@ -859,32 +924,37 @@ class Component extends DCLogic {
       keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:n.ticker }); this.go('detail'); }, event)
     })).sort((a,b) => volNum(b.vol) - volNum(a.vol));
     const q = s.query.trim().toUpperCase();
+    const obQ = String(s.obQuery || '').trim().toUpperCase(), obPool = (!s.onboarded && s.session) ? this.searchPool(obQ) : [];
     const volOf = t => { let best = 0; NEWS.forEach(n => { if (n.ticker === t) { const m = /([\d.]+)x/.exec(String(n.vol || '')); if (m && parseFloat(m[1]) > best) best = parseFloat(m[1]); } }); return best; };
     const daysOf = t => { const m = /(\d+)d/.exec(String((FOLLOWS[t] || {}).earnDays || '')); return m ? +m[1] : 999; };
-    let shown = UNIVERSE.filter(x => !q || x.ticker.includes(q) || x.name.toUpperCase().includes(q));
-    if (s.screenFilter === 'vol') shown = shown.filter(x => volOf(x.ticker) >= 2);
-    if (s.screenFilter === 'earn') shown = shown.filter(x => daysOf(x.ticker) <= 14);
-    if (s.screenFilter === 'stories') shown = shown.slice().sort((a,b) => (+b.stories || 0) - (+a.stories || 0));
+    const rec = t => FOLLOWS[t] || this.liveRecord(t);
+    // Search-only: nothing is listed until the user types (no suggested tickers).
+    const shown = this.searchPool(q);
     const results = shown.map(x => {
       const on = s.follows.includes(x.ticker);
+      const liveOnly = !FOLLOWS[x.ticker];
       return Object.assign({}, x, {
-        following: on, notFollowing: !on,
+        following: on, notFollowing: !on, liveOnly,
+        open: () => this.openTicker(x.ticker, x.name),
+        keyOpen: event => this.activateFromKeyboard(() => this.openTicker(x.ticker, x.name), event),
+        openLabel: 'Open ' + x.ticker + ' · ' + x.name,
         toggle: () => {
           if (on) return this.setState(st => ({ follows: st.follows.filter(f => f !== x.ticker) }));
           if (isFree && s.follows.length >= 3) { this.flash('3 / 3 — ' + u.liftCap.toUpperCase()); return this.go('paywall'); }
+          if (liveOnly) { this.setState(st => ({ liveNames: Object.assign({}, st.liveNames, { [x.ticker]: x.name }) })); this.syncLiveOnly(x.ticker); }
           this.setState(st => ({ follows: st.follows.concat(x.ticker) }));
           this.flash(x.ticker + ' · ' + u.added.toUpperCase());
         }
       });
     });
-    const stock = FOLLOWS[s.selected] || FOLLOWS.NVDA;
+    const stock = s.selected ? rec(s.selected) : FOLLOWS.NVDA;
     const following = s.follows.includes(stock.ticker);
     const am = /^\s*(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*$/.exec(String(stock.analystDetail || ''));
     const aTot = am ? ((+am[1] + +am[2] + +am[3]) || 1) : 1;
     const analystBar = am ? [am[1], am[2], am[3]].map(v => (v / aTot * 100).toFixed(1) + '%') : ['0%','0%','0%'];
     return {
       ui: u,
-      brand: this.props.brand || 'Heard It First',
+      brand: this.props.brand || 'Market Pulse',
       planLabel: isFree ? u.free : u.pro,
       planToggleLabel: isFree ? u.viewPro : u.viewFree,
       togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),
@@ -929,17 +999,23 @@ class Component extends DCLogic {
       signInICloud: () => this.signInWith('iCloud'),
       submitAuth: () => this.submitEmailAuth(),
       obCount: String(s.follows.length),
-      obPicks: UNIVERSE.slice(0, 10).map(x => {
+      obQuery: s.obQuery || '',
+      onObQuery: e => { const v = e.target.value; this.setState({ obQuery: v }); this.liveSearch(v); },
+      obHasQuery: !!obQ, obNoQuery: !obQ,
+      obResults: obPool.map(x => {
         const on = s.follows.indexOf(x.ticker) !== -1;
-        return { ticker:x.ticker, name:x.name, stories:x.stories, box: on ? this.pal.accent : 'transparent', boxEdge: on ? this.pal.accent : this.pal.rule,
-          toggle: () => this.togglePick(x.ticker) };
+        return { ticker:x.ticker, name:x.name, box: on ? this.pal.accent : 'transparent', boxEdge: on ? this.pal.accent : this.pal.rule,
+          toggle: () => this.togglePick(x.ticker, x.name) };
       }),
+      obStatus: s.liveBusy && !obPool.length ? (u.searching || 'Searching…') : (!obPool.length ? u.noMatch : ''),
+      obHasPicks: s.follows.length > 0,
+      obChosen: s.follows.map(t => ({ ticker:t, removeLabel:'Remove ' + t, remove: () => this.togglePick(t) })),
       finishOnboard: () => {
-        const picks = s.follows.length ? s.follows : ['NVDA','AAPL','TSLA'];
-        this.setState({ onboarded:true, follows:picks, screen:'feed' });
-        this.flash(picks.length + ' / 3 · ' + u.tabList.toUpperCase());
+        if (!s.follows.length) return this.flash((u.obNeedOne || 'Pick at least one ticker').toUpperCase());
+        this.setState({ onboarded:true, screen:'feed', obQuery:'', liveHits:null });
+        this.flash(s.follows.length + ' / 3 · ' + u.tabList.toUpperCase());
       },
-      skipOnboard: () => this.setState({ onboarded:true, follows:['NVDA','AAPL','TSLA'], screen:'feed' }),
+      skipOnboard: () => this.setState({ onboarded:true, screen:'feed', obQuery:'', liveHits:null }),
       theme: s.theme || 'system',
       themes: [['system', u.themeSystem], ['light', u.themeLight], ['dark', u.themeDark]].map((x, i) => {
         const on = (s.theme || 'system') === x[0];
@@ -1016,10 +1092,10 @@ class Component extends DCLogic {
       feedFollowingOn: s.feedTab === 'following', feedFollowingOff: s.feedTab !== 'following',
       feedMarketOn: s.feedTab === 'market', feedMarketOff: s.feedTab !== 'market',
       feed,
-      follows: s.follows.map(t => Object.assign({}, FOLLOWS[t], {
-        latest: FOLLOWS[t].latest[L],
-        down: !FOLLOWS[t].up,
-        spark: this.sparkEl(t, FOLLOWS[t].price, FOLLOWS[t].move, FOLLOWS[t].up),
+      follows: s.follows.map(t => rec(t)).map(r => { const t = r.ticker; return Object.assign({}, r, {
+        latest: r.latest[L],
+        down: !r.up,
+        spark: r.liveOnly && r.price === '—' ? null : this.sparkEl(t, r.price, r.move, r.up),
         pushLabel: isFree ? (u.pro + ' · push') : (s.push[t] !== false ? u.pushOn : u.pushOff),
         togglePush: event => {
           if (event && event.stopPropagation) event.stopPropagation();
@@ -1027,16 +1103,17 @@ class Component extends DCLogic {
           this.setState(st => ({ push: Object.assign({}, st.push, { [t]: st.push[t] === false }) }));
         },
         alert: isFree ? u.pushOff : (s.push[t] !== false ? u.pushOn : u.pushOff),
-        open: () => { this.setState({ selected:t }); this.go('detail'); },
-        keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:t }); this.go('detail'); }, event)
-      })),
+        open: () => this.openTicker(t),
+        keyOpen: event => this.activateFromKeyboard(() => this.openTicker(t), event)
+      }); }),
       atCap: isFree && s.follows.length >= 3,
       capLabel: isFree ? s.follows.length + ' / 3' : s.follows.length + ' / ∞',
       capWarn: isFree && s.follows.length >= 3, capOk: !(isFree && s.follows.length >= 3),
       intervalLabel: isFree ? '24h' : '30m',
       query: s.query,
-      onQuery: e => this.setState({ query: e.target.value }),
-      resultsLabel: (q ? u.match + ' · ' + q : u.topVolume) + ' · ' + results.length,
+      onQuery: e => { const v = e.target.value; this.setState({ query: v }); this.liveSearch(v); },
+      resultsLabel: s.liveBusy && !results.length ? (u.searching || 'Searching…') : u.match + ' · ' + q + ' · ' + results.length,
+      hasQuery: !!q, noQuery: !q, noResults: !!q && !results.length && !s.liveBusy,
       filters: [['all', u.filterAll], ['vol', u.filterVol], ['earn', u.filterEarn], ['stories', u.filterStories]]
         .map(x => ({ key:x[0], label:x[1], on: s.screenFilter === x[0], off: s.screenFilter !== x[0], set: () => this.setState({ screenFilter:x[0] }) })),
       analystFull: !isFree, analystLocked: isFree,
@@ -1046,8 +1123,11 @@ class Component extends DCLogic {
         analystDetail: this.analystSplit(stock.analystDetail),
         buyW: analystBar[0], holdW: analystBar[1], sellW: analystBar[2],
         lastEarn: stock.lastEarn || '—' }),
-      chart: this.chartEl(stock),
-      stockNews: NEWS.filter(n => n.ticker === stock.ticker).concat(NEWS.slice(0,2)).slice(0,3).map(n => Object.assign({}, n, { headline: n.headline[L] })),
+      // A live-only ticker has no price until its quote arrives; draw nothing rather than NaN.
+      chart: stock.liveOnly && stock.price === '—' ? null : this.chartEl(stock),
+      stockNews: stock.liveOnly
+        ? ((s.liveNews || {})[stock.ticker] || []).slice(0, 3).map(n => ({ headline:n.headline, source:n.source, stamp:n.stamp }))
+        : NEWS.filter(n => n.ticker === stock.ticker).concat(NEWS.slice(0,2)).slice(0,3).map(n => Object.assign({}, n, { headline: n.headline[L] })),
       freqNote: isFree ? u.freqFree : u.freqPro,
       detailActionLabel: following ? (isFree ? u.enablePush : u.pushEnabled.replace('%s', stock.ticker)) : u.addToList.replace('%s', stock.ticker),
       primaryDetailAction: () => {
