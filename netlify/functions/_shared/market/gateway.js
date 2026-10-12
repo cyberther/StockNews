@@ -7,7 +7,9 @@
 //   - identical requests in flight share one upstream call;
 //   - a provider that rate-limits us (429) or keeps failing is skipped for a while;
 //   - when every provider fails, the last good answer is served, marked stale;
-//   - /quotes?symbols=A,B,C answers many quotes in one request.
+//   - /quotes?symbols=A,B,C answers many quotes in one request;
+//   - each provider is paced under its per-minute limit, and with a shared usage store
+//     (Supabase, see usage-store.js) under its daily cap across all instances.
 // Replies keep each provider's own shape, which is what hif-live.js reads today.
 // Keys come from the caller (env vars) and appear only on upstream URLs: never in cache
 // keys, logs or responses.
@@ -43,6 +45,11 @@ const WINDOW_MS = 60_000;
 const cache = new Map();     // capability|params -> { data, at, ttl, source }
 const inflight = new Map();  // capability|params -> Promise
 const breakers = new Map();  // provider -> { until, fails, reason }
+const minute = new Map();    // provider -> { started, count }: this instance's pace
+const pending = new Map();   // provider -> { calls, rate_limited, errors } not yet in the shared store
+const totals = new Map();    // provider -> the same, since this instance started
+let lastFlush = Date.now();
+let sharedToday = { at: 0, day: '', rows: {} }; // provider -> calls today, all instances
 const clients = new Map();   // client -> { started, count }
 
 const securityHeaders = {
@@ -117,6 +124,56 @@ function recordFailure(name, log) {
 }
 const recordSuccess = name => { const b = breakers.get(name); if (b) { b.fails = 0; } };
 
+// Stays a little under the provider's per-minute limit on this instance; the breaker
+// covers the rest when several instances share a key.
+function paceAllows(p) {
+  const per = p.limits && p.limits.perMinute;
+  if (!per) return true;
+  const now = Date.now(), m = minute.get(p.name);
+  if (!m || now - m.started >= WINDOW_MS) { minute.set(p.name, { started: now - (now % WINDOW_MS), count: 0 }); return true; }
+  return m.count < Math.floor(per * 0.9);
+}
+function count(name, kind) {
+  for (const map of [pending, totals]) {
+    const c = map.get(name) || { calls: 0, rate_limited: 0, errors: 0 };
+    c[kind] += 1; map.set(name, c);
+  }
+  if (kind === 'calls') { const m = minute.get(name); if (m) m.count += 1; }
+}
+const utcDay = () => new Date().toISOString().slice(0, 10);
+// Calls made today by every instance, for providers with a daily cap. Read at most once a
+// minute; this instance's own unflushed calls are added on top.
+async function dailyAllows(p, ctx) {
+  const per = p.limits && p.limits.perDay;
+  if (!per || !ctx.usage) return true;
+  const day = utcDay();
+  if (sharedToday.day !== day || Date.now() - sharedToday.at > 60_000) {
+    try {
+      const rows = await ctx.usage.read(1);
+      const byName = {};
+      (rows || []).forEach(r => { if (r.day === day) byName[r.provider] = r.calls; });
+      sharedToday = { at: Date.now(), day, rows: byName };
+    } catch (e) { sharedToday.at = Date.now(); } // keep the last figures; try again in a minute
+  }
+  const used = (sharedToday.rows[p.name] || 0) + ((pending.get(p.name) || {}).calls || 0);
+  return used < Math.floor(per * 0.95);
+}
+// Sends this instance's counts to the shared store every 30 seconds (or 25 calls), after
+// the response has gone out.
+function maybeFlush(ctx, force) {
+  if (!ctx.usage || !pending.size) return null;
+  const queued = [...pending.values()].reduce((a, c) => a + c.calls, 0);
+  if (!force && Date.now() - lastFlush < 30_000 && queued < 25) return null;
+  const rows = [...pending.entries()].map(([provider, c]) => ({ provider, ...c }));
+  pending.clear(); lastFlush = Date.now();
+  return ctx.usage.bump(rows).catch(e => {
+    // Put the counts back for the next flush rather than losing them.
+    rows.forEach(r => { const c = pending.get(r.provider) || { calls: 0, rate_limited: 0, errors: 0 };
+      c.calls += r.calls; c.rate_limited += r.rate_limited; c.errors += r.errors; pending.set(r.provider, c); });
+    ctx.log({ evt: 'market.usage', status: 'flush-failed', error: String(e && e.message || e) });
+  });
+}
+
 async function fetchJson(target, headers) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -148,7 +205,9 @@ async function fetchCapability(cap, params, ctx) {
     for (const p of PROVIDERS[cap]) {
       const apiKey = p.needsKey ? ctx.keys[p.name] : null;
       if (p.needsKey && !apiKey) { fail = { status: 503, error: 'market data is not configured' }; continue; }
-      if (breakerOpen(p.name)) { fail = { status: 429, error: 'rate limit exceeded' }; continue; }
+      if (breakerOpen(p.name) || !paceAllows(p)) { fail = { status: 429, error: 'rate limit exceeded' }; continue; }
+      if (!(await dailyAllows(p, ctx))) { fail = { status: 429, error: 'daily quota reached' }; continue; }
+      count(p.name, 'calls');
       const t0 = Date.now();
       let res;
       try {
@@ -156,13 +215,13 @@ async function fetchCapability(cap, params, ctx) {
       } catch (e) {
         const timeout = e && e.name === 'AbortError';
         ctx.log({ evt: 'market.upstream', provider: p.name, cap, status: timeout ? 'timeout' : 'error', ms: Date.now() - t0 });
-        recordFailure(p.name, ctx.log);
+        recordFailure(p.name, ctx.log); count(p.name, 'errors');
         fail = { status: 502, error: timeout ? 'market data timed out' : 'market data unavailable' };
         continue;
       }
       ctx.log({ evt: 'market.upstream', provider: p.name, cap, status: res.status, ms: Date.now() - t0 });
-      if (res.status === 429) { tripRateLimit(p.name, res.retryAfter, ctx.log); fail = { status: 429, error: 'rate limit exceeded' }; continue; }
-      if (res.status >= 500 || res.parsed == null) { recordFailure(p.name, ctx.log); continue; }
+      if (res.status === 429) { count(p.name, 'rate_limited'); tripRateLimit(p.name, res.retryAfter, ctx.log); fail = { status: 429, error: 'rate limit exceeded' }; continue; }
+      if (res.status >= 500 || res.parsed == null) { recordFailure(p.name, ctx.log); count(p.name, 'errors'); continue; }
       // A client error (bad symbol, plan limit) is the answer; another provider won't differ.
       if (res.status >= 400) return { status: res.status, data: res.parsed, source: p.name, cache: 'miss', ttl: 0 };
       recordSuccess(p.name);
@@ -227,7 +286,8 @@ function withinRateLimit(clientId, rawLimit) {
 
 const defaultLog = process.env.NODE_TEST_CONTEXT ? () => {} : e => console.log(JSON.stringify(e));
 
-// options: { apiKey (Finnhub), keys: { provider: key }, allowedOrigins, rateLimit, clientId, log }
+// options: { apiKey (Finnhub), keys: { provider: key }, allowedOrigins, rateLimit, clientId, log,
+//            usage (usage-store.js), waitUntil (keeps a flush alive after the response) }
 export async function handleMarketRequest(request, options = {}) {
   if (request.method !== 'GET') return json({ error: 'method not allowed' }, 405, { allow: 'GET' });
   if (!allowedOrigin(request, options.allowedOrigins)) return json({ error: 'origin not allowed' }, 403);
@@ -239,8 +299,10 @@ export async function handleMarketRequest(request, options = {}) {
   const parsed = parse(cap, url.searchParams);
   if (parsed.error) return json({ error: parsed.error }, 400);
 
-  const ctx = { keys: { finnhub: options.apiKey, ...(options.keys || {}) }, log: options.log || defaultLog };
+  const ctx = { keys: { finnhub: options.apiKey, ...(options.keys || {}) }, log: options.log || defaultLog, usage: options.usage || null };
   const r = cap === 'quotes' ? await fetchQuotes(parsed.params.symbols, ctx) : await fetchCapability(cap, parsed.params, ctx);
+  const flush = maybeFlush(ctx);
+  if (flush && options.waitUntil) options.waitUntil(flush);
   const headers = { 'x-market-cache': r.cache, 'netlify-vary': VARY };
   if (r.source) headers['x-market-source'] = r.source;
   if (r.status === 200 && r.ttl > 0) {
@@ -253,18 +315,41 @@ export async function handleMarketRequest(request, options = {}) {
   return json(r.data, r.status, headers);
 }
 
-// For a future health page: which providers are cooling down, and how much is cached.
+const startedAt = Date.now();
+const allProviders = () => [...new Set(Object.values(PROVIDERS).flat())];
+
+// What this instance knows: breakers, cache size and its own call counts. Instances don't
+// share memory, so the health page leans on the shared store for the overall picture.
 export function gatewayStatus() {
   const now = Date.now();
   return {
     cached: cache.size,
-    providers: Object.fromEntries([...new Set(Object.values(PROVIDERS).flat().map(p => p.name))].map(n => {
-      const b = breakers.get(n);
-      return [n, b && b.until > now ? { open: true, reason: b.reason, secondsLeft: Math.ceil((b.until - now) / 1000) } : { open: false }];
+    upSeconds: Math.round((now - startedAt) / 1000),
+    providers: Object.fromEntries(allProviders().map(p => {
+      const b = breakers.get(p.name);
+      return [p.name, {
+        breaker: b && b.until > now ? { open: true, reason: b.reason, secondsLeft: Math.ceil((b.until - now) / 1000) } : { open: false },
+        thisInstance: totals.get(p.name) || { calls: 0, rate_limited: 0, errors: 0 }
+      }];
     }))
   };
 }
 
+// Provider list for the health page: capabilities, limits and whether a key is set
+// (never the key).
+export function providerInfo(keys) {
+  return allProviders().map(p => ({
+    name: p.name,
+    capabilities: Object.keys(PROVIDERS).filter(c => PROVIDERS[c].includes(p)),
+    limits: p.limits || {},
+    configured: !p.needsKey || !!(keys && keys[p.name])
+  }));
+}
+
+// Sends whatever this instance has counted to the shared store now.
+export function flushUsage(usage) { return maybeFlush({ usage, log: defaultLog }, true) || Promise.resolve(); }
+
 export function resetGatewayForTests() {
-  cache.clear(); inflight.clear(); breakers.clear(); clients.clear();
+  cache.clear(); inflight.clear(); breakers.clear(); clients.clear(); minute.clear(); pending.clear(); totals.clear();
+  lastFlush = Date.now(); sharedToday = { at: 0, day: '', rows: {} };
 }

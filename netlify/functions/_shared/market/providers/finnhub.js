@@ -18,6 +18,8 @@ const PATHS = {
 export const finnhub = {
   name: 'finnhub',
   needsKey: true,
+  // Free tier: 60 calls a minute per key, no daily cap.
+  limits: { perMinute: 60 },
   supports: cap => cap in PATHS,
   url(cap, p, key) {
     const u = new URL(BASE + PATHS[cap]);
