@@ -557,8 +557,13 @@ const STORE_KEY = 'hif.dark.v2';
 // Keys that survive a reload. Transient input (passwords, codes, toasts) never persists.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','smaOn',
   'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme'];
+// hif-store.js can finish loading after this logic is evaluated. Until the saved
+// record has been read, nothing may be written, or a reload would overwrite the
+// stored session with these defaults; see restoreLate().
+let hydrated = false;
 function hydrate(defaults) {
   const S = window.HIFStore, saved = S ? S.read(STORE_KEY) : null;
+  hydrated = !!S;
   const out = Object.assign({}, defaults);
   if (saved) PERSIST.forEach(k => { if (saved[k] !== undefined) out[k] = saved[k]; });
   if (out.screen === 'auth') out.screen = 'feed';
@@ -571,12 +576,27 @@ class Component extends DCLogic {
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'' });
   componentDidMount() {
     this.startIdleWatch();
-    if (!bindShared()) { this._poll = setInterval(() => { if (bindShared()) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
+    if (!bindShared() || !window.HIFStore) { this._poll = setInterval(() => { if (bindShared() && window.HIFStore) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
   }
   componentDidUpdate() { this.persist(); }
   componentWillUnmount() { this.stopIdleWatch(); clearTimeout(this._t); clearInterval(this._poll); }
+  // Returns true once the saved record has been read; restores it if the store
+  // loaded only after the initial state was built.
+  restoreLate() {
+    if (hydrated) return true;
+    const S = window.HIFStore; if (!S) return false;
+    hydrated = true;
+    const saved = S.read(STORE_KEY);
+    if (!saved) return true;
+    const patch = {};
+    PERSIST.forEach(k => { if (saved[k] !== undefined) patch[k] = saved[k]; });
+    if (patch.screen === 'auth') patch.screen = 'feed';
+    this.setState(patch);
+    return false;
+  }
   persist() {
-    const S = window.HIFStore; if (!S) return;
+    if (!this.restoreLate()) return;
+    const S = window.HIFStore;
     const out = {};
     PERSIST.forEach(k => { if (this.state[k] !== undefined) out[k] = this.state[k]; });
     S.write(STORE_KEY, out);
