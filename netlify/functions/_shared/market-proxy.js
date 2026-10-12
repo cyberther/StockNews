@@ -1,3 +1,5 @@
+import { cleanNews } from './news-clean.js';
+
 const FINNHUB_BASE = 'https://finnhub.io/api/v1';
 const MAX_UPSTREAM_BYTES = 2 * 1024 * 1024;
 const REQUEST_TIMEOUT_MS = 8000;
@@ -130,6 +132,10 @@ export async function handleMarketRequest(request, options = {}) {
 
   try {
     const result = await fetchJson(checked.target);
+    // Company news: only stories that name the company, linked to the real publisher.
+    if (result.status === 200 && checked.target.pathname.endsWith('/company-news')) {
+      result.parsed = await cleanNews(result.parsed, checked.target.searchParams.get('symbol'), { apiKey: options.apiKey });
+    }
     if (result.status >= 200 && result.status < 300) {
       cache.set(cacheKey, { data: result.parsed, status: result.status, expires: Date.now() + checked.ttl * 1000 });
     }

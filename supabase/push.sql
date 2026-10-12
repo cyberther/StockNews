@@ -90,6 +90,16 @@ grant select on public.stories to authenticated;
 drop policy if exists "read stories" on public.stories;
 create policy "read stories" on public.stories for select to authenticated using (true);
 
+-- Company names the scan uses to tell real company news from general market articles.
+create table if not exists public.ticker_names (
+  ticker      text        primary key,
+  name        text,
+  updated_at  timestamptz not null default now()
+);
+alter table public.ticker_names enable row level security;
+alter table public.ticker_names force row level security;
+revoke all on public.ticker_names from anon, authenticated;
+
 -- One row per scan, for the "last scan" time and for checking that the job runs.
 create table if not exists public.scan_runs (
   id           bigserial   primary key,
