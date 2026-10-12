@@ -56,6 +56,18 @@ if (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY) {
   console.error('Refusing to start: a service_role key is in the environment. This process must only ever hold the anon key.');
   process.exit(1);
 }
+// /api/config hands SUPABASE_ANON_KEY to every browser, so it must provably be the public
+// key: a legacy JWT with role 'anon', or a new-style publishable key. A secret key pasted
+// into the wrong variable would otherwise be published.
+{
+  const parts = SUPABASE_ANON_KEY.split('.');
+  let role = null;
+  try { if (parts.length === 3) role = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')).role; } catch {}
+  if (!/^sb_publishable_/.test(SUPABASE_ANON_KEY) && role !== 'anon') {
+    console.error('Refusing to start: SUPABASE_ANON_KEY is not the public anon key (it would be served to browsers).');
+    process.exit(1);
+  }
+}
 
 const app = express();
 app.disable('x-powered-by');

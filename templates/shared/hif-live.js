@@ -52,7 +52,14 @@ function available(token){ return proxyState !== 'no' || !!token; }
 
 function fmtPrice(v){ return v == null ? null : Number(v).toFixed(2); }
 function fmtPct(v){ if (v == null) return null; const n = Number(v); return (n < 0 ? '−' : '+') + Math.abs(n).toFixed(1) + '%'; }
-function stamp(sec){ const d = new Date(sec * 1000), p = n => String(n).padStart(2,'0'); return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()); }
+// When a story was published, in the reader's locale: "12 Oct · 10:24", with the year
+// added for anything outside the current year.
+function stamp(sec){
+  const d = new Date(sec * 1000), p = n => String(n).padStart(2,'0');
+  const opts = { day:'numeric', month:'short' };
+  if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
+  return d.toLocaleDateString([], opts) + ' · ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
 function isoDay(off){ return new Date(Date.now() + off * 86400000).toISOString().slice(0,10); }
 
 async function quote(symbol, token){
