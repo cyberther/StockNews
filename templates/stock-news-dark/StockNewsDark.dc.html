@@ -673,7 +673,7 @@ class Component extends DCLogic {
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
-    liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{}, charts:{} });
+    liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{}, charts:{}, liveEarnDates:{} });
   componentDidMount() {
     this.startIdleWatch();
     if (!bindShared() || !window.HIFStore) { this._poll = setInterval(() => { if (bindShared() && window.HIFStore) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
@@ -819,6 +819,14 @@ class Component extends DCLogic {
     const keep = c => this.setState(st => ({ charts: Object.assign({}, st.charts, { [key]: c || false }) }));
     L.chart(t, r).then(keep).catch(() => keep(false));
   }
+  // Last and next earnings report dates for the open ticker (the adapter caches 6 hours).
+  ensureEarnDates(t) {
+    const L = window.HIFLive; if (!L || !L.earningsDates || !t) return;
+    this._edReq = this._edReq || {};
+    if (this._edReq[t]) return;
+    this._edReq[t] = true;
+    L.earningsDates(t).then(ed => { if (ed) this.setState(st => ({ liveEarnDates: Object.assign({}, st.liveEarnDates, { [t]: ed }) })); }).catch(() => {});
+  }
   openStory(n) {
     if (n.url && /^https?:\/\//.test(n.url)) { window.open(n.url, '_blank', 'noopener,noreferrer'); return; }
     this.openTicker(n.ticker);
@@ -850,7 +858,7 @@ class Component extends DCLogic {
   }
   componentDidUpdate() {
     this.queueWatchlistSync();
-    if (this.state.screen === 'detail' && this.state.selected) this.ensureChart(this.state.selected, this.state.chartRange || '1d');
+    if (this.state.screen === 'detail' && this.state.selected) { this.ensureChart(this.state.selected, this.state.chartRange || '1d'); this.ensureEarnDates(this.state.selected); }
     // A ticker added from search, onboarding or the ticker page gets its live data now.
     if (this._synced && window.HIFLive) {
       const added = (this.state.follows || []).filter(t => this._synced.indexOf(t) < 0);
@@ -1463,7 +1471,12 @@ class Component extends DCLogic {
         analystSentiment: this.sentimentFor(stock.buyPct),
         analystDetail: this.analystSplit(stock.analystDetail),
         buyW: analystBar[0], holdW: analystBar[1], sellW: analystBar[2],
-        lastEarn: stock.lastEarn || '—' }),
+        ...(() => {
+          // Report dates from the earnings calendar win over the demo dates.
+          const ED = (s.liveEarnDates || {})[stock.ticker];
+          const tx = ED && (ED.next || ED.last) && window.HIFLive && window.HIFLive.earningsText ? window.HIFLive.earningsText(ED, u) : null;
+          return tx ? { earnDays: tx.days, earnDate: tx.date, lastEarn: tx.last || stock.lastEarn || '—' } : { lastEarn: stock.lastEarn || '—' };
+        })() }),
       // A live-only ticker has no price until its quote arrives; draw nothing rather than NaN.
       chart: stock.liveOnly && stock.price === '—' ? null : this.chartEl(stock),
       stockNews: (stock.liveOnly || ((s.liveNews || {})[stock.ticker] || []).length)

@@ -7,7 +7,7 @@
 // Only the endpoints this prototype needs are allowed through.
 import { cleanNews } from './_shared/news-clean.js';
 
-const ALLOWED = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/chart']);
+const ALLOWED = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/calendar/earnings', '/chart']);
 const BASE = 'https://finnhub.io/api/v1';
 
 const CHART_RANGES = {
