@@ -658,6 +658,12 @@ const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push',
 // record has been read, nothing may be written, or a reload would overwrite the
 // stored session with these defaults; see restoreLate().
 let hydrated = false;
+// An auth session that arrived before the saved record was read. Applying it early
+// would compare against the default accountId (null) and wipe a returning user's
+// account as if it were new; restoreLate() applies it once the record is in.
+let pendingAuth = null;
+// True from the moment the saved record is handed to setState until React has applied it.
+let restoring = false;
 function hydrate(defaults) {
   const S = window.HIFStore, saved = S ? S.read(STORE_KEY) : null;
   hydrated = !!S;
@@ -707,6 +713,9 @@ class Component extends DCLogic {
   // Mirror the Supabase session into the app. A different account on this device starts
   // fresh: its own onboarding and watchlist, not the previous user's.
   applyAuthSession(sess) {
+    // Wait for the saved record (and its accountId) before deciding whether this is a new account.
+    if (!this.restoreLate()) { pendingAuth = { sess }; return; }
+    pendingAuth = null;
     if (!sess) { this._wlUser = null; this._wlReady = false; this.setState({ session:null, locked:false, serverPlan:null, devicePush:'unavailable' }); return; }
     const fresh = this.state.accountId !== sess.userId;
     this.setState(Object.assign({
@@ -871,16 +880,20 @@ class Component extends DCLogic {
   // Returns true once the saved record has been read; restores it if the store
   // loaded only after the initial state was built.
   restoreLate() {
-    if (hydrated) return true;
+    if (hydrated) return !restoring;
     const S = window.HIFStore; if (!S) return false;
     hydrated = true;
     const saved = S.read(STORE_KEY);
-    if (!saved) return true;
+    if (!saved) { setTimeout(() => this.runAfterRestore(), 0); return true; }
     const patch = {};
     PERSIST.forEach(k => { if (saved[k] !== undefined) patch[k] = saved[k]; });
     if (patch.screen === 'auth') patch.screen = 'feed';
-    this.setState(patch);
+    restoring = true;
+    this.setState(patch, () => { restoring = false; this.runAfterRestore(); });
     return false;
+  }
+  runAfterRestore() {
+    if (pendingAuth) { const p = pendingAuth; pendingAuth = null; this.applyAuthSession(p.sess); }
   }
   persist() {
     if (!this.restoreLate()) return;
