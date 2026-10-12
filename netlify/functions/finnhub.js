@@ -5,6 +5,8 @@
 // Call it as: /api/finnhub?path=/quote&symbol=NVDA
 //
 // Only the endpoints this prototype needs are allowed through.
+import { cleanNews } from './_shared/news-clean.js';
+
 const ALLOWED = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/chart']);
 const BASE = 'https://finnhub.io/api/v1';
 
@@ -51,7 +53,11 @@ export default async (request) => {
 
   try {
     const res = await fetch(out, { headers: { accept: 'application/json' } });
-    const body = await res.text();
+    let body = await res.text();
+    // Company news: only stories that name the company, linked to the real publisher.
+    if (path === '/company-news' && res.ok) {
+      try { body = JSON.stringify(await cleanNews(JSON.parse(body), out.searchParams.get('symbol'), { apiKey: key })); } catch {}
+    }
     return new Response(body, {
       status: res.status,
       headers: {
