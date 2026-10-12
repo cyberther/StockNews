@@ -79,3 +79,68 @@ Operational hygiene:
 - Back up `user_settings` and `security_events`; both are small.
 - The rate limiter and the response cache are per process. Running more than one
   instance means moving both to Redis, or the limits multiply.
+
+## Admin panel
+
+A second process, `admin.js`, serves the operator panel: users (plan, suspend,
+sign out everywhere, delete), the security log with CSV export, the admin audit
+trail, live health counters, and editable site content. It holds the Supabase
+`service_role` key, so it is kept apart from the public server on purpose:
+
+- its own env file, `admin.env` (the public server never reads it, and still
+  refuses to start if that key reaches its environment)
+- listens on `127.0.0.1:8081` only, and rejects any other `Host` header
+- its own login: scrypt password + authenticator code, lockout after 5 failures
+- every action is written to `admin_audit`, which cannot be edited or deleted
+
+Setup, once:
+
+    psql / Supabase SQL editor: re-run schema.sql (adds the admin tables)
+    cp admin.env.example admin.env && chmod 600 admin.env   # fill it in
+    # put the same STATS_TOKEN in .env too, then restart the public server
+    node admin-cli.js create yourname     # prompts for a password, prints the 2FA secret
+    npm run admin
+
+Then from your own machine:
+
+    ssh -L 8081:127.0.0.1:8081 you@server
+    open http://127.0.0.1:8081
+
+There is no way to create an admin from the web. Manage admins with
+`admin-cli.js` (`list`, `reset-2fa`, `set-password`, `disable`, `enable`, `unlock`).
+
+systemd unit for the admin process — same sandboxing as the app, plus loopback-only networking:
+
+    [Unit]
+    Description=Market Pulse admin
+    After=network-online.target
+
+    [Service]
+    Type=simple
+    User=hif
+    Group=hif
+    WorkingDirectory=/opt/hif/server
+    EnvironmentFile=/opt/hif/server/admin.env
+    ExecStart=/usr/bin/node admin.js
+    Restart=on-failure
+    NoNewPrivileges=yes
+    PrivateTmp=yes
+    PrivateDevices=yes
+    ProtectSystem=strict
+    ProtectHome=yes
+    ProtectKernelTunables=yes
+    ProtectKernelModules=yes
+    ProtectControlGroups=yes
+    RestrictAddressFamilies=AF_INET AF_INET6
+    RestrictNamespaces=yes
+    LockPersonality=yes
+    MemoryDenyWriteExecute=yes
+    SystemCallFilter=@system-service
+    CapabilityBoundingSet=
+    UMask=0077
+
+    [Install]
+    WantedBy=multi-user.target
+
+Keep `admin.env` readable only by the service user. If the box is shared,
+run the admin unit as a separate user that alone can read `admin.env`.

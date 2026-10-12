@@ -456,4 +456,37 @@ const CROWD = {
   JPM:15, GS:9, LLY:21, PFE:11, XOM:10, TSM:24, ARM:16, NFLX:31, ORCL:20, CRM:13
 };
 window.HIF = { NEWS, FOLLOWS, UNIVERSE, EVENTS, SIGNALS, SECTORS, SECTOR_OF, CROWD, UI };
+
+// Content edited in the admin panel (GET /api/content). Everything above stays
+// the fallback: offline, in the design tool, or if the request fails, the page
+// renders exactly as built. Overrides are applied in place, then 'hif:content'
+// tells mounted templates to re-render.
+function applyContent(c) {
+  if (!c || typeof c !== 'object') return;
+  const H = window.HIF;
+  if (c.featured && c.featured.ticker) H.FEATURED = c.featured;
+  if (Array.isArray(c.tickers) && c.tickers.length) H.LANDING_TICKERS = c.tickers.slice(0, 8);
+  if (c.sources && Number.isInteger(c.sources.count)) H.SOURCES_COUNT = c.sources.count;
+  if (Array.isArray(c.universe)) {
+    c.universe.forEach(r => {
+      if (r && r.ticker && !UNIVERSE.some(x => x.ticker === r.ticker)) UNIVERSE.push({ ticker: r.ticker, name: r.name, stories: '—' });
+    });
+  }
+  if (c.copy && typeof c.copy === 'object') {
+    Object.keys(c.copy).forEach(lang => {
+      const target = UI[lang], over = c.copy[lang];
+      if (!target || !over) return;
+      // Only replace strings that exist, so a typo cannot inject a stray key.
+      Object.keys(over).forEach(k => { if (typeof target[k] === 'string' && typeof over[k] === 'string') target[k] = over[k]; });
+    });
+  }
+  H.contentLoaded = true;
+  window.dispatchEvent(new Event('hif:content'));
+}
+if (typeof fetch === 'function' && /^https?:$/.test(location.protocol)) {
+  fetch('/api/content', { credentials: 'same-origin', headers: { accept: 'application/json' } })
+    .then(r => (r.ok && /json/.test(r.headers.get('content-type') || '') ? r.json() : null))
+    .then(applyContent)
+    .catch(() => {});
+}
 })();

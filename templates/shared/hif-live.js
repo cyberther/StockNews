@@ -84,8 +84,9 @@ async function chart(symbol, range){
   const timestamps = result.timestamp || [];
   const quote = result.indicators && result.indicators.quote && result.indicators.quote[0];
   const closes = quote && quote.close || [];
-  const rows = timestamps.map((ts, i) => ({ ts: ts, close: Number(closes[i]) }))
-    .filter(p => Number.isFinite(p.close));
+  // Yahoo marks missing bars with null, and Number(null) is 0 — drop them before converting.
+  const rows = timestamps.map((ts, i) => ({ ts: ts, close: closes[i] == null ? NaN : Number(closes[i]) }))
+    .filter(p => Number.isFinite(p.close) && p.close > 0);
   return put('chart', key, { points: rows, currency: result.meta && result.meta.currency || 'USD' });
 }
 
