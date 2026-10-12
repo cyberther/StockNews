@@ -9,7 +9,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news app — dark terminal" description="Executive/terminal variant of the stock news product: dark surfaces, numbers-forward rows, one decision per screen, separate app and content languages." -->
-<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
+<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">TERMINAL</text></svg></template>
 <div data-theme="{{ theme }}" style="min-height:100vh;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums">
 <div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid var(--s-rule)">
@@ -267,10 +267,63 @@
 <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.watchlist }}</div>
 <div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)"><sc-if value="{{ capWarn }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ capLabel }}</span></sc-if><sc-if value="{{ capOk }}" hint-placeholder-val="{{ true }}"><span>{{ capLabel }}</span></sc-if></div>
 </div>
+<div data-m="smooth" style="flex:1;overflow-y:auto">
+<section aria-labelledby="hold-title-m" style="border-bottom:1px solid var(--s-rule);font-variant-numeric:tabular-nums">
+<div style="display:flex;align-items:center;gap:8px;padding:12px 16px 4px">
+<h2 id="hold-title-m" style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:16px">{{ ui.holdTitle }}</h2><span style="font-size:11px;color:var(--s-mute)">{{ holdCount }}</span>
+<button onClick="{{ holdAdd }}" style="margin-left:auto;min-height:34px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer">{{ ui.holdAdd }}</button>
+</div>
+<sc-if value="{{ hasHold }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ holdTotals }}" as="t" hint-placeholder-count="1">
+<div style="display:flex;gap:14px;padding:6px 16px 10px">
+<div style="flex:1;min-width:0"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.hdValue }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;white-space:nowrap">{{ t.valueLabel }}</div></div>
+<div style="text-align:right"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.hdPL }}</div><div style="font-weight:700;font-size:13px;white-space:nowrap"><sc-if value="{{ t.plDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.plLabel }}</span></sc-if><sc-if value="{{ t.plUp }}" hint-placeholder-val="{{ true }}"><span>{{ t.plLabel }}</span></sc-if></div><div style="font-size:11px;white-space:nowrap"><sc-if value="{{ t.plDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.plPctLabel }}</span></sc-if><sc-if value="{{ t.plUp }}" hint-placeholder-val="{{ true }}"><span>{{ t.plPctLabel }}</span></sc-if> · {{ ui.hdToday }} <sc-if value="{{ t.dayDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.dayPctLabel }}</span></sc-if><sc-if value="{{ t.dayUp }}" hint-placeholder-val="{{ true }}"><span>{{ t.dayPctLabel }}</span></sc-if></div></div>
+</div>
+</sc-for>
+</sc-if>
+<div style="padding:0 16px 10px;font-size:11px;color:var(--s-mute);line-height:1.4">{{ holdWhere }}</div>
+<sc-if value="{{ holdAdding }}" hint-placeholder-val="{{ false }}">
+<div onKeyDown="{{ holdKey }}" style="margin:0 16px 12px;padding:12px;border:1px solid var(--color-accent);background:var(--s-panel)">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+<label style="display:block;min-width:0"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:4px">{{ ui.posTicker }}</span><input value="{{ posTickerVal }}" onChange="{{ onPosTicker }}" autocomplete="off" spellCheck="false" autoCapitalize="characters" placeholder="GRAB" style="width:100%;min-height:42px;padding:0 10px;background:var(--s-bg);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:700;font-size:16px;font-weight:800;letter-spacing:0.04em" /></label>
+<label style="display:block;min-width:0"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:4px">{{ ui.hdQty }}</span><input value="{{ posSharesVal }}" onChange="{{ onPosShares }}" inputMode="decimal" autocomplete="off" placeholder="99" style="width:100%;min-height:42px;padding:0 10px;background:var(--s-bg);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:700;font-size:16px" /></label>
+<label style="display:block;min-width:0"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:4px">{{ ui.hdAvg }}</span><input value="{{ posCostVal }}" onChange="{{ onPosCost }}" inputMode="decimal" autocomplete="off" placeholder="4.1265" style="width:100%;min-height:42px;padding:0 10px;background:var(--s-bg);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:700;font-size:16px" /></label>
+</div>
+<div style="display:flex;gap:8px;margin-top:10px"><button onClick="{{ holdSave }}" style="min-height:42px;padding:0 14px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.posSave }}</button><button onClick="{{ holdCancel }}" style="min-height:42px;padding:0 10px;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaCancel }}</button></div>
+</div>
+</sc-if>
+<sc-if value="{{ holdEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:0 16px 14px;font-size:12px;color:var(--s-mute);line-height:1.45">{{ ui.holdEmpty }}</div>
+</sc-if>
+<sc-for list="{{ holdRows }}" as="h" hint-placeholder-count="2">
+<div data-m="rise" style="border-top:1px solid var(--s-rule)">
+<button onClick="{{ h.edit }}" aria-label="{{ h.editLabel }}" style="display:block;width:100%;padding:11px 16px;background:transparent;border:0;color:var(--s-ink);text-align:left;font:inherit;cursor:pointer">
+<div style="display:flex;align-items:baseline;gap:10px">
+<div style="flex:1;min-width:0"><span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ h.ticker }}</span><sc-if value="{{ h.showName }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;color:var(--s-mute);margin-left:6px">{{ h.name }}</span></sc-if></div>
+<div data-m-flash="1" style="font-family:var(--font-heading);font-weight:800;font-size:15px;white-space:nowrap">{{ h.valueLabel }}</div>
+</div>
+<div style="display:flex;align-items:baseline;gap:10px;margin-top:4px;font-size:12px">
+<div style="flex:1;min-width:0;color:var(--s-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.qtyLabel }} × {{ h.avgLabel }} → {{ h.priceLabel }}</div>
+<div style="font-weight:700;white-space:nowrap"><sc-if value="{{ h.plDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ h.plLabel }} · {{ h.plPctLabel }}</span></sc-if><sc-if value="{{ h.plUp }}" hint-placeholder-val="{{ true }}"><span>{{ h.plLabel }} · {{ h.plPctLabel }}</span></sc-if></div>
+</div>
+<div style="display:flex;gap:10px;margin-top:3px;font-size:11px;color:var(--s-mute)"><span>{{ ui.hdToday }} <sc-if value="{{ h.moveDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ h.moveLabel }}</span></sc-if><sc-if value="{{ h.moveUp }}" hint-placeholder-val="{{ true }}"><span>{{ h.moveLabel }}</span></sc-if></span><span>{{ ui.hdCost }} {{ h.costLabel }}</span><span style="margin-left:auto">{{ h.weightLabel }}</span></div>
+</button>
+<sc-if value="{{ h.editing }}" hint-placeholder-val="{{ false }}">
+<div onKeyDown="{{ holdKey }}" style="padding:0 16px 12px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<label style="display:block;min-width:0"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:4px">{{ ui.hdQty }}</span><input value="{{ posSharesVal }}" onChange="{{ onPosShares }}" inputMode="decimal" autocomplete="off" style="width:100%;min-height:42px;padding:0 10px;background:var(--s-bg);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:700;font-size:16px" /></label>
+<label style="display:block;min-width:0"><span style="display:block;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:4px">{{ ui.hdAvg }}</span><input value="{{ posCostVal }}" onChange="{{ onPosCost }}" inputMode="decimal" autocomplete="off" style="width:100%;min-height:42px;padding:0 10px;background:var(--s-bg);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:700;font-size:16px" /></label>
+</div>
+<div style="display:flex;gap:8px;margin-top:10px"><button onClick="{{ holdSave }}" style="min-height:42px;padding:0 14px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.posSave }}</button><button onClick="{{ holdRemove }}" style="min-height:42px;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.posRemove }}</button><button onClick="{{ holdCancel }}" style="min-height:42px;padding:0 10px;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaCancel }}</button></div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</section>
+<div style="padding:12px 16px 2px;font-family:var(--font-heading);font-weight:800;font-size:16px">{{ ui.watchlist }}</div>
 <div style="display:flex;padding:8px 16px;border-bottom:1px solid var(--s-rule);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">
 <div style="flex:1">{{ ui.ticker }}</div><div style="width:66px;text-align:right">{{ ui.last }}</div><div style="width:56px;text-align:right">{{ ui.chg }}</div><div style="width:62px;text-align:right">1D</div>
 </div>
-<div data-m="smooth" style="flex:1;overflow-y:auto">
 <sc-for list="{{ follows }}" as="row" hint-placeholder-count="3">
 <article data-m="rise" role="button" tabIndex="0" onClick="{{ row.open }}" onKeyDown="{{ row.keyOpen }}" style="display:block;width:100%;padding:12px 16px;border-bottom:1px solid var(--s-rule);cursor:pointer">
 <div style="display:flex;align-items:baseline">
@@ -653,7 +706,7 @@ function bindShared() {
 const STORE_KEY = 'hif.dark.v2';
 // Keys that survive a reload. Transient input (passwords, codes, toasts) never persists.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','smaOn',
-  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme','liveNames','accountId'];
+  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme','liveNames','positions','profiles','accountId'];
 // hif-store.js can finish loading after this logic is evaluated. Until the saved
 // record has been read, nothing may be written, or a reload would overwrite the
 // stored session with these defaults; see restoreLate().
@@ -673,6 +726,7 @@ class Component extends DCLogic {
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
+    positions:{}, profiles:{}, posEdit:null, posShares:'', posCost:'', posTicker:'',
     liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{}, charts:{}, liveEarnDates:{} });
   componentDidMount() {
     this.startIdleWatch();
@@ -681,7 +735,7 @@ class Component extends DCLogic {
     // and headlines from the server proxy; the feed falls back to demo stories without them.
     const startLive = () => {
       this.restoreLate();
-      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.liveTickers().forEach(t => this.syncTicker(t)); if (this.state.feedTab === 'market') this.syncMarket(); this.startAutoRefresh(); }, 0);
+      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.liveTickers().forEach(t => this.syncTicker(t)); this.syncPositions(); if (this.state.feedTab === 'market') this.syncMarket(); this.startAutoRefresh(); }, 0);
     };
     if (window.HIFLive && window.HIFStore) startLive();
     else this._livePoll = setInterval(() => { if (window.HIFLive && window.HIFStore) { clearInterval(this._livePoll); startLive(); } }, 60);
@@ -707,14 +761,14 @@ class Component extends DCLogic {
   // Mirror the Supabase session into the app. A different account on this device starts
   // fresh: its own onboarding and watchlist, not the previous user's.
   applyAuthSession(sess) {
-    if (!sess) { this._wlUser = null; this._wlReady = false; this.setState({ session:null, locked:false, serverPlan:null, devicePush:'unavailable' }); return; }
+    if (!sess) { this._wlUser = null; this._wlReady = false; this._hdReady = false; this.setState({ holdServer:false, session:null, locked:false, serverPlan:null, devicePush:'unavailable' }); return; }
     const fresh = this.state.accountId !== sess.userId;
     this.setState(Object.assign({
       session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
       accountId: sess.userId, authPw:'', authPw2:'', authSent:'', authErr:''
-    }, fresh ? { onboarded:false, follows:[], selected:'', screen:'feed', liveNames:{} } : {}));
+    }, fresh ? { onboarded:false, follows:[], selected:'', screen:'feed', liveNames:{}, positions:{}, posEdit:null } : {}));
     this.loadPlan();
-    if (this._wlUser !== sess.userId) { this._wlUser = sess.userId; this.loadServerWatchlist(); }
+    if (this._wlUser !== sess.userId) { this._wlUser = sess.userId; this.loadServerWatchlist(); this.loadServerHoldings(); }
     this.refreshPush();
   }
   // Push alerts on this device (real accounts only; hidden until the server has a key).
@@ -756,6 +810,61 @@ class Component extends DCLogic {
     clearTimeout(this._wlT);
     this._wlT = setTimeout(() => window.HIFPush.syncWatchlist(this.state.follows, this.state.push).catch(() => {}), 1500);
   }
+  // Positions follow the same rule as the watchlist: the server copy wins on sign-in,
+  // then local edits go up. Without the holdings table (supabase/holdings.sql) both
+  // calls fail quietly and positions stay on this device.
+  loadServerHoldings() {
+    const P = window.HIFPush; if (!P || !P.loadHoldings) return;
+    this._hdReady = false;
+    P.loadHoldings().then(rows => {
+      if (rows && rows.length) {
+        const positions = {};
+        rows.forEach(r => { positions[r.ticker] = { shares: Number(r.shares), cost: r.avg_price == null ? null : String(r.avg_price) }; });
+        this.setState({ positions });
+      }
+      this._hdReady = !!rows; this._hdSig = ''; this.setState({ holdServer: !!rows }); this.queueHoldingsSync();
+    }).catch(() => {});
+  }
+  queueHoldingsSync() {
+    const s = this.state;
+    if (!this._hdReady || !s.authLive || !s.session || !window.HIFPush || !window.HIFPush.syncHoldings) return;
+    const sig = JSON.stringify(s.positions || {});
+    if (sig === this._hdSig) return;
+    this._hdSig = sig;
+    clearTimeout(this._hdT);
+    this._hdT = setTimeout(() => window.HIFPush.syncHoldings(this.state.positions).catch(() => {}), 1500);
+  }
+  // Positions on tickers that aren't on the watchlist still need a price, and every
+  // position needs its company name and listing currency.
+  syncPositions() {
+    const L = window.HIFLive; if (!L) return;
+    const held = Object.keys(this.state.positions || {});
+    const keep = (t, q) => this.setState(st => ({ liveQuotes: Object.assign({}, st.liveQuotes, { [t]: q }) }));
+    held.filter(t => this.liveTickers().indexOf(t) < 0).forEach(t => L.quote(t).then(q => q && keep(t, q)).catch(() => {}));
+    if (!L.profile) return;
+    const WEEK = 7 * 86400000, P = this.state.profiles || {};
+    held.filter(t => !P[t] || Date.now() - (P[t].at || 0) > WEEK).reduce((chain, t) => chain.then(() => L.profile(t).then(pr => {
+      if (pr) this.setState(st => ({ profiles: Object.assign({}, st.profiles, { [t]: Object.assign({ at: Date.now() }, pr) }) }));
+    }).catch(() => {})), Promise.resolve());
+  }
+  savePosition(ticker, remove) {
+    const u = UI[this.appLang] || {}, t = String(ticker || '').toUpperCase();
+    const shares = parseFloat(this.state.posShares), cost = parseFloat(this.state.posCost);
+    if (!remove && (!/^[A-Z0-9][A-Z0-9.\-]{0,11}$/.test(t) || !(shares > 0))) return this.flash((u.posInvalid || 'Enter a ticker and a quantity').toUpperCase());
+    this.setState(st => {
+      const p = Object.assign({}, st.positions);
+      if (remove) delete p[t];
+      else p[t] = { shares, cost: isFinite(cost) && cost >= 0 ? String(cost) : null };
+      return { positions:p, posEdit:null, posShares:'', posCost:'', posTicker:'' };
+    });
+    this.flash((remove ? (u.posCleared || 'Position removed') : (u.posSaved || 'Position saved')).toUpperCase());
+  }
+  // Quantities and prices as typed: "4,1265" (comma decimals) becomes 4.1265.
+  decimalInput(v) {
+    const t = String(v || '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
+    const i = t.indexOf('.');
+    return i < 0 ? t : t.slice(0, i + 1) + t.slice(i + 1).replace(/\./g, '');
+  }
   loadPlan() {
     window.HIFAuth.plan().then(p => {
       if (p.suspended) {
@@ -793,6 +902,7 @@ class Component extends DCLogic {
       if (document.hidden || !this.state.session) return;
       this._lastAuto = Date.now();
       this.liveTickers().forEach(t => this.syncTicker(t, true));
+      this.syncPositions();
       if (this.state.feedTab === 'market') this.syncMarket();
     };
     this._auto = setInterval(tick, 5 * 60000);
@@ -858,6 +968,10 @@ class Component extends DCLogic {
   }
   componentDidUpdate() {
     this.queueWatchlistSync();
+    this.queueHoldingsSync();
+    const held = Object.keys(this.state.positions || {}).join(',');
+    if (this._held !== undefined && held !== this._held && window.HIFLive) this.syncPositions();
+    this._held = held;
     if (this.state.screen === 'detail' && this.state.selected) { this.ensureChart(this.state.selected, this.state.chartRange || '1d'); this.ensureEarnDates(this.state.selected); }
     // A ticker added from search, onboarding or the ticker page gets its live data now.
     if (this._synced && window.HIFLive) {
@@ -1234,6 +1348,14 @@ class Component extends DCLogic {
     });
     const stock = s.selected ? rec(s.selected) : FOLLOWS.NVDA;
     const following = s.follows.includes(stock.ticker);
+    // Positions (../shared/hif-insight.js holdings()), each in its listing's own currency.
+    const IN = window.HIFInsight, posMap = s.positions || {}, PR = s.profiles || {};
+    const HB = IN && IN.holdings ? IN.holdings(posMap, t => {
+      const r = rec(t) || {}, q = (s.liveQuotes || {})[t] || {}, pr = PR[t] || {}, ch = (s.charts || {})[t + ':1d'];
+      return { price: Number.isFinite(q.last) ? q.last : r.price, move: Number.isFinite(q.dp) ? q.dp : r.move,
+        name: pr.name || (r.name !== t ? r.name : ''), currency: pr.currency || (ch && ch.currency) || 'USD' };
+    }) : { rows:[], totals:[], empty:true };
+    const holdAdding = s.posEdit === '__new';
     const am = /^\s*(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*$/.exec(String(stock.analystDetail || ''));
     const aTot = am ? ((+am[1] + +am[2] + +am[3]) || 1) : 1;
     const analystBar = am ? [am[1], am[2], am[3]].map(v => (v / aTot * 100).toFixed(1) + '%') : ['0%','0%','0%'];
@@ -1457,6 +1579,24 @@ class Component extends DCLogic {
       }); }),
       atCap: isFree && s.follows.length >= 3,
       capLabel: isFree ? s.follows.length + ' / 3' : s.follows.length + ' / ∞',
+      holdRows: HB.rows.map(r => Object.assign({}, r, {
+        plUp: !r.plDown, moveUp: !r.moveDown, showName: !!r.name && r.name !== r.ticker,
+        editing: s.posEdit === r.ticker, editLabel: (u.posEdit || 'Edit') + ' ' + r.ticker,
+        edit: () => this.setState({ posEdit: s.posEdit === r.ticker ? null : r.ticker, posShares:String(r.shares), posCost: r.avg == null ? '' : String(r.avg) })
+      })),
+      holdTotals: HB.totals.map(t => Object.assign({}, t, { plUp: !t.plDown, dayUp: !t.dayDown, label: (u.holdTotal || 'Total') + ' · ' + t.currency })),
+      hasHold: !HB.empty, holdEmpty: HB.empty && !holdAdding, holdAdding,
+      holdCount: HB.rows.length ? String(HB.rows.length) : '',
+      holdWhere: s.authLive && s.session && s.holdServer ? u.holdSynced : u.holdLocal,
+      posTickerVal: s.posTicker || '', posSharesVal: s.posShares || '', posCostVal: s.posCost || '',
+      onPosTicker: ev => this.setState({ posTicker: String(ev.target.value || '').toUpperCase().replace(/[^A-Z0-9.\-]/g, '').slice(0, 12) }),
+      onPosShares: ev => this.setState({ posShares: this.decimalInput(ev.target.value) }),
+      onPosCost: ev => this.setState({ posCost: this.decimalInput(ev.target.value) }),
+      holdAdd: () => this.setState({ posEdit: holdAdding ? null : '__new', posShares:'', posCost:'', posTicker: (s.follows || []).filter(t => !posMap[t])[0] || '' }),
+      holdSave: () => this.savePosition(holdAdding ? s.posTicker : s.posEdit),
+      holdRemove: () => this.savePosition(s.posEdit, true),
+      holdCancel: () => this.setState({ posEdit:null }),
+      holdKey: ev => { if (ev.key === 'Enter') this.savePosition(holdAdding ? s.posTicker : s.posEdit); else if (ev.key === 'Escape') this.setState({ posEdit:null }); },
       capWarn: isFree && s.follows.length >= 3, capOk: !(isFree && s.follows.length >= 3),
       intervalLabel: isFree ? '24h' : '30m',
       query: s.query,

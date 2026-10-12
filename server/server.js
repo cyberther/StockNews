@@ -417,7 +417,7 @@ const ALLOWED = {
 // /api/finnhub?path=/quote&symbol=… ; these map that onto the kinds above.
 const PATH_KINDS = {
   '/quote': 'quote', '/company-news': 'news', '/stock/recommendation': 'reco',
-  '/stock/earnings': 'earnings', '/search': 'search', '/chart': 'chart'
+  '/stock/earnings': 'earnings', '/search': 'search', '/chart': 'chart', '/stock/profile2': 'profile'
 };
 // Price history comes from Yahoo's public chart endpoint (Finnhub's candles are
 // not on the free tier). Range -> bar interval, same table as the Netlify function.
