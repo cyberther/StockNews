@@ -678,7 +678,7 @@ class Component extends DCLogic {
     // and headlines from the server proxy; the feed falls back to demo stories without them.
     const startLive = () => {
       this.restoreLate();
-      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.liveTickers().forEach(t => this.syncTicker(t)); if (this.state.feedTab === 'market') this.syncMarket(); }, 0);
+      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.liveTickers().forEach(t => this.syncTicker(t)); if (this.state.feedTab === 'market') this.syncMarket(); this.startAutoRefresh(); }, 0);
     };
     if (window.HIFLive && window.HIFStore) startLive();
     else this._livePoll = setInterval(() => { if (window.HIFLive && window.HIFStore) { clearInterval(this._livePoll); startLive(); } }, 60);
@@ -738,7 +738,26 @@ class Component extends DCLogic {
     const keep = (k, v) => this.setState(st => ({ [k]: Object.assign({}, st[k], { [t]: v }) }));
     L.quote(t).then(q => q && keep('liveQuotes', q)).catch(() => {});
     if (!FOLLOWS[t] && !light) L.recommendation(t).then(r => r && keep('liveRecs', r)).catch(() => {});
-    L.news(t, null, 8).then(n => n && keep('liveNews', n)).catch(() => {});
+    L.news(t, null, 8).then(n => { if (n) { keep('liveNews', n); this.setState({ lastScan: Date.now() }); } }).catch(() => {});
+  }
+  // Keeps the open app current: every 5 minutes, and when the tab comes back into view
+  // after a minute or more away. Hidden tabs don't poll, and the adapter's caches
+  // (quotes 60s, news 5 min) mean each round only re-fetches what has expired.
+  startAutoRefresh() {
+    this.stopAutoRefresh();
+    const tick = () => {
+      if (document.hidden || !this.state.session) return;
+      this._lastAuto = Date.now();
+      this.liveTickers().forEach(t => this.syncTicker(t, true));
+      if (this.state.feedTab === 'market') this.syncMarket();
+    };
+    this._auto = setInterval(tick, 5 * 60000);
+    this._onVis = () => { if (!document.hidden && Date.now() - (this._lastAuto || 0) > 60000) tick(); };
+    document.addEventListener('visibilitychange', this._onVis);
+  }
+  stopAutoRefresh() {
+    clearInterval(this._auto);
+    if (this._onVis) document.removeEventListener('visibilitychange', this._onVis);
   }
   // The Market tab's headlines: the ten largest names, independent of the watchlist.
   syncMarket() {
@@ -795,7 +814,7 @@ class Component extends DCLogic {
     }
     this.persist();
   }
-  componentWillUnmount() { clearInterval(this._authPoll); this._synced = null; this.stopIdleWatch(); clearTimeout(this._t); clearTimeout(this._search); clearInterval(this._poll); clearInterval(this._livePoll); }
+  componentWillUnmount() { this.stopAutoRefresh(); clearInterval(this._authPoll); this._synced = null; this.stopIdleWatch(); clearTimeout(this._t); clearTimeout(this._search); clearInterval(this._poll); clearInterval(this._livePoll); }
   // Returns true once the saved record has been read; restores it if the store
   // loaded only after the initial state was built.
   restoreLate() {
@@ -1362,7 +1381,7 @@ class Component extends DCLogic {
       back: () => this.go(s.prev || 'feed'),
       upgrade: () => { if (s.authLive) return this.flash((u.payComing || 'Payments are coming soon').toUpperCase()); this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
       tabs: [this.tab('feed',u.tabFeed), this.tab('watchlist',u.tabList), this.tab('search',u.tabAdd), this.tab('more',u.tabMore), this.tab('account',u.tabYou)],
-      scanLabel: isFree ? u.delayLabel : u.lastScan,
+      scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '—'),
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
       setFeedMarket: () => { this.setState({ feedTab:'market' }); this.syncMarket(); },
       feedFollowingOn: s.feedTab === 'following', feedFollowingOff: s.feedTab !== 'following',
