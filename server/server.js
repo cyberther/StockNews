@@ -13,7 +13,8 @@
 // Start: npm install && npm start   (reads ./.env, or use systemd EnvironmentFile)
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
-import { createHash } from 'node:crypto';
+import { createHash, timingSafeEqual } from 'node:crypto';
+import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -63,6 +64,26 @@ app.set('trust proxy', TRUST_PROXY);
 app.set('query parser', 'simple');
 
 const SUPABASE_ORIGIN = new URL(SUPABASE_URL).origin;
+
+// ---- operational counters ---------------------------------------------
+// Read by the admin process over a loopback-only listener (see the bottom of
+// this file). Counts only — no user ids, tokens, IPs or error details.
+const stats = {
+  startedAt: Date.now(),
+  requests: { total: 0, s2xx: 0, s3xx: 0, s4xx: 0, s5xx: 0 },
+  rateLimited: {},
+  errors: { total: 0, recent: [] },
+  finnhub: { upstream: 0, upstreamErrors: 0, cacheHits: 0, coalesced: 0, recent: [] },
+  blocked: { suspended: 0, revoked: 0 }
+};
+app.use((_req, res, next) => {
+  res.on('finish', () => {
+    stats.requests.total++;
+    const k = 's' + String(res.statusCode)[0] + 'xx';
+    if (k in stats.requests) stats.requests[k]++;
+  });
+  next();
+});
 
 // ---- headers ----------------------------------------------------------
 // One CSP for the whole app. connect-src has to include Supabase because
@@ -129,6 +150,7 @@ function limit(name, perMinute, burst) {
     b.tokens = Math.min(capacity, b.tokens + (now - b.at) * refill);
     b.at = now; b.seen = now;
     if (b.tokens < 1) {
+      stats.rateLimited[name] = (stats.rateLimited[name] || 0) + 1;
       res.setHeader('Retry-After', Math.ceil((1 - b.tokens) / refill / 1000));
       return res.status(429).json({ error: 'rate_limited' });
     }
@@ -166,6 +188,9 @@ app.use('/api', (err, _req, res, _next) => {
 let errSeq = 0;
 function fail(res, status, code, detail) {
   const ref = (++errSeq).toString(36);
+  stats.errors.total++;
+  stats.errors.recent.unshift({ at: Date.now(), code, status, ref });
+  stats.errors.recent.length = Math.min(stats.errors.recent.length, 20);
   if (detail) console.error(`[${new Date().toISOString()}] ${code} ref=${ref}:`, String(detail).slice(0, 300));
   res.status(status).json({ error: code, ref });
 }
@@ -206,18 +231,67 @@ function clientFor(token) {
   });
 }
 
+// Issued-at of an access token Supabase has already verified (decoding only).
+function tokenIat(token) {
+  try { return Number(JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8')).iat) || 0; }
+  catch { return 0; }
+}
+
+// account_status is written only by the admin process. A suspended account, or
+// a token issued before an admin forced a sign-out, is refused here. Because of
+// the 30 s verify memo, either takes effect within 30 seconds.
+async function accountBlock(db, user, token) {
+  const { data, error } = await db.from('account_status').select('suspended, revoked_before, plan').eq('user_id', user.id).maybeSingle();
+  // Before schema.sql's admin section has been applied the table does not exist;
+  // nobody can be suspended yet, so carry on. Any other failure still blocks.
+  if (error && (error.code === 'PGRST205' || error.code === '42P01')) return { account: { plan: 'free' } };
+  if (error) return { status: 503, code: 'account_check_failed', detail: error.message };
+  if (data?.suspended) { stats.blocked.suspended++; return { status: 403, code: 'account_suspended' }; }
+  if (data?.revoked_before && tokenIat(token) * 1000 < Date.parse(data.revoked_before)) { stats.blocked.revoked++; return { status: 401, code: 'session_revoked' }; }
+  return { account: { plan: data?.plan || 'free' } };
+}
+
 async function requireUser(req, res) {
   const token = bearer(req);
   if (!token) { res.status(401).json({ error: 'no_token' }); return null; }
   const key = createHash('sha256').update(token).digest('hex');
   const hit = verified.get(key);
-  if (hit && Date.now() - hit.at < VERIFY_TTL) return { db: clientFor(token), user: hit.user };
+  if (hit && Date.now() - hit.at < VERIFY_TTL) return { db: clientFor(token), user: hit.user, account: hit.account };
   const db = clientFor(token);
   const { data, error } = await db.auth.getUser();
   if (error || !data?.user) { res.status(401).json({ error: 'bad_token' }); return null; }
-  verified.set(key, { at: Date.now(), user: data.user });
-  return { db, user: data.user };
+  const check = await accountBlock(db, data.user, token);
+  if (!check.account) {
+    if (check.detail) fail(res, check.status, check.code, check.detail);
+    else res.status(check.status).json({ error: check.code });
+    return null;
+  }
+  verified.set(key, { at: Date.now(), user: data.user, account: check.account });
+  return { db, user: data.user, account: check.account };
 }
+
+// The server-owned plan. user_settings.plan is only the client's view toggle.
+app.get('/api/account', limit('account_read', 60), async (req, res) => {
+  const ctx = await requireUser(req, res); if (!ctx) return;
+  res.json({ plan: ctx.account.plan, email: ctx.user.email || null });
+});
+
+// ---- editable content -------------------------------------------------
+// Written by the admin process, read here with the anon key (the table is
+// public by policy). Cached for 30 s; on any failure the client keeps the copy
+// built into the page, so content is an enhancement, never a dependency.
+const anonDb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+let contentCache = { at: 0, body: null };
+
+app.get('/api/content', limit('content', 120, 30), async (_req, res) => {
+  if (contentCache.body && Date.now() - contentCache.at < 30_000) return res.json(contentCache.body);
+  const { data, error } = await anonDb.from('site_content').select('key, value');
+  if (error) return fail(res, 503, 'content_unavailable', error.message);
+  const body = {};
+  for (const r of data) body[r.key] = r.value;
+  contentCache = { at: Date.now(), body };
+  res.json(body);
+});
 
 // ---- per-user settings ------------------------------------------------
 // The client is free to keep its own UI state, but only these keys are ever
@@ -322,8 +396,18 @@ const ALLOWED = {
   candle:   { path: 'stock/candle',           params: ['symbol', 'resolution', 'from', 'to'] },
   news:     { path: 'company-news',           params: ['symbol', 'from', 'to'] },
   earnings: { path: 'stock/earnings',         params: ['symbol'] },
-  reco:     { path: 'stock/recommendation',   params: ['symbol'] }
+  reco:     { path: 'stock/recommendation',   params: ['symbol'] },
+  search:   { path: 'search',                 params: ['q'] }
 };
+// The shared front-end (templates/shared/hif-live.js) calls the Netlify-style
+// /api/finnhub?path=/quote&symbol=… ; these map that onto the kinds above.
+const PATH_KINDS = {
+  '/quote': 'quote', '/company-news': 'news', '/stock/recommendation': 'reco',
+  '/stock/earnings': 'earnings', '/search': 'search', '/chart': 'chart'
+};
+// Price history comes from Yahoo's public chart endpoint (Finnhub's candles are
+// not on the free tier). Range -> bar interval, same table as the Netlify function.
+const CHART_RANGES = { '1d': '5m', '5d': '15m', '1mo': '60m', '6mo': '1d', ytd: '1d', '1y': '1d', '5y': '1wk' };
 const SYMBOL_RE = /^[A-Z0-9][A-Z0-9.\-]{0,11}$/;
 const RESOLUTIONS = new Set(['1', '5', '15', '30', '60', 'D', 'W', 'M']);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -337,10 +421,15 @@ function validateUpstream(kind, query) {
     const raw = query[name];
     if (raw === undefined) {
       if (name === 'symbol') return { error: 'symbol_required' };
+      if (name === 'q') return { error: 'q_required' };
       continue;
     }
     if (typeof raw !== 'string') return { error: 'bad_' + name };
-    if (name === 'symbol') {
+    if (name === 'q') {
+      const q = raw.trim();
+      if (!q || q.length > 64 || /[\u0000-\u001f]/.test(q)) return { error: 'bad_q' };
+      out.set('q', q);
+    } else if (name === 'symbol') {
       const sym = raw.toUpperCase();
       if (!SYMBOL_RE.test(sym)) return { error: 'bad_symbol' };
       out.set('symbol', sym);
@@ -376,44 +465,71 @@ function cacheSet(key, body) {
 // symbol collapses into a single call instead of N.
 const inflight = new Map();
 
-app.get('/api/finnhub/:kind', limit('finnhub', 60, 20), async (req, res) => {
-  if (!FINNHUB_TOKEN) return res.status(503).json({ error: 'no_token_configured' });
-  const v = validateUpstream(req.params.kind, req.query);
-  if (v.error) return res.status(v.error === 'unknown_endpoint' ? 404 : 400).json({ error: v.error });
+// Yahoo chart, validated and cached like the Finnhub calls. No token involved.
+function validateChart(query) {
+  const sym = typeof query.symbol === 'string' ? query.symbol.toUpperCase() : '';
+  const range = typeof query.range === 'string' ? query.range : '6mo';
+  if (!SYMBOL_RE.test(sym)) return { error: 'bad_symbol' };
+  if (!CHART_RANGES[range]) return { error: 'bad_range' };
+  const params = new URLSearchParams({ range, interval: CHART_RANGES[range], includePrePost: 'false' });
+  return { url: `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?${params}`, key: 'chart?' + sym + '&' + range };
+}
 
-  const hit = cache.get(v.key);
-  if (hit && Date.now() - hit.at < TTL) return res.json(hit.body);
+async function proxyMarket(kind, query, res) {
+  let key, upstreamUrl, headers = { accept: 'application/json' };
+  if (kind === 'chart') {
+    const c = validateChart(query);
+    if (c.error) return res.status(400).json({ error: c.error });
+    key = c.key; upstreamUrl = c.url; headers['user-agent'] = 'Mozilla/5.0';
+  } else {
+    if (!FINNHUB_TOKEN) return res.status(503).json({ error: 'no_token_configured' });
+    const v = validateUpstream(kind, query);
+    if (v.error) return res.status(v.error === 'unknown_endpoint' ? 404 : 400).json({ error: v.error });
+    const params = new URLSearchParams(v.params);
+    params.set('token', FINNHUB_TOKEN);
+    key = v.key; upstreamUrl = `https://finnhub.io/api/v1/${v.path}?${params}`;
+  }
 
-  if (inflight.has(v.key)) {
-    try { return res.json(await inflight.get(v.key)); }
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.at < TTL) { stats.finnhub.cacheHits++; return res.json(hit.body); }
+
+  if (inflight.has(key)) {
+    stats.finnhub.coalesced++;
+    try { return res.json(await inflight.get(key)); }
     catch { return fail(res, 504, 'upstream_unreachable'); }
   }
 
-  const params = new URLSearchParams(v.params);
-  params.set('token', FINNHUB_TOKEN);
+  stats.finnhub.upstream++;
+  stats.finnhub.recent.push(Date.now());
+  if (stats.finnhub.recent.length > 600) stats.finnhub.recent.splice(0, stats.finnhub.recent.length - 600);
   const job = (async () => {
-    const r = await fetch(`https://finnhub.io/api/v1/${v.path}?${params}`, {
-      signal: AbortSignal.timeout(8000),
-      headers: { accept: 'application/json' }
-    });
+    const r = await fetch(upstreamUrl, { signal: AbortSignal.timeout(8000), headers });
     if (!r.ok) throw new Error('upstream_' + r.status);
     const type = String(r.headers.get('content-type') || '');
     if (!type.includes('application/json')) throw new Error('upstream_not_json');
     const body = await r.json();
-    cacheSet(v.key, body);
+    cacheSet(key, body);
     return body;
   })();
-  inflight.set(v.key, job);
+  inflight.set(key, job);
   try {
     res.json(await job);
   } catch (e) {
+    stats.finnhub.upstreamErrors++;
     // The upstream status is interesting to us, not to the client.
     const upstream = /^upstream_(\d{3})$/.exec(e.message);
     if (upstream) return fail(res, 502, 'upstream_error', e.message);
     return fail(res, 504, 'upstream_unreachable', e.message);
   } finally {
-    inflight.delete(v.key);
+    inflight.delete(key);
   }
+}
+
+app.get('/api/finnhub/:kind', limit('finnhub', 60, 20), (req, res) => proxyMarket(req.params.kind, req.query, res));
+app.get('/api/finnhub', limit('finnhub', 60, 20), (req, res) => {
+  const kind = Object.hasOwn(PATH_KINDS, req.query.path) ? PATH_KINDS[req.query.path] : null;
+  if (!kind) return res.status(400).json({ error: 'path_not_allowed' });
+  proxyMarket(kind, req.query, res);
 });
 
 app.use('/api', (_req, res) => res.status(404).json({ error: 'not_found' }));
@@ -453,8 +569,44 @@ server.headersTimeout = 15_000;
 server.requestTimeout = 20_000;
 server.keepAliveTimeout = 5_000;
 
+// ---- stats listener ---------------------------------------------------
+// A second, loopback-only port for the admin process. It is not routed by the
+// reverse proxy (which only knows :PORT), and still demands a shared token.
+const STATS_TOKEN = process.env.STATS_TOKEN || '';
+const STATS_PORT = Number(process.env.STATS_PORT || 8082);
+let statsServer = null;
+if (STATS_TOKEN.length >= 32) {
+  const want = createHash('sha256').update('Bearer ' + STATS_TOKEN).digest();
+  statsServer = createServer((req, res) => {
+    const got = createHash('sha256').update(String(req.headers.authorization || '')).digest();
+    if (req.method !== 'GET' || req.url !== '/stats' || !timingSafeEqual(want, got)) { res.writeHead(404).end(); return; }
+    const now = Date.now();
+    res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+    res.end(JSON.stringify({
+      uptimeS: Math.round((now - stats.startedAt) / 1000),
+      rssMb: Math.round(process.memoryUsage().rss / 1048576),
+      node: process.version,
+      production: PROD,
+      liveData: !!FINNHUB_TOKEN,
+      requests: stats.requests,
+      rateLimited: stats.rateLimited,
+      errors: stats.errors,
+      blocked: stats.blocked,
+      finnhub: {
+        upstream: stats.finnhub.upstream, upstreamErrors: stats.finnhub.upstreamErrors,
+        cacheHits: stats.finnhub.cacheHits, coalesced: stats.finnhub.coalesced,
+        lastMinute: stats.finnhub.recent.filter(t => now - t < 60_000).length,
+        quotaPerMinute: 60, cacheSize: cache.size
+      }
+    }));
+  });
+  statsServer.listen(STATS_PORT, '127.0.0.1');
+} else if (STATS_TOKEN) {
+  console.error('STATS_TOKEN is shorter than 32 characters; the stats listener is off.');
+}
+
 for (const sig of ['SIGTERM', 'SIGINT']) {
-  process.on(sig, () => { server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
+  process.on(sig, () => { if (statsServer) statsServer.close(); server.close(() => process.exit(0)); setTimeout(() => process.exit(0), 5000).unref(); });
 }
 // Never let an unexpected rejection take the process down silently mid-request.
 process.on('unhandledRejection', e => console.error('unhandledRejection:', e && e.message));

@@ -53,7 +53,7 @@
 </div>
 <div style="margin-top:auto;border-top:1px solid var(--s-rule);display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--s-rule)">
 <div style="background:var(--s-bg);padding:12px 14px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.interval }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;margin-top:2px">{{ intervalLabel }}</div></div>
-<div style="background:var(--s-bg);padding:12px 14px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.sources }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;margin-top:2px">840</div></div>
+<div style="background:var(--s-bg);padding:12px 14px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.sources }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;margin-top:2px">{{ sourcesLabel }}</div></div>
 </div>
 <div style="padding:12px 14px;border-top:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:13px">{{ accountName }}</div>
@@ -174,6 +174,9 @@
 </div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:20px;line-height:1.2;letter-spacing:-0.02em;margin-top:6px;color:{{ whyTone }}">{{ whyLabel }}</div>
 <div style="font-size:14px;line-height:1.45;margin-top:6px;max-width:56ch;text-wrap:pretty">{{ whyDetail }}</div>
+<sc-if value="{{ whyHasLink }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ openWhy }}" style-hover="color:var(--s-ink)" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 0;min-height:32px;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.04em;cursor:pointer">{{ whyLinkLabel }}<span aria-hidden="true">↗</span></button>
+</sc-if>
 <div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ whyNote }}</div>
 </div>
 </sc-if>
@@ -201,7 +204,7 @@
 <sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
 <article role="button" tabIndex="0" onClick="{{ n.open }}" onKeyDown="{{ n.keyOpen }}" style-hover="background:var(--s-panel)" style="display:grid;grid-template-columns:96px 1fr;gap:16px;padding:14px 28px;border-top:1px solid var(--s-rule);align-items:baseline;cursor:pointer">
 <span style="font-size:11px;letter-spacing:0.06em;color:var(--s-mute)">{{ n.stamp }}</span>
-<div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.25;text-wrap:pretty">{{ n.headline }}</div><div style="font-size:11px;color:var(--s-mute);margin-top:3px">{{ n.source }}</div></div>
+<div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.25;text-wrap:pretty">{{ n.headline }}</div><div style="font-size:11px;color:var(--s-mute);margin-top:3px">{{ n.source }}<sc-if value="{{ n.hasUrl }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent);margin-left:6px" aria-hidden="true">↗</span></sc-if></div></div>
 </article>
 </sc-for>
 <sc-if value="{{ noStockNews }}" hint-placeholder-val="{{ false }}">
@@ -1037,21 +1040,31 @@ class Component extends DCLogic {
     window.addEventListener('resize', this._onResize);
     this._onKey = e => this.onKey(e);
     window.addEventListener('keydown', this._onKey);
+    this._onContent = () => this.forceUpdate();
+    window.addEventListener('hif:content', this._onContent);
     this._onResize();
     // The shared scripts load independently; render only once every one renderVals needs is in.
     if (!this.sharedReady()) { this._poll = setInterval(() => { if (this.sharedReady()) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
+    this._synced = (this.state.follows || []).slice();
     this.syncLive();
     this.syncDetail(this.state.selected);
     this.state.follows.forEach(t => this.syncSpark(t));
   }
   componentDidUpdate(prevProps) {
     if (prevProps && prevProps.finnhubToken !== this.props.finnhubToken) this.syncLive();
+    // Sign-up, onboarding and "add to watchlist" all change follows; fetch live
+    // quotes and news for whatever was just added, or the feed stays on demo data.
+    // Tracked here rather than via prevState, which this runtime does not pass.
+    const synced = this._synced || [];
+    const added = (this.state.follows || []).filter(t => synced.indexOf(t) < 0);
+    this._synced = (this.state.follows || []).slice();
+    if (added.length) this.syncLive(added);
     const el = this.plotRef && this.plotRef.current;
     if (el && this._ro && this._roEl !== el) { if (this._roEl) this._ro.unobserve(this._roEl); this._ro.observe(el); this._roEl = el; }
     this.measureChart();
     this.persist();
   }
-  componentWillUnmount() { if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); window.removeEventListener('keydown', this._onKey); clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); this.stopIdleWatch(); }
+  componentWillUnmount() { if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); window.removeEventListener('keydown', this._onKey); window.removeEventListener('hif:content', this._onContent); clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); this.stopIdleWatch(); }
   get token() { return (this.props.finnhubToken || '').trim(); }
   // Manual / on-open only: the adapter caches (quotes 60s, news 5m, analysts 15m),
   // so an extra call on screen open is usually free.
@@ -1110,7 +1123,11 @@ class Component extends DCLogic {
       if (opened) opened.opener = null;
       return;
     }
-    if (item && item.ticker) this.openTicker(item.ticker);
+    if (!item || !item.ticker) return;
+    // Demo stories carry no source article. On their own ticker page, re-opening
+    // the ticker looks like a dead click, so say why there is nothing to open.
+    if (this.state.screen === 'detail' && this.state.selected === item.ticker) return this.flash(this.copy.demoNoSource || 'Demo story · no source article');
+    this.openTicker(item.ticker);
   }
   openTicker(ticker) {
     this.setState({ selected:ticker, screen:'detail', prev:this.state.screen });
@@ -1365,8 +1382,13 @@ class Component extends DCLogic {
     const data = this.state.charts[stock.ticker + ':' + range];
     const livePts = (data && data.points) || [];
     const rawPoints = livePts.length > 1 ? livePts : this.seriesFor(stock.ticker, range, stock.price, stock.move, this.sampleCap());
-    const points = this.downsample(rawPoints, this.sampleCap());
+    // Thin to the plot width for drawing, but keep the indices: indicators below are
+    // computed on every bar and sampled at these same positions.
+    const keep = window.HIFChart.downsampleIndex(rawPoints.length, this.sampleCap());
+    const points = keep.map(i => rawPoints[i]);
     const values = points.map(p => p.close);
+    const rawValues = rawPoints.map(p => p.close);
+    const atKeep = arr => keep.map(i => arr[i]);
     const w = Math.max(220, Math.round(this.state.chartW || 640)), h = 250, loading = this.state.detailLoading;
     const perf = values.length > 1 ? ((values[values.length-1] / values[0] - 1) * 100) : 0;
     const pickRange = r => {
@@ -1388,11 +1410,11 @@ class Component extends DCLogic {
           loading ? null : React.createElement('div', { style:{ fontSize:10, letterSpacing:'0.1em', color:this.pal.mute } },
             this.state.liveStatus === 'live' ? 'LIVE FEED CONNECTED' : 'SHOWING DEMO PRICES AND HEADLINES')));
     }
-    // Fixed 20/50-sample periods; the shorter windows only appear when there is genuinely enough data.
-    const p20 = values.length >= 30 ? 20 : null;
-    const p50 = values.length >= 70 ? 50 : null;
-    const sma20 = p20 ? this.movingAverage(values, p20) : values.map(() => null);
-    const sma50 = p50 ? this.movingAverage(values, p50) : values.map(() => null);
+    // Periods are in bars of the loaded series (days from 6M up), not in thinned samples.
+    const p20 = rawValues.length >= 30 ? 20 : null;
+    const p50 = rawValues.length >= 70 ? 50 : null;
+    const sma20 = p20 ? atKeep(this.movingAverage(rawValues, p20)) : values.map(() => null);
+    const sma50 = p50 ? atKeep(this.movingAverage(rawValues, p50)) : values.map(() => null);
     const smaOn = ov.sma && !!p20;
     const scale = smaOn ? values.concat(sma20.filter(v => v != null), sma50.filter(v => v != null)) : values;
     const min = Math.min(...scale), max = Math.max(...scale), spread = Math.max(max - min, 0.01);
@@ -1402,8 +1424,8 @@ class Component extends DCLogic {
     // Earnings read as bars against the time axis, and only where a quarter boundary is actually visible.
     const barRange = window.HIFChart.supportsEarningsBars(range);
     const markers = (ov.earn && barRange) ? this.earningsMarks(stock.ticker, points) : [];
-    const rsiP = 14, rsiOk = values.length > rsiP + 4;
-    const rsiS = rsiOk ? this.rsiSeries(values, rsiP) : values.map(() => null);
+    const rsiP = 14, rsiOk = rawValues.length > rsiP + 4;
+    const rsiS = rsiOk ? atKeep(this.rsiSeries(rawValues, rsiP)) : values.map(() => null);
     const rsiNow = rsiS.filter(v => v != null).slice(-1)[0];
     const last = values[values.length-1], m20 = sma20[sma20.length-1], m50 = sma50[sma50.length-1];
     const signal = (smaOn && m20 && m50) ? (last > m20 && m20 > m50 ? 'BULLISH' : last < m20 && m20 < m50 ? 'BEARISH' : 'MIXED') : 'BUILDING';
@@ -1617,7 +1639,7 @@ class Component extends DCLogic {
     const peerList = ((H.SECTORS || {})[sector] || []).filter(t => t !== stock.ticker);
     const peers = peerList.map(t => ({ ticker:t, move:(rec(t) || {}).move })).filter(p => p.move);
     const dayNews = ((live && LN[stock.ticker]) ? LN[stock.ticker] : NEWS.filter(n => n.ticker === stock.ticker))
-      .slice(0, 3).map(n => ({ headline: typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN, source:n.source }));
+      .slice(0, 3).map(n => ({ headline: typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN, source:n.source, url:n.url || '' }));
     const why = IN ? IN.attribute({ ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
     const whyTone = why && (why.kind === 'none' || why.kind === 'quiet') ? 'var(--s-mute)' : 'var(--color-accent)';
     const trend = window.HIFChart.seriesFor(stock.ticker, '1mo', stock.price, stock.move, 60).map(p => p.close);
@@ -1734,6 +1756,8 @@ class Component extends DCLogic {
       tabOverview: dTab === 'overview', tabNews: dTab === 'news', tabResearch: dTab === 'research',
       why, hasWhy: !!why, whyLabel: why ? why.label : '', whyDetail: why ? why.detail : '',
       whyNote: why ? (why.note || '') : '', whyTone,
+      whyHasLink: !!(why && why.url), whyLinkLabel: why && why.url ? (u.readAt || 'Read at %s').replace('%s', why.source || 'source') : '',
+      openWhy: () => { if (why && why.url) this.openNews({ url: why.url, ticker: stock.ticker }); },
       whyConf: why && why.confidence ? why.confidence.toUpperCase() + ' ' + u.whyConfidence.toUpperCase() : '',
       clashes, hasClash: !!clashes.length, noClash: !clashes.length,
       clashRows: clashes.map(c => ({ title:c.title, detail:c.detail, accent: c.tone === 'warn' ? 'var(--color-accent)' : 'var(--s-mute)' })),
@@ -1782,14 +1806,18 @@ class Component extends DCLogic {
       openAuth: () => this.setState({ authOpen:true }),
       closeAuth: () => this.setState({ authOpen:false, authErr:'' }),
       stopProp: e => e.stopPropagation(),
-      lpProof: [u.lpP1, u.lpP2, u.lpP3].map(t => { const p = String(t || '').split('|'); return { a:p[0] || '', b:p[1] || '' }; }),
-      lpFeat: (() => { const n = NEWS[0]; return { ticker:n.ticker, source:n.source, stamp:n.stamp, score:n.score, delta:n.delta, headline:n.headline[L], watch:n.watch[L] }; })(),
-      lpTickers: ['NVDA','AAPL','MSFT','TSLA','AMZN'].map(t => {
-        const f = FOLLOWS[t]; let seed = 0; for (const ch of t) seed = (seed * 31 + ch.charCodeAt(0)) % 997;
+      lpProof: [u.lpP1, H.SOURCES_COUNT != null ? String(u.lpP2 || '').replace(/\d[\d.,]*/, H.SOURCES_COUNT.toLocaleString()) : u.lpP2, u.lpP3]
+        .map(t => { const p = String(t || '').split('|'); return { a:p[0] || '', b:p[1] || '' }; }),
+      // Admin-edited featured story when one is set (H.FEATURED), else the top demo story.
+      lpFeat: (() => { const n = H.FEATURED || NEWS[0]; const loc = v => (v && (v[L] || v.EN)) || ''; return { ticker:n.ticker, source:n.source, stamp:n.stamp || '', score:n.score, delta:n.delta, headline:loc(n.headline), watch:loc(n.watch) }; })(),
+      // A configured symbol with neither demo data nor a live quote is skipped, not drawn empty.
+      lpTickers: (H.LANDING_TICKERS || ['NVDA','AAPL','MSFT','TSLA','AMZN']).filter(t => Q[t] || FOLLOWS[t]).map(t => {
+        const f = Q[t] || FOLLOWS[t]; let seed = 0; for (const ch of t) seed = (seed * 31 + ch.charCodeAt(0)) % 997;
         const pts = []; let y = f.up ? 22 : 8;
         for (let i = 0; i < 12; i++) { seed = (seed * 73 + 41) % 997; y += (f.up ? -1.6 : 1.6) + (seed / 997 - 0.5) * 7; y = Math.max(2, Math.min(26, y)); pts.push((i * 8).toFixed(0) + ',' + y.toFixed(1)); }
         return { ticker:t, price:f.price, move:f.move, pts:pts.join(' '), col: f.up ? 'var(--s-ink)' : 'var(--color-accent)' };
       }),
+      sourcesLabel: H.SOURCES_COUNT != null ? H.SOURCES_COUNT.toLocaleString() : '840',
       lpFeatures: [['lpF1t','lpF1d','M4 6h16M4 12h16M4 18h10'],['lpF2t','lpF2d','M3 5h18l-7 8v6l-4 2v-8z'],['lpF3t','lpF3d','M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'],['lpF4t','lpF4d','M4 20V10M10 20V4M16 20v-7M22 20H2']].map(r => ({ t:u[r[0]], d:u[r[1]], path:r[2] })),
       obCount: String(s.follows.length),
       obPicks: UNIVERSE.slice(0, 10).map(x => {
@@ -1942,6 +1970,7 @@ class Component extends DCLogic {
         ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, headline:n.headline, source:n.source, stamp:n.stamp, score:'', url:n.url || '' }))
         : NEWS.filter(n => n.ticker === stock.ticker).slice(0,5).map(n => Object.assign({}, n, { headline: n.headline[L] })))
         .map(n => Object.assign({}, n, {
+          hasUrl: /^https?:\/\//i.test(n.url || ''),
           open: () => this.openNews(n),
           keyOpen: event => this.activateFromKeyboard(() => this.openNews(n), event)
         })),

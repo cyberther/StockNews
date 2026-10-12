@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Heard It First — static host, Finnhub proxy and per-user settings store",
+  "description": "Heard It First — static host, Finnhub proxy, per-user settings store, and a separate loopback-only admin process",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "admin": "node admin.js",
+    "admin-cli": "node admin-cli.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

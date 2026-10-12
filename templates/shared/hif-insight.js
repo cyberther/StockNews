@@ -41,7 +41,7 @@ function attribute(input) {
     // Company news beats sector when the stock clearly outran its peers.
     const excess = peerMed == null ? mag : mag - Math.abs(peerMed);
     if (!sectorDriven || excess >= mag * 0.5) {
-      return { kind:'news', label:'Company news', detail:top.headline, source:top.source,
+      return { kind:'news', label:'Company news', detail:top.headline, source:top.source, url:top.url || '',
         confidence: excess >= mag * 0.6 ? 'high' : 'medium',
         note: peerMed == null ? '' : 'Outran the sector by ' + Math.abs(excess).toFixed(1) + ' pts.', weight:3 };
     }

@@ -91,11 +91,19 @@ function rsiSeries(values, period) {
   return out;
 }
 
-function downsample(pts, cap) {
-  if (!pts || pts.length <= cap) return pts || [];
-  const out = [], stride = (pts.length - 1) / (cap - 1);
-  for (let i = 0; i < cap; i++) out.push(pts[Math.round(i * stride)]);
+// Indices of the samples kept when thinning n points to at most cap. Indicators
+// are computed on the full series and then read at these same indices, so an
+// SMA 20 stays a 20-bar average and sits exactly on the price line it describes.
+function downsampleIndex(n, cap) {
+  if (n <= cap) return Array.from({ length: n }, (_, i) => i);
+  const out = [], stride = (n - 1) / (cap - 1);
+  for (let i = 0; i < cap; i++) out.push(Math.round(i * stride));
   return out;
+}
+
+function downsample(pts, cap) {
+  if (!pts || !pts.length) return [];
+  return downsampleIndex(pts.length, cap).map(i => pts[i]);
 }
 
 // Real earnings when the feed has them, otherwise quarters stepped back from `nextTs`.
@@ -141,5 +149,5 @@ function priceAt(ticker, secondsAgo, basePrice) {
 // Ranges wide enough for quarterly earnings bars to mean anything.
 function supportsEarningsBars(range) { return range === '6mo' || range === 'ytd' || range === '1y' || range === '5y'; }
 
-window.HIFChart = { rng, backbone, seriesFor, movingAverage, rsiSeries, downsample, earningsMarks, supportsEarningsBars, priceAt, SUB };
+window.HIFChart = { rng, backbone, seriesFor, movingAverage, rsiSeries, downsample, downsampleIndex, earningsMarks, supportsEarningsBars, priceAt, SUB };
 })();

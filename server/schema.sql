@@ -127,3 +127,132 @@ drop policy if exists "read cache" on public.quote_cache;
 -- are only possible from a privileged (service_role) context on the server.
 create policy "read cache" on public.quote_cache
   for select to authenticated using (true);
+
+-- =====================================================================
+-- Admin — used only by the separate admin process (server/admin.js),
+-- which authenticates as service_role on 127.0.0.1. The public app server
+-- never holds that key; it only reads account_status (own row) and
+-- site_content (public) through the policies below.
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- account_status — server-owned facts about an account. Users can read
+-- their own row but never write it, unlike user_settings.
+-- ---------------------------------------------------------------------
+create table if not exists public.account_status (
+  user_id          uuid primary key references auth.users on delete cascade,
+  plan             text        not null default 'free',
+  suspended        boolean     not null default false,
+  suspended_reason text,
+  -- Access tokens issued before this instant are refused by the app server.
+  revoked_before   timestamptz,
+  updated_at       timestamptz not null default now(),
+  updated_by       text,
+  constraint account_status_plan   check (plan in ('free', 'pro')),
+  constraint account_status_reason check (suspended_reason is null or length(suspended_reason) <= 200)
+);
+
+alter table public.account_status enable row level security;
+alter table public.account_status force row level security;
+revoke all on public.account_status from anon, authenticated;
+grant select on public.account_status to authenticated;
+
+drop policy if exists "read own status" on public.account_status;
+create policy "read own status" on public.account_status
+  for select to authenticated using (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------
+-- site_content — editable public content (featured story, tickers, copy).
+-- Public by nature, so anon may read it; only service_role may write.
+-- ---------------------------------------------------------------------
+create table if not exists public.site_content (
+  key        text primary key,
+  value      jsonb       not null,
+  updated_at timestamptz not null default now(),
+  updated_by text,
+  constraint site_content_key  check (key in ('featured', 'tickers', 'sources', 'copy', 'universe')),
+  constraint site_content_size check (pg_column_size(value) < 65536)
+);
+
+alter table public.site_content enable row level security;
+alter table public.site_content force row level security;
+revoke all on public.site_content from anon, authenticated;
+grant select on public.site_content to anon, authenticated;
+
+drop policy if exists "read content" on public.site_content;
+create policy "read content" on public.site_content
+  for select to anon, authenticated using (true);
+
+-- ---------------------------------------------------------------------
+-- admin_users — panel operators. Not Supabase users: separate login,
+-- scrypt password hash, TOTP secret encrypted with a key held only in the
+-- admin process environment. No grants at all outside service_role.
+-- ---------------------------------------------------------------------
+create table if not exists public.admin_users (
+  id              bigint generated always as identity primary key,
+  username        text        not null unique,
+  pw_hash         text        not null,
+  totp_secret_enc text        not null,
+  totp_last_step  bigint      not null default 0,
+  failed_count    integer     not null default 0,
+  locked_until    timestamptz,
+  disabled        boolean     not null default false,
+  created_at      timestamptz not null default now(),
+  last_login_at   timestamptz,
+  constraint admin_users_username check (username ~ '^[a-z0-9_.-]{3,32}$')
+);
+
+alter table public.admin_users enable row level security;
+alter table public.admin_users force row level security;
+revoke all on public.admin_users from anon, authenticated;
+
+-- ---------------------------------------------------------------------
+-- admin_audit — every admin action, append only. The trigger refuses
+-- updates and deletes even from service_role, so a stolen admin session
+-- cannot tidy up after itself.
+-- ---------------------------------------------------------------------
+create table if not exists public.admin_audit (
+  id         bigint generated always as identity primary key,
+  admin      text        not null,
+  action     text        not null,
+  target     text,
+  detail     jsonb,
+  ip         inet,
+  created_at timestamptz not null default now(),
+  constraint admin_audit_detail_size check (detail is null or pg_column_size(detail) < 4096)
+);
+
+create index if not exists admin_audit_time on public.admin_audit (created_at desc);
+
+alter table public.admin_audit enable row level security;
+alter table public.admin_audit force row level security;
+revoke all on public.admin_audit from anon, authenticated;
+
+create or replace function public.admin_audit_append_only() returns trigger
+  language plpgsql set search_path = '' as $$
+begin
+  raise exception 'admin_audit is append-only';
+end $$;
+
+drop trigger if exists admin_audit_no_change on public.admin_audit;
+create trigger admin_audit_no_change before update or delete on public.admin_audit
+  for each row execute function public.admin_audit_append_only();
+drop trigger if exists admin_audit_no_truncate on public.admin_audit;
+create trigger admin_audit_no_truncate before truncate on public.admin_audit
+  for each statement execute function public.admin_audit_append_only();
+
+-- ---------------------------------------------------------------------
+-- admin_revoke_sessions — ends every Supabase session for one user, so a
+-- forced sign-out also kills refresh tokens. Callable by service_role only.
+-- ---------------------------------------------------------------------
+create or replace function public.admin_revoke_sessions(target uuid) returns integer
+  language plpgsql security definer set search_path = '' as $$
+declare n integer;
+begin
+  delete from auth.sessions where user_id = target;
+  get diagnostics n = row_count;
+  return n;
+end $$;
+
+revoke all on function public.admin_revoke_sessions(uuid) from public, anon, authenticated;
+grant execute on function public.admin_revoke_sessions(uuid) to service_role;

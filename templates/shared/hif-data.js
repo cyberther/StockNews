@@ -163,7 +163,7 @@ const UI = {
     screener:'Screener', screenerNote:'Filter by news volume', noMatch:'No ticker matches', noMatchNote:'Connect a Finnhub token to search the full market beyond the demo universe.', liveReq:'Live', noData:'No data', needsLive:'Live data required', needsLiveNote:'This ticker is outside the demo dataset. Connect a Finnhub token in Tweaks to load its price, chart and stories.', filterAll:'All', filterVol:'Vol ≥ 2×', filterEarn:'Earnings ≤ 14d', filterStories:'Most stories', digests:'Digests', digestsNote:'06:30 pre-open email', broker:'Broker link', brokerNote:'Import holdings automatically',
     account:'Account', plan:'Plan', tickers:'Tickers', appLang:'App language', contentLang:'Content language',
     appLangNote:'Buttons, labels and menus appear in English.', quiet:'Quiet hours · 22:00–07:00', manageSub:'Manage subscription', signOut:'Sign out',
-    upgradeBtn:'Upgrade · $7/mo', managePro:'Manage Pro', goPro:'Go Pro', removed:'Removed', noNews:'No stories in the last 24h',
+    upgradeBtn:'Upgrade · $7/mo', managePro:'Manage Pro', goPro:'Go Pro', removed:'Removed', noNews:'No stories in the last 24h', readAt:'Read at %s', demoNoSource:'Demo story · no source article. Connect live data to read sources.',
     notifTickers:'Followed tickers', notifTickersNote:'Push on scan match', notifMove:'Move threshold', notifMoveNote:'Absolute daily change', notifQuiet:'Quiet hours', notifQuietNote:'Suppressed overnight',
     alertTypes:'Alert types', alertTypesNote:'What earns a push. Off by default except news.',
     alNews:'Breaking news', alNewsNote:'A story lands on a followed ticker',
@@ -222,7 +222,7 @@ const UI = {
     screener:'Filtrare', screenerNote:'Filtrează după volumul de știri', noMatch:'Niciun simbol găsit', noMatchNote:'Conectează un token Finnhub pentru a căuta în toată piața, dincolo de universul demo.', liveReq:'Live', noData:'Fără date', needsLive:'Necesită date live', needsLiveNote:'Acest simbol este în afara setului demo. Conectează un token Finnhub în Tweaks pentru preț, grafic și știri.', filterAll:'Toate', filterVol:'Vol ≥ 2×', filterEarn:'Raportare ≤ 14z', filterStories:'Cele mai multe știri', digests:'Sumare', digestsNote:'E-mail la 06:30, înainte de deschidere', broker:'Conectare broker', brokerNote:'Importă automat pozițiile',
     account:'Cont', plan:'Plan', tickers:'Simboluri', appLang:'Limba aplicației', contentLang:'Limba conținutului',
     appLangNote:'Butoanele, etichetele și meniurile apar în română.', quiet:'Ore silențioase · 22:00–07:00', manageSub:'Gestionează abonamentul', signOut:'Deconectare',
-    upgradeBtn:'Upgrade · 7 $/lună', managePro:'Gestionează Pro', goPro:'Trec pe Pro', removed:'Eliminat', noNews:'Nicio știre în ultimele 24h',
+    upgradeBtn:'Upgrade · 7 $/lună', managePro:'Gestionează Pro', goPro:'Trec pe Pro', removed:'Eliminat', noNews:'Nicio știre în ultimele 24h', readAt:'Citește pe %s', demoNoSource:'Știre demo · fără articol sursă. Conectează datele live pentru surse.',
     alertTypes:'Tipuri de alerte', alertTypesNote:'Ce declanșează o notificare. Doar știrile sunt active implicit.',
     alNews:'Știri de ultimă oră', alNewsNote:'Apare o știre despre un simbol urmărit',
     alInsider:'Tranzacții insider', alInsiderNote:'Cumpărări și vânzări Form 4 ale conducerii',
@@ -281,7 +281,7 @@ const UI = {
     screener:'Screener', screenerNote:'Nach Meldungsvolumen filtern', noMatch:'Kein Ticker gefunden', noMatchNote:'Für die Suche im gesamten Markt über das Demo-Universum hinaus einen Finnhub-Token verbinden.', liveReq:'Live', noData:'Keine Daten', needsLive:'Live-Daten erforderlich', needsLiveNote:'Dieser Ticker liegt außerhalb des Demo-Datensatzes. Für Kurs, Chart und Meldungen einen Finnhub-Token in Tweaks verbinden.', filterAll:'Alle', filterVol:'Vol ≥ 2×', filterEarn:'Zahlen ≤ 14 T', filterStories:'Meiste Meldungen', digests:'Digests', digestsNote:'E-Mail um 06:30 vor Handelsstart', broker:'Broker-Anbindung', brokerNote:'Positionen automatisch importieren',
     account:'Konto', plan:'Tarif', tickers:'Ticker', appLang:'App-Sprache', contentLang:'Inhaltssprache',
     appLangNote:'Buttons, Bezeichnungen und Menüs erscheinen auf Deutsch.', quiet:'Ruhezeiten · 22:00–07:00', manageSub:'Abo verwalten', signOut:'Abmelden',
-    upgradeBtn:'Upgrade · 7 $/Mon.', managePro:'Pro verwalten', goPro:'Pro holen', removed:'Entfernt', noNews:'Keine Meldungen in den letzten 24 Std.',
+    upgradeBtn:'Upgrade · 7 $/Mon.', managePro:'Pro verwalten', goPro:'Pro holen', removed:'Entfernt', noNews:'Keine Meldungen in den letzten 24 Std.', readAt:'Bei %s lesen', demoNoSource:'Demo-Meldung · kein Quellartikel. Live-Daten verbinden, um Quellen zu lesen.',
     alertTypes:'Alarmtypen', alertTypesNote:'Was einen Push auslöst. Außer News alles standardmäßig aus.',
     alNews:'Eilmeldungen', alNewsNote:'Eine Meldung zu einem verfolgten Ticker erscheint',
     alInsider:'Insidergeschäfte', alInsiderNote:'Form-4-Käufe und -Verkäufe von Organmitgliedern',
@@ -456,4 +456,37 @@ const CROWD = {
   JPM:15, GS:9, LLY:21, PFE:11, XOM:10, TSM:24, ARM:16, NFLX:31, ORCL:20, CRM:13
 };
 window.HIF = { NEWS, FOLLOWS, UNIVERSE, EVENTS, SIGNALS, SECTORS, SECTOR_OF, CROWD, UI };
+
+// Content edited in the admin panel (GET /api/content). Everything above stays
+// the fallback: offline, in the design tool, or if the request fails, the page
+// renders exactly as built. Overrides are applied in place, then 'hif:content'
+// tells mounted templates to re-render.
+function applyContent(c) {
+  if (!c || typeof c !== 'object') return;
+  const H = window.HIF;
+  if (c.featured && c.featured.ticker) H.FEATURED = c.featured;
+  if (Array.isArray(c.tickers) && c.tickers.length) H.LANDING_TICKERS = c.tickers.slice(0, 8);
+  if (c.sources && Number.isInteger(c.sources.count)) H.SOURCES_COUNT = c.sources.count;
+  if (Array.isArray(c.universe)) {
+    c.universe.forEach(r => {
+      if (r && r.ticker && !UNIVERSE.some(x => x.ticker === r.ticker)) UNIVERSE.push({ ticker: r.ticker, name: r.name, stories: '—' });
+    });
+  }
+  if (c.copy && typeof c.copy === 'object') {
+    Object.keys(c.copy).forEach(lang => {
+      const target = UI[lang], over = c.copy[lang];
+      if (!target || !over) return;
+      // Only replace strings that exist, so a typo cannot inject a stray key.
+      Object.keys(over).forEach(k => { if (typeof target[k] === 'string' && typeof over[k] === 'string') target[k] = over[k]; });
+    });
+  }
+  H.contentLoaded = true;
+  window.dispatchEvent(new Event('hif:content'));
+}
+if (typeof fetch === 'function' && /^https?:$/.test(location.protocol)) {
+  fetch('/api/content', { credentials: 'same-origin', headers: { accept: 'application/json' } })
+    .then(r => (r.ok && /json/.test(r.headers.get('content-type') || '') ? r.json() : null))
+    .then(applyContent)
+    .catch(() => {});
+}
 })();

@@ -94,12 +94,46 @@ lock, the 2FA setup flow and the device list already existed.
 7. **Logs are stdout only.** Ship them somewhere durable if you want the audit
    trail to survive a host.
 
-## 4. Deployment checklist
+## 4. Admin panel (`server/admin.js`)
+
+Finding 12 still holds for the public server: it refuses a `service_role` key.
+Managing accounts needs one, so it lives in a separate process with a smaller
+attack surface:
+
+| Control | How |
+| --- | --- |
+| Key isolation | `service_role` only in `admin.env`, read only by `admin.js` / `admin-cli.js` |
+| Network | Binds `127.0.0.1` only (refuses anything else); reached by SSH tunnel |
+| DNS rebinding | Requests whose `Host` is not `127.0.0.1:PORT` / `localhost:PORT` get 421 |
+| Login | scrypt (N=2^15) + RFC 6238 TOTP, replay-protected per time step; unknown users cost the same as wrong passwords |
+| Brute force | 10 attempts/min per IP; 5 failures lock the account for 15 min |
+| 2FA secrets | AES-256-GCM with `ADMIN_TOTP_KEY` (env only), so a table dump cannot mint codes |
+| Sessions | Random 256-bit id, stored hashed in memory; HttpOnly, SameSite=Strict; 30 min idle, 8 h absolute |
+| CSRF | SameSite=Strict, plus `Origin` must be the loopback origin and bodies must be JSON |
+| XSS | CSP `default-src 'none'`, no inline script or style; UI writes data with `textContent` only |
+| Accountability | `admin_audit` is append-only even for `service_role` (trigger blocks update/delete/truncate) |
+| Destructive actions | Account deletion needs the email typed back; admins are created only from the CLI |
+| CSV export | Cells starting `= + - @` are prefixed so spreadsheets do not execute them |
+
+Account controls reach the public API through `account_status`, which users can
+read (own row) but not write: a suspended account gets 403, and a token issued
+before a forced sign-out gets 401, within the 30 s verify cache. Suspension also
+bans the Supabase user, and `admin_revoke_sessions()` deletes their sessions so
+refresh tokens die too. `user_settings.plan` stays a client view toggle; the
+authoritative plan is `account_status.plan` (`GET /api/account`).
+
+Residual: sessions are per process (a restart signs admins out); the admin
+process can read every user's data by design, so treat `admin.env` like a root
+password. `site_content` is readable by `anon` because it is public copy.
+
+## 5. Deployment checklist
 
 - [ ] `NODE_ENV=production`, `PUBLIC_ORIGIN` set to the real origin
 - [ ] `BIND=127.0.0.1` with TLS terminating in Caddy/nginx, `TRUST_PROXY=1`
 - [ ] `.env` mode 0600, owned by the service user, never committed
-- [ ] No `service_role` key anywhere near the app process
+- [ ] No `service_role` key anywhere near the app process (only in `admin.env`, mode 0600)
+- [ ] `admin.js` bound to 127.0.0.1, port 8081 not opened in ufw, reached by SSH tunnel
+- [ ] `STATS_TOKEN` set to the same random value in `.env` and `admin.env`
 - [ ] `schema.sql` run, and RLS confirmed enabled on all three tables
 - [ ] systemd unit with the sandboxing directives from `server/README.md`
 - [ ] Backups of `user_settings` and `security_events`
