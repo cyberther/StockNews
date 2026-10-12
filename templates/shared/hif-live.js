@@ -6,7 +6,7 @@
 // The proxy is probed once; if it isn't there, calls fall back to direct. With neither, every
 // function resolves to null and the templates keep rendering the demo data from hif-data.js.
 //
-// Free-tier endpoints only: /quote, /company-news, /search, /stock/recommendation.
+// Free-tier endpoints only. /quotes (many symbols at once) exists only through the proxy.
 (function(){
 // The page runtime evaluates helmet scripts twice; a second copy would replace the
 // adapter and throw away its response cache (so every refresh refetched everything).
@@ -16,6 +16,7 @@ const PROXY = '/api/finnhub';
 const cache = new Map();
 const TTL = { profile: 24 * 3600000, quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000, edates: 6 * 3600000 };
 let proxyState = 'unknown'; // 'unknown' | 'yes' | 'no'
+let batchQuotes = true;      // false once the proxy has turned /quotes down (an older server)
 
 function fresh(kind, arg){
   const hit = cache.get(kind + ':' + arg);
@@ -69,10 +70,36 @@ async function quote(symbol, token){
   if (!available(token)) return null;
   const hit = fresh('quote', symbol); if (hit) return hit;
   const j = await get('/quote', { symbol: symbol }, token);
-  if (!j || j.c == null || j.c === 0) return put('quote', symbol, null);
-  // last/dp keep full precision for position maths; price/move are the display strings.
-  return put('quote', symbol, { price: fmtPrice(j.c), move: fmtPct(j.dp), up: Number(j.dp) >= 0, changeAbs: fmtPrice(j.d),
-    last: Number(j.c), dp: j.dp == null ? null : Number(j.dp) });
+  return put('quote', symbol, shapeQuote(j));
+}
+// last/dp keep full precision for position maths; price/move are the display strings.
+function shapeQuote(j){
+  if (!j || j.c == null || j.c === 0) return null;
+  return { price: fmtPrice(j.c), move: fmtPct(j.dp), up: Number(j.dp) >= 0, changeAbs: fmtPrice(j.d),
+    last: Number(j.c), dp: j.dp == null ? null : Number(j.dp) };
+}
+
+// Many quotes in one request: { SYMBOL: quote }. The gateway answers /quotes from its
+// per-symbol cache; without it (direct mode, an older server) this falls back to one call
+// per symbol. Symbols are sorted so the same set shares one CDN cache entry.
+async function quotes(symbols, token){
+  const out = {};
+  if (!available(token)) return out;
+  const need = [];
+  Array.from(new Set(symbols || [])).forEach(s => { const hit = fresh('quote', s); if (hit) out[s] = hit; else need.push(s); });
+  if (!need.length) return out;
+  need.sort();
+  if (proxyState !== 'no' && batchQuotes) {
+    try {
+      const j = await callProxy('/quotes', { symbols: need.join(',') });
+      if (j && j.quotes) {
+        need.forEach(s => { const q = put('quote', s, shapeQuote(j.quotes[s])); if (q) out[s] = q; });
+        return out;
+      }
+    } catch (e) { if (/proxy 400/.test(e.message)) batchQuotes = false; }
+  }
+  for (const s of need) { try { const q = await quote(s, token); if (q) out[s] = q; } catch (e) {} }
+  return out;
 }
 
 // { name, currency } from /stock/profile2, for positions and tickers missing from the demo data.
@@ -245,10 +272,12 @@ async function load(symbols, token, opts){
   const o = opts || {};
   const out = { quotes:{}, news:{}, recs:{}, errors:[], mode:'off' };
   if (!symbols || !symbols.length || !available(token)) return out;
+  // Every quote in one request first; news and analysts are per symbol.
+  try { out.quotes = await quotes(symbols, token); } catch (e) { out.errors.push('quotes: ' + e.message); }
   for (const sym of symbols) {
     try {
       const [q, n, r] = await Promise.all([
-        quote(sym, token),
+        out.quotes[sym] ? out.quotes[sym] : quote(sym, token),
         o.news === false ? null : news(sym, token, o.newsLimit || 10),
         o.recs === false ? null : recommendation(sym, token)
       ]);
@@ -272,7 +301,7 @@ function dayHead(sec, u){
   return d.toLocaleDateString([], opts);
 }
 
-window.HIFLive = { quote, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
+window.HIFLive = { quote, quotes, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();
