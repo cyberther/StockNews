@@ -13,6 +13,8 @@
 //   HIFPush.forget()            -> drop this device's subscription (called on sign-out)
 //   HIFPush.syncWatchlist(follows, pushMap) -> mirror the watchlist (debounce in the caller)
 //   HIFPush.loadWatchlist()     -> Promise<[{ ticker, push }] | null>
+//   HIFPush.syncHoldings(positions) -> mirror the positions ({ TICKER: { shares, cost } })
+//   HIFPush.loadHoldings()      -> Promise<[{ ticker, shares, avg_price }] | null>
 (function(){
 if (window.HIFPush) return;
 const SW = '/templates/shared/hif-sw.js', SCOPE = '/templates/shared/';
@@ -125,5 +127,32 @@ async function loadWatchlist() {
   return r.ok && Array.isArray(r.body) ? r.body : null;
 }
 
-window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, supported };
+// Positions (public.holdings, supabase/holdings.sql). Until that table exists both calls
+// fail quietly and positions stay on the device.
+const TICKER = /^[A-Z0-9][A-Z0-9.\-]{0,11}$/;
+let lastHold = '';
+async function syncHoldings(positions) {
+  if (!live()) return;
+  const s = auth().session(), map = positions || {};
+  const rows = Object.keys(map).filter(t => TICKER.test(t)).map(t => {
+    const shares = parseFloat(map[t] && map[t].shares), avg = parseFloat(map[t] && map[t].cost);
+    return { user_id: s.userId, ticker: t, shares, avg_price: isFinite(avg) && avg >= 0 ? avg : null };
+  }).filter(r => isFinite(r.shares) && r.shares > 0);
+  const sig = s.userId + '|' + JSON.stringify(rows);
+  if (sig === lastHold) return;
+  const up = rows.length
+    ? await auth().rest('holdings?on_conflict=user_id,ticker', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: rows })
+    : { ok: true };
+  const keep = rows.length ? '&ticker=not.in.(' + encodeURIComponent(rows.map(r => '"' + r.ticker + '"').join(',')) + ')' : '';
+  const del = await auth().rest('holdings?user_id=eq.' + s.userId + keep, { method: 'DELETE' });
+  if (up.ok && del.ok) lastHold = sig;
+}
+
+async function loadHoldings() {
+  if (!live()) return null;
+  const r = await auth().rest('holdings?select=ticker,shares,avg_price&order=ticker.asc');
+  return r.ok && Array.isArray(r.body) ? r.body : null;
+}
+
+window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, supported };
 })();

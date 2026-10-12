@@ -7,7 +7,7 @@
 // Only the endpoints this prototype needs are allowed through.
 import { cleanNews } from './_shared/news-clean.js';
 
-const ALLOWED = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/calendar/earnings', '/chart']);
+const ALLOWED = new Set(['/quote', '/company-news', '/search', '/stock/recommendation', '/stock/earnings', '/calendar/earnings', '/stock/profile2', '/chart']);
 const BASE = 'https://finnhub.io/api/v1';
 
 const CHART_RANGES = {
@@ -62,8 +62,8 @@ export default async (request) => {
       status: res.status,
       headers: {
         'content-type': 'application/json',
-        // quotes go stale fast; news and analyst trends do not
-        'cache-control': path === '/quote' ? 'public, max-age=30' : 'public, max-age=300'
+        // quotes go stale fast; news and analyst trends do not; company names hardly change
+        'cache-control': path === '/quote' ? 'public, max-age=30' : path === '/stock/profile2' ? 'public, max-age=86400' : 'public, max-age=300'
       }
     });
   } catch (e) {
