@@ -56,6 +56,18 @@ if (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY) {
   console.error('Refusing to start: a service_role key is in the environment. This process must only ever hold the anon key.');
   process.exit(1);
 }
+// /api/config hands SUPABASE_ANON_KEY to every browser, so it must provably be the public
+// key: a legacy JWT with role 'anon', or a new-style publishable key. A secret key pasted
+// into the wrong variable would otherwise be published.
+{
+  const parts = SUPABASE_ANON_KEY.split('.');
+  let role = null;
+  try { if (parts.length === 3) role = JSON.parse(Buffer.from(parts[1], 'base64url').toString('utf8')).role; } catch {}
+  if (!/^sb_publishable_/.test(SUPABASE_ANON_KEY) && role !== 'anon') {
+    console.error('Refusing to start: SUPABASE_ANON_KEY is not the public anon key (it would be served to browsers).');
+    process.exit(1);
+  }
+}
 
 const app = express();
 app.disable('x-powered-by');
@@ -408,6 +420,9 @@ const PATH_KINDS = {
 // Price history comes from Yahoo's public chart endpoint (Finnhub's candles are
 // not on the free tier). Range -> bar interval, same table as the Netlify function.
 const CHART_RANGES = { '1d': '5m', '5d': '15m', '1mo': '60m', '6mo': '1d', ytd: '1d', '1y': '1d', '5y': '1wk' };
+// With warm=1 the same bar size is fetched over a longer range, so moving averages
+// and RSI have history before the first visible bar instead of starting mid-chart.
+const CHART_WARM = { '1d': '5d', '5d': '1mo', '1mo': '3mo', '6mo': '1y', ytd: '2y', '1y': '2y', '5y': '10y' };
 const SYMBOL_RE = /^[A-Z0-9][A-Z0-9.\-]{0,11}$/;
 const RESOLUTIONS = new Set(['1', '5', '15', '30', '60', 'D', 'W', 'M']);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -471,8 +486,9 @@ function validateChart(query) {
   const range = typeof query.range === 'string' ? query.range : '6mo';
   if (!SYMBOL_RE.test(sym)) return { error: 'bad_symbol' };
   if (!CHART_RANGES[range]) return { error: 'bad_range' };
-  const params = new URLSearchParams({ range, interval: CHART_RANGES[range], includePrePost: 'false' });
-  return { url: `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?${params}`, key: 'chart?' + sym + '&' + range };
+  const warm = query.warm === '1';
+  const params = new URLSearchParams({ range: warm ? CHART_WARM[range] : range, interval: CHART_RANGES[range], includePrePost: 'false' });
+  return { url: `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?${params}`, key: 'chart?' + sym + '&' + range + (warm ? '&warm' : '') };
 }
 
 async function proxyMarket(kind, query, res) {

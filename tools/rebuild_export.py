@@ -31,6 +31,7 @@ TARGETS = {
             '../shared/hif-insight.js': '9cf08d53-172d-43a0-9618-2b7d30215898',
             '../shared/hif-live.js': 'c3512b4d-940f-4c6c-be48-a62e195d9a3c',
             '../shared/hif-store.js': 'cbf22793-fdd7-4578-9f64-92a72296bdea',
+            '../shared/hif-auth.js': '52c9775c-5507-4644-883e-53d9f73850bc',
             './assets/aa-logo.png': '8f4d386c-5068-40fe-9b17-49e5c21ab630',
             './assets/hero-globe.png': 'f6717536-9b6d-44c4-b709-5a1f9fbe7642',
         },
@@ -43,6 +44,8 @@ TARGETS = {
             './ds-base.js': '1a23418a-47b6-4488-b543-86c6c76bc75d',
             '../shared/hif-data.js': '579b1aee-3c99-4dcd-89f7-0266059cff28',
             '../shared/hif-store.js': 'fa1601de-b213-46b7-8267-9c64cee3176c',
+            '../shared/hif-live.js': 'e89e04c7-f293-4933-aa4b-fb7445f878f8',
+            '../shared/hif-auth.js': '09f71f5f-3174-4584-a50c-bb5a128cef28',
         },
     },
 }
@@ -103,7 +106,8 @@ def rebuild(t, check):
         if path in KEEP_BUNDLED:
             continue
         data = (t['page'].parent / path).resolve().read_bytes()
-        entry = manifest[uuid]
+        # An asset the page gained after the bundle was first exported.
+        entry = manifest.setdefault(uuid, {'mime': 'application/javascript', 'compressed': True})
         if entry.get('compressed'):
             data = gzip.compress(data, mtime=0)
         entry['data'] = base64.b64encode(data).decode()
@@ -111,6 +115,11 @@ def rebuild(t, check):
     tpl_a, tpl_b, _ = block_span(new, 'template')
     tpl = json.dumps(build_template(t)).replace('</', '<\\/')
     new = new[:tpl_a] + tpl + new[tpl_b:]
+    # The unpacker page shows its own <title> in the tab; keep it in step with the page's.
+    title = re.search(r'<title>(.*?)</title>', t['page'].read_text(), re.S)
+    first = re.search(r'<title>.*?</title>', new, re.S)
+    if title and first and first.start() < block_span(new, 'manifest')[0]:
+        new = new[:first.start()] + '<title>' + title.group(1) + '</title>' + new[first.end():]
     if check:
         fresh = decoded(new) == decoded(s)
         print(t['out'].relative_to(ROOT), 'up to date' if fresh else 'STALE')

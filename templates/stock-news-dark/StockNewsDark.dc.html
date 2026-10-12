@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Heard It First — Stock News</title>
+<title>Market Pulse — Stock News</title>
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
 <!-- @template name="Stock news app — dark terminal" description="Executive/terminal variant of the stock news product: dark surfaces, numbers-forward rows, one decision per screen, separate app and content languages." -->
-<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-store.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
+<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-auth.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">TERMINAL</text></svg></template>
 <div data-theme="{{ theme }}" style="min-height:100vh;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums">
 <div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid var(--s-rule)">
@@ -17,7 +17,7 @@
 <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.terminal }}</div>
 <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
 <span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ planLabel }}</span>
-<button onClick="{{ togglePlan }}" style="padding:7px 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ planToggleLabel }}</button>
+<sc-if value="{{ showPlanToggle }}" hint-placeholder-val="{{ true }}"><button onClick="{{ togglePlan }}" style="padding:7px 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ planToggleLabel }}</button></sc-if>
 </div>
 </div>
 <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;padding:40px 24px 80px;justify-content:center">
@@ -37,15 +37,38 @@
 </div>
 <div role="tablist" style="display:flex;border-bottom:1px solid var(--s-rule);margin-bottom:16px"><button role="tab" aria-selected="{{ authIsIn }}" onClick="{{ authToIn }}" style="flex:1;min-height:44px;padding:0;background:transparent;border:0;border-bottom:2px solid {{ authTabInLine }};color:{{ authTabInInk }};font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.04em;cursor:pointer">{{ ui.authTabIn }}</button><button role="tab" aria-selected="{{ authIsUp }}" onClick="{{ authToUp }}" style="flex:1;min-height:44px;padding:0;background:transparent;border:0;border-bottom:2px solid {{ authTabUpLine }};color:{{ authTabUpInk }};font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.04em;cursor:pointer">{{ ui.authTabUp }}</button></div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:20px;letter-spacing:-0.02em;line-height:1.1">{{ authKicker }}</div>
+<sc-if value="{{ authSentOn }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="margin-top:18px;border:1px solid var(--color-accent);padding:14px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ ui.authSentTitle }}</div>
+<div style="font-size:12px;color:var(--s-mute);margin-top:6px;line-height:1.5">{{ authSentBody }}</div>
+</div>
+<sc-if value="{{ authErr }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="margin-top:12px;font-size:12px;color:var(--color-accent)">{{ authErr }}</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+<button onClick="{{ authResend }}" style="min-height:44px;text-align:left;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.authResend }}</button>
+<button onClick="{{ authUseOther }}" style="min-height:40px;text-align:left;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.authUseOther }}</button>
+</div>
+</sc-if>
+<sc-if value="{{ authFormOn }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ showProviders }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column;gap:8px;margin-top:18px">
+<sc-if value="{{ showGoogle }}" hint-placeholder-val="{{ true }}">
 <button onClick="{{ signInGoogle }}" style="min-height:48px;display:flex;align-items:center;gap:11px;text-align:left;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer"><span style="flex:none;width:20px;height:20px;border:1px solid var(--s-faint);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--s-mute)">G</span>{{ ui.contGoogle }}</button>
+</sc-if>
+<sc-if value="{{ showICloud }}" hint-placeholder-val="{{ true }}">
 <button onClick="{{ signInICloud }}" style="min-height:48px;display:flex;align-items:center;gap:11px;text-align:left;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer"><span style="flex:none;width:20px;height:20px;border:1px solid var(--s-faint);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--s-mute)">⌘</span>{{ ui.contICloud }}</button>
+</sc-if>
 </div>
 <div style="display:flex;align-items:center;gap:10px;margin:16px 0 14px">
 <span style="flex:1;height:1px;background:var(--s-rule)"></span>
 <span style="flex:none;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ authOrEmail }}</span>
 <span style="flex:1;height:1px;background:var(--s-rule)"></span>
 </div>
+</sc-if>
+<sc-if value="{{ noProviders }}" hint-placeholder-val="{{ false }}">
+<div style="height:16px"></div>
+</sc-if>
 <div style="display:flex;flex-direction:column;gap:11px">
 <sc-if value="{{ authIsUp }}" hint-placeholder-val="{{ false }}">
 <label style="display:block">
@@ -85,10 +108,11 @@
 <sc-if value="{{ authErr }}" hint-placeholder-val="{{ false }}">
 <div role="alert" style="margin-top:12px;font-size:12px;color:var(--color-accent)">{{ authErr }}</div>
 </sc-if>
-<button onClick="{{ submitAuth }}" style="min-height:48px;margin-top:16px;text-align:left;padding:0 14px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ authBtn }}</button>
+<button onClick="{{ submitAuth }}" style="min-height:48px;margin-top:16px;text-align:left;padding:0 14px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer;opacity:{{ authBtnOpacity }}" aria-busy="{{ authBusyOn }}">{{ authBtn }}</button>
 <div style="font-size:12px;color:var(--s-mute);margin-top:14px;line-height:1.45">{{ authFootQ }} <button onClick="{{ authSwitch }}" style="min-height:32px;padding:0;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-body);font-size:12px;text-decoration:underline;cursor:pointer">{{ authSwitchLabel }}</button></div>
 <sc-if value="{{ authIsUp }}" hint-placeholder-val="{{ false }}">
 <div style="font-size:11px;color:var(--s-faint);margin-top:4px;line-height:1.45">{{ ui.footUpNote }}</div>
+</sc-if>
 </sc-if>
 </div>
 </sc-if>
@@ -103,14 +127,29 @@
 <span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.obCount }}</span>
 </div>
 </div>
+<div style="padding:12px 20px 0">
+<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="Symbol or company" value="{{ obQuery }}" onChange="{{ onObQuery }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.04em">
+<sc-if value="{{ obHasPicks }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+<sc-for list="{{ obChosen }}" as="c" hint-placeholder-count="2">
+<button onClick="{{ c.remove }}" aria-label="{{ c.removeLabel }}" style="display:flex;align-items:center;gap:7px;min-height:34px;padding:0 9px 0 11px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.06em;cursor:pointer">{{ c.ticker }}<span aria-hidden="true" style="font-size:14px;line-height:1">×</span></button>
+</sc-for>
+</div>
+</sc-if>
+</div>
 <div style="flex:1;overflow-y:auto">
-<sc-for list="{{ obPicks }}" as="p" hint-placeholder-count="8">
+<sc-if value="{{ obNoQuery }}" hint-placeholder-val="{{ true }}">
+<div style="padding:14px 20px;font-size:12px;color:var(--s-mute);line-height:1.45">{{ ui.searchEmpty }}</div>
+</sc-if>
+<sc-for list="{{ obResults }}" as="p" hint-placeholder-count="4">
 <button onClick="{{ p.toggle }}" style="display:flex;width:100%;align-items:center;gap:12px;padding:13px 20px;border:0;border-bottom:1px solid var(--s-rule);background:transparent;text-align:left;cursor:pointer">
 <span style="flex:none;width:16px;height:16px;background:{{ p.box }};border:1px solid {{ p.boxEdge }}"></span>
 <span style="flex:1;min-width:0"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:15px;color:var(--s-ink)">{{ p.ticker }}</span><span style="display:block;font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span></span>
-<span style="flex:none;text-align:right"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:13px;color:var(--s-ink)">{{ p.stories }}</span><span style="display:block;font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stories24 }}</span></span>
 </button>
 </sc-for>
+<sc-if value="{{ obHasQuery }}" hint-placeholder-val="{{ false }}">
+<div style="padding:12px 20px;font-size:11px;color:var(--s-mute)">{{ obStatus }}</div>
+</sc-if>
 <div style="height:12px"></div>
 </div>
 <div style="padding:12px 20px;border-top:1px solid var(--s-rule);display:flex;flex-direction:column;gap:8px">
@@ -207,21 +246,21 @@
 <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
 <div style="padding:8px 16px 12px;border-bottom:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em;margin-bottom:10px">{{ ui.addTicker }}</div>
-<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="NVDA" value="{{ query }}" onChange="{{ onQuery }}" style="width:100%;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
-<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-<sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
-<button onClick="{{ f.set }}" style="position:relative;overflow:hidden;min-height:32px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">
-<sc-if value="{{ f.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">{{ f.label }}</span></sc-if>
-<sc-if value="{{ f.off }}" hint-placeholder-val="{{ true }}"><span>{{ f.label }}</span></sc-if>
-</button>
-</sc-for>
-</div>
+<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="Symbol or company" value="{{ query }}" onChange="{{ onQuery }}" style="width:100%;min-height:44px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
 </div>
 <div style="flex:1;overflow-y:auto">
+<sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
 <div style="padding:10px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ resultsLabel }}</div>
+</sc-if>
+<sc-if value="{{ noQuery }}" hint-placeholder-val="{{ true }}">
+<div style="padding:16px;font-size:12px;color:var(--s-mute);line-height:1.45">{{ ui.searchEmpty }}</div>
+</sc-if>
+<sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ ui.noMatch }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:6px;line-height:1.45">{{ ui.noMatchNote }}</div></div>
+</sc-if>
 <sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
 <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--s-rule)">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.ticker }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
+<div role="button" tabIndex="0" aria-label="{{ r.openLabel }}" onClick="{{ r.open }}" onKeyDown="{{ r.keyOpen }}" style="flex:1;min-width:0;cursor:pointer"><div style="display:flex;align-items:center;gap:7px"><span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.ticker }}</span><sc-if value="{{ r.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:1px 5px">{{ ui.liveReq }}</span></sc-if></div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
 <div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ r.stories }}</div><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stories24 }}</div></div>
 <button onClick="{{ r.toggle }}" style="position:relative;overflow:hidden;min-width:84px;min-height:38px;padding:0 12px;text-align:left;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
 <sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">{{ ui.add }}</span></sc-if>
@@ -542,7 +581,7 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Heard It First&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;brand&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Market Pulse&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
 // The shared scripts can finish loading after this logic is evaluated, so the
 // content globals are bound lazily; until then the component renders empty.
 let NEWS, FOLLOWS, UNIVERSE, UI;
@@ -556,9 +595,14 @@ function bindShared() {
 const STORE_KEY = 'hif.dark.v2';
 // Keys that survive a reload. Transient input (passwords, codes, toasts) never persists.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','smaOn',
-  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme'];
+  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme','liveNames','accountId'];
+// hif-store.js can finish loading after this logic is evaluated. Until the saved
+// record has been read, nothing may be written, or a reload would overwrite the
+// stored session with these defaults; see restoreLate().
+let hydrated = false;
 function hydrate(defaults) {
   const S = window.HIFStore, saved = S ? S.read(STORE_KEY) : null;
+  hydrated = !!S;
   const out = Object.assign({}, defaults);
   if (saved) PERSIST.forEach(k => { if (saved[k] !== undefined) out[k] = saved[k]; });
   if (out.screen === 'auth') out.screen = 'feed';
@@ -567,16 +611,130 @@ function hydrate(defaults) {
 class Component extends DCLogic {
   state = hydrate({ screen:'feed', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed', chartRange:'1d', smaOn:true, push:{}, screenFilter:'all',
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
+    authLive:false, authInfo:null, authBusy:false, authSent:'', serverPlan:null, accountId:null,
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
-    loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'' });
+    loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
+    liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{} });
   componentDidMount() {
     this.startIdleWatch();
-    if (!bindShared()) { this._poll = setInterval(() => { if (bindShared()) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
+    if (!bindShared() || !window.HIFStore) { this._poll = setInterval(() => { if (bindShared() && window.HIFStore) { clearInterval(this._poll); this.forceUpdate(); } }, 60); }
+    // Once the adapter is in, every followed ticker (and the open one) gets its live quote
+    // and headlines from the server proxy; the feed falls back to demo stories without them.
+    const startLive = () => {
+      this.restoreLate();
+      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.liveTickers().forEach(t => this.syncTicker(t)); }, 0);
+    };
+    if (window.HIFLive && window.HIFStore) startLive();
+    else this._livePoll = setInterval(() => { if (window.HIFLive && window.HIFStore) { clearInterval(this._livePoll); startLive(); } }, 60);
+    if (window.HIFAuth) this.bootAuth();
+    else this._authPoll = setInterval(() => { if (window.HIFAuth) { clearInterval(this._authPoll); this.bootAuth(); } }, 60);
   }
-  componentDidUpdate() { this.persist(); }
-  componentWillUnmount() { this.stopIdleWatch(); clearTimeout(this._t); clearInterval(this._poll); }
+  // Real accounts when /api/config names a Supabase project; otherwise the demo sign-in.
+  bootAuth() {
+    const A = window.HIFAuth;
+    A.ready.then(info => {
+      if (!info || !info.enabled) return;
+      this.setState({ authLive:true, authInfo:info });
+      if (info.error) this.setState({ authMode:'in', authErr:this.authMessage(info.error === 'otp_expired' ? 'link' : info.error) });
+      this.applyAuthSession(A.session());
+      this._authOff = A.onChange(sess => this.applyAuthSession(sess));
+    }).catch(() => {});
+  }
+  // Mirror the Supabase session into the app. A different account on this device starts
+  // fresh: its own onboarding and watchlist, not the previous user's.
+  applyAuthSession(sess) {
+    if (!sess) { this.setState({ session:null, locked:false, serverPlan:null }); return; }
+    const fresh = this.state.accountId !== sess.userId;
+    this.setState(Object.assign({
+      session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
+      accountId: sess.userId, authPw:'', authSent:'', authErr:''
+    }, fresh ? { onboarded:false, follows:[], selected:'', screen:'feed', liveNames:{} } : {}));
+    this.loadPlan();
+  }
+  loadPlan() {
+    window.HIFAuth.plan().then(p => {
+      if (p.suspended) {
+        window.HIFAuth.signOut(false);
+        return this.setState({ authMode:'in', authErr:(UI[this.appLang] || {}).authErrSuspended || 'This account is suspended.' });
+      }
+      this.setState({ serverPlan:p.plan });
+    }).catch(() => {});
+  }
+  authMessage(code) {
+    const u = UI[this.appLang] || {};
+    return ({ bad_credentials:u.authErrCreds, not_confirmed:u.authErrConfirm, exists:u.authErrExists, rate_limited:u.authErrRate,
+      weak_password:u.authErrWeak, signup_disabled:u.authErrClosed, bad_email:u.authErrEmail, link:u.authErrLink,
+      access_denied:u.authErrLink })[code] || u.authErrFailed || 'Something went wrong.';
+  }
+  liveTickers() {
+    const s = this.state, out = (s.follows || []).slice();
+    if (s.selected && out.indexOf(s.selected) < 0) out.push(s.selected);
+    return out;
+  }
+  // Quote and headlines for any ticker; analysts only where the demo set has none.
+  syncTicker(t) {
+    const L = window.HIFLive; if (!L || !t) return;
+    const keep = (k, v) => this.setState(st => ({ [k]: Object.assign({}, st[k], { [t]: v }) }));
+    L.quote(t).then(q => q && keep('liveQuotes', q)).catch(() => {});
+    if (!FOLLOWS[t]) L.recommendation(t).then(r => r && keep('liveRecs', r)).catch(() => {});
+    L.news(t, null, 8).then(n => n && keep('liveNews', n)).catch(() => {});
+  }
+  openStory(n) {
+    if (n.url && /^https?:\/\//.test(n.url)) { window.open(n.url, '_blank', 'noopener,noreferrer'); return; }
+    this.openTicker(n.ticker);
+  }
+  liveSearch(q) {
+    clearTimeout(this._search);
+    if (!window.HIFLive || q.trim().length < 1) { this.setState({ liveHits:null, liveBusy:false }); return; }
+    this.setState({ liveBusy:true });
+    this._search = setTimeout(() => {
+      window.HIFLive.search(q.trim())
+        .then(rows => this.setState({ liveHits: rows || null, liveBusy:false }))
+        .catch(() => this.setState({ liveHits:null, liveBusy:false }));
+    }, 350);
+  }
+  openTicker(t, name) {
+    if (!FOLLOWS[t] && name) this.setState(st => ({ liveNames: Object.assign({}, st.liveNames, { [t]: name }) }));
+    this.setState({ selected:t });
+    this.go('detail');
+    this.syncTicker(t);
+  }
+  // FOLLOWS-shaped record for a ticker outside the demo set, filled from live data.
+  liveRecord(t) {
+    const s = this.state, q = (s.liveQuotes || {})[t], r = (s.liveRecs || {})[t], u = UI[this.appLang] || {};
+    const note = { EN:'Live quote only — no scored stories for this ticker yet.', RO:'Doar cotație live — încă nu există știri evaluate pentru acest simbol.', DE:'Nur Live-Kurs — für diesen Ticker gibt es noch keine bewerteten Meldungen.' };
+    return { ticker:t, name:(s.liveNames || {})[t] || t, price: q ? q.price : '—', move: q ? q.move : '—', up: q ? q.up : true,
+      score:'—', buyPct: r ? r.buyPct : '—', analystDetail: r ? r.detail : '—', earnDays:'—', earnDate:'—', perf6m:'—', lastEarn:'—',
+      latest:(() => { const ln = (s.liveNews || {})[t], v = ln && ln.length ? ln.length + ' ' + (u.storiesWord || 'stories') : (u.liveReq || 'Live'); return { EN:v, RO:v, DE:v }; })(),
+      call:note, liveOnly:true };
+  }
+  componentDidUpdate() {
+    // A ticker added from search, onboarding or the ticker page gets its live data now.
+    if (this._synced && window.HIFLive) {
+      const added = (this.state.follows || []).filter(t => this._synced.indexOf(t) < 0);
+      this._synced = (this.state.follows || []).slice();
+      added.forEach(t => this.syncTicker(t));
+    }
+    this.persist();
+  }
+  componentWillUnmount() { if (this._authOff) this._authOff(); clearInterval(this._authPoll); this._synced = null; this.stopIdleWatch(); clearTimeout(this._t); clearTimeout(this._search); clearInterval(this._poll); clearInterval(this._livePoll); }
+  // Returns true once the saved record has been read; restores it if the store
+  // loaded only after the initial state was built.
+  restoreLate() {
+    if (hydrated) return true;
+    const S = window.HIFStore; if (!S) return false;
+    hydrated = true;
+    const saved = S.read(STORE_KEY);
+    if (!saved) return true;
+    const patch = {};
+    PERSIST.forEach(k => { if (saved[k] !== undefined) patch[k] = saved[k]; });
+    if (patch.screen === 'auth') patch.screen = 'feed';
+    this.setState(patch);
+    return false;
+  }
   persist() {
-    const S = window.HIFStore; if (!S) return;
+    if (!this.restoreLate()) return;
+    const S = window.HIFStore;
     const out = {};
     PERSIST.forEach(k => { if (this.state[k] !== undefined) out[k] = this.state[k]; });
     S.write(STORE_KEY, out);
@@ -673,14 +831,31 @@ class Component extends DCLogic {
       if (str.score < 2) return this.setState({ authErr: u.authErrWeak, authBad:'pw' });
     }
     const at = mail.lastIndexOf('@');
-    this.signInWith('Email', mail.slice(0, at + 1) + mail.slice(at + 1).toLowerCase(), up ? name : null);
+    const email = mail.slice(0, at + 1) + mail.slice(at + 1).toLowerCase();
+    if (!st.authLive) return this.signInWith('Email', email, up ? name : null);
+    if (st.authBusy) return;
+    this.setState({ authBusy:true, authErr:'' });
+    (up ? window.HIFAuth.signUp(email, pw, name) : window.HIFAuth.signIn(email, pw)).then(r => {
+      if (r.error) return this.setState({ authBusy:false, authErr:this.authMessage(r.error), authBad: r.error === 'bad_email' ? 'email' : r.error === 'weak_password' ? 'pw' : null });
+      if (r.confirm) return this.setState({ authBusy:false, authSent:email, authPw:'' });
+      this.setState({ authBusy:false });
+      this.flash((u.toastSignedIn || 'Signed in').toUpperCase());
+    }).catch(() => this.setState({ authBusy:false, authErr:this.authMessage('failed') }));
   }
-  togglePick(t) {
+  togglePick(t, name) {
     const u = UI[this.appLang], free = this.plan === 'free';
     const has = this.state.follows.indexOf(t) !== -1;
     if (has) return this.setState(st => ({ follows: st.follows.filter(x => x !== t) }));
     if (free && this.state.follows.length >= 3) return this.flash('3 / 3 — ' + (u.liftCap || '').toUpperCase());
+    if (!FOLLOWS[t]) { this.setState(st => ({ liveNames: Object.assign({}, st.liveNames, { [t]: name || t }) })); this.syncTicker(t); }
     this.setState(st => ({ follows: st.follows.concat(t) }));
+  }
+  // Demo-universe matches first, then live search hits; empty for an empty query.
+  searchPool(q) {
+    if (!q) return [];
+    const pool = UNIVERSE.filter(x => x.ticker.includes(q) || x.name.toUpperCase().includes(q));
+    (this.state.liveHits || []).forEach(h => { if (!pool.some(x => x.ticker === h.ticker)) pool.push({ ticker:h.ticker, name:h.name, stories:'—' }); });
+    return pool;
   }
   sessionList() {
     const rv = this.state.revoked || [];
@@ -691,7 +866,8 @@ class Component extends DCLogic {
       { id:'win', device:'Windows 11 · Chrome 129', meta:'Frankfurt, DE · 03 Sep 09:12' }
     ].filter(x => rv.indexOf(x.id) === -1);
   }
-  get plan() { return this.state.plan || this.props.plan || 'free'; }
+  // With real accounts the plan is the server's (account_status); the demo keeps its toggle.
+  get plan() { return this.state.authLive ? (this.state.serverPlan || 'free') : (this.state.plan || this.props.plan || 'free'); }
   get lang() { return this.state.lang || this.props.lang || 'EN'; }
   get appLang() { return this.state.appLang || this.props.appLang || 'EN'; }
   go(screen) { this.setState(s => ({ screen, prev: (s.screen === 'paywall' || s.screen === 'detail') ? s.prev : s.screen })); }
@@ -830,41 +1006,67 @@ class Component extends DCLogic {
     const hintText = { len:u.hintLen, case:u.hintCase, digit:u.hintDigit, symbol:u.hintSymbol };
     const timeoutMin = s.timeoutMin === undefined ? 30 : s.timeoutMin;
     const volNum = v => { const m = /([\d.]+)x/.exec(String(v || '')); return m ? parseFloat(m[1]) : 0; };
-    const feed = (s.feedTab === 'following' ? NEWS.filter(n => s.follows.includes(n.ticker)) : NEWS).map(n => Object.assign({}, n, {
-      headline: n.headline[L], watch: n.watch[L],
-      down: !n.up,
-      outlier: volNum(n.vol) >= 2,
-      volBadge: volNum(n.vol).toFixed(1) + '× volume',
-      open: () => { this.setState({ selected:n.ticker }); this.go('detail'); },
-      keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:n.ticker }); this.go('detail'); }, event)
-    })).sort((a,b) => volNum(b.vol) - volNum(a.vol));
+    // Live headlines for the followed tickers (or every ticker with live news on the
+    // Market tab), newest first; demo stories only when nothing live has arrived.
+    const LN = s.liveNews || {}, LQ = s.liveQuotes || {};
+    const liveRows = [];
+    (s.feedTab === 'following' ? s.follows : Object.keys(LN)).forEach(t => (LN[t] || []).forEach(n => liveRows.push({
+      ticker:t, headline:n.headline, watch:n.summary || ((n.source ? 'Read at ' + n.source : 'Read the story') + ' ↗'), source:n.source || '', stamp:n.stamp, ts:n.ts, url:n.url || '',
+      delta:(LQ[t] || {}).move || '—', up:(LQ[t] || {}).up !== false, vol:'—', live:true })));
+    const feedLive = liveRows.length > 0;
+    const feed = feedLive
+      ? liveRows.sort((a,b) => b.ts - a.ts).slice(0, 20).map(n => Object.assign({}, n, {
+          down: !n.up, outlier:false, volBadge:'',
+          open: () => this.openStory(n),
+          keyOpen: event => this.activateFromKeyboard(() => this.openStory(n), event)
+        }))
+      : (s.feedTab === 'following' ? NEWS.filter(n => s.follows.includes(n.ticker)) : NEWS).map(n => Object.assign({}, n, {
+          headline: n.headline[L], watch: n.watch[L],
+          down: !n.up,
+          outlier: volNum(n.vol) >= 2,
+          volBadge: volNum(n.vol).toFixed(1) + '× volume',
+          open: () => { this.setState({ selected:n.ticker }); this.go('detail'); },
+          keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:n.ticker }); this.go('detail'); }, event)
+        })).sort((a,b) => volNum(b.vol) - volNum(a.vol));
     const q = s.query.trim().toUpperCase();
+    const obQ = String(s.obQuery || '').trim().toUpperCase(), obPool = (!s.onboarded && s.session) ? this.searchPool(obQ) : [];
     const volOf = t => { let best = 0; NEWS.forEach(n => { if (n.ticker === t) { const m = /([\d.]+)x/.exec(String(n.vol || '')); if (m && parseFloat(m[1]) > best) best = parseFloat(m[1]); } }); return best; };
     const daysOf = t => { const m = /(\d+)d/.exec(String((FOLLOWS[t] || {}).earnDays || '')); return m ? +m[1] : 999; };
-    let shown = UNIVERSE.filter(x => !q || x.ticker.includes(q) || x.name.toUpperCase().includes(q));
-    if (s.screenFilter === 'vol') shown = shown.filter(x => volOf(x.ticker) >= 2);
-    if (s.screenFilter === 'earn') shown = shown.filter(x => daysOf(x.ticker) <= 14);
-    if (s.screenFilter === 'stories') shown = shown.slice().sort((a,b) => (+b.stories || 0) - (+a.stories || 0));
+    const rec = t => {
+      if (!FOLLOWS[t]) return this.liveRecord(t);
+      const lq = (s.liveQuotes || {})[t], ln = (s.liveNews || {})[t];
+      const out = lq ? Object.assign({}, FOLLOWS[t], { price:lq.price, move:lq.move, up:lq.up }) : FOLLOWS[t];
+      if (!ln || !ln.length) return out;
+      const n = ln.length + ' ' + (u.storiesWord || 'stories');
+      return Object.assign({}, out, { latest:{ EN:n, RO:n, DE:n } });
+    };
+    // Search-only: nothing is listed until the user types (no suggested tickers).
+    const shown = this.searchPool(q);
     const results = shown.map(x => {
       const on = s.follows.includes(x.ticker);
+      const liveOnly = !FOLLOWS[x.ticker];
       return Object.assign({}, x, {
-        following: on, notFollowing: !on,
+        following: on, notFollowing: !on, liveOnly,
+        open: () => this.openTicker(x.ticker, x.name),
+        keyOpen: event => this.activateFromKeyboard(() => this.openTicker(x.ticker, x.name), event),
+        openLabel: 'Open ' + x.ticker + ' · ' + x.name,
         toggle: () => {
           if (on) return this.setState(st => ({ follows: st.follows.filter(f => f !== x.ticker) }));
           if (isFree && s.follows.length >= 3) { this.flash('3 / 3 — ' + u.liftCap.toUpperCase()); return this.go('paywall'); }
+          if (liveOnly) { this.setState(st => ({ liveNames: Object.assign({}, st.liveNames, { [x.ticker]: x.name }) })); this.syncTicker(x.ticker); }
           this.setState(st => ({ follows: st.follows.concat(x.ticker) }));
           this.flash(x.ticker + ' · ' + u.added.toUpperCase());
         }
       });
     });
-    const stock = FOLLOWS[s.selected] || FOLLOWS.NVDA;
+    const stock = s.selected ? rec(s.selected) : FOLLOWS.NVDA;
     const following = s.follows.includes(stock.ticker);
     const am = /^\s*(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*$/.exec(String(stock.analystDetail || ''));
     const aTot = am ? ((+am[1] + +am[2] + +am[3]) || 1) : 1;
     const analystBar = am ? [am[1], am[2], am[3]].map(v => (v / aTot * 100).toFixed(1) + '%') : ['0%','0%','0%'];
     return {
       ui: u,
-      brand: this.props.brand || 'Heard It First',
+      brand: this.props.brand || 'Market Pulse',
       planLabel: isFree ? u.free : u.pro,
       planToggleLabel: isFree ? u.viewPro : u.viewFree,
       togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),
@@ -885,7 +1087,7 @@ class Component extends DCLogic {
       authTabUpLine: authUp ? 'var(--color-accent)' : 'transparent', authTabUpInk: authUp ? 'var(--s-ink)' : 'var(--s-mute)',
       authKicker: authUp ? u.authKickerUp : u.authKickerIn,
       authOrEmail: authUp ? u.orEmailUp : u.orEmail,
-      authBtn: authUp ? u.btnSignUp : u.btnSignIn,
+      authBtn: s.authBusy ? (u.authBusy || '…') : (authUp ? u.btnSignUp : u.btnSignIn),
       authFootQ: authUp ? u.footUp : u.footIn,
       authSwitchLabel: authUp ? u.authTabIn : u.authTabUp,
       authEmailAc: authUp ? 'email' : 'username',
@@ -905,21 +1107,37 @@ class Component extends DCLogic {
       pwScoreLabel: (u.pwScores || [])[pw.score] || '',
       pwHint: pw.hints.length ? (u.pwAdd + ' ' + pw.hints.map(h => hintText[h]).join(' · ')) : '',
       pwBreached: pw.breached,
-      signInGoogle: () => this.signInWith('Google'),
-      signInICloud: () => this.signInWith('iCloud'),
+      signInGoogle: () => s.authLive ? window.HIFAuth.oauth('google') : this.signInWith('Google'),
+      signInICloud: () => s.authLive ? window.HIFAuth.oauth('apple') : this.signInWith('iCloud'),
+      showGoogle: !s.authLive || !!(s.authInfo && s.authInfo.providers.google),
+      showICloud: !s.authLive || !!(s.authInfo && s.authInfo.providers.apple),
+      showProviders: !s.authLive || !!(s.authInfo && (s.authInfo.providers.google || s.authInfo.providers.apple)),
+      noProviders: !!s.authLive && !(s.authInfo && (s.authInfo.providers.google || s.authInfo.providers.apple)),
+      authSentOn: !!s.authSent, authFormOn: !s.authSent,
+      authSentBody: String(u.authSentBody || '').replace('%s', s.authSent || ''),
+      authResend: () => window.HIFAuth.resend(s.authSent).then(r => r.error ? this.setState({ authErr:this.authMessage(r.error) }) : this.flash((u.authResent || 'Sent').toUpperCase())),
+      authUseOther: () => this.setState({ authSent:'', authErr:'' }),
+      authBusyOn: !!s.authBusy, authBtnOpacity: s.authBusy ? 0.6 : 1,
+      showPlanToggle: !s.authLive,
       submitAuth: () => this.submitEmailAuth(),
       obCount: String(s.follows.length),
-      obPicks: UNIVERSE.slice(0, 10).map(x => {
+      obQuery: s.obQuery || '',
+      onObQuery: e => { const v = e.target.value; this.setState({ obQuery: v }); this.liveSearch(v); },
+      obHasQuery: !!obQ, obNoQuery: !obQ,
+      obResults: obPool.map(x => {
         const on = s.follows.indexOf(x.ticker) !== -1;
-        return { ticker:x.ticker, name:x.name, stories:x.stories, box: on ? this.pal.accent : 'transparent', boxEdge: on ? this.pal.accent : this.pal.rule,
-          toggle: () => this.togglePick(x.ticker) };
+        return { ticker:x.ticker, name:x.name, box: on ? this.pal.accent : 'transparent', boxEdge: on ? this.pal.accent : this.pal.rule,
+          toggle: () => this.togglePick(x.ticker, x.name) };
       }),
+      obStatus: s.liveBusy && !obPool.length ? (u.searching || 'Searching…') : (!obPool.length ? u.noMatch : ''),
+      obHasPicks: s.follows.length > 0,
+      obChosen: s.follows.map(t => ({ ticker:t, removeLabel:'Remove ' + t, remove: () => this.togglePick(t) })),
       finishOnboard: () => {
-        const picks = s.follows.length ? s.follows : ['NVDA','AAPL','TSLA'];
-        this.setState({ onboarded:true, follows:picks, screen:'feed' });
-        this.flash(picks.length + ' / 3 · ' + u.tabList.toUpperCase());
+        if (!s.follows.length) return this.flash((u.obNeedOne || 'Pick at least one ticker').toUpperCase());
+        this.setState({ onboarded:true, screen:'feed', obQuery:'', liveHits:null });
+        this.flash(s.follows.length + ' / 3 · ' + u.tabList.toUpperCase());
       },
-      skipOnboard: () => this.setState({ onboarded:true, follows:['NVDA','AAPL','TSLA'], screen:'feed' }),
+      skipOnboard: () => this.setState({ onboarded:true, screen:'feed', obQuery:'', liveHits:null }),
       theme: s.theme || 'system',
       themes: [['system', u.themeSystem], ['light', u.themeLight], ['dark', u.themeDark]].map((x, i) => {
         const on = (s.theme || 'system') === x[0];
@@ -962,6 +1180,7 @@ class Component extends DCLogic {
         revoke: () => { this.setState(st => ({ revoked:(st.revoked || []).concat(x.id) })); this.flash(u.toastRevoked.toUpperCase()); }
       })),
       signOutAll: () => {
+        if (s.authLive) window.HIFAuth.signOut(true);
         this.setState({ revoked:['ipad','mac','win'], session:null, locked:false, screen:'feed', authPw:'', twofaSetup:false });
         this.flash(u.toastSignedOutAll.toUpperCase());
       },
@@ -979,16 +1198,18 @@ class Component extends DCLogic {
       onLockPw: e => this.setState({ lockPw:e.target.value, lockErr:'' }),
       unlock: () => {
         if (!(s.lockPw || '').length) return this.setState({ lockErr: u.authErrPw });
-        this.setState({ locked:false, lockPw:'', lockErr:'' });
-        this.touch();
+        const done = () => { this.setState({ locked:false, lockPw:'', lockErr:'' }); this.touch(); };
+        if (!s.authLive) return done();
+        // A real account unlocks only with its real password, checked by Supabase.
+        window.HIFAuth.signIn(sessionEmail, s.lockPw).then(r => r.error ? this.setState({ lockErr:this.authMessage(r.error), lockPw:'' }) : done());
       },
-      lockSignOut: () => this.setState({ session:null, locked:false, lockPw:'', lockErr:'' }),
+      lockSignOut: () => { if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, locked:false, lockPw:'', lockErr:'' }); },
       isFreeTier: isFree, isProTier: !isFree,
-      signOut: () => { this.setState({ session:null, locked:false, screen:'feed', authPw:'', authErr:'', twofaSetup:false }); this.flash(u.signOut.toUpperCase()); },
+      signOut: () => { if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, locked:false, screen:'feed', authPw:'', authErr:'', twofaSetup:false }); this.flash(u.signOut.toUpperCase()); },
       goPaywall: () => this.go('paywall'),
       goSearch: () => this.go('search'),
       back: () => this.go(s.prev || 'feed'),
-      upgrade: () => { this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
+      upgrade: () => { if (s.authLive) return this.flash((u.payComing || 'Payments are coming soon').toUpperCase()); this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
       tabs: [this.tab('feed',u.tabFeed), this.tab('watchlist',u.tabList), this.tab('search',u.tabAdd), this.tab('more',u.tabMore), this.tab('account',u.tabYou)],
       scanLabel: isFree ? u.delayLabel : u.lastScan,
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
@@ -996,10 +1217,10 @@ class Component extends DCLogic {
       feedFollowingOn: s.feedTab === 'following', feedFollowingOff: s.feedTab !== 'following',
       feedMarketOn: s.feedTab === 'market', feedMarketOff: s.feedTab !== 'market',
       feed,
-      follows: s.follows.map(t => Object.assign({}, FOLLOWS[t], {
-        latest: FOLLOWS[t].latest[L],
-        down: !FOLLOWS[t].up,
-        spark: this.sparkEl(t, FOLLOWS[t].price, FOLLOWS[t].move, FOLLOWS[t].up),
+      follows: s.follows.map(t => rec(t)).map(r => { const t = r.ticker; return Object.assign({}, r, {
+        latest: r.latest[L],
+        down: !r.up,
+        spark: r.liveOnly && r.price === '—' ? null : this.sparkEl(t, r.price, r.move, r.up),
         pushLabel: isFree ? (u.pro + ' · push') : (s.push[t] !== false ? u.pushOn : u.pushOff),
         togglePush: event => {
           if (event && event.stopPropagation) event.stopPropagation();
@@ -1007,16 +1228,17 @@ class Component extends DCLogic {
           this.setState(st => ({ push: Object.assign({}, st.push, { [t]: st.push[t] === false }) }));
         },
         alert: isFree ? u.pushOff : (s.push[t] !== false ? u.pushOn : u.pushOff),
-        open: () => { this.setState({ selected:t }); this.go('detail'); },
-        keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:t }); this.go('detail'); }, event)
-      })),
+        open: () => this.openTicker(t),
+        keyOpen: event => this.activateFromKeyboard(() => this.openTicker(t), event)
+      }); }),
       atCap: isFree && s.follows.length >= 3,
       capLabel: isFree ? s.follows.length + ' / 3' : s.follows.length + ' / ∞',
       capWarn: isFree && s.follows.length >= 3, capOk: !(isFree && s.follows.length >= 3),
       intervalLabel: isFree ? '24h' : '30m',
       query: s.query,
-      onQuery: e => this.setState({ query: e.target.value }),
-      resultsLabel: (q ? u.match + ' · ' + q : u.topVolume) + ' · ' + results.length,
+      onQuery: e => { const v = e.target.value; this.setState({ query: v }); this.liveSearch(v); },
+      resultsLabel: s.liveBusy && !results.length ? (u.searching || 'Searching…') : u.match + ' · ' + q + ' · ' + results.length,
+      hasQuery: !!q, noQuery: !q, noResults: !!q && !results.length && !s.liveBusy,
       filters: [['all', u.filterAll], ['vol', u.filterVol], ['earn', u.filterEarn], ['stories', u.filterStories]]
         .map(x => ({ key:x[0], label:x[1], on: s.screenFilter === x[0], off: s.screenFilter !== x[0], set: () => this.setState({ screenFilter:x[0] }) })),
       analystFull: !isFree, analystLocked: isFree,
@@ -1026,8 +1248,11 @@ class Component extends DCLogic {
         analystDetail: this.analystSplit(stock.analystDetail),
         buyW: analystBar[0], holdW: analystBar[1], sellW: analystBar[2],
         lastEarn: stock.lastEarn || '—' }),
-      chart: this.chartEl(stock),
-      stockNews: NEWS.filter(n => n.ticker === stock.ticker).concat(NEWS.slice(0,2)).slice(0,3).map(n => Object.assign({}, n, { headline: n.headline[L] })),
+      // A live-only ticker has no price until its quote arrives; draw nothing rather than NaN.
+      chart: stock.liveOnly && stock.price === '—' ? null : this.chartEl(stock),
+      stockNews: (stock.liveOnly || ((s.liveNews || {})[stock.ticker] || []).length)
+        ? ((s.liveNews || {})[stock.ticker] || []).slice(0, 3).map(n => ({ headline:n.headline, source:n.source, stamp:n.stamp }))
+        : NEWS.filter(n => n.ticker === stock.ticker).concat(NEWS.slice(0,2)).slice(0,3).map(n => Object.assign({}, n, { headline: n.headline[L] })),
       freqNote: isFree ? u.freqFree : u.freqPro,
       detailActionLabel: following ? (isFree ? u.enablePush : u.pushEnabled.replace('%s', stock.ticker)) : u.addToList.replace('%s', stock.ticker),
       primaryDetailAction: () => {
