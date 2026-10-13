@@ -63,8 +63,14 @@ export const SYSTEM = [
   'Rules for every summary:',
   '- Use ONLY information in the story. Do not add figures, names, causes or opinions, and do not generalize ' +
     '(one company\'s deliveries are not the whole market\'s).',
-  '- At most 4 sentences and under 600 characters: what happened, the 2-3 most important figures, and why it ' +
-    'matters for the company. Do not list every metric.',
+  '- At most 4 sentences and under 600 characters: what happened and the 2-3 most important figures. Say why it ' +
+    'matters for the company only if the story itself explains it. Never end with a general remark of your own ' +
+    '("this reflects...", "this may influence investors..."): when the facts are told, stop. A short story gets a ' +
+    'short summary. Do not list every metric.',
+  '- If the story is a list about many companies (top downgrades, movers), summarize only the part about the ' +
+    'ticker\'s company and say nothing about the rest of the list.',
+  '- Analyst rating changes: name both ratings and the target as the story gives them ("de la Overweight la ' +
+    'Neutral", "ținta de preț redusă de la 98 la 54 de dolari").',
   '- Attribute every figure and event to the company it belongs to in the story. The company named after ' +
     '"Ticker:" is the reader\'s interest: lead with what the story says about it. If the story is mainly about ' +
     'another company (a rival, a supplier), say so and name that company; never move its figures to the ticker\'s ' +
@@ -322,6 +328,18 @@ export function fixRomanian(s) {
 // At most `max` characters, cut after the last whole sentence that fits. A sentence ends
 // at . ! or ? followed by a space and a capital (or the end), so "1.500%" and "aprox. 13"
 // don't count as ends.
+// A closing sentence that only comments ("Această schimbare reflectă...", "Aceste cifre
+// arată...", "...poate influența deciziile investitorilor"), which the model adds even when
+// told not to. Dropped when the summary has other sentences.
+const FILLER = /^(?:(?:Această|Acest|Aceste|Acestea|Aceasta)(?:\s+\p{L}+)?\s+(?:reflectă|indică|arată|evidențiază|subliniază|sugerează|consolidează|demonstrează|confirmă)|.*\bpoate (?:influența|afecta) (?:deciziile|percepția|sentimentul) investitorilor)/u;
+export function dropFiller(s) {
+  const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)|$)/g);
+  if (!parts || parts.length < 2) return s;
+  const last = parts[parts.length - 1].trim();
+  // A sentence with a figure carries facts, so it stays.
+  return FILLER.test(last) && !/\d/.test(last) ? parts.slice(0, -1).join('').trim() : s;
+}
+
 export function trimSentences(s, max = 650) {
   if (s.length <= max) return s;
   const ends = [];
@@ -345,7 +363,7 @@ export function cleanSummary(text, lang = 'ro') {
     .replace(/\s+/g, ' ')
     .trim();
   s = s.replace(/^["„“”«»']+|["„“”«»']+$/g, '').trim();
-  return trimSentences(lang === 'ro' ? fixRomanian(s) : s);
+  return trimSentences(lang === 'ro' ? dropFiller(fixRomanian(s)) : s);
 }
 // A reply worth saving: prose of a sensible length, not a tool call or JSON.
 export function usable(s) {
