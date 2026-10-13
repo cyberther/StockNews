@@ -75,6 +75,27 @@ EARNINGS, CHART). Daily caps are tracked across instances when `USAGE_SECRET` is
 Several free tiers are for personal or non-commercial use: check each provider's terms
 before showing its data in a public app, and use one account per provider.
 
+## 2c. Bucharest Stock Exchange (BVB)
+
+Romanian shares use Yahoo-style symbols with `.RO` (`TLV.RO`, `SNP.RO`, `H2O.RO`), so they
+never clash with US tickers (`SNP` alone is a US listing).
+
+| In the app | Source | Notes |
+| --- | --- | --- |
+| Search, names | `templates/shared/hif-bvb.js` | 305 tradable shares (main market and AeRO), from BVB's share list |
+| Price, change, charts | Yahoo via the gateway | delayed; Finnhub only as a stale fallback for quotes |
+| Company news | Romanian press RSS (ZF, Financial Intelligence, Profit.ro, Economica.net, InvestEnergy) | headline, short description and link only; matched by company name, alias or `(TLV)` |
+| BVB feed tab | `/api/finnhub?path=/ro-news` | every story naming a listed company, cached 10 minutes |
+
+The backup providers (Twelve Data, FMP, Alpha Vantage) are never asked about `.RO`
+symbols. Analyst ratings and the earnings calendar stay empty for BVB shares: BVB's
+financial calendar and current reports are on bvb.ro, whose terms don't allow reuse
+without BVB's written consent.
+
+Refresh the catalog with `node tools/update-bvb-catalog.mjs` (downloads BVB's export).
+BVB's site terms limit its content to personal use: ask BVB for written consent (or a
+market-data licence) before a public or commercial launch.
+
 ## 3. When to refresh
 
 The detail page loads automatically — no polling:
