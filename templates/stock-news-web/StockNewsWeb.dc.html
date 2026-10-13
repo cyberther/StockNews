@@ -114,6 +114,7 @@
 </div>
 <div style="border-top:1px solid var(--s-rule);margin-top:0"></div>
 <sc-if value="{{ bvbEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.bvbEmpty }}</div></sc-if>
+<sc-if value="{{ feedLoading }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute)">{{ ui.feedLoading }}</div></sc-if>
 <sc-if value="{{ feedEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.feedEmpty }}</div></sc-if>
 <sc-for list="{{ feed }}" as="item" hint-placeholder-count="4">
 <sc-if value="{{ item.hasDayHead }}" hint-placeholder-val="{{ false }}"><h3 style="margin:0;padding:14px var(--gx) 8px;border-bottom:1px solid var(--s-rule);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ item.dayHead }}</h3></sc-if>
@@ -142,7 +143,7 @@
 <sc-if value="{{ item.hasTranslate }}" hint-placeholder-val="{{ false }}"><a href="{{ item.translateHref }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;font-size:11px;color:var(--s-mute);text-decoration:underline;text-underline-offset:3px">{{ item.translateLabel }}</a></sc-if>
 </div>
 </div>
-<div class="m-feed-side" style="display:grid;grid-template-columns:1fr;gap:1px;background:var(--s-rule)">
+<div class="m-feed-side" style="display:grid;grid-template-columns:1fr;gap:1px;background:var(--s-rule);align-self:start">
 <div style="background:var(--s-panel);padding:8px 10px;grid-column:1 / -1"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.source }}</div><div style="font-size:12px;font-weight:600;margin-top:1px">{{ item.source }}</div></div>
 <button onClick="{{ item.pin }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="grid-column:1 / -1;min-height:34px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;text-align:left;padding:0 10px;cursor:pointer;display:flex;align-items:center;gap:8px">
 <sc-if value="{{ item.pinned }}" hint-placeholder-val="{{ false }}"><span style="width:7px;height:7px;flex:none;background:var(--color-accent)"></span></sc-if>
@@ -1512,6 +1513,12 @@ class Component extends DCLogic {
     if (this._held !== undefined && held !== this._held) this.syncPositions();
     this._held = held;
     this.syncSummaries();
+    // The US Market and BVB tabs load their stories the first time the feed shows them,
+    // including when the app opens on one of them.
+    if (this.state.screen === 'feed' && this.state.session) {
+      if (this.state.feedTab === 'market' && !this._mktAsked) { this._mktAsked = true; this.syncMarket(); }
+      if (this.state.feedTab === 'bvb' && !this._bvbAsked) { this._bvbAsked = true; this.syncBvb(); }
+    }
     const pfSig = this.state.screen === 'portfolio' ? (this.state.pfRange || '1mo') + '|' + held : '';
     if (pfSig && pfSig !== this._pfSig) this.syncPortfolioCharts();
     this._pfSig = pfSig;
@@ -2842,7 +2849,10 @@ class Component extends DCLogic {
       scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '—'),
       feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : s.feedTab === 'bvb' ? u.bvbSub : u.topVolume,
       bvbEmpty: s.feedTab === 'bvb' && !(s.roNews || []).length,
-      feedEmpty: s.feedTab !== 'bvb' && !feed.length,
+      // Stories still on their way (none of the tab's tickers answered yet) read as loading,
+      // not as "no stories".
+      feedLoading: s.feedTab !== 'bvb' && !feed.length && !((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t])) && (s.feedTab === 'market' || s.follows.length > 0),
+      feedEmpty: s.feedTab !== 'bvb' && !feed.length && ((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t]) || (s.feedTab !== 'market' && !s.follows.length)),
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
       setFeedMarket: () => { this.setState({ feedTab:'market' }); this.syncMarket(); },
       setFeedBvb: () => { this.setState({ feedTab:'bvb' }); this.syncBvb(); },
