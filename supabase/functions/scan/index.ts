@@ -155,6 +155,34 @@ async function companyNews(ticker: string, name: string, errors: string[]): Prom
   }
 }
 
+// The BVB feed tab: every Romanian press story that names a listed company, whoever follows
+// it. Stored like the rest so the AI summary job writes summaries for that tab too; alerts
+// still go only to users who follow the company. Ids match companyNews() for .RO tickers.
+async function bvbMarketNews(errors: string[]): Promise<Story[]> {
+  const appUrl = env('APP_URL');
+  if (!appUrl) return [];
+  try {
+    const res = await fetch(new URL('api/finnhub?path=/ro-news', appUrl).toString(), { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) { errors.push(`bvb feed: gateway ${res.status}`); return []; }
+    const rows = await res.json();
+    if (!Array.isArray(rows)) return [];
+    const since = Date.now() - 2 * 86400000;
+    return rows.filter(n => n && n.id && n.headline && n.datetime * 1000 > since && isBvb(String(n.related || '')) && TICKER_RE.test(n.related))
+      .slice(0, 40).map(n => ({
+        id: `${n.related}:${n.id}`,
+        ticker: n.related,
+        headline: String(n.headline).slice(0, 500),
+        source: n.source ? String(n.source).slice(0, 120) : null,
+        url: /^https?:\/\//.test(n.url || '') ? String(n.url).slice(0, 1000) : null,
+        summary: n.summary ? String(n.summary).replace(/\s+/g, ' ').trim().slice(0, 400) : null,
+        published_at: new Date(n.datetime * 1000).toISOString(),
+      }));
+  } catch (e) {
+    errors.push(`bvb feed: ${(e as Error).message}`);
+    return [];
+  }
+}
+
 // One alert per user per run: the newest story leads, the rest are counted.
 function message(stories: Story[], appUrl: string) {
   const s = [...stories].sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
@@ -198,7 +226,9 @@ Deno.serve(async (req) => {
     } catch { names.set(t, ''); }
   }
 
-  const found = (await pool(tickers, CONCURRENCY, t => companyNews(t, names.get(t) || '', errors))).flat();
+  const followed = (await pool(tickers, CONCURRENCY, t => companyNews(t, names.get(t) || '', errors))).flat();
+  const seen = new Set(followed.map(s => s.id));
+  const found = followed.concat((await bvbMarketNews(errors)).filter(s => !seen.has(s.id)));
 
   // Insert what is new; ON CONFLICT DO NOTHING returns only the rows actually inserted.
   const fresh: Story[] = [];
