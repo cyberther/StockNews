@@ -13,7 +13,7 @@
 //   SUMMARY_SECRET                   the batch job's secret (Vault 'summary_secret')
 //   LMSTUDIO_URL    default http://127.0.0.1:1234/v1
 //   LMSTUDIO_MODEL  default openai/gpt-oss-20b
-//   LMSTUDIO_THREADS  default 3: CPU threads the model is loaded with (tools/lmstudio-model.mjs); 0 = LM Studio's choice
+//   LMSTUDIO_THREADS  auto (default: 4, or 3 during a remote desktop session) | a number | 0 = LM Studio's choice
 //   SUMMARY_LANG    default ro,en,de (comma-separated, in order of preference)
 //   BATCH_LIMIT     default 10 summaries a run
 //   MAX_AGE_HOURS   default 24
@@ -30,7 +30,7 @@ import { join } from 'node:path';
 import https from 'node:https';
 import http from 'node:http';
 import zlib from 'node:zlib';
-import { ensureModel } from './lmstudio-model.mjs';
+import { ensureModel, pickThreads } from './lmstudio-model.mjs';
 
 const ENV_FILE = join(homedir(), '.config/market-pulse/summarizer.env');
 if (existsSync(ENV_FILE)) {
@@ -46,7 +46,7 @@ const cfg = {
   secret: env.SUMMARY_SECRET || '',
   lmUrl: (env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1').replace(/\/$/, ''),
   model: env.LMSTUDIO_MODEL || 'openai/gpt-oss-20b',
-  threads: env.LMSTUDIO_THREADS === undefined ? 3 : Math.max(0, Math.min(Number(env.LMSTUDIO_THREADS) || 0, 64)),
+  threads: env.LMSTUDIO_THREADS,
   langs: [...new Set(String(env.SUMMARY_LANG || 'ro,en,de').toLowerCase().split(/[\s,]+/).filter(l => ['ro', 'en', 'de'].includes(l)))],
   limit: Math.max(1, Math.min(Number(env.BATCH_LIMIT) || 10, 100)),
   readArticles: env.READ_ARTICLES !== '0',
@@ -430,7 +430,7 @@ async function main() {
     const r = await fetch(`${cfg.lmUrl}/models`, { signal: AbortSignal.timeout(5000) });
     if (!r.ok) throw new Error(String(r.status));
   } catch (e) { log('LM Studio is not answering at', cfg.lmUrl, '- nothing to do this run'); return; }
-  log(await ensureModel({ model: cfg.model, threads: cfg.threads, wsUrl: cfg.lmUrl.replace(/^http/, 'ws').replace(/\/v1$/, '') }));
+  log(await ensureModel({ model: cfg.model, threads: pickThreads(cfg.threads), wsUrl: cfg.lmUrl.replace(/^http/, 'ws').replace(/\/v1$/, '') }));
 
   if (!cfg.langs.length) { log('SUMMARY_LANG has no supported language (ro, en, de)'); process.exitCode = 2; return; }
   // What each language still needs, in the server's priority order; then one queue in which
