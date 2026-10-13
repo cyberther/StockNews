@@ -271,6 +271,8 @@ async function recommendation(symbol, token){
 // Bucharest listings come from the local BVB catalog (hif-bvb.js), US ones from Finnhub;
 // the catalog's matches go first when the query names a Romanian company or symbol.
 async function search(q, token){
+  // "NVDA.US" is how the apps show US listings; the providers know it as "NVDA".
+  q = String(q || '').replace(/\.us$/i, '');
   if (!q) return null;
   const local = window.HIFBVB ? window.HIFBVB.search(q, 6).map(r => ({ ticker: r.ticker, name: r.name, exchange: r.exchange })) : [];
   if (!available(token)) return local.length ? local : null;

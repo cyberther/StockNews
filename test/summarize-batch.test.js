@@ -40,3 +40,35 @@ test('tool-call and JSON replies are not usable', () => {
   assert.equal(usable('{"name": "summarize", "parameters": {"text": "x"}}'), false);
   assert.equal(usable('Apple și-a crescut cota de piață la 22% în trimestrul al treilea.'), true);
 });
+
+import { robotsAllow, extractArticleText, isPaywall } from '../tools/summarize-batch.mjs';
+
+test('robots.txt: the "*" group applies, the longest rule wins, Allow wins a tie', () => {
+  const txt = 'User-agent: Googlebot\nDisallow: /\n\nUser-agent: *\nDisallow: /private/\nAllow: /private/press/\nDisallow: /*.pdf$\n';
+  assert.equal(robotsAllow(txt, '/news/story-1'), true);
+  assert.equal(robotsAllow(txt, '/private/notes'), false);
+  assert.equal(robotsAllow(txt, '/private/press/release'), true);
+  assert.equal(robotsAllow(txt, '/files/report.pdf'), false);
+  assert.equal(robotsAllow('', '/anything'), true);
+  assert.equal(robotsAllow('User-agent: *\nDisallow:\n', '/x'), true);
+  assert.equal(robotsAllow('User-agent: MarketPulseSummarizer\nDisallow: /\nUser-agent: *\nAllow: /\n', '/x'), false);
+});
+
+test('article text: JSON-LD articleBody first, then <article> paragraphs, then an article-body block', () => {
+  const body = 'Compania a raportat un profit de 120 de milioane de lei în trimestrul al treilea, în creștere cu 15%. '.repeat(6);
+  const ld = `<script type="application/ld+json">${JSON.stringify({ '@type': 'NewsArticle', articleBody: body })}</script>`;
+  assert.ok(extractArticleText(`<html>${ld}<p>other</p></html>`).startsWith('Compania a raportat'));
+  const paras = '<article><p>Advertisement</p>' + `<p>${body}</p>`.repeat(2) + '</article><p>Cookie policy text that is long enough to count as a paragraph here.</p>';
+  const t = extractArticleText(paras);
+  assert.ok(t.length > 400 && !/Advertisement|Cookie/.test(t));
+  const div = `<div class="article-body"><script>var x=1</script><span>${body}</span></div>`;
+  assert.ok(extractArticleText(div).startsWith('Compania a raportat'));
+  assert.equal(extractArticleText('<p>short</p>'), '');
+  assert.ok(extractArticleText(`<article><p>${body.repeat(20)}</p></article>`).length <= 3500);
+});
+
+test('a subscription wall is not taken for the article', () => {
+  assert.equal(isPaywall('Poți să accesezi acest articol doar dacă ești abonat ZFCorporate.ro - platforma completă de informații.'), true);
+  assert.equal(isPaywall('Subscribe to read the full story. Already a subscriber? Sign in.'), true);
+  assert.equal(isPaywall('Nvidia a livrat 678.000 de cipuri în China în primul semestru, cu 44% mai puține decât anul trecut.'), false);
+});

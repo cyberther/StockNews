@@ -150,10 +150,19 @@ summary and save summaries.
 
    To keep it running while you're logged out: `loginctl enable-linger $USER`.
 
-The model only sees each story's headline and the source's short summary; it never fetches
-articles. On a 4-core CPU without a GPU, gpt-oss-20b takes about a minute per story, so a
-run handles at most 15 (`BATCH_LIMIT`), newest first, from the last 24 hours
+The summary is written from the whole article where the publisher allows it: the job
+fetches the page as `MarketPulseSummarizer`, only where `robots.txt` permits, and gives the
+model up to 3,500 characters of the article text. Nothing but the short summary is stored.
+Blocked or paywalled pages fall back to the headline and the source's own snippet; the
+summary's `model` field ends in `· article` or `· snippet` to show which. Set
+`READ_ARTICLES=0` to always use the snippet.
+
+On a 4-core CPU without a GPU, gpt-oss-20b takes 1-2.5 minutes per article, so a run
+handles at most 10 stories (`BATCH_LIMIT`), newest first, from the last 24 hours
 (`MAX_AGE_HOURS`). Stories without a summary keep showing the source's text.
+
+After updating `supabase/summaries.sql`, run it again in the SQL Editor: the job needs the
+story links that `summaries_pending` now returns.
 
 ## Checking it works
 
