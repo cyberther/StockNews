@@ -1,0 +1,11 @@
+# Runs a few minutes after each background scan (Supabase cron at :00 and :30).
+[Unit]
+Description=Run Market Pulse AI news summaries every 30 minutes
+
+[Timer]
+OnCalendar=*-*-* *:07,37:00
+Persistent=true
+RandomizedDelaySec=60
+
+[Install]
+WantedBy=timers.target

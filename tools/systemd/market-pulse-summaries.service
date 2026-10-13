@@ -1,0 +1,17 @@
+# AI news summaries from the local model (tools/summarize-batch.mjs). User unit:
+#   cp tools/systemd/market-pulse-summaries.* ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now market-pulse-summaries.timer
+# Edit WorkingDirectory if the repository lives elsewhere.
+[Unit]
+Description=Market Pulse AI news summaries (LM Studio)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/StockNews
+ExecStart=/usr/bin/env node tools/summarize-batch.mjs
+# Background work: lowest CPU and IO priority, so the desktop stays responsive.
+Nice=15
+CPUWeight=20
+IOSchedulingClass=idle
+TimeoutStartSec=45min
