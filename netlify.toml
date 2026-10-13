@@ -17,3 +17,7 @@
   from = "/mobile"
   to = "/templates/stock-news-dark/StockNewsDark.dc.html"
   status = 302
+
+
+# Security headers (CSP and others) are written to dist/_headers by scripts/build-netlify.mjs,
+# which takes the Supabase address from the environment.
