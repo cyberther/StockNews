@@ -115,9 +115,10 @@ read these counters, never the service-role key.
 
 ## AI summaries (optional)
 
-A batch job on a PC running LM Studio writes short summaries of new stories (Romanian by
-default) and the apps show them in the feed, labelled "Rezumat AI", when the reader's
-content language matches. The PC gets a secret that can only list stories still needing a
+A batch job on a PC running LM Studio writes short summaries of new stories in Romanian,
+English and German, and the apps show them in the feed, labelled "AI summary", in the
+reader's content language. A story is summarized once per language and every reader sees
+the same summary. The PC gets a secret that can only list stories still needing a
 summary and save summaries.
 
 1. **Supabase SQL Editor:** run all of `supabase/summaries.sql`, then store the job's secret
@@ -134,6 +135,7 @@ summary and save summaries.
    SUPABASE_ANON_KEY=<the project's anon key>
    SUMMARY_SECRET=<summary secret>
    LMSTUDIO_MODEL=openai/gpt-oss-20b
+   SUMMARY_LANG=ro,en,de
    ```
 
    Run it once by hand: `node tools/summarize-batch.mjs`.
@@ -157,9 +159,11 @@ Blocked or paywalled pages fall back to the headline and the source's own snippe
 summary's `model` field ends in `· article` or `· snippet` to show which. Set
 `READ_ARTICLES=0` to always use the snippet.
 
-On a 4-core CPU without a GPU, gpt-oss-20b takes 1-2.5 minutes per article, so a run
-handles at most 10 stories (`BATCH_LIMIT`), newest first, from the last 24 hours
-(`MAX_AGE_HOURS`). Stories without a summary keep showing the source's text.
+On a 4-core CPU without a GPU, gpt-oss-20b takes 2-5 minutes per summary, so a run writes
+at most 10 summaries (`BATCH_LIMIT`) for stories from the last 24 hours (`MAX_AGE_HOURS`):
+stories for tickers someone follows or holds, and BVB stories, first, then the newest. A
+story gets all its languages (`SUMMARY_LANG`, in that order) before the next one, and its
+article is read once for all of them. Stories without a summary keep showing the source's text.
 
 After updating `supabase/summaries.sql`, run it again in the SQL Editor: the job needs the
 story links that `summaries_pending` now returns.
