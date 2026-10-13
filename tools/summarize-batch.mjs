@@ -65,7 +65,11 @@ export const SYSTEM = [
     '(one company\'s deliveries are not the whole market\'s).',
   '- At most 4 sentences and under 600 characters: what happened, the 2-3 most important figures, and why it ' +
     'matters for the company. Do not list every metric.',
-  '- If the story is about several companies, focus on the one named after "Ticker:".',
+  '- Attribute every figure and event to the company it belongs to in the story. The company named after ' +
+    '"Ticker:" is the reader\'s interest: lead with what the story says about it. If the story is mainly about ' +
+    'another company (a rival, a supplier), say so and name that company; never move its figures to the ticker\'s ' +
+    'company. When more than one company appears, name the company in every sentence that gives a figure ' +
+    '("Lucid a livrat 3.806 vehicule"), never just "the company".',
   '- Keep tickers, company names and figures exactly as in the story. Write a fall as "fell 1.2%", never with a minus sign.',
   '- Third person; past tense for what happened. Reply with the summary only: no title, no quotation marks, no ' +
     'bullet points, no introduction.',
@@ -281,13 +285,11 @@ const RO_TERMS = [
   ['sunt optimist', 'sunt optimiști'],
   ['sunt pesimist', 'sunt pesimiști'],
   // Gender and spelling slips the model makes in otherwise Romanian text.
-  ['un pierdere', 'o pierdere'],
-  ['un marjă', 'o marjă'],
-  ['un lună', 'o lună'],
-  ['un creștere', 'o creștere'],
-  ['un scădere', 'o scădere'],
-  ['un majorare', 'o majorare'],
-  ['un reducere', 'o reducere'],
+  ...['pierdere', 'marjă', 'lună', 'creștere', 'scădere', 'majorare', 'reducere', 'rețea', 'companie', 'piață',
+    'investiție', 'cotă', 'prognoză', 'estimare', 'livrare', 'vânzare', 'ofertă', 'achiziție', 'fuziune', 'tranzacție',
+    'decizie', 'strategie', 'platformă', 'fabrică', 'uzină', 'acțiune', 'evaluare', 'recomandare', 'dobândă',
+    'datorie', 'producție', 'cerere', 'întârziere', 'anchetă', 'amendă', 'licență', 'parte', 'serie']
+    .map(n => ['un ' + n, 'o ' + n]),
   ['superând', 'depășind'],
   ['analistilor', 'analiștilor'],
   ['analistii', 'analiștii'],
@@ -306,6 +308,11 @@ RO_TERMS.forEach(([en, ro, suffixed]) => {
 export function fixRomanian(s) {
   let out = s;
   for (const [re, ro] of RO_RULES) out = out.replace(re, ro);
+  // Numbers: "$6,2 trilioni de dolari" -> "6,2 trilioane de dolari"; "1 500 %" -> "1.500%".
+  out = out.replace(/(?<![\p{L}])trilioni(?![\p{L}])/gu, 'trilioane')
+    .replace(/\$\s?(\d[\d.,]*)\s+(mii|milioane|miliarde|trilioane)\s+de\s+dolari/g, '$1 $2 de dolari')
+    .replace(/(?<![\d.,])(\d{1,3})[ \u00a0\u202f](\d{3})(?![\d])/g, '$1.$2')
+    .replace(/(\d)[ \u00a0\u202f]%/g, '$1%');
   // "Tesla acționările au scăzut" -> "Acțiunile Tesla au scăzut".
   out = out.replace(/(^|[.!?]\s+)([A-Z][\w&.-]*(?: [A-Z][\w&.-]*)*) acționările\b/g, (m, p, name) => p + 'Acțiunile ' + name)
     .replace(/(?<![A-Za-zĂÂÎȘȚăâîșț])acționările(?![A-Za-zĂÂÎȘȚăâîșț])/g, 'acțiunile');
