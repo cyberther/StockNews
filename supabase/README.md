@@ -113,6 +113,48 @@ read these counters, never the service-role key.
 
    Without `HEALTH_TOKEN` the endpoint answers 404; with a wrong token, 401.
 
+## AI summaries (optional)
+
+A batch job on a PC running LM Studio writes short summaries of new stories (Romanian by
+default) and the apps show them in the feed, labelled "Rezumat AI", when the reader's
+content language matches. The PC gets a secret that can only list stories still needing a
+summary and save summaries.
+
+1. **Supabase SQL Editor:** run all of `supabase/summaries.sql`, then store the job's secret
+   (a long random string, `openssl rand -hex 32`):
+
+   ```sql
+   select vault.create_secret('<summary secret>', 'summary_secret');
+   ```
+
+2. **On the PC**, create `~/.config/market-pulse/summarizer.env` (mode 600):
+
+   ```
+   SUPABASE_URL=https://<project-ref>.supabase.co
+   SUPABASE_ANON_KEY=<the project's anon key>
+   SUMMARY_SECRET=<summary secret>
+   LMSTUDIO_MODEL=openai/gpt-oss-20b
+   ```
+
+   Run it once by hand: `node tools/summarize-batch.mjs`.
+
+3. **Every 30 minutes**, a few minutes after each scan, at low priority:
+
+   ```bash
+   mkdir -p ~/.config/systemd/user
+   cp tools/systemd/market-pulse-summaries.* ~/.config/systemd/user/
+   systemctl --user daemon-reload
+   systemctl --user enable --now market-pulse-summaries.timer
+   journalctl --user -u market-pulse-summaries -n 30
+   ```
+
+   To keep it running while you're logged out: `loginctl enable-linger $USER`.
+
+The model only sees each story's headline and the source's short summary; it never fetches
+articles. On a 4-core CPU without a GPU, gpt-oss-20b takes about a minute per story, so a
+run handles at most 15 (`BATCH_LIMIT`), newest first, from the last 24 hours
+(`MAX_AGE_HOURS`). Stories without a summary keep showing the source's text.
+
 ## Checking it works
 
 - Run the scan by hand:
