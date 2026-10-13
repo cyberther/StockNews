@@ -13,10 +13,17 @@
   to = "/templates/stock-news-web/StockNewsWeb.dc.html"
   status = 302
 
+# The mobile app is no longer published (scripts/build-netlify.mjs); old links land on the
+# web app, which has its own phone layout.
 [[redirects]]
   from = "/mobile"
-  to = "/templates/stock-news-dark/StockNewsDark.dc.html"
-  status = 302
+  to = "/templates/stock-news-web/StockNewsWeb.dc.html"
+  status = 301
+
+[[redirects]]
+  from = "/templates/stock-news-dark/*"
+  to = "/templates/stock-news-web/StockNewsWeb.dc.html"
+  status = 301
 
 
 # Security headers (CSP and others) are written to dist/_headers by scripts/build-netlify.mjs,
