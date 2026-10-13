@@ -102,3 +102,11 @@ test('a failing feed is skipped; the others still answer', async () => {
   };
   assert.equal((await companyNews('TGN.RO')).length, 1);
 });
+
+test('IAR Brașov is IARV, not the exchange named later in the headline', async () => {
+  feeds([{ title: 'IAR Braşov, companie de stat, a pierdut aproape 100 mil. lei din capitalizare în două zile la Bursa de Valori Bucureşti', link: 'https://zf.ro/iar' },
+    { title: 'Iar acțiunile au crescut, spune Bursa de Valori București', link: 'https://zf.ro/iar2' }]);
+  const m = await marketNews(10);
+  assert.equal(m.find(x => x.url === 'https://zf.ro/iar').related, 'IARV.RO');
+  assert.equal(m.find(x => x.url === 'https://zf.ro/iar2').related, 'BVB.RO');
+});
