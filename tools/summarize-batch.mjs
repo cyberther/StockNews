@@ -244,8 +244,30 @@ const RO_TERMS = [
   ['market cap', 'valoare de piață'],
   ['buyback-ul', 'programul de răscumpărare', true],
   ['buyback', 'program de răscumpărare'],
+  ['futures-urile', 'contractele futures', true],
+  ['futures-urilor', 'contractelor futures', true],
+  ['în premergerea', 'înaintea', true],
+  ['unui board de alimentare', 'unei plăci de alimentare'],
+  ['un board de alimentare', 'o placă de alimentare'],
+  ['board-ul de alimentare', 'placa de alimentare', true],
+  ['board de alimentare', 'placă de alimentare'],
+  ['data-centerelor', 'centrelor de date', true],
+  ['data-centerele', 'centrele de date', true],
+  ['data-centerului', 'centrului de date', true],
+  ['data-centerul', 'centrul de date', true],
+  ['data-centere', 'centre de date', true],
+  ['data-center', 'centru de date', true],
+  ['data centerelor', 'centrelor de date'],
+  ['data centerele', 'centrele de date'],
+  ['data center', 'centru de date'],
   ['bullish', 'optimist'],
-  ['bearish', 'pesimist']
+  ['bearish', 'pesimist'],
+  // Plural subjects ("investitorii rămân optimist"): the adjective agrees. Runs after
+  // bullish/bearish, which give the singular.
+  ['rămân optimist', 'rămân optimiști'],
+  ['rămân pesimist', 'rămân pesimiști'],
+  ['sunt optimist', 'sunt optimiști'],
+  ['sunt pesimist', 'sunt pesimiști']
 ];
 // A match may not start or end inside a word ("închidere", "enclosed", "closely").
 const LETTER = 'A-Za-zĂÂÎȘȚăâîșț';
@@ -267,6 +289,8 @@ export function fixRomanian(s) {
 export function cleanSummary(text, lang = cfg.lang) {
   let s = String(text || '')
     .replace(/ş/g, 'ș').replace(/Ş/g, 'Ș').replace(/ţ/g, 'ț').replace(/Ţ/g, 'Ț')
+    // Non-breaking and other Unicode hyphens ("data‑center") to a plain one.
+    .replace(/[\u2010\u2011]/g, '-')
     .replace(/<think>[\s\S]*?<\/think>/g, '')
     .replace(/^\s*(rezumat|summary|zusammenfassung)\s*:\s*/i, '')
     .replace(/\*\*/g, '')

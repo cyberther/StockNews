@@ -21,6 +21,22 @@ test('common finance anglicisms become grammatical Romanian', () => {
   for (const [input, want] of cases) assert.equal(fixRomanian(input), want);
 });
 
+test('the real NVDA summaries come out in plain Romanian', () => {
+  const cases = [
+    ['În premergerea rapoartelor trimestriale, futures-urile Nasdaq au scăzut cu 0,6%.',
+      'Înaintea rapoartelor trimestriale, contractele futures Nasdaq au scăzut cu 0,6%.'],
+    ['Navitas a crescut după lansarea unui board de alimentare cu putere de 24 kW.',
+      'Navitas a crescut după lansarea unei plăci de alimentare cu putere de 24 kW.'],
+    ['Investitorii retail pe Stocktwits rămân optimist, iar analiștii sunt bearish.',
+      'Investitorii retail pe Stocktwits rămân optimiști, iar analiștii sunt pesimiști.'],
+    ['Futures-urile au scăzut în premergerea deschiderii.', 'Contractele futures au scăzut înaintea deschiderii.']
+  ];
+  for (const [input, want] of cases) assert.equal(fixRomanian(input), want);
+  // The model's non-breaking hyphen ("data‑centerelor") is normalised first.
+  assert.equal(cleanSummary('Nvidia a pierdut cota de piață a cipurilor AI ale data\u2011centerelor din China.', 'ro'),
+    'Nvidia a pierdut cota de piață a cipurilor AI ale centrelor de date din China.');
+});
+
 test('names and words that only contain the terms are left alone', () => {
   const keep = [
     'Close Brothers și Rally Health au raportat rezultate.',        // capitalised names
