@@ -162,3 +162,26 @@ test('health endpoint: hidden without a token, refuses a wrong one, never shows 
     assert.equal(conf.yahoo, true);
   } finally { process.env = env; }
 });
+
+test('cache misses that spend quota need a signed-in user; RSS news and landing quotes do not', async () => {
+  const { handleMarketRequest: h, resetGatewayForTests: reset, publicRequest } = await import('../netlify/functions/_shared/market/gateway.js');
+  reset();
+  const seen = [];
+  const authFetch = async (url, init) => { seen.push(init.headers.authorization); return new Response('{}', { status: init.headers.authorization === 'Bearer good' ? 200 : 401 }); };
+  const auth = { supabaseUrl: 'https://x.supabase.co', anonKey: 'anon', fetch: authFetch };
+  const q = (s, hdr) => new Request('http://localhost:8080/api/finnhub?' + s, { headers: hdr || {} });
+  const opts = { keys: {}, log: () => {}, auth };
+  assert.equal((await h(q('path=/stock/recommendation&symbol=NVDA'), opts)).status, 401);
+  assert.equal((await h(q('path=/stock/recommendation&symbol=NVDA', { 'x-hif-auth': 'bad' }), opts)).status, 401);
+  assert.notEqual((await h(q('path=/stock/recommendation&symbol=NVDA', { 'x-hif-auth': 'good' }), opts)).status, 401);
+  assert.notEqual((await h(q('path=/stock/recommendation&symbol=AAPL', { 'x-hif-auth': 'good' }), opts)).status, 401);
+  assert.equal(seen.filter(x => x === 'Bearer good').length, 1, 'a good token is checked once, then remembered');
+  assert.equal(publicRequest('marketNewsRO', {}), true);
+  assert.equal(publicRequest('news', { symbol: 'SNP.RO' }), true);
+  assert.equal(publicRequest('news', { symbol: 'NVDA' }), false);
+  assert.equal(publicRequest('quotes', { symbols: ['AAPL', 'NVDA'] }), true);
+  assert.equal(publicRequest('quotes', { symbols: ['AAPL', 'GME'] }), false);
+  assert.equal(publicRequest('quotes', { symbols: ['GME'] }, 'GME,AMC'), true);
+  assert.equal(publicRequest('chart', { symbol: 'NVDA' }), false);
+  reset();
+});
