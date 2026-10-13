@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 // AI news summaries, in batches, from a local model (LM Studio's OpenAI-compatible server).
 //
-// Each run asks Supabase for the newest stories without a summary in the chosen language,
-// summarizes them one at a time, and saves the results (supabase/summaries.sql). Meant for a
+// Each run asks Supabase for the stories without a summary in each chosen language (stories
+// for followed and held tickers first), summarizes them one at a time, and saves the results
+// (supabase/summaries.sql). A story gets all its languages before the next story starts, and
+// its article is read once for all of them. Meant for a
 // systemd timer every 30 minutes (tools/systemd/); it exits when done, and exits quietly
 // when LM Studio isn't running.
 //
@@ -11,8 +13,8 @@
 //   SUMMARY_SECRET                   the batch job's secret (Vault 'summary_secret')
 //   LMSTUDIO_URL    default http://127.0.0.1:1234/v1
 //   LMSTUDIO_MODEL  default openai/gpt-oss-20b
-//   SUMMARY_LANG    default ro
-//   BATCH_LIMIT     default 10 stories a run
+//   SUMMARY_LANG    default ro,en,de (comma-separated, in order of preference)
+//   BATCH_LIMIT     default 10 summaries a run
 //   MAX_AGE_HOURS   default 24
 //   READ_ARTICLES   default 1: summarize the whole article; 0 = headline and snippet only
 //
@@ -42,7 +44,7 @@ const cfg = {
   secret: env.SUMMARY_SECRET || '',
   lmUrl: (env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1').replace(/\/$/, ''),
   model: env.LMSTUDIO_MODEL || 'openai/gpt-oss-20b',
-  lang: env.SUMMARY_LANG || 'ro',
+  langs: [...new Set(String(env.SUMMARY_LANG || 'ro,en,de').toLowerCase().split(/[\s,]+/).filter(l => ['ro', 'en', 'de'].includes(l)))],
   limit: Math.max(1, Math.min(Number(env.BATCH_LIMIT) || 10, 100)),
   readArticles: env.READ_ARTICLES !== '0',
   hours: Math.max(1, Math.min(Number(env.MAX_AGE_HOURS) || 24, 168))
@@ -316,7 +318,7 @@ export function trimSentences(s, max = 650) {
 }
 
 // Cedilla forms (ş ţ) to the correct comma-below letters, and tidy the model's reply.
-export function cleanSummary(text, lang = cfg.lang) {
+export function cleanSummary(text, lang = 'ro') {
   let s = String(text || '')
     .replace(/ş/g, 'ș').replace(/Ş/g, 'Ș').replace(/ţ/g, 'ț').replace(/Ţ/g, 'Ț')
     // Non-breaking and other Unicode hyphens ("data‑center") to a plain one.
@@ -334,22 +336,29 @@ export function usable(s) {
   return s.length >= 40 && s.length <= 1200 && !/^[{[]/.test(s) && !/"(name|parameters)"\s*:/.test(s);
 }
 
-export async function summarizeForTest(story, article) { return summarize(story, article); }
-async function summarize(story, article) {
+// Field labels in the language of the summary.
+const LABELS = {
+  ro: ['Titlu', 'Articol', 'Rezumat sursă', '(fără rezumat)'],
+  en: ['Title', 'Article', 'Source summary', '(no summary)'],
+  de: ['Titel', 'Artikel', 'Kurzfassung der Quelle', '(keine Kurzfassung)']
+};
+export async function summarizeForTest(story, article, lang = 'ro') { return summarize(story, article, lang); }
+async function summarize(story, article, lang) {
+  const [T, A, S, none] = LABELS[lang] || LABELS.en;
   const input = article
-    ? `Ticker: ${story.ticker}\nTitlu: ${story.headline}\nArticol:\n${article}`
-    : `Ticker: ${story.ticker}\nTitlu: ${story.headline}\nRezumat sursă: ${story.summary || '(fără rezumat)'}`;
+    ? `Ticker: ${story.ticker}\n${T}: ${story.headline}\n${A}:\n${article}`
+    : `Ticker: ${story.ticker}\n${T}: ${story.headline}\n${S}: ${story.summary || none}`;
   const prompts = article ? ARTICLE_PROMPTS : PROMPTS;
   const res = await fetch(`${cfg.lmUrl}/chat/completions`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ model: cfg.model, temperature: 0.2, max_tokens: 800,
-      messages: [{ role: 'system', content: prompts[cfg.lang] || prompts.en }, { role: 'user', content: input }] }),
+      messages: [{ role: 'system', content: prompts[lang] || prompts.en }, { role: 'user', content: input }] }),
     signal: AbortSignal.timeout(600_000)
   });
   if (!res.ok) throw new Error(`model: ${res.status} ${(await res.text()).slice(0, 200)}`);
   const d = await res.json();
-  return cleanSummary(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content);
+  return cleanSummary(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content, lang);
 }
 
 async function main() {
@@ -362,28 +371,48 @@ async function main() {
     if (!r.ok) throw new Error(String(r.status));
   } catch (e) { log('LM Studio is not answering at', cfg.lmUrl, '- nothing to do this run'); return; }
 
-  const stories = await rpc('summaries_pending', { p_secret: cfg.secret, p_lang: cfg.lang, p_limit: cfg.limit, p_hours: cfg.hours }) || [];
-  if (!stories.length) { log('no stories waiting'); return; }
-  log(`${stories.length} stories to summarize with ${cfg.model}`);
+  if (!cfg.langs.length) { log('SUMMARY_LANG has no supported language (ro, en, de)'); process.exitCode = 2; return; }
+  // What each language still needs, in the server's priority order; then one queue in which
+  // a story's languages sit together, in the order of its best position in any list.
+  const rank = new Map(), byId = new Map();
+  for (const lang of cfg.langs) {
+    const rows = await rpc('summaries_pending', { p_secret: cfg.secret, p_lang: lang, p_limit: cfg.limit, p_hours: cfg.hours }) || [];
+    rows.forEach((r, i) => {
+      byId.set(r.id, r);
+      const e = rank.get(r.id) || { at: i, langs: [] };
+      e.at = Math.min(e.at, i); e.langs.push(lang);
+      rank.set(r.id, e);
+    });
+  }
+  const queue = [...rank.entries()].sort((a, b) => a[1].at - b[1].at)
+    .flatMap(([id, e]) => cfg.langs.filter(l => e.langs.includes(l)).map(lang => ({ story: byId.get(id), lang })))
+    .slice(0, cfg.limit);
+  if (!queue.length) { log('no stories waiting'); return; }
+  log(`${queue.length} summaries to write (${cfg.langs.join(', ')}) with ${cfg.model}`);
 
   let saved = 0;
-  for (const s of stories) {
+  const articles = new Map();
+  for (const { story: s, lang } of queue) {
     const t0 = Date.now();
     try {
-      let article = { text: '', why: 'off' };
-      try { article = await readArticle(s.url); } catch (e) { article = { text: '', why: String(e.message || e) }; }
-      const text = await summarize(s, article.text);
-      if (!usable(text)) { log('skipped', s.id, '- reply not usable'); continue; }
+      if (!articles.has(s.id)) {
+        let article = { text: '', why: 'off' };
+        try { article = await readArticle(s.url); } catch (e) { article = { text: '', why: String(e.message || e) }; }
+        articles.set(s.id, article);
+      }
+      const article = articles.get(s.id);
+      const text = await summarize(s, article.text, lang);
+      if (!usable(text)) { log('skipped', s.id, lang, '- reply not usable'); continue; }
       // The model field records what the summary was written from.
       const basis = article.text ? 'article' : 'snippet';
       // Saved one at a time, so a slow batch still shows progress in the apps.
-      saved += await rpc('summaries_save', { p_secret: cfg.secret, p_rows: [{ story_id: s.id, lang: cfg.lang, summary: text, model: cfg.model + ' · ' + basis }] }) || 0;
-      log('saved', s.id, basis + (article.why ? ` (${article.why})` : ` (${article.text.length} chars)`), `${Math.round((Date.now() - t0) / 1000)}s`);
+      saved += await rpc('summaries_save', { p_secret: cfg.secret, p_rows: [{ story_id: s.id, lang, summary: text, model: cfg.model + ' · ' + basis }] }) || 0;
+      log('saved', s.id, lang, basis + (article.why ? ` (${article.why})` : ` (${article.text.length} chars)`), `${Math.round((Date.now() - t0) / 1000)}s`);
     } catch (e) {
-      log('failed', s.id, String(e.message || e));
+      log('failed', s.id, lang, String(e.message || e));
     }
   }
-  log(`done: ${saved} of ${stories.length} saved`);
+  log(`done: ${saved} of ${queue.length} saved`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch(e => { log('error', e.message); process.exitCode = 1; });
