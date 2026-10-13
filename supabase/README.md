@@ -140,7 +140,7 @@ summary and save summaries.
 
    Run it once by hand: `node tools/summarize-batch.mjs`.
 
-3. **Every 30 minutes**, a few minutes after each scan, at low priority:
+3. **Every 10 minutes**, at low priority (a run with nothing to do ends in seconds):
 
    ```bash
    mkdir -p ~/.config/systemd/user

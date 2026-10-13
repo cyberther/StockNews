@@ -1161,6 +1161,10 @@ let hydrated = false;
 let pendingAuth = null;
 // True from the moment the saved record is handed to setState until React has applied it.
 let restoring = false;
+// Languages the AI summary job writes (SUMMARY_LANG on the PC, tools/summarize-batch.mjs).
+const AI_LANGS = ['ro'];
+// How far back it writes them, in seconds (MAX_AGE_HOURS, default 24).
+const AI_WINDOW = 24 * 3600;
 function hydrate(defaults) {
   const S = window.HIFStore, saved = S ? S.read(STORE_KEY) : null;
   hydrated = !!S;
@@ -1598,11 +1602,15 @@ class Component extends DCLogic {
       if (this.state.feedTab === 'bvb') this.syncBvb();
     };
     this._auto = setInterval(tick, 5 * 60000);
+    // New summaries for recent stories, every 2 minutes while the feed is open (only the last
+    // day's stories still without one are asked again: usually one small request).
+    this._sumTick = setInterval(() => { if (!document.hidden && this.state.screen === 'feed') this.syncSummaries(true); }, 2 * 60000);
     this._onVis = () => { if (!document.hidden && Date.now() - (this._lastAuto || 0) > 60000) tick(); };
     document.addEventListener('visibilitychange', this._onVis);
   }
   stopAutoRefresh() {
     clearInterval(this._auto);
+    clearInterval(this._sumTick);
     if (this._onVis) document.removeEventListener('visibilitychange', this._onVis);
   }
   // The Market tab's headlines come from a fixed list of the largest names rather than
@@ -1946,13 +1954,17 @@ class Component extends DCLogic {
   syncSummaries(force) {
     const P = window.HIFPush, s = this.state;
     if (!P || !P.loadSummaries || !s.authLive || !s.session) return;
-    const lang = String(this.lang || 'EN').toLowerCase(), LN = s.liveNews || {}, ids = [];
-    Object.keys(LN).forEach(t => (LN[t] || []).forEach(n => { if (n && n.id) ids.push(t + ':' + n.id); }));
-    (s.roNews || []).forEach(n => { if (n && n.id && n.related) ids.push(n.related + ':' + n.id); });
+    const lang = String(this.lang || 'EN').toLowerCase(), LN = s.liveNews || {}, ids = [], recent = [];
+    // Stories from the batch job's window (24 h): it may be writing their summaries now. Not
+    // just the newest: Finnhub sometimes lists a story hours after it was published.
+    const fresh = n => n.ts && Date.now() / 1000 - n.ts < AI_WINDOW;
+    const add = (id, n) => { ids.push(id); if (fresh(n)) recent.push(id); };
+    Object.keys(LN).forEach(t => (LN[t] || []).forEach(n => { if (n && n.id) add(t + ':' + n.id, n); }));
+    (s.roNews || []).forEach(n => { if (n && n.id && n.related) add(n.related + ':' + n.id, n); });
     const sig = lang + '|' + ids.join(',');
     if (!ids.length || (!force && sig === this._sumSig)) return;
     this._sumSig = sig;
-    P.loadSummaries(ids, lang).then(found => {
+    P.loadSummaries(ids, lang, recent).then(found => {
       const keys = Object.keys(found);
       if (!keys.length) return;
       this.setState(st => { const next = Object.assign({}, st.summaries); keys.forEach(id => { next[lang + '|' + id] = found[id]; }); return { summaries: next }; });
@@ -2280,7 +2292,10 @@ class Component extends DCLogic {
       // With a summary in the reader's language, it replaces the (English) headline.
       if (ai) r.watch = ai;
       r.isAi = !!ai; r.notAi = !ai;
-      r.watchLabel = ai ? (u.aiSummary || 'AI summary') : u.watch;
+      // A recent story on a tab the batch job covers, in a language it writes, without its
+      // summary yet: say one is coming (the card switches to it when it arrives).
+      const pending = !ai && AI_LANGS.includes(sumLang) && s.feedTab !== 'market' && r.ts && Date.now() / 1000 - r.ts < AI_WINDOW;
+      r.watchLabel = ai ? (u.aiSummary || 'AI summary') : pending ? (u.aiPending || 'AI summary in progress…') : u.watch;
       // The whole article, translated, for readers whose content language isn't English.
       // The publisher's own page first; Google's translated view of it as a small extra.
       const tr = window.HIFLive && window.HIFLive.translatedUrl ? window.HIFLive.translatedUrl(r.url, sumLang) : '';

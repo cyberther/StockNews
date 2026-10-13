@@ -5,7 +5,7 @@
 // for followed and held tickers first), summarizes them one at a time, and saves the results
 // (supabase/summaries.sql). A story gets all its languages before the next story starts, and
 // its article is read once for all of them. Meant for a
-// systemd timer every 30 minutes (tools/systemd/); it exits when done, and exits quietly
+// systemd timer every 10 minutes (tools/systemd/); it exits when done, and exits quietly
 // when LM Studio isn't running.
 //
 // Settings come from the environment or from ~/.config/market-pulse/summarizer.env:

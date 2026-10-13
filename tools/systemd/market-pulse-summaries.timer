@@ -1,11 +1,13 @@
-# Runs a few minutes after each background scan (Supabase cron at :00 and :30).
+# Every 10 minutes, so a new story gets its summary within minutes of the background scan
+# (Supabase cron at :00 and :30). A run with nothing to do ends in a few seconds; one that
+# is still busy when the next is due simply delays it (systemd never starts two at once).
 [Unit]
-Description=Run Market Pulse AI news summaries every 30 minutes
+Description=Run Market Pulse AI news summaries every 10 minutes
 
 [Timer]
-OnCalendar=*-*-* *:07,37:00
+OnCalendar=*-*-* *:02/10:00
 Persistent=true
-RandomizedDelaySec=60
+RandomizedDelaySec=30
 
 [Install]
 WantedBy=timers.target

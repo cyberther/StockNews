@@ -157,17 +157,17 @@ async function loadHoldings() {
 
 // AI summaries written by the batch job (public.story_summaries, supabase/summaries.sql):
 // { 'NVDA:123': 'text' } for the ids that have one in lang. Misses are asked again after
-// 10 minutes, since the job adds summaries a few minutes after each scan.
+// 10 minutes, or after 2 for the ids in `recent` (stories the job may be writing now).
 const summaryCache = new Map(); // id|lang -> { text, at }
 const SUMMARY_ID = /^[A-Z0-9.\-]{1,12}:\d{1,20}$/;
-async function loadSummaries(ids, lang) {
+async function loadSummaries(ids, lang, recent) {
   const out = {};
   if (!live() || !lang) return out;
-  const now = Date.now(), want = [];
+  const now = Date.now(), want = [], soon = new Set(recent || []);
   [...new Set(ids || [])].forEach(id => {
     if (!SUMMARY_ID.test(id)) return;
     const hit = summaryCache.get(id + '|' + lang);
-    if (hit && (hit.text || now - hit.at < 600000)) { if (hit.text) out[id] = hit.text; }
+    if (hit && (hit.text || now - hit.at < (soon.has(id) ? 120000 : 600000))) { if (hit.text) out[id] = hit.text; }
     else want.push(id);
   });
   for (let i = 0; i < want.length; i += 60) {
