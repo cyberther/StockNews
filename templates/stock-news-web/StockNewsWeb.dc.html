@@ -1146,7 +1146,7 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;finnhubToken&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Live data&quot;},&quot;brand&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Market Pulse&quot;,&quot;Heard It First&quot;],&quot;default&quot;:&quot;Market Pulse&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;A. Novak&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;finnhubToken&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Live data&quot;},&quot;brand&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Market Pulse&quot;,&quot;Heard It First&quot;],&quot;default&quot;:&quot;Market Pulse&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
 const STORE_KEY = 'hif.web.v2';
 // Keys that survive a reload. Live quotes and transient input (passwords, codes) never persist.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','overlays',
@@ -2077,7 +2077,7 @@ class Component extends DCLogic {
           loading ? null : React.createElement('button', { onClick:() => this.syncDetail(stock.ticker, true),
             style:{ minHeight:38, padding:'0 16px', background:'transparent', border:'1px solid #D4AF37', color:this.pal.accent, fontFamily:'var(--font-heading)', fontWeight:800, fontSize:12, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer' } }, 'retry'),
           loading ? null : React.createElement('div', { style:{ fontSize:10, letterSpacing:'0.1em', color:this.pal.mute } },
-            this.state.liveStatus === 'live' ? 'LIVE FEED CONNECTED' : 'SHOWING DEMO PRICES AND HEADLINES')));
+            this.state.liveStatus === 'live' ? 'LIVE FEED CONNECTED' : 'NO LIVE MARKET DATA')));
     }
     // Periods are in bars of the loaded series (days from 6M up), not in thinned samples.
     const p20 = fullValues.length >= 30 ? 20 : null;
@@ -2856,7 +2856,7 @@ class Component extends DCLogic {
       liveOn: live, liveOff: !live,
       liveLabel: live
         ? (s.liveMode === 'proxy' ? 'LIVE · FINNHUB' : 'LIVE · FINNHUB (DIRECT)')
-        : (s.refreshing ? 'FINNHUB …' : (s.liveStatus === 'error' ? 'FINNHUB · ' + (s.liveError || 'error').toUpperCase() : 'DEMO DATA')),
+        : (s.refreshing ? 'FINNHUB …' : (s.liveStatus === 'error' ? 'FINNHUB · ' + (s.liveError || 'error').toUpperCase() : 'NO LIVE DATA')),
       refreshTicker: () => { this.syncLive([stock.ticker], true); this.syncDetail(stock.ticker, true); },
       refreshLabel: s.refreshing ? '…' : '↻',
       signOut: () => { this.logEvent('signout'); if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, locked:false, authPw:'', authErr:'', twofaSetup:false }); this.go('portfolio'); this.flash(u.signOut.toUpperCase()); },
@@ -2954,7 +2954,7 @@ class Component extends DCLogic {
         { label:u.digests, note:u.digestsNote, eta:'Q1' },
         { label:u.broker, note:u.brokerNote, eta:'Q2' }
       ],
-      accountName: (s.session && s.session.name) || this.props.accountName || 'A. Novak',
+      accountName: (s.session && (s.session.name || s.session.email)) || this.props.accountName || '',
       accountEmail: sessionEmail,
       accountProvider: provider,
       accountPlanLabel: isFree ? u.upgradeBtn : u.managePro,
