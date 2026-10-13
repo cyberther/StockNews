@@ -15,6 +15,7 @@
 //   HIFPush.loadWatchlist()     -> Promise<[{ ticker, push }] | null>
 //   HIFPush.syncHoldings(positions) -> mirror the positions ({ TICKER: { shares, cost } })
 //   HIFPush.loadHoldings()      -> Promise<[{ ticker, shares, avg_price }] | null>
+//   HIFPush.loadSummaries(ids, lang) -> Promise<{ storyId: summary }> (AI summaries)
 (function(){
 if (window.HIFPush) return;
 const SW = '/templates/shared/hif-sw.js', SCOPE = '/templates/shared/';
@@ -154,5 +155,32 @@ async function loadHoldings() {
   return r.ok && Array.isArray(r.body) ? r.body : null;
 }
 
-window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, supported };
+// AI summaries written by the batch job (public.story_summaries, supabase/summaries.sql):
+// { 'NVDA:123': 'text' } for the ids that have one in lang. Misses are asked again after
+// 10 minutes, since the job adds summaries a few minutes after each scan.
+const summaryCache = new Map(); // id|lang -> { text, at }
+const SUMMARY_ID = /^[A-Z0-9.\-]{1,12}:\d{1,20}$/;
+async function loadSummaries(ids, lang) {
+  const out = {};
+  if (!live() || !lang) return out;
+  const now = Date.now(), want = [];
+  [...new Set(ids || [])].forEach(id => {
+    if (!SUMMARY_ID.test(id)) return;
+    const hit = summaryCache.get(id + '|' + lang);
+    if (hit && (hit.text || now - hit.at < 600000)) { if (hit.text) out[id] = hit.text; }
+    else want.push(id);
+  });
+  for (let i = 0; i < want.length; i += 60) {
+    const part = want.slice(i, i + 60);
+    const r = await auth().rest('story_summaries?select=story_id,summary&lang=eq.' + encodeURIComponent(lang) +
+      '&story_id=in.(' + encodeURIComponent(part.map(x => '"' + x + '"').join(',')) + ')');
+    if (!r.ok || !Array.isArray(r.body)) continue;
+    const found = {};
+    r.body.forEach(row => { found[row.story_id] = row.summary; });
+    part.forEach(id => { summaryCache.set(id + '|' + lang, { text: found[id] || '', at: now }); if (found[id]) out[id] = found[id]; });
+  }
+  return out;
+}
+
+window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, supported };
 })();

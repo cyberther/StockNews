@@ -116,7 +116,7 @@ async function news(symbol, token, limit){
   const j = await get('/company-news', { symbol: symbol, from: isoDay(-30), to: isoDay(0) }, token);
   const rows = (Array.isArray(j) ? j : []).filter(n => n && n.headline)
     .sort((a,b) => b.datetime - a.datetime)
-    .map(n => ({ headline: n.headline, source: n.source || '', stamp: stamp(n.datetime), ts: n.datetime, url: n.url || '',
+    .map(n => ({ id: n.id, headline: n.headline, source: n.source || '', stamp: stamp(n.datetime), ts: n.datetime, url: n.url || '',
       summary: (n.summary || '').replace(/\s+/g, ' ').trim().slice(0, 160) }));
   put('news', symbol, rows);
   return rows.slice(0, limit || 5);
@@ -301,7 +301,16 @@ function dayHead(sec, u){
   return d.toLocaleDateString([], opts);
 }
 
-window.HIFLive = { quote, quotes, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
+// The original article through Google Translate's web view, in the reader's language. The
+// publisher's page is translated in the reader's browser; nothing is copied to this site.
+// Paywalled articles stay paywalled.
+function translatedUrl(url, lang){
+  const tl = String(lang || '').toLowerCase();
+  if (!/^https?:\/\//i.test(url || '') || !/^(ro|de)$/.test(tl)) return '';
+  return 'https://translate.google.com/translate?sl=auto&tl=' + tl + '&hl=' + tl + '&u=' + encodeURIComponent(url);
+}
+
+window.HIFLive = { quote, quotes, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();

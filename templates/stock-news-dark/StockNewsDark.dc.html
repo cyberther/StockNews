@@ -245,9 +245,10 @@
 <div style="flex:1.6;background:var(--s-panel);padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.source }}</div><div style="font-size:12px;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ item.source }}</div></div>
 </div>
 <div style="display:flex;gap:6px;align-items:baseline;margin-top:9px">
-<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ ui.watch }}</span>
+<span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ item.watchLabel }}</span>
 <span style="font-size:13px;color:var(--s-ink);line-height:1.4">{{ item.watch }}</span>
 </div>
+<sc-if value="{{ item.hasTranslate }}" hint-placeholder-val="{{ false }}"><a href="{{ item.translateHref }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;margin-top:6px;font-size:12px;font-weight:600;color:var(--s-mute);text-decoration:underline;text-underline-offset:3px">{{ item.translateLabel }} ↗</a></sc-if>
 </article>
 </sc-for>
 <sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}">
@@ -747,7 +748,7 @@ class Component extends DCLogic {
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
-    positions:{}, profiles:{}, pfRange:'1mo', pfHover:null, pfCharts:{}, posEdit:null, posShares:'', posCost:'', posTicker:'',
+    positions:{}, profiles:{}, summaries:{}, pfRange:'1mo', pfHover:null, pfCharts:{}, posEdit:null, posShares:'', posCost:'', posTicker:'',
     liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{}, charts:{}, liveEarnDates:{} });
   componentDidMount() {
     this.startIdleWatch();
@@ -886,6 +887,22 @@ class Component extends DCLogic {
     });
     this.flash((remove ? (u.posCleared || 'Position removed') : (u.posSaved || 'Position saved')).toUpperCase());
   }
+  // AI summaries (supabase/summaries.sql) for the stories loaded, in the content language.
+  // Only real accounts can read them; the cache in hif-push.js re-asks for misses later.
+  syncSummaries(force) {
+    const P = window.HIFPush, s = this.state;
+    if (!P || !P.loadSummaries || !s.authLive || !s.session) return;
+    const lang = String(this.lang || 'EN').toLowerCase(), LN = s.liveNews || {}, ids = [];
+    Object.keys(LN).forEach(t => (LN[t] || []).forEach(n => { if (n && n.id) ids.push(t + ':' + n.id); }));
+    const sig = lang + '|' + ids.join(',');
+    if (!ids.length || (!force && sig === this._sumSig)) return;
+    this._sumSig = sig;
+    P.loadSummaries(ids, lang).then(found => {
+      const keys = Object.keys(found);
+      if (!keys.length) return;
+      this.setState(st => { const next = Object.assign({}, st.summaries); keys.forEach(id => { next[lang + '|' + id] = found[id]; }); return { summaries: next }; });
+    }).catch(() => {});
+  }
   // Portfolio chart: price history for every held ticker over the chosen range (the
   // adapter caches charts for 5 minutes). null marks a ticker without history.
   syncPortfolioCharts() {
@@ -990,6 +1007,7 @@ class Component extends DCLogic {
       this._lastAuto = Date.now();
       this.syncTickers(this.liveTickers(), true);
       this.syncPositions();
+      this.syncSummaries(true);
       if (this.state.screen === 'portfolio') this.syncPortfolioCharts();
       if (this.state.feedTab === 'market') this.syncMarket();
     };
@@ -1060,6 +1078,7 @@ class Component extends DCLogic {
     const held = Object.keys(this.state.positions || {}).join(',');
     if (this._held !== undefined && held !== this._held && window.HIFLive) this.syncPositions();
     this._held = held;
+    this.syncSummaries();
     const pfSig = this.state.screen === 'portfolio' && window.HIFLive ? (this.state.pfRange || '1mo') + '|' + held : '';
     if (pfSig && pfSig !== this._pfSig) this.syncPortfolioCharts();
     this._pfSig = pfSig;
@@ -1394,7 +1413,7 @@ class Component extends DCLogic {
     // Strictly newest first across tickers; Market draws on the ten largest names.
     const market = s.feedTab !== 'following';
     (market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows).forEach(t => (LN[t] || []).forEach(n => liveRows.push({
-      ticker:t, headline:n.headline, watch:n.summary || ((n.source ? 'Read at ' + n.source : 'Read the story') + ' ↗'), source:n.source || '', stamp:n.stamp, ts:n.ts, url:n.url || '',
+      ticker:t, storyId: n.id ? t + ':' + n.id : '', headline:n.headline, watch:n.summary || ((n.source ? 'Read at ' + n.source : 'Read the story') + ' ↗'), source:n.source || '', stamp:n.stamp, ts:n.ts, url:n.url || '',
       delta:(LQ[t] || {}).move || '—', up:(LQ[t] || {}).up !== false, vol:'—', live:true })));
     const feedLive = liveRows.length > 0;
     const feed = feedLive
@@ -1411,6 +1430,17 @@ class Component extends DCLogic {
           open: () => { this.setState({ selected:n.ticker }); this.go('detail'); },
           keyOpen: event => this.activateFromKeyboard(() => { this.setState({ selected:n.ticker }); this.go('detail'); }, event)
         })).sort((a,b) => String(b.stamp).localeCompare(String(a.stamp)));
+    // The AI summary, when the batch job has written one in the content language.
+    const SUMS = s.summaries || {}, sumLang = String(this.lang || 'EN').toLowerCase();
+    feed.forEach(r => {
+      const ai = r.storyId ? SUMS[sumLang + '|' + r.storyId] : '';
+      if (ai) { r.watch = ai; r.isAi = true; }
+      r.watchLabel = ai ? (u.aiSummary || 'AI summary') : u.watch;
+      // The whole article, translated, for readers whose content language isn't English.
+      const tr = window.HIFLive && window.HIFLive.translatedUrl ? window.HIFLive.translatedUrl(r.url, sumLang) : '';
+      r.translateHref = tr; r.hasTranslate = !!tr; r.translateLabel = u.readTranslated || 'Read translated';
+      r.stopOpen = event => { if (event && event.stopPropagation) event.stopPropagation(); };
+    });
     feed.forEach((r, i) => {
       const day = r.ts && window.HIFLive && window.HIFLive.dayHead ? window.HIFLive.dayHead(r.ts, u) : '';
       r.dayHead = day && (i === 0 || day !== feed[i - 1].dayLabel) ? day : '';
