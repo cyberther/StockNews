@@ -13,7 +13,7 @@ US listings and the Bucharest Stock Exchange (BVB), in English, Romanian and Ger
 | Path | What it is |
 | --- | --- |
 | `templates/stock-news-web/StockNewsWeb.dc.html` | Web app (desktop and phone layouts) |
-| `templates/stock-news-dark/StockNewsDark.dc.html` | Mobile app |
+| `templates/stock-news-dark/StockNewsDark.dc.html` | Mobile app (kept in the repo, not published) |
 | `templates/shared/` | Shared client code: data, live adapter, auth, push, charts, motion, BVB catalog |
 | `netlify/functions/` | Market data gateway (`/api/finnhub`), config, health endpoint |
 | `netlify/functions/_shared/market/` | Gateway: providers (Finnhub, Yahoo, Twelve Data, FMP, Alpha Vantage), Romanian news, caching, failover, usage |
