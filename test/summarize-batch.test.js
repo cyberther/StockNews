@@ -117,3 +117,12 @@ test('a Romanian summary in English, or repeating the headline, is retried', () 
   assert.equal(looksWrong('Acțiunile Tesla au scăzut cu 1,22%, la 378,03 dolari, mai mult decât indicele S&P 500.', story, 'ro'), '');
   assert.equal(looksWrong('Tesla shares fell 1.2% and the stock is down for the week, with analysts said to be cautious.', story, 'en'), '');
 });
+
+test('currency written twice and spaced numbers from the real NVDA and ASTS summaries', () => {
+  assert.equal(fixRomanian('Compania e evaluată la circa $6,2 trilioni de dolari.'), 'Compania e evaluată la circa 6,2 trilioane de dolari.');
+  assert.equal(fixRomanian('Venituri în creștere de aproximativ 1 500 %, marja negativă fiind de 482 %.'),
+    'Venituri în creștere de aproximativ 1.500%, marja negativă fiind de 482%.');
+  assert.equal(fixRomanian('Lucid a livrat 3 806 vehicule în 2026, între 7 000 și 8 000 de unități.'), 'Lucid a livrat 3.806 vehicule în 2026, între 7.000 și 8.000 de unități.');
+  assert.equal(fixRomanian('În 2026 120 de magazine, din 2025 până în 2026.'), 'În 2026 120 de magazine, din 2025 până în 2026.');
+  assert.equal(fixRomanian('Tesla dispune de un rețea extinsă și un companie nouă.'), 'Tesla dispune de o rețea extinsă și o companie nouă.');
+});
