@@ -2,9 +2,11 @@ import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const output = 'dist';
+// The mobile app (templates/stock-news-dark) stays in the repo but is not published: work
+// continues on the web app only, and its old Security screen still offers a two-factor
+// setup that the server never enforced.
 const directories = [
   'templates/shared',
-  'templates/stock-news-dark',
   'templates/stock-news-web',
 ];
 
