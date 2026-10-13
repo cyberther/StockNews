@@ -9,7 +9,7 @@ settings in Supabase Postgres, and keeps an append-only security log.
 
 Put the built front-end in `./public` (`index.html` = the web build).
 Run `schema.sql` once in the Supabase SQL editor before first use.
-Full setup, including Supabase and Google sign-in: see "HIF Server Setup".
+Full setup, including Supabase and Google sign-in: see [SETUP.md](SETUP.md).
 The threat model, findings and residual risks: see `../SECURITY.md`.
 
 ## What the server enforces
