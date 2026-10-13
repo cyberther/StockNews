@@ -125,6 +125,7 @@
 <sc-if value="{{ item.onCursor }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--color-accent)"></span></sc-if>
 <div class="m-feed-meta">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:15px;letter-spacing:0.02em">{{ item.tickerLabel }}</div>
+<sc-if value="{{ item.hasAlso }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;letter-spacing:0.08em;color:var(--s-mute);margin-top:2px">{{ item.alsoLabel }}</div></sc-if>
 <div style="font-size:13px;font-weight:600;margin-top:2px"><sc-if value="{{ item.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ item.delta }}</span></sc-if><sc-if value="{{ item.up }}" hint-placeholder-val="{{ true }}"><span>{{ item.delta }}</span></sc-if></div>
 <sc-if value="{{ item.outlier }}" hint-placeholder-val="{{ false }}"><span style="display:inline-block;margin-top:8px;padding:2px 5px;border:1px solid var(--color-accent);color:var(--color-accent);font-size:10px;letter-spacing:0.12em;text-transform:uppercase">{{ item.volBadge }}</span></sc-if>
 <div style="font-size:10px;letter-spacing:0.08em;color:var(--s-mute);margin-top:8px">{{ item.stamp }}</div>
@@ -251,7 +252,7 @@
 <sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
 <article role="button" tabIndex="0" onClick="{{ n.open }}" onKeyDown="{{ n.keyOpen }}" style-hover="background:var(--s-panel)" style="display:grid;grid-template-columns:96px 1fr;gap:16px;padding:14px var(--gx);border-top:1px solid var(--s-rule);align-items:baseline;cursor:pointer">
 <span style="font-size:11px;letter-spacing:0.06em;color:var(--s-mute)">{{ n.stamp }}</span>
-<div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.25;text-wrap:pretty">{{ n.headline }}</div><div style="font-size:11px;color:var(--s-mute);margin-top:3px">{{ n.source }}<sc-if value="{{ n.hasUrl }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent);margin-left:6px" aria-hidden="true">↗</span></sc-if></div></div>
+<div><sc-if value="{{ n.isAi }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">{{ ui.aiSummary }}</div><div style="font-size:14px;line-height:1.5;margin-top:4px;text-wrap:pretty">{{ n.summary }}</div></sc-if><sc-if value="{{ n.notAi }}" hint-placeholder-val="{{ true }}"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.25;text-wrap:pretty">{{ n.headline }}</div></sc-if><div style="font-size:11px;color:var(--s-mute);margin-top:3px">{{ n.source }}<sc-if value="{{ n.hasUrl }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent);margin-left:6px" aria-hidden="true">↗</span></sc-if></div></div>
 </article>
 </sc-for>
 <sc-if value="{{ noStockNews }}" hint-placeholder-val="{{ false }}">
@@ -319,9 +320,9 @@
 </div>
 </sc-if>
 </div>
+<sc-if value="{{ hasCrowd }}" hint-placeholder-val="{{ true }}">
 <div style="background:var(--s-bg);padding:16px 18px">
 <div style="display:flex;align-items:baseline;gap:8px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.crowdTitle }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:{{ crowdInk }}">{{ crowdZone }}</div></div>
-<sc-if value="{{ hasCrowd }}" hint-placeholder-val="{{ true }}">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:28px;line-height:1.1;margin-top:4px;color:{{ crowdInk }}">{{ crowdPct }}</div>
 <div style="font-size:11px;color:var(--s-mute)">{{ ui.crowdOf }}</div>
 <div style="position:relative;height:10px;margin-top:10px;background:var(--s-rule)">
@@ -339,8 +340,8 @@
 <div style="font-size:10px;color:var(--s-mute);margin-top:5px">{{ ui.crowdBookNote }}</div>
 </div>
 </sc-if>
-</sc-if>
 </div>
+</sc-if>
 <sc-if value="{{ hasAnalyst }}" hint-placeholder-val="{{ true }}">
 <div style="background:var(--s-bg);padding:16px 18px">
 <div style="display:flex;align-items:baseline;gap:8px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.analyst }}</div><sc-if value="{{ analystLocked }}" hint-placeholder-val="{{ true }}"><span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);border:1px solid var(--color-accent);padding:1px 5px">{{ ui.pro }}</span></sc-if></div>
@@ -388,7 +389,7 @@
 <div style="font-size:10px;letter-spacing:0.08em;color:var(--s-mute);margin-top:3px">{{ r.when }}</div>
 </div>
 <div>
-<div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.25;text-wrap:pretty;max-width:56ch">{{ r.headline }}</div>
+<sc-if value="{{ r.isAi }}" hint-placeholder-val="{{ false }}"><div style="font-size:15px;line-height:1.5;text-wrap:pretty;max-width:68ch">{{ r.summary }}</div></sc-if><sc-if value="{{ r.notAi }}" hint-placeholder-val="{{ true }}"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.25;text-wrap:pretty;max-width:56ch">{{ r.headline }}</div></sc-if>
 <div style="font-size:11px;color:var(--s-mute);margin-top:4px">{{ r.source }} · {{ r.priceThen }} → {{ r.priceNow }}</div>
 </div>
 <div style="text-align:right">
@@ -1818,9 +1819,22 @@ class Component extends DCLogic {
   // stories carry their publish time (ts), so the formatted stamp is left out of the
   // key: reformatting how times are shown must never resurrect a skipped story. Demo
   // stories have no ts and keep the stamp. The feed filters on this key.
+  // Live stories with an id use it: several stories can share ticker, source and time
+  // (Motley Fool posts many at 00:00), and skipping one must not hide the others.
   storyKey(item) {
     if (!item) return '';
-    return this.normKey([item.ticker || '', item.source || '', item.stamp || '', item.ts || ''].join('|'));
+    if (item.storyId) return 'id|' + item.storyId;
+    return this.legacyKey(item);
+  }
+  // The key skips were saved under before story ids; still honoured for those skips.
+  legacyKey(item) {
+    return item ? this.normKey([item.ticker || '', item.source || '', item.stamp || '', item.ts || ''].join('|')) : '';
+  }
+  // A story's AI summary in the content language, or '' while there is none. Every place
+  // that shows a story uses it, so it reads the same in the feed, the ticker page and the ledger.
+  aiText(storyId) {
+    const lang = String(this.lang || 'EN').toLowerCase();
+    return storyId ? (this.state.summaries || {})[lang + '|' + storyId] || '' : '';
   }
   // Saved skips from before this rule still hold the old stamp text; drop it the same way.
   normKey(key) {
@@ -1833,6 +1847,7 @@ class Component extends DCLogic {
     const key = this.storyKey(item);
     if ((this.state.dismissed || []).some(d => this.normKey(d.key) === key)) return;
     this.setState(st => ({ dismissed: [{ ticker:item.ticker, headline:item.headline, source:item.source, stamp:item.stamp, key,
+      storyId: item.storyId || '', summary: this.aiText(item.storyId),
       id: Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
       up: item.up !== false, price: priceStr, ts: Date.now(),
       when: new Date().toLocaleDateString([], { month:'short', day:'numeric' }) }].concat(st.dismissed || []).slice(0, 60) }));
@@ -2184,8 +2199,15 @@ class Component extends DCLogic {
     }
     baseFeed = baseFeed || [];
     const skipKeys = {};
-    (s.dismissed || []).forEach(d => { if (d.key) skipKeys[this.normKey(d.key)] = 1; });
-    baseFeed = baseFeed.filter(n => !skipKeys[this.storyKey(n)]);
+    // Older skips were saved under ticker|source|time, which several stories can share: those
+    // also have to match the skipped headline.
+    (s.dismissed || []).forEach(d => { if (d.key) skipKeys[this.normKey(d.key)] = d.key.indexOf('id|') === 0 ? true : (d.headline || true); });
+    const skipped = n => {
+      if (skipKeys[this.storyKey(n)]) return true;
+      const old = n.storyId && skipKeys[this.legacyKey(n)];
+      return !!old && (old === true || old === n.headline);
+    };
+    baseFeed = baseFeed.filter(n => !skipped(n));
     const volNum = v => { const m = /([\d.]+)x/.exec(String(v || '')); return m ? parseFloat(m[1]) : 0; };
     const stackList = (s.stack || []);
     const pinned = t => stackList.indexOf(t) !== -1;
@@ -2219,6 +2241,26 @@ class Component extends DCLogic {
       let host = ''; try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch (e) {}
       r.sourceLabel = (u.sourceAt || 'Full article at {s}').replace('{s}', r.source || host || '');
       r.stopOpen = event => { if (event && event.stopPropagation) event.stopPropagation(); };
+    });
+    // One card per article: Finnhub lists a story under every ticker it mentions ("AST
+    // SpaceMobile vs Firefly" under ASTS and FLY). The first copy stays (one with a summary
+    // if any has it), names the other tickers, and skipping it skips every copy.
+    const sameArticle = r => { const u2 = String(r.url || '').replace(/[?#].*$/, '').replace(/\/$/, '').toLowerCase(); return u2 || (r.headline ? 'h|' + r.headline : ''); };
+    const firstOf = {};
+    feed.forEach(r => { const k = sameArticle(r); if (k && (!firstOf[k] || (r.isAi && !firstOf[k].isAi))) firstOf[k] = r; });
+    for (let i = feed.length - 1; i >= 0; i--) {
+      const r = feed[i], k = sameArticle(r), keep = k && firstOf[k];
+      if (!keep || keep === r) continue;
+      (keep.twins = keep.twins || []).push(r);
+      feed.splice(i, 1);
+    }
+    feed.forEach(r => {
+      if (!r.twins) { r.hasAlso = false; return; }
+      const others = r.twins.map(x => x.ticker).filter((t, i, a) => t !== r.ticker && a.indexOf(t) === i);
+      r.hasAlso = others.length > 0;
+      r.alsoLabel = (u.alsoAbout || 'Also about {t}').replace('{t}', others.map(t => this.tickerLabel(t)).join(', '));
+      const one = r.dismiss, all = r.twins;
+      r.dismiss = event => { one(event); all.forEach(x => this.dismissStory(x, (Q[x.ticker] || {}).price || (FOLLOWS[x.ticker] || {}).price)); };
     });
     // A date header above the first story of each day.
     feed.forEach((r, i) => {
@@ -2334,7 +2376,7 @@ class Component extends DCLogic {
     const peerList = ((H.SECTORS || {})[sector] || []).filter(t => t !== stock.ticker);
     const peers = peerList.map(t => ({ ticker:t, move:(rec(t) || {}).move })).filter(p => p.move);
     const dayNews = ((live && LN[stock.ticker]) ? LN[stock.ticker] : NEWS.filter(n => n.ticker === stock.ticker))
-      .slice(0, 3).map(n => ({ headline: typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN, source:n.source, url:n.url || '' }));
+      .slice(0, 3).map(n => ({ headline: (live && n.id && this.aiText(stock.ticker + ':' + n.id)) || (typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN), source:n.source, url:n.url || '' }));
     const why = IN ? IN.attribute({ ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
     const whyTone = why && (why.kind === 'none' || why.kind === 'quiet') ? 'var(--s-mute)' : 'var(--color-accent)';
     // RSI for the conflict check: the loaded live series when there is one; the demo
@@ -2455,6 +2497,8 @@ class Component extends DCLogic {
       bookCrowdPct: bookCrowd ? bookCrowd.pctLabel : '', hasBookCrowd: !!bookCrowd,
       bookCrowdFill: bookCrowd ? bookCrowd.fill + '%' : '0%', bookCrowdInk: bookCrowd ? toneInk(bookCrowd.tone) : 'var(--s-mute)',
       ledgerRows: lRows.map(r => Object.assign({}, r, {
+        // The summary the story had when it was skipped (or has now), like the feed showed it.
+        summary: this.aiText(r.storyId) || r.summary || '', isAi: !!(this.aiText(r.storyId) || r.summary), notAi: !(this.aiText(r.storyId) || r.summary),
         accent: r.verdict === 'missed' ? 'var(--color-accent)' : r.verdict === 'dodged' ? 'var(--s-ink)' : 'var(--s-rule)',
         ink: r.verdict === 'pending' ? 'var(--s-mute)' : r.up ? 'var(--s-ink)' : 'var(--color-accent)',
         open: () => this.openTicker(r.ticker),
@@ -2669,12 +2713,12 @@ class Component extends DCLogic {
       lpFeat: (() => {
         const loc = v => typeof v === 'string' ? v : ((v && (v[L] || v.EN)) || '');
         let n = null;
-        Object.keys(LN).forEach(t => (LN[t] || []).forEach(x => { if (x && x.headline && (!n || (x.ts || 0) > (n.ts || 0))) n = Object.assign({ ticker:t }, x); }));
+        Object.keys(LN).forEach(t => (LN[t] || []).forEach(x => { if (x && x.headline && (!n || (x.ts || 0) > (n.ts || 0))) n = Object.assign({ ticker:t, storyId: x.id ? t + ':' + x.id : '' }, x); }));
         n = n || H.FEATURED;
         if (!n) return { has:false };
         const q = Q[n.ticker] || {};
         return { has:true, ticker:n.ticker, source:n.source || '', stamp:this.storyTime(n.ts, n.stamp || ''), score:q.move || n.delta || '—', delta:q.price || '',
-          headline:loc(n.headline), watch:loc(n.summary || n.watch) };
+          headline:this.aiText(n.storyId) || loc(n.headline), watch:this.aiText(n.storyId) ? '' : loc(n.summary || n.watch) };
       })(),
       // Live quotes only; the line is the day's real intraday series when it has loaded.
       lpTickers: (H.LANDING_TICKERS || ['NVDA','AAPL','MSFT','TSLA','AMZN']).filter(t => Q[t]).map(t => {
@@ -2821,9 +2865,11 @@ class Component extends DCLogic {
       dataless: dataless(stock.ticker), hasData: !dataless(stock.ticker),
       chart: dataless(stock.ticker) ? null : this.chartEl(stock),
       stockNews: ((live && LN[stock.ticker] && LN[stock.ticker].length)
-        ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, headline:n.headline, source:n.source, stamp:this.storyTime(n.ts, n.stamp), score:'', url:n.url || '' }))
+        ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, storyId: n.id ? stock.ticker + ':' + n.id : '', headline:n.headline, source:n.source, stamp:this.storyTime(n.ts, n.stamp), score:'', url:n.url || '' }))
         : NEWS.filter(n => n.ticker === stock.ticker).slice(0,5).map(n => Object.assign({}, n, { headline: n.headline[L] })))
         .map(n => Object.assign({}, n, {
+          // The AI summary replaces the headline here as it does in the feed.
+          summary: this.aiText(n.storyId), isAi: !!this.aiText(n.storyId), notAi: !this.aiText(n.storyId),
           hasUrl: /^https?:\/\//i.test(n.url || ''),
           open: () => this.openNews(n),
           keyOpen: event => this.activateFromKeyboard(() => this.openNews(n), event)
