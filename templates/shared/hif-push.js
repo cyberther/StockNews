@@ -157,7 +157,7 @@ async function loadHoldings() {
 
 // AI summaries written by the batch job (public.story_summaries, supabase/summaries.sql):
 // { 'NVDA:123': 'text' } for the ids that have one in lang. Misses are asked again after
-// 10 minutes, or after 2 for the ids in `recent` (stories the job is likely writing now).
+// 10 minutes, or after 2 for the ids in `recent` (stories the job may be writing now).
 const summaryCache = new Map(); // id|lang -> { text, at }
 const SUMMARY_ID = /^[A-Z0-9.\-]{1,12}:\d{1,20}$/;
 async function loadSummaries(ids, lang, recent) {
