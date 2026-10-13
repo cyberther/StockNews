@@ -686,24 +686,12 @@
 </div>
 </div>
 <div style="margin-top:28px;border-top:1px solid var(--s-rule)">
-<div style="padding:20px 0 4px"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.alertTypes }}</div><div style="font-size:13px;color:var(--s-mute);margin-top:5px">{{ ui.alertTypesNote }}</div></div>
-<sc-for list="{{ alertRows }}" as="a" hint-placeholder-count="6">
-<div style="display:flex;align-items:center;gap:16px;padding:13px 0;border-top:1px solid var(--s-rule)">
-<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ a.label }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px;text-wrap:pretty">{{ a.note }}</div></div>
-<button onClick="{{ a.toggle }}" style="flex:none;min-width:64px;min-height:36px;padding:0 12px;text-align:left;background:{{ a.bg }};border:1px solid {{ a.edge }};color:{{ a.ink }};font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ a.stateLabel }}</button>
-</div>
-</sc-for>
-<div style="height:22px"></div>
+<div style="padding:20px 0 18px"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.alertTypes }}</div><div style="font-size:13px;color:var(--s-mute);margin-top:5px;max-width:64ch;text-wrap:pretty">{{ ui.alertsWhat }}</div></div>
 <sc-if value="{{ pushRow.show }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ ui.pushDevice }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px;text-wrap:pretty">{{ pushRow.note }}</div></div><sc-if value="{{ pushRow.canAct }}" hint-placeholder-val="{{ true }}"><button onClick="{{ pushRow.act }}" style="flex:none;min-height:36px;padding:0 14px;background:{{ pushRow.bg }};border:1px solid var(--color-accent);color:{{ pushRow.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ pushRow.actionLabel }}</button></sc-if></div>
 </sc-if>
-<sc-for list="{{ notifRows }}" as="s" hint-placeholder-count="3">
-<div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1"><div style="font-size:14px;font-weight:600">{{ s.label }}</div><div style="font-size:12px;color:var(--s-mute)">{{ s.note }}</div></div><span style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-mute)">{{ s.value }}</span></div>
-</sc-for>
 </div>
 <div style="display:flex;gap:10px;margin-top:20px">
-<button style="min-height:42px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.quiet }}</button>
-<button style="min-height:42px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.manageSub }}</button>
 <button onClick="{{ goSecurity }}" style="min-height:42px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.manageSecurity }}</button>
 <button onClick="{{ signOut }}" style="min-height:42px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.signOut }}</button>
 </div>
@@ -1076,7 +1064,7 @@
 const STORE_KEY = 'hif.web.v2';
 // Keys that survive a reload. Live quotes and transient input (passwords, codes) never persist.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','overlays',
-  'screen','feedTab','selected','timeoutMin','locked','theme','alerts','positions','profiles','pfRange','dismissed','stack','stackOpen','events','accountId'];
+  'screen','feedTab','selected','timeoutMin','locked','theme','positions','profiles','pfRange','dismissed','stack','stackOpen','events','accountId'];
 // hif-store.js can finish loading after this logic is evaluated. Until the saved
 // record has been read, nothing may be written, or a reload would overwrite the
 // stored session with these defaults; see restoreLate().
@@ -1108,7 +1096,6 @@ class Component extends DCLogic {
     authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     timeoutMin:30, lockPw:'', lockErr:'',
-    alerts:{ news:true, insider:false, filings:false, rating:false, earnings:false, move:false },
     positions:{}, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, roNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
     dismissed:[], detailTab:'overview',
     stack:[], stackOpen:false, cmdOpen:false, cmdQ:'', cmdIx:0, cursor:0, events:[] });
@@ -1255,11 +1242,6 @@ class Component extends DCLogic {
       this.logEvent('signin', 'Email · ' + email);
       this.flash((u.toastSignedIn || 'Signed in').toUpperCase());
     }).catch(() => this.setState({ authBusy:false, authErr:this.authMessage('failed') }));
-  }
-  toggleAlert(k, locked) {
-    const u = this.copy;
-    if (locked) { this.flash((u[k === 'insider' ? 'alInsider' : k === 'filings' ? 'alFilings' : 'alRating'] || '').toUpperCase() + ' · ' + (u.pro || '').toUpperCase()); return this.go('paywall'); }
-    this.setState(st => ({ alerts: Object.assign({}, st.alerts, { [k]: !(st.alerts || {})[k] }) }));
   }
   togglePick(t) {
     const u = this.copy, free = this.plan === 'free';
@@ -2296,25 +2278,6 @@ class Component extends DCLogic {
     const lastEarn = edText && edText.last ? edText.last : earnRows.length
       ? ((Number(earnRows[0].surprisePercent) >= 0 ? 'Beat by ' : 'Missed by ') + Math.abs(Number(earnRows[0].surprisePercent)).toFixed(1) + '% · ' + earnRows[0].date)
       : (stock.lastEarn || '—');
-    const AL = s.alerts || {};
-    const alertRows = [
-      { key:'news',     label:u.alNews,     note:u.alNewsNote,     pro:false },
-      { key:'insider',  label:u.alInsider,  note:u.alInsiderNote,  pro:true },
-      { key:'filings',  label:u.alFilings,  note:u.alFilingsNote,  pro:true },
-      { key:'rating',   label:u.alRating,   note:u.alRatingNote,   pro:true },
-      { key:'earnings', label:u.alEarnings, note:u.alEarningsNote, pro:false },
-      { key:'move',     label:u.alMove,     note:u.alMoveNote,     pro:false }
-    ].map(r => {
-      const locked = r.pro && isFree, on = !locked && !!AL[r.key];
-      return Object.assign({}, r, {
-        on, locked,
-        stateLabel: locked ? u.pro : (on ? 'ON' : 'OFF'),
-        bg: on ? 'var(--color-accent)' : 'transparent',
-        edge: on ? 'var(--color-accent)' : 'var(--s-rule)',
-        ink: on ? 'var(--s-on-accent)' : (locked ? 'var(--color-accent)' : 'var(--s-mute)'),
-        toggle: () => this.toggleAlert(r.key, locked)
-      });
-    });
     // The calendar: the next report date from the earnings calendar, when one is announced.
     const calRows = ED && ED.next && ED.next.date ? [(() => {
       const d = new Date(ED.next.date + 'T12:00:00Z');
@@ -2550,7 +2513,6 @@ class Component extends DCLogic {
       holdKey: ev => { if (ev.key === 'Enter') this.savePosition(adding ? s.posTicker : s.posEdit); else if (ev.key === 'Escape') this.setState({ posEdit:null }); },
       bookValue: book.valueLabel || '', bookDay: book.dayLabel || '', bookDayUp: book.dayUp, bookHas: !book.empty,
       ui: u,
-      alertRows,
       calRows, noCal: !calRows.length && !dataless(stock.ticker),
       sigRows, noSig: !sigRows.length && !dataless(stock.ticker),
       brand: this.props.brand || 'Market Pulse',
@@ -2878,11 +2840,6 @@ class Component extends DCLogic {
           act: () => this.togglePushDevice(),
           bg: dp === 'on' ? 'transparent' : 'var(--color-accent)', ink: dp === 'on' ? 'var(--color-accent)' : 'var(--s-on-accent)' };
       })(),
-      notifRows: [
-        { label:u.notifTickers, note:u.notifTickersNote, value: isFree ? u.pro : '✓' },
-        { label:u.notifMove, note:u.notifMoveNote, value: isFree ? u.pro : '5%' },
-        { label:u.notifQuiet, note:u.notifQuietNote, value:'22–07' }
-      ],
       toast: s.toast
     };
   }
