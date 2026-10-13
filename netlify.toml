@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/build-netlify.cjs"
+  command = "node scripts/build-netlify.mjs"
   publish = "dist"
   functions = "netlify/functions"
 
