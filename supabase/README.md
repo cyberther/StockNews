@@ -161,9 +161,12 @@ summary's `model` field ends in `· article` or `· snippet` to show which. Set
 
 LM Studio's headless server picks its own CPU thread count (it chose 1 of 4 cores here).
 Before each batch the job reloads the model, through the SDK that ships with LM Studio, with
-3 threads, flash attention and one session at a time (`LMSTUDIO_THREADS`, 0 to leave it to LM
-Studio): on the 4-core i5 that took a summary from ~250 s to ~150 s; 4 threads were slower,
-as the model then competes with the desktop for every core. The rules and a style example sit
+flash attention, one session at a time and 4 threads, or 3 while someone is connected through
+Remote Desktop (`LMSTUDIO_THREADS`: auto, a number, or 0 to leave it to LM Studio). On the
+4-core i5: LM Studio's own choice (1 thread) ~250 s a summary; with a remote session 3
+threads 151 s and 4 threads 247 s (the remote desktop takes ~2 cores); with nobody connected
+3 threads 121 s and 4 threads 105 s. Switching reloads the model (10-40 s), only when a
+remote session starts or ends. The rules and a style example sit
 in one system prompt that LM Studio keeps cached, so only the article is read for each story;
 a reply in English or one that repeats the headline is retried once.
 
