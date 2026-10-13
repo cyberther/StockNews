@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cleanSummary, fixRomanian, usable } from '../tools/summarize-batch.mjs';
+import { cleanSummary, fixRomanian, trimSentences, usable } from '../tools/summarize-batch.mjs';
 
 test('the real Tesla summary loses its English "close"', () => {
   assert.equal(fixRomanian('Tesla (TSLA) s-a încheiat la 378,03$, cu o scădere de 1,22% față de ultimul close.'),
@@ -35,6 +35,27 @@ test('the real NVDA summaries come out in plain Romanian', () => {
   // The model's non-breaking hyphen ("data‑centerelor") is normalised first.
   assert.equal(cleanSummary('Nvidia a pierdut cota de piață a cipurilor AI ale data\u2011centerelor din China.', 'ro'),
     'Nvidia a pierdut cota de piață a cipurilor AI ale centrelor de date din China.');
+});
+
+test('gender and spelling slips from the real ASTS and TSLA summaries', () => {
+  const cases = [
+    ['Compania a raportat un pierdere netă de 342 de milioane, rezultând un marjă negativă de 482%.',
+      'Compania a raportat o pierdere netă de 342 de milioane, rezultând o marjă negativă de 482%.'],
+    ['Tesla acționările au scăzut cu aproximativ 13%, iar un lună mai târziu au revenit.',
+      'Acțiunile Tesla au scăzut cu aproximativ 13%, iar o lună mai târziu au revenit.'],
+    ['Acțiunile au crescut cu 4,72%, superând sectorul; estimările analistilor prevăd un profit.',
+      'Acțiunile au crescut cu 4,72%, depășind sectorul; estimările analiștilor prevăd un profit.']
+  ];
+  for (const [input, want] of cases) assert.equal(fixRomanian(input), want);
+});
+
+test('long summaries are cut after the last whole sentence', () => {
+  const s = 'Prima propoziție are 1.500% creștere și aprox. 13 unități. ' + 'A doua propoziție e ceva mai lungă. '.repeat(30);
+  const out = trimSentences(s, 120);
+  assert.ok(out.length <= 120, out);
+  assert.ok(out.endsWith('.'), out);
+  assert.ok(out.startsWith('Prima propoziție are 1.500% creștere și aprox. 13 unități.'), out);
+  assert.equal(trimSentences('Scurt.', 650), 'Scurt.');
 });
 
 test('names and words that only contain the terms are left alone', () => {

@@ -68,14 +68,15 @@ const PROMPTS = {
 // The same rules, for a whole article: a little longer, and only what the article says.
 const ARTICLE_PROMPTS = {
   ro: PROMPTS.ro.replace('în 2-3 propoziții scurte, DOAR informația din textul primit.',
-    'în 3-4 propoziții, informațiile principale ale articolului primit: ce s-a întâmplat, cifrele importante și ' +
-    'de ce contează pentru companie. Folosește DOAR informația din articol.'),
+    'în cel mult 4 propoziții (sub 600 de caractere în total), informațiile principale ale articolului primit: ce s-a ' +
+    'întâmplat, cele 2-3 cifre cele mai importante și de ce contează pentru companie. Nu enumera toți indicatorii. ' +
+    'Folosește DOAR informația din articol.'),
   en: PROMPTS.en.replace('in 2-3 short sentences, ONLY the information in the text given.',
-    'in 3-4 sentences, the main points of the article given: what happened, the key figures and why it matters for ' +
-    'the company. Use ONLY information from the article.'),
+    'in at most 4 sentences (under 600 characters in all), the main points of the article given: what happened, the ' +
+    '2-3 key figures and why it matters for the company. Do not list every metric. Use ONLY information from the article.'),
   de: PROMPTS.de.replace('in 2-3 kurzen Sätzen NUR die Informationen aus dem Text zusammen.',
-    'in 3-4 Sätzen die wichtigsten Punkte des Artikels zusammen: was passiert ist, die wichtigen Zahlen und warum es ' +
-    'für das Unternehmen zählt. Nur Informationen aus dem Artikel.')
+    'in höchstens 4 Sätzen (unter 600 Zeichen insgesamt) die wichtigsten Punkte des Artikels zusammen: was passiert ist, ' +
+    'die 2-3 wichtigsten Zahlen und warum es für das Unternehmen zählt. Nicht jede Kennzahl aufzählen. Nur Informationen aus dem Artikel.')
 };
 
 const log = (...a) => console.log(new Date().toISOString(), ...a);
@@ -267,7 +268,19 @@ const RO_TERMS = [
   ['rămân optimist', 'rămân optimiști'],
   ['rămân pesimist', 'rămân pesimiști'],
   ['sunt optimist', 'sunt optimiști'],
-  ['sunt pesimist', 'sunt pesimiști']
+  ['sunt pesimist', 'sunt pesimiști'],
+  // Gender and spelling slips the model makes in otherwise Romanian text.
+  ['un pierdere', 'o pierdere'],
+  ['un marjă', 'o marjă'],
+  ['un lună', 'o lună'],
+  ['un creștere', 'o creștere'],
+  ['un scădere', 'o scădere'],
+  ['un majorare', 'o majorare'],
+  ['un reducere', 'o reducere'],
+  ['superând', 'depășind'],
+  ['analistilor', 'analiștilor'],
+  ['analistii', 'analiștii'],
+  ['analisti', 'analiști']
 ];
 // A match may not start or end inside a word ("închidere", "enclosed", "closely").
 const LETTER = 'A-Za-zĂÂÎȘȚăâîșț';
@@ -282,7 +295,24 @@ RO_TERMS.forEach(([en, ro, suffixed]) => {
 export function fixRomanian(s) {
   let out = s;
   for (const [re, ro] of RO_RULES) out = out.replace(re, ro);
+  // "Tesla acționările au scăzut" -> "Acțiunile Tesla au scăzut".
+  out = out.replace(/(^|[.!?]\s+)([A-Z][\w&.-]*(?: [A-Z][\w&.-]*)*) acționările\b/g, (m, p, name) => p + 'Acțiunile ' + name)
+    .replace(/(?<![A-Za-zĂÂÎȘȚăâîșț])acționările(?![A-Za-zĂÂÎȘȚăâîșț])/g, 'acțiunile');
   return out;
+}
+
+// At most `max` characters, cut after the last whole sentence that fits. A sentence ends
+// at . ! or ? followed by a space and a capital (or the end), so "1.500%" and "aprox. 13"
+// don't count as ends.
+export function trimSentences(s, max = 650) {
+  if (s.length <= max) return s;
+  const ends = [];
+  const re = /[.!?](?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)/g;
+  let m;
+  while ((m = re.exec(s))) ends.push(m.index + 1);
+  const fit = ends.filter(i => i <= max).pop();
+  if (fit) return s.slice(0, fit).trim();
+  return s.slice(0, max).replace(/\s+\S*$/, '') + '…';
 }
 
 // Cedilla forms (ş ţ) to the correct comma-below letters, and tidy the model's reply.
@@ -297,7 +327,7 @@ export function cleanSummary(text, lang = cfg.lang) {
     .replace(/\s+/g, ' ')
     .trim();
   s = s.replace(/^["„“”«»']+|["„“”«»']+$/g, '').trim();
-  return lang === 'ro' ? fixRomanian(s) : s;
+  return trimSentences(lang === 'ro' ? fixRomanian(s) : s);
 }
 // A reply worth saving: prose of a sensible length, not a tool call or JSON.
 export function usable(s) {
