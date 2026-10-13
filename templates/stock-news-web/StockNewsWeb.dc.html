@@ -134,9 +134,9 @@
 </sc-if>
 <sc-if value="{{ item.notAi }}" hint-placeholder-val="{{ true }}">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:22px;line-height:1.2;letter-spacing:-0.02em;text-wrap:pretty;max-width:44ch">{{ item.headline }}</div>
-<div style="display:flex;gap:8px;align-items:baseline;margin-top:10px">
+<div style="display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;margin-top:10px">
 <span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ item.watchLabel }}</span>
-<span style="font-size:14px;color:var(--s-ink);line-height:1.45">{{ item.watch }}</span>
+<span style="font-size:14px;color:var(--s-ink);line-height:1.45;flex:1 1 24ch;min-width:0">{{ item.watch }}</span>
 </div>
 </sc-if>
 <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin-top:8px">

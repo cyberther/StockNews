@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cleanSummary, fixRomanian, looksWrong, trimSentences, usable } from '../tools/summarize-batch.mjs';
+import { cleanSummary, dropFiller, fixRomanian, looksWrong, trimSentences, usable } from '../tools/summarize-batch.mjs';
 
 test('the real Tesla summary loses its English "close"', () => {
   assert.equal(fixRomanian('Tesla (TSLA) s-a încheiat la 378,03$, cu o scădere de 1,22% față de ultimul close.'),
@@ -125,4 +125,15 @@ test('currency written twice and spaced numbers from the real NVDA and ASTS summ
   assert.equal(fixRomanian('Lucid a livrat 3 806 vehicule în 2026, între 7 000 și 8 000 de unități.'), 'Lucid a livrat 3.806 vehicule în 2026, între 7.000 și 8.000 de unități.');
   assert.equal(fixRomanian('În 2026 120 de magazine, din 2025 până în 2026.'), 'În 2026 120 de magazine, din 2025 până în 2026.');
   assert.equal(fixRomanian('Tesla dispune de un rețea extinsă și un companie nouă.'), 'Tesla dispune de o rețea extinsă și o companie nouă.');
+});
+
+test('a closing comment of the model\'s own is dropped, facts are kept', () => {
+  const facts = 'Piper Sandler a redus ratingul AST SpaceMobile de la Overweight la Neutral și ținta de la 98$ la 54$. Acțiunile au închis la 51,46$ luni.';
+  assert.equal(dropFiller(facts + ' Această schimbare reflectă o reevaluare a perspectivelor financiare ale firmei.'), facts);
+  assert.equal(dropFiller(facts + ' Acest pas reflectă o perspectivă mai precaută.'), facts);
+  assert.equal(dropFiller(facts + ' Decizia poate influența deciziile investitorilor privind titlul.'), facts);
+  assert.equal(dropFiller(facts), facts);
+  assert.equal(dropFiller(facts + ' Aceste cifre arată că veniturile au crescut cu 20%.'), facts + ' Aceste cifre arată că veniturile au crescut cu 20%.');
+  assert.equal(dropFiller('Această schimbare reflectă cererea mai slabă.'), 'Această schimbare reflectă cererea mai slabă.');
+  assert.equal(cleanSummary(facts + ' Aceste cifre arată o poziție solidă.', 'ro'), facts);
 });
