@@ -13,6 +13,7 @@
 //   SUMMARY_SECRET                   the batch job's secret (Vault 'summary_secret')
 //   LMSTUDIO_URL    default http://127.0.0.1:1234/v1
 //   LMSTUDIO_MODEL  default openai/gpt-oss-20b
+//   LMSTUDIO_THREADS  default 3: CPU threads the model is loaded with (tools/lmstudio-model.mjs); 0 = LM Studio's choice
 //   SUMMARY_LANG    default ro,en,de (comma-separated, in order of preference)
 //   BATCH_LIMIT     default 10 summaries a run
 //   MAX_AGE_HOURS   default 24
@@ -29,6 +30,7 @@ import { join } from 'node:path';
 import https from 'node:https';
 import http from 'node:http';
 import zlib from 'node:zlib';
+import { ensureModel } from './lmstudio-model.mjs';
 
 const ENV_FILE = join(homedir(), '.config/market-pulse/summarizer.env');
 if (existsSync(ENV_FILE)) {
@@ -44,42 +46,49 @@ const cfg = {
   secret: env.SUMMARY_SECRET || '',
   lmUrl: (env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1').replace(/\/$/, ''),
   model: env.LMSTUDIO_MODEL || 'openai/gpt-oss-20b',
+  threads: env.LMSTUDIO_THREADS === undefined ? 3 : Math.max(0, Math.min(Number(env.LMSTUDIO_THREADS) || 0, 64)),
   langs: [...new Set(String(env.SUMMARY_LANG || 'ro,en,de').toLowerCase().split(/[\s,]+/).filter(l => ['ro', 'en', 'de'].includes(l)))],
   limit: Math.max(1, Math.min(Number(env.BATCH_LIMIT) || 10, 100)),
   readArticles: env.READ_ARTICLES !== '0',
   hours: Math.max(1, Math.min(Number(env.MAX_AGE_HOURS) || 24, 168))
 };
 
-const PROMPTS = {
-  ro: 'Ești redactor financiar. Rezumă în limba română, în 2-3 propoziții scurte, DOAR informația din textul primit. ' +
-      'Nu adăuga cifre, nume, cauze sau interpretări care nu apar în text și nu generaliza (de exemplu, livrările unei ' +
-      'companii nu sunt livrările întregii piețe). Păstrează simbolurile bursiere și cifrele exact; scrie o scădere ca ' +
-      '„a scăzut cu 1,2%”, fără semnul minus. Nu folosi cuvinte în engleză când există echivalent românesc: scrie ' +
-      '„închidere” (nu close), „tranzacționare” (nu trading), „avans” (nu rally), „val de vânzări” (nu sell-off), ' +
-      '„rezultate financiare” (nu earnings), „prognoză” (nu guidance), „perspective” (nu outlook), „preț-țintă” ' +
-      '(nu price target), „valoare de piață” (nu market cap), „program de răscumpărare” (nu buyback). ' +
-      'Folosește diacriticele corecte (ă, â, î, ș, ț). Răspunde doar cu rezumatul, fără titlu și fără ghilimele.',
-  en: 'You are a financial editor. Summarize in English, in 2-3 short sentences, ONLY the information in the text given. ' +
-      'Do not add figures, names, causes or interpretation that are not in it. Keep tickers and figures exact. ' +
-      'Reply with the summary only.',
-  de: 'Du bist Finanzredakteur. Fasse auf Deutsch in 2-3 kurzen Sätzen NUR die Informationen aus dem Text zusammen. ' +
-      'Füge keine Zahlen, Namen, Ursachen oder Deutungen hinzu, die nicht im Text stehen. Ticker und Zahlen exakt übernehmen. ' +
-      'Antworte nur mit der Zusammenfassung.'
-};
-
-// The same rules, for a whole article: a little longer, and only what the article says.
-export const ARTICLE_PROMPTS = {
-  ro: PROMPTS.ro.replace('în 2-3 propoziții scurte, DOAR informația din textul primit.',
-    'în cel mult 4 propoziții (sub 600 de caractere în total), informațiile principale ale articolului primit: ce s-a ' +
-    'întâmplat, cele 2-3 cifre cele mai importante și de ce contează pentru companie. Nu enumera toți indicatorii. ' +
-    'Folosește DOAR informația din articol.'),
-  en: PROMPTS.en.replace('in 2-3 short sentences, ONLY the information in the text given.',
-    'in at most 4 sentences (under 600 characters in all), the main points of the article given: what happened, the ' +
-    '2-3 key figures and why it matters for the company. Do not list every metric. Use ONLY information from the article.'),
-  de: PROMPTS.de.replace('in 2-3 kurzen Sätzen NUR die Informationen aus dem Text zusammen.',
-    'in höchstens 4 Sätzen (unter 600 Zeichen insgesamt) die wichtigsten Punkte des Artikels zusammen: was passiert ist, ' +
-    'die 2-3 wichtigsten Zahlen und warum es für das Unternehmen zählt. Nicht jede Kennzahl aufzählen. Nur Informationen aus dem Artikel.')
-};
+// One system prompt for every story and language. LM Studio keeps it in its prompt cache,
+// so after the first story its length costs nothing; the story follows, then one line naming
+// the language, so a story's summaries in several languages share the article as well.
+// On a CPU, reading the prompt is most of the time a summary takes.
+export const SYSTEM = [
+  'You are a financial news editor. You summarize one news story at a time for investors.',
+  '',
+  'Rules for every summary:',
+  '- Use ONLY information in the story. Do not add figures, names, causes or opinions, and do not generalize ' +
+    '(one company\'s deliveries are not the whole market\'s).',
+  '- At most 4 sentences and under 600 characters: what happened, the 2-3 most important figures, and why it ' +
+    'matters for the company. Do not list every metric.',
+  '- If the story is about several companies, focus on the one named after "Ticker:".',
+  '- Keep tickers, company names and figures exactly as in the story. Write a fall as "fell 1.2%", never with a minus sign.',
+  '- Third person; past tense for what happened. Reply with the summary only: no title, no quotation marks, no ' +
+    'bullet points, no introduction.',
+  '',
+  'Romanian (ro): correct diacritics (ă, â, î, ș, ț) and correct grammatical gender and agreement ("o pierdere ' +
+    'netă", "o marjă negativă", "acțiunile Tesla", "investitorii rămân optimiști"). Use Romanian words, not English ' +
+    'ones: închidere (close), tranzacționare (trading), avans (rally), val de vânzări (sell-off), rezultate financiare ' +
+    '(earnings), prognoză (guidance), perspective (outlook), preț-țintă (price target), valoare de piață (market cap), ' +
+    'program de răscumpărare (buyback), contracte futures (futures), centre de date (data centers), optimist / ' +
+    'pesimist (bullish / bearish), investitori individuali (retail investors), anul fiscal 2025 (FY 2025). Romanian ' +
+    'number style: 1,5 miliarde de dolari; 8%; 678.000 de unități.',
+  'A summary in the right style (it is about another story; never copy its facts): „Acțiunile companiei au scăzut ' +
+    'cu 3,1%, după ce aceasta și-a redus prognoza de vânzări pentru 2026 la 12 miliarde de dolari. Conducerea a ' +
+    'explicat scăderea prin cererea mai slabă din Europa, iar analiștii se așteaptă la o marjă mai mică în trimestrul ' +
+    'următor.”',
+  '',
+  'English (en): plain, concise financial English.',
+  'German (de): correct German financial terms; no English words where German ones exist (bullish: optimistisch).'
+].join('\n');
+// The line after the story: the language, and how much there is to go on.
+const LANG_LINE = { ro: 'Scrie rezumatul în limba română.', en: 'Write the summary in English.', de: 'Schreibe die Zusammenfassung auf Deutsch.' };
+const SNIPPET_LINE = { ro: 'Ai doar titlul și un scurt fragment: 1-2 propoziții.', en: 'Only the headline and a short snippet are given: 1-2 sentences.',
+  de: 'Nur Überschrift und kurzer Auszug liegen vor: 1-2 Sätze.' };
 
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 
@@ -354,27 +363,37 @@ function postJson(url, body, timeout) {
   });
 }
 
-// The same for every language, so the prompt cache can share the story between them.
-const SYSTEM = 'You are a financial news editor. You write short, accurate summaries of news stories, using only ' +
-  'the information in the story, in the language and form the instructions after the story ask for.';
-// Field labels. English for every language: the start of the prompt must not depend on it.
-const LABEL = ['Title', 'Article', 'Source summary', '(no summary)'];
+// What a Romanian summary should not look like: English sentences, or the headline repeated.
+const EN_WORDS = /(?<![\p{L}])(the|and|of|to|is|are|was|with|for|its|shares|stock|said)(?![\p{L}])/giu;
+const fold = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+export function looksWrong(text, story, lang) {
+  if (!usable(text)) return 'not usable';
+  if (lang !== 'en' && (text.match(EN_WORDS) || []).length >= 4) return 'English words';
+  const head = fold(story.headline);
+  if (head.length > 30 && fold(text).startsWith(head.slice(0, 40))) return 'repeats the headline';
+  return '';
+}
+
 export async function summarizeForTest(story, article, lang = 'ro') { return summarize(story, article, lang); }
+// One try, and a second (a little less conservative) when the first looks wrong; the
+// second reuses the cached prompt, so it costs only the writing.
 async function summarize(story, article, lang) {
-  const [T, A, S, none] = LABEL;
   const input = article
-    ? `Ticker: ${story.ticker}\n${T}: ${story.headline}\n${A}:\n${article}`
-    : `Ticker: ${story.ticker}\n${T}: ${story.headline}\n${S}: ${story.summary || none}`;
-  const prompts = article ? ARTICLE_PROMPTS : PROMPTS;
-  const res = await postJson(`${cfg.lmUrl}/chat/completions`, { model: cfg.model, temperature: 0.2, max_tokens: 800,
-    // The story comes first and the language's instructions last, so the summaries of one
-    // story in each language start with the same tokens and LM Studio reads the article
-    // only once (its prompt cache keeps the longest shared start). On a CPU, reading the
-    // article is most of the time.
-    messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: input + '\n\n---\n' + (prompts[lang] || prompts.en) }] }, 600_000);
-  if (res.status !== 200) throw new Error(`model: ${res.status} ${res.body.slice(0, 200)}`);
-  const d = JSON.parse(res.body);
-  return cleanSummary(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content, lang);
+    ? `Ticker: ${story.ticker}\nTitle: ${story.headline}\nArticle:\n${article}`
+    : `Ticker: ${story.ticker}\nTitle: ${story.headline}\nSource summary: ${story.summary || '(none)'}`;
+  const tail = '\n\n---\n' + (LANG_LINE[lang] || LANG_LINE.en) + (article ? '' : ' ' + (SNIPPET_LINE[lang] || SNIPPET_LINE.en));
+  let text = '', why = '';
+  for (const temperature of [0.2, 0.5]) {
+    const res = await postJson(`${cfg.lmUrl}/chat/completions`, { model: cfg.model, temperature, max_tokens: 800,
+      messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: input + tail }] }, 600_000);
+    if (res.status !== 200) throw new Error(`model: ${res.status} ${res.body.slice(0, 200)}`);
+    const d = JSON.parse(res.body);
+    text = cleanSummary(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content, lang);
+    why = looksWrong(text, story, lang);
+    if (!why) return text;
+    log('retry', story.id, lang, '-', why);
+  }
+  return text;
 }
 
 async function main() {
@@ -386,6 +405,7 @@ async function main() {
     const r = await fetch(`${cfg.lmUrl}/models`, { signal: AbortSignal.timeout(5000) });
     if (!r.ok) throw new Error(String(r.status));
   } catch (e) { log('LM Studio is not answering at', cfg.lmUrl, '- nothing to do this run'); return; }
+  log(await ensureModel({ model: cfg.model, threads: cfg.threads, wsUrl: cfg.lmUrl.replace(/^http/, 'ws').replace(/\/v1$/, '') }));
 
   if (!cfg.langs.length) { log('SUMMARY_LANG has no supported language (ro, en, de)'); process.exitCode = 2; return; }
   // What each language still needs, in the server's priority order; then one queue in which
@@ -431,4 +451,7 @@ async function main() {
   log(`done: ${saved} of ${queue.length} saved`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main().catch(e => { log('error', e.message); process.exitCode = 1; });
+// The LM Studio SDK keeps a socket open, so the job exits explicitly when it is done.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(e => { log('error', e.message); process.exitCode = 1; }).finally(() => process.exit());
+}

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cleanSummary, fixRomanian, trimSentences, usable } from '../tools/summarize-batch.mjs';
+import { cleanSummary, fixRomanian, looksWrong, trimSentences, usable } from '../tools/summarize-batch.mjs';
 
 test('the real Tesla summary loses its English "close"', () => {
   assert.equal(fixRomanian('Tesla (TSLA) s-a încheiat la 378,03$, cu o scădere de 1,22% față de ultimul close.'),
@@ -108,4 +108,12 @@ test('a subscription wall is not taken for the article', () => {
   assert.equal(isPaywall('Poți să accesezi acest articol doar dacă ești abonat ZFCorporate.ro - platforma completă de informații.'), true);
   assert.equal(isPaywall('Subscribe to read the full story. Already a subscriber? Sign in.'), true);
   assert.equal(isPaywall('Nvidia a livrat 678.000 de cipuri în China în primul semestru, cu 44% mai puține decât anul trecut.'), false);
+});
+
+test('a Romanian summary in English, or repeating the headline, is retried', () => {
+  const story = { headline: 'Tesla (TSLA) Declines More Than Market: Some Information for Investors' };
+  assert.equal(looksWrong('Tesla shares fell 1.2% and the stock is down for the week, with analysts said to be cautious.', story, 'ro'), 'English words');
+  assert.equal(looksWrong('Tesla (TSLA) declines more than market: some information for investors, potrivit sursei.', story, 'ro'), 'repeats the headline');
+  assert.equal(looksWrong('Acțiunile Tesla au scăzut cu 1,22%, la 378,03 dolari, mai mult decât indicele S&P 500.', story, 'ro'), '');
+  assert.equal(looksWrong('Tesla shares fell 1.2% and the stock is down for the week, with analysts said to be cautious.', story, 'en'), '');
 });
