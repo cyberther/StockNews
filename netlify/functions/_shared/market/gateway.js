@@ -18,6 +18,14 @@ import { yahoo, CHART_RANGES } from './providers/yahoo.js';
 import { twelvedata } from './providers/twelvedata.js';
 import { fmp } from './providers/fmp.js';
 import { alphavantage } from './providers/alphavantage.js';
+import { companyNews, marketNews } from './ro-news.js';
+
+// Romanian company news from the press's RSS feeds (ro-news.js); no upstream key.
+const ronews = {
+  name: 'ronews', needsKey: false, limits: {},
+  supports: cap => cap === 'news' || cap === 'marketNewsRO',
+  load: (cap, p, ctx) => cap === 'news' ? companyNews(p.symbol, p.from, p.to, ctx.log) : marketNews(40, ctx.log)
+};
 
 // Default order per capability. A provider without a key is skipped; Alpha Vantage's
 // 25 calls a day make it a last resort. Override with MARKET_ORDER_<CAPABILITY>, e.g.
@@ -28,12 +36,22 @@ const PROVIDERS = {
   earnings: [finnhub, fmp],
   earningsHistory: [fmp],   // internal: past reports that enrich the earnings calendar
   chart: [yahoo, twelvedata],
+  marketNewsRO: [ronews],  // /ro-news: every story naming a BVB-listed company
   news: [finnhub], search: [finnhub], recommendation: [finnhub], earningsCalendar: [finnhub]
 };
-const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage].map(p => [p.name, p]));
+const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage, ronews].map(p => [p.name, p]));
 // Keys by provider, from the environment (never sent anywhere but the provider itself).
 export const keysFromEnv = env => ({ finnhub: env.FINNHUB_KEY, twelvedata: env.TWELVEDATA_KEY, fmp: env.FMP_KEY, alphavantage: env.ALPHAVANTAGE_KEY });
-const providersFor = (cap, ctx) => (ctx.order && ctx.order[cap]) || PROVIDERS[cap];
+// Bucharest Stock Exchange listings (.RO): Yahoo has their prices and names, the Romanian
+// press their news. The backup providers don't cover them, so they aren't asked (their
+// small daily quotas would be spent on nothing).
+const RO_ROUTES = {
+  quote: [yahoo, finnhub], profile: [yahoo], chart: [yahoo], news: [ronews],
+  earnings: [finnhub], earningsCalendar: [finnhub], recommendation: [finnhub]
+};
+export const isBvb = symbol => /\.RO$/.test(String(symbol || ''));
+const providersFor = (cap, ctx, params) =>
+  (params && isBvb(params.symbol) && RO_ROUTES[cap]) || (ctx.order && ctx.order[cap]) || PROVIDERS[cap];
 // { CHART: 'twelvedata,yahoo' } (from env MARKET_ORDER_*) -> { chart: [twelvedata, yahoo] }
 export function orderFromEnv(env) {
   const out = {};
@@ -49,10 +67,10 @@ export function orderFromEnv(env) {
 const ROUTES = {
   '/quote': 'quote', '/quotes': 'quotes', '/company-news': 'news', '/search': 'search',
   '/stock/recommendation': 'recommendation', '/stock/earnings': 'earnings',
-  '/calendar/earnings': 'earningsCalendar', '/stock/profile2': 'profile', '/chart': 'chart'
+  '/calendar/earnings': 'earningsCalendar', '/stock/profile2': 'profile', '/chart': 'chart', '/ro-news': 'marketNewsRO'
 };
 // Seconds an answer is fresh. Quotes go stale fast; company names hardly change.
-const TTL = { quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
+const TTL = { marketNewsRO: 600, quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
 // How long past its TTL an answer may still be served when every provider is failing.
 const STALE_FOR = { quote: 600 };
 const STALE_DEFAULT = 86400;
@@ -91,6 +109,7 @@ const isoDate = v => /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v
 // Rebuilds the parameters from validated values only, so nothing the client adds (a second
 // token=, a path in symbol) reaches a provider.
 function parse(cap, q) {
+  if (cap === 'marketNewsRO') return { params: {} };
   if (cap === 'quotes') {
     const symbols = [...new Set(String(q.get('symbols') || '').toUpperCase().split(',').map(s => s.trim()).filter(Boolean))].sort();
     if (!symbols.length || symbols.length > MAX_BATCH || !symbols.every(validSymbol)) return { error: 'invalid symbols' };
@@ -228,13 +247,27 @@ async function fetchCapability(cap, params, ctx) {
   const run = (async () => {
     // The most telling failure wins: one from a provider that was tried beats "not configured".
     let fail = null, unconfigured = false, emptyAnswer = null;
-    for (const p of providersFor(cap, ctx)) {
+    for (const p of providersFor(cap, ctx, params)) {
       const apiKey = p.needsKey ? ctx.keys[p.name] : null;
       if (p.needsKey && !apiKey) { unconfigured = true; continue; }
       if (breakerOpen(p.name) || !paceAllows(p)) { fail = { status: 429, error: 'rate limit exceeded' }; continue; }
       if (!(await dailyAllows(p, ctx))) { fail = { status: 429, error: 'daily quota reached' }; continue; }
       count(p.name, 'calls');
       const t0 = Date.now();
+      // A provider that reads its own sources (the RSS feeds) instead of one HTTP API.
+      if (p.load) {
+        try {
+          const data = await p.load(cap, params, ctx);
+          ctx.log({ evt: 'market.upstream', provider: p.name, cap, status: 200, ms: Date.now() - t0 });
+          recordSuccess(p.name);
+          return remember(key, cap, params, data, p.name);
+        } catch (e) {
+          ctx.log({ evt: 'market.upstream', provider: p.name, cap, status: 'error', ms: Date.now() - t0 });
+          recordFailure(p.name, ctx.log); count(p.name, 'errors');
+          fail = { status: 502, error: 'market data unavailable' };
+          continue;
+        }
+      }
       let res;
       try {
         res = await fetchJson(p.url(cap, params, apiKey), p.headers);
@@ -281,7 +314,7 @@ function remember(key, cap, params, data, source) {
 async function fetchEarningsCalendar(params, ctx) {
   const r = await fetchCapability('earningsCalendar', params, ctx);
   const rows = r.status === 200 && r.data && Array.isArray(r.data.earningsCalendar) ? r.data.earningsCalendar : null;
-  if (!rows || rows.some(x => x && x.epsActual != null)) return r;
+  if (!rows || isBvb(params.symbol) || rows.some(x => x && x.epsActual != null)) return r;
   const h = await fetchCapability('earningsHistory', { symbol: params.symbol }, ctx);
   if (h.status !== 200 || !Array.isArray(h.data) || !h.data.length) return r;
   const have = new Set(rows.map(x => x.date));

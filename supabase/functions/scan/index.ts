@@ -121,15 +121,24 @@ async function pool<T, R>(items: T[], n: number, fn: (x: T) => Promise<R>): Prom
   return out;
 }
 
+// Bucharest listings (.RO) have no Finnhub news. Their stories come from the app's own
+// market gateway (APP_URL), which reads the Romanian press and already files each story
+// under the company it names.
+const isBvb = (t: string) => /\.RO$/.test(t);
+
 async function companyNews(ticker: string, name: string, errors: string[]): Promise<Story[]> {
   const now = Date.now();
-  const url = `${env('FINNHUB_BASE') || 'https://finnhub.io/api/v1'}/company-news?symbol=${encodeURIComponent(ticker)}&from=${ymd(now - 2 * 86400000)}&to=${ymd(now + 86400000)}`;
+  const range = `from=${ymd(now - 2 * 86400000)}&to=${ymd(now + 86400000)}`;
+  const bvb = isBvb(ticker);
+  const url = bvb
+    ? new URL(`api/finnhub?path=/company-news&symbol=${encodeURIComponent(ticker)}&${range}`, env('APP_URL') || 'http://invalid/').toString()
+    : `${env('FINNHUB_BASE') || 'https://finnhub.io/api/v1'}/company-news?symbol=${encodeURIComponent(ticker)}&${range}`;
   try {
-    const res = await fetch(url, { headers: { 'X-Finnhub-Token': env('FINNHUB_KEY') } });
-    if (!res.ok) { errors.push(`${ticker}: finnhub ${res.status}`); return []; }
+    const res = await fetch(url, bvb ? { signal: AbortSignal.timeout(15000) } : { headers: { 'X-Finnhub-Token': env('FINNHUB_KEY') } });
+    if (!res.ok) { errors.push(`${ticker}: ${bvb ? 'gateway' : 'finnhub'} ${res.status}`); return []; }
     const rows = await res.json();
     if (!Array.isArray(rows)) return [];
-    const relevant = matcher(ticker, name);
+    const relevant = bvb ? () => true : matcher(ticker, name);
     return rows.filter(n => n && n.id && n.headline && n.datetime && relevant(n.headline + ' ' + (n.summary || '')))
       .sort((a, b) => b.datetime - a.datetime).slice(0, 25).map(n => ({
       id: `${ticker}:${n.id}`,
@@ -179,7 +188,7 @@ Deno.serve(async (req) => {
   const names = new Map<string, string>();
   const { data: nameRows } = await db.from('ticker_names').select('ticker,name').in('ticker', tickers);
   (nameRows || []).forEach(r => names.set(r.ticker, r.name || ''));
-  const unnamed = tickers.filter(t => !names.has(t)).slice(0, 10);
+  const unnamed = tickers.filter(t => !names.has(t) && !isBvb(t)).slice(0, 10);
   for (const t of unnamed) {
     try {
       const res = await fetch(`${env('FINNHUB_BASE') || 'https://finnhub.io/api/v1'}/stock/profile2?symbol=${encodeURIComponent(t)}`, { headers: { 'X-Finnhub-Token': env('FINNHUB_KEY') } });

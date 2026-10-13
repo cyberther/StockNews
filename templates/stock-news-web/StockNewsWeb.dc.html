@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:0 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(4,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:0 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(4,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -106,9 +106,14 @@
 <sc-if value="{{ feedMarketOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.market }}</span></sc-if>
 <sc-if value="{{ feedMarketOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.market }}</span></sc-if>
 </button>
+<button onClick="{{ setFeedBvb }}" style="position:relative;padding:0 0 10px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">
+<sc-if value="{{ feedBvbOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.bvbTab }}</span></sc-if>
+<sc-if value="{{ feedBvbOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.bvbTab }}</span></sc-if>
+</button>
 </div>
 </div>
 <div style="border-top:1px solid var(--s-rule);margin-top:0"></div>
+<sc-if value="{{ bvbEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.bvbEmpty }}</div></sc-if>
 <sc-for list="{{ feed }}" as="item" hint-placeholder-count="4">
 <sc-if value="{{ item.hasDayHead }}" hint-placeholder-val="{{ false }}"><h3 style="margin:0;padding:14px var(--gx) 8px;border-bottom:1px solid var(--s-rule);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ item.dayHead }}</h3></sc-if>
 <article data-m="rise spotlight" role="button" tabIndex="0" onClick="{{ item.open }}" onKeyDown="{{ item.keyOpen }}" style-hover="background:var(--s-panel)" class="m-feed" style="position:relative;display:grid;grid-template-columns:104px 1fr 168px;gap:24px;padding:20px var(--gx);border-bottom:1px solid var(--s-rule);cursor:pointer">
@@ -1162,7 +1167,7 @@ class Component extends DCLogic {
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
     alerts:{ news:true, insider:false, filings:false, rating:false, earnings:false, move:false },
-    positions:{ NVDA:{ shares:40, cost:'151.20' }, AAPL:{ shares:75, cost:'214.60' } }, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, pfRange:'1mo', pfHover:null, pfCharts:{},
+    positions:{ NVDA:{ shares:40, cost:'151.20' }, AAPL:{ shares:75, cost:'214.60' } }, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, roNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
     dismissed:[], detailTab:'overview',
     stack:[], stackOpen:false, cmdOpen:false, cmdQ:'', cmdIx:0, cursor:0, events:[] });
   // Append-only security trail. The server mirrors this shape at POST /api/events,
@@ -1349,6 +1354,7 @@ class Component extends DCLogic {
       this.syncLive();
       this.syncPositions();
       if (this.state.feedTab === 'market') this.syncMarket();
+      if (this.state.feedTab === 'bvb') this.syncBvb();
       this.startAutoRefresh();
       this.syncDetail(this.state.selected);
       this.state.follows.forEach(t => this.syncSpark(t));
@@ -1551,6 +1557,7 @@ class Component extends DCLogic {
       this.syncSummaries(true);
       if (this.state.screen === 'portfolio') this.syncPortfolioCharts();
       if (this.state.feedTab === 'market') this.syncMarket();
+      if (this.state.feedTab === 'bvb') this.syncBvb();
     };
     this._auto = setInterval(tick, 5 * 60000);
     this._onVis = () => { if (!document.hidden && Date.now() - (this._lastAuto || 0) > 60000) tick(); };
@@ -1570,6 +1577,20 @@ class Component extends DCLogic {
       if (!got && !Object.keys(res.news).length) return;
       this.setState(st => ({ quotes: Object.assign({}, st.quotes, res.quotes), liveNews: Object.assign({}, st.liveNews, res.news),
         liveMode: res.mode, liveStatus: got ? 'live' : st.liveStatus }));
+    }).catch(() => {});
+  }
+  // The BVB tab: Romanian press stories (/ro-news) and the quotes of the companies they
+  // name, plus the largest Bucharest listings, in one batch.
+  syncBvb() {
+    const L = window.HIFLive, B = window.HIFBVB;
+    if (!L || !L.roNews) return;
+    L.roNews().then(rows => {
+      if (!rows) return;
+      this.setState({ roNews: rows });
+      const syms = [...new Set(rows.map(r => r.related).concat((B && B.top) || []))].slice(0, 50);
+      return L.quotes(syms, this.token).then(qs => {
+        if (Object.keys(qs).length) this.setState(st => ({ quotes: Object.assign({}, st.quotes, qs) }));
+      });
     }).catch(() => {});
   }
   syncDetail(symbol, force, requestedRange) {
@@ -1858,6 +1879,7 @@ class Component extends DCLogic {
     if (!P || !P.loadSummaries || !s.authLive || !s.session) return;
     const lang = String(this.lang || 'EN').toLowerCase(), LN = s.liveNews || {}, ids = [];
     Object.keys(LN).forEach(t => (LN[t] || []).forEach(n => { if (n && n.id) ids.push(t + ':' + n.id); }));
+    (s.roNews || []).forEach(n => { if (n && n.id && n.related) ids.push(n.related + ':' + n.id); });
     const sig = lang + '|' + ids.join(',');
     if (!ids.length || (!force && sig === this._sumSig)) return;
     this._sumSig = sig;
@@ -1885,11 +1907,15 @@ class Component extends DCLogic {
     return d.toLocaleDateString([], { day:'numeric', month:'short', year: range === '1y' || range === '6mo' ? '2-digit' : undefined });
   }
   // Value line with the cost basis as a dashed reference; hover or drag reads any point.
-  portfolioChartEl(series, range, compact) {
+  portfolioChartEl(series, range, compact, currencies, currency) {
     const pal = this.pal, h = React.createElement, ranges = [['1d','1D'],['5d','1W'],['1mo','1M'],['6mo','6M'],['1y','1Y']];
     const chips = h('div', { role:'group', 'aria-label':'Chart range', style:{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:12 } },
       ...ranges.map(([k, label]) => h('button', { key:k, 'aria-pressed': range === k, onClick: () => this.setState({ pfRange:k, pfHover:null }),
-        style:Object.assign(this.chipStyle(range === k), { minHeight:32, padding:'0 12px', fontSize:10 }) }, label)));
+        style:Object.assign(this.chipStyle(range === k), { minHeight:32, padding:'0 12px', fontSize:10 }) }, label)),
+      // One chart per currency (no conversion): pick which positions it shows.
+      ...((currencies || []).length > 1 ? [h('span', { key:'sep', style:{ width:1, alignSelf:'stretch', background:pal.rule, margin:'0 4px' } })].concat(
+        currencies.map(c => h('button', { key:'c' + c, 'aria-pressed': c === currency, onClick: () => this.setState({ pfCur:c, pfHover:null }),
+          style:Object.assign(this.chipStyle(c === currency), { minHeight:32, padding:'0 12px', fontSize:10 }) }, c))) : []));
     const pts = series.points || [], n = pts.length;
     if (n < 2) return h('div', null, chips, h('div', { style:{ height: compact ? 160 : 220, display:'flex', alignItems:'center', justifyContent:'center', border:'1px dashed ' + pal.rule, color:pal.mute, fontSize:12, textAlign:'center', padding:16 } }, series.message || ''));
     const W = 1000, H = compact ? 160 : 220;
@@ -2126,7 +2152,7 @@ class Component extends DCLogic {
     const PR = s.profiles || {};
     const rec = t => {
       const uni = UNIVERSE.filter(x => x.ticker === t)[0];
-      const base = FOLLOWS[t] || Object.assign({ ticker:t, name:(uni && uni.name) || (PR[t] && PR[t].name) || t, stories:(uni && uni.stories) || '—',
+      const base = FOLLOWS[t] || Object.assign({ ticker:t, name:(uni && uni.name) || (window.HIFBVB && window.HIFBVB.name(t)) || (PR[t] && PR[t].name) || t, stories:(uni && uni.stories) || '—',
         latest:{ EN:'', RO:'', DE:'' }, call:{ EN:'', RO:'', DE:'' } }, blank);
       const ev = (EVENTS[t] || []).filter(e => e.kind === 'evEarnings')[0];
       const d = ev ? this.daysUntil(ev.date) : null;
@@ -2139,16 +2165,20 @@ class Component extends DCLogic {
     {
       // Real stories whenever any have loaded (even if a quote call failed), strictly
       // newest first across tickers. Market draws on the ten largest names.
-      const market = s.feedTab !== 'following';
+      // The BVB tab: Romanian press stories, each filed under the company it names.
+      const market = s.feedTab !== 'following', bvb = s.feedTab === 'bvb';
       const syms = market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows;
       const rows = [];
-      syms.forEach(t => (LN[t] || []).forEach(n => rows.push({
+      const row = (t, n) => ({
         ticker:t, storyId: n.id ? t + ':' + n.id : '', source:n.source, stamp:n.stamp, ts:n.ts, headline:n.headline, watch:n.summary || '', url:n.url || '',
         score:'#' + storyCount(t), vol:'—', delta:(Q[t] || {}).move || '—', up:(Q[t] || {}).up !== false
-      })));
+      });
+      if (bvb) (s.roNews || []).forEach(n => rows.push(row(n.related, n)));
+      else syms.forEach(t => (LN[t] || []).forEach(n => rows.push(row(t, n))));
       baseFeed = rows.sort((a,b) => b.ts - a.ts).slice(0, 40);
     }
-    if (!baseFeed || !baseFeed.length) {
+    // No demo stand-ins on the BVB tab: the demo set has no Romanian companies.
+    if (s.feedTab !== 'bvb' && (!baseFeed || !baseFeed.length)) {
       baseFeed = (s.feedTab === 'following' ? NEWS.filter(n => s.follows.includes(n.ticker)) : NEWS)
         .map(n => Object.assign({}, n, { headline:n.headline[L], watch:n.watch[L] }));
     }
@@ -2302,14 +2332,15 @@ class Component extends DCLogic {
     const rsiNow = rsiArr.length ? rsiArr[rsiArr.length - 1] : null;
     const clashes = IN ? IN.conflicts({ analystDetail: stock.analystDetail, signals: SIGNALS[stock.ticker] || [], movePct: stock.move, rsi: rsiNow }) : [];
     const posMap = s.positions || {};
-    const pos = IN ? IN.position(posMap[stock.ticker], stock.price, stock.move) : null;
+    const curSign = window.HIFBVB && window.HIFBVB.is(stock.ticker) ? 'RON ' : undefined;
+    const pos = IN ? IN.position(posMap[stock.ticker], stock.price, stock.move, curSign) : null;
     const book = IN ? IN.portfolio(posMap, t => (rec(t) || {}).price, t => (rec(t) || {}).move) : { rows:[], empty:true };
     // Positions table on the Watchlist screen (../shared/hif-insight.js holdings()).
     const HQ = s.quotes || {};
     const HB = IN && IN.holdings ? IN.holdings(posMap, t => {
       const r = rec(t) || {}, q = HQ[t] || {}, pr = PR[t] || {}, ch = s.charts[t + ':1d'];
       return { price: Number.isFinite(q.last) ? q.last : r.price, move: Number.isFinite(q.dp) ? q.dp : r.move,
-        name: pr.name || r.name, currency: pr.currency || (ch && ch.currency) || 'USD' };
+        name: (window.HIFBVB && window.HIFBVB.name(t)) || pr.name || r.name, currency: pr.currency || (ch && ch.currency) || 'USD' };
     }) : { rows:[], totals:[], empty:true };
     const adding = s.posEdit === '__new';
     const stopEv = ev => { if (ev && ev.stopPropagation) ev.stopPropagation(); };
@@ -2458,7 +2489,9 @@ class Component extends DCLogic {
       pf: (() => {
         const range = s.pfRange || '1mo', byCur = {};
         HB.rows.forEach(r => { byCur[r.currency] = (byCur[r.currency] || 0) + (r.value || 0); });
-        const cur = Object.keys(byCur).sort((a, b) => byCur[b] - byCur[a])[0] || 'USD';
+        // Largest currency by value, unless the reader picked another (USD / RON chips).
+        const curList = Object.keys(byCur).sort((a, b) => byCur[b] - byCur[a]);
+        const cur = s.pfCur && byCur[s.pfCur] != null ? s.pfCur : (curList[0] || 'USD');
         const curOf = t => { const r = HB.rows.filter(x => x.ticker === t)[0]; return r ? r.currency : 'USD'; };
         const chartOf = t => {
           if (!live) { const r = rec(t) || {}; return window.HIFChart.seriesFor(t, range, r.price, r.move, 80); }
@@ -2484,7 +2517,7 @@ class Component extends DCLogic {
           chgLabel: chg == null ? '' : IN.signedAmt(chg, cur) + ' \u00b7 ' + IN.pctL(chgPct),
           rangeName: ({ '1d':'1D', '5d':'1W', '1mo':'1M', '6mo':'6M', '1y':'1Y' })[range] || range,
           note: HB.empty ? '' : notes.join(' '),
-          chart: this.portfolioChartEl(PS, range, vw < 700)
+          chart: this.portfolioChartEl(PS, range, vw < 700, curList, cur)
         };
       })(),
       holdRows, holdTotals: HB.totals.map(t => Object.assign({}, t, { plUp: !t.plDown, dayUp: !t.dayDown, label: u.holdTotal + ' · ' + t.currency })),
@@ -2752,9 +2785,12 @@ class Component extends DCLogic {
       back: () => this.go(s.prev || 'feed'),
       upgrade: () => { if (s.authLive) return this.flash((u.payComing || 'Payments are coming soon').toUpperCase()); this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
       scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '—'),
-      feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : u.topVolume,
+      feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : s.feedTab === 'bvb' ? u.bvbSub : u.topVolume,
+      bvbEmpty: s.feedTab === 'bvb' && !(s.roNews || []).length,
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
       setFeedMarket: () => { this.setState({ feedTab:'market' }); this.syncMarket(); },
+      setFeedBvb: () => { this.setState({ feedTab:'bvb' }); this.syncBvb(); },
+      feedBvbOn: s.feedTab === 'bvb', feedBvbOff: s.feedTab !== 'bvb',
       feedFollowingOn: s.feedTab === 'following', feedFollowingOff: s.feedTab !== 'following',
       feedMarketOn: s.feedTab === 'market', feedMarketOff: s.feedTab !== 'market',
       feed, follows,
