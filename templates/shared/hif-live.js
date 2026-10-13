@@ -29,9 +29,21 @@ function qs(params){
     .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])).join('&');
 }
 
+// The gateway serves quota-spending requests only to signed-in users: the session token
+// goes in x-hif-auth (not Authorization, so the CDN keeps caching the answers).
+async function authHeader(){
+  try {
+    const A = window.HIFAuth;
+    const t = A && A.session && A.session() && A.token ? await A.token() : null;
+    return t ? { 'x-hif-auth': t } : {};
+  } catch (e) { return {}; }
+}
 async function callProxy(path, params){
-  const res = await fetch(PROXY + '?' + qs(Object.assign({ path: path }, params)));
+  const res = await fetch(PROXY + '?' + qs(Object.assign({ path: path }, params)), { headers: await authHeader() });
   if (res.status === 404 || res.status === 405) { proxyState = 'no'; return null; }
+  // Signed out (or the session not restored yet): the proxy exists, this call just isn't
+  // allowed. An error, not an empty answer, so nothing empty is cached for after sign-in.
+  if (res.status === 401) { proxyState = 'yes'; throw new Error('sign in required'); }
   if (!res.ok) throw new Error('proxy ' + res.status);
   proxyState = 'yes';
   return res.json();

@@ -21,6 +21,8 @@ export default async (request, context) => handleMarketRequest(request, {
   rateLimit: process.env.API_RATE_LIMIT || 600,
   clientId: context && context.ip,
   usage,
+  // Cache misses spend provider quota, so they need a signed-in user (see gateway.js).
+  auth: { supabaseUrl: process.env.SUPABASE_URL, anonKey: process.env.SUPABASE_ANON_KEY, publicSymbols: process.env.PUBLIC_SYMBOLS },
   waitUntil: context && typeof context.waitUntil === 'function' ? p => context.waitUntil(p) : null
 });
 

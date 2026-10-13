@@ -369,10 +369,43 @@ function withinRateLimit(clientId, rawLimit) {
   return entry.count <= limit;
 }
 
+// ------------------------------------------------------------------ who may ask
+// Without an account, only what spends no paid quota: Romanian press stories (RSS) and the
+// quotes the landing page shows. Everything else needs a signed-in user, checked against
+// Supabase Auth (cached for 5 minutes). Answers already in the CDN cache are served to
+// anyone without reaching this code, so only cache misses, which spend quota, are gated.
+const PUBLIC_SYMBOLS = ['NVDA', 'AAPL', 'MSFT', 'TSLA', 'AMZN'];
+const AUTH_TTL_MS = 5 * 60 * 1000;
+const users = new Map(); // token -> { ok, until }
+export function publicRequest(cap, params, extraSymbols) {
+  const open = new Set(PUBLIC_SYMBOLS.concat(String(extraSymbols || '').toUpperCase().split(',').map(x => x.trim()).filter(Boolean)));
+  if (cap === 'marketNewsRO') return true;
+  if (cap === 'news') return /\.RO$/.test(params.symbol);
+  if (cap === 'quotes') return params.symbols.length <= 8 && params.symbols.every(t => open.has(t));
+  if (cap === 'quote') return open.has(params.symbol);
+  return false;
+}
+async function signedIn(request, auth, fetchImpl) {
+  const token = (request.headers.get('x-hif-auth') || '').trim();
+  if (!token || token.length > 4096) return false;
+  const now = Date.now(), hit = users.get(token);
+  if (hit && hit.until > now) return hit.ok;
+  let ok = false;
+  try {
+    const res = await (fetchImpl || fetch)(auth.supabaseUrl.replace(/\/$/, '') + '/auth/v1/user', {
+      headers: { apikey: auth.anonKey, authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(5000) });
+    ok = res.ok;
+  } catch { return false; } // Supabase unreachable: refuse, but don't remember it.
+  if (users.size > 5000) for (const [k, v] of users) if (v.until <= now) users.delete(k);
+  users.set(token, { ok, until: now + AUTH_TTL_MS });
+  return ok;
+}
+
 const defaultLog = process.env.NODE_TEST_CONTEXT ? () => {} : e => console.log(JSON.stringify(e));
 
 // options: { apiKey (Finnhub), keys: { provider: key }, order (orderFromEnv), allowedOrigins, rateLimit, clientId, log,
-//            usage (usage-store.js), waitUntil (keeps a flush alive after the response) }
+//            usage (usage-store.js), waitUntil (keeps a flush alive after the response),
+//            auth: { supabaseUrl, anonKey, publicSymbols, fetch } (without it, nothing is gated: local use) }
 export async function handleMarketRequest(request, options = {}) {
   if (request.method !== 'GET') return json({ error: 'method not allowed' }, 405, { allow: 'GET' });
   if (!allowedOrigin(request, options.allowedOrigins)) return json({ error: 'origin not allowed' }, 403);
@@ -383,6 +416,11 @@ export async function handleMarketRequest(request, options = {}) {
   if (!cap) return json({ error: 'path not allowed' }, 400);
   const parsed = parse(cap, url.searchParams);
   if (parsed.error) return json({ error: parsed.error }, 400);
+  const auth = options.auth;
+  if (auth && auth.supabaseUrl && auth.anonKey && !publicRequest(cap, parsed.params, auth.publicSymbols) &&
+      !(await signedIn(request, auth, auth.fetch))) {
+    return json({ error: 'sign in required' }, 401, { 'cache-control': 'no-store' });
+  }
 
   const ctx = { keys: { finnhub: options.apiKey, ...(options.keys || {}) }, log: options.log || defaultLog, usage: options.usage || null, order: options.order || null };
   const r = cap === 'quotes' ? await fetchQuotes(parsed.params.symbols, ctx)
@@ -437,6 +475,6 @@ export function providerInfo(keys, order) {
 export function flushUsage(usage) { return maybeFlush({ usage, log: defaultLog }, true) || Promise.resolve(); }
 
 export function resetGatewayForTests() {
-  cache.clear(); inflight.clear(); breakers.clear(); clients.clear(); minute.clear(); pending.clear(); totals.clear();
+  cache.clear(); inflight.clear(); breakers.clear(); clients.clear(); minute.clear(); pending.clear(); totals.clear(); users.clear();
   lastFlush = Date.now(); sharedToday = { at: 0, day: '', rows: {} };
 }

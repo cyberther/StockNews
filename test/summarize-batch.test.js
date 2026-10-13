@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cleanSummary, dropFiller, fixRomanian, looksWrong, trimSentences, usable } from '../tools/summarize-batch.mjs';
+import { cleanSummary, dropFiller, fixRomanian, httpGet, isPublicAddress, looksWrong, trimSentences, usable } from '../tools/summarize-batch.mjs';
 
 test('the real Tesla summary loses its English "close"', () => {
   assert.equal(fixRomanian('Tesla (TSLA) s-a încheiat la 378,03$, cu o scădere de 1,22% față de ultimul close.'),
@@ -136,4 +136,15 @@ test('a closing comment of the model\'s own is dropped, facts are kept', () => {
   assert.equal(dropFiller(facts + ' Aceste cifre arată că veniturile au crescut cu 20%.'), facts + ' Aceste cifre arată că veniturile au crescut cu 20%.');
   assert.equal(dropFiller('Această schimbare reflectă cererea mai slabă.'), 'Această schimbare reflectă cererea mai slabă.');
   assert.equal(cleanSummary(facts + ' Aceste cifre arată o poziție solidă.', 'ro'), facts);
+});
+
+test('article links may not reach this PC or its network', async () => {
+  for (const ip of ['127.0.0.1', '10.1.2.3', '192.168.1.1', '172.20.0.5', '169.254.169.254', '100.64.1.1', '0.0.0.0', '::1', 'fe80::1', 'fd00::5', '::ffff:192.168.1.1'])
+    assert.equal(isPublicAddress(ip), false, ip);
+  for (const ip of ['8.8.8.8', '104.16.0.1', '2606:4700::1111']) assert.equal(isPublicAddress(ip), true, ip);
+  await assert.rejects(httpGet('http://127.0.0.1/'), /blocked address/);
+  await assert.rejects(httpGet('http://192.168.1.1/admin'), /blocked address/);
+  await assert.rejects(httpGet('http://127.0.0.1:1234/v1/models'), /port 1234/);
+  await assert.rejects(httpGet('http://localhost/'), /blocked address/);
+  await assert.rejects(httpGet('file:///etc/passwd'), /not http/);
 });

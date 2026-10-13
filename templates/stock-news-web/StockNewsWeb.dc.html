@@ -719,53 +719,6 @@
 <div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.security }}</div>
 <div style="font-size:13px;color:var(--s-mute);margin-top:8px">{{ ui.securityNote }}</div>
 
-<div style="margin-top:26px;padding-top:20px;border-top:2px solid var(--s-rule)">
-<div style="display:flex;align-items:baseline;gap:12px">
-<div style="flex:1;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.twofaTitle }}</div>
-<span style="flex:none;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:{{ twofaColor }}">{{ twofaStateLabel }}</span>
-</div>
-<div style="font-size:13px;color:var(--s-mute);margin-top:6px">{{ ui.twofaNote }}</div>
-<sc-if value="{{ twofaIdle }}" hint-placeholder-val="{{ true }}">
-<button onClick="{{ startTwofa }}" style="min-height:44px;margin-top:14px;padding:0 16px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.twofaSetup }}</button>
-</sc-if>
-<sc-if value="{{ twofaSetting }}" hint-placeholder-val="{{ false }}">
-<div style="margin-top:14px;border:1px solid var(--s-rule);padding:18px;max-width:440px">
-<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.twofaKey }}</div>
-<div style="font-family:var(--font-heading);font-weight:800;font-size:19px;letter-spacing:0.14em;margin-top:6px">{{ twofaSecret }}</div>
-<div style="font-size:12px;color:var(--s-mute);margin-top:9px;line-height:1.45">{{ ui.twofaKeyNote }}</div>
-<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:16px">{{ ui.twofaCode }}</div>
-<input inputMode="numeric" autocomplete="one-time-code" placeholder="000000" value="{{ twofaCode }}" onChange="{{ onTwofaCode }}" style="width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px;margin-top:6px;font-family:var(--font-heading);font-weight:800;letter-spacing:0.32em;font-size:17px">
-<sc-if value="{{ twofaErr }}" hint-placeholder-val="{{ false }}">
-<div style="margin-top:9px;font-size:12px;color:var(--color-accent)">{{ twofaErr }}</div>
-</sc-if>
-<div style="display:flex;gap:8px;margin-top:14px">
-<button onClick="{{ verifyTwofa }}" style="min-height:44px;padding:0 16px;font-size:12px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.twofaVerify }}</button>
-<button onClick="{{ cancelTwofa }}" style="min-height:44px;padding:0 16px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.twofaCancel }}</button>
-</div>
-</div>
-</sc-if>
-<sc-if value="{{ twofaOn }}" hint-placeholder-val="{{ false }}">
-<div style="margin-top:14px;border:1px solid var(--s-rule);padding:18px;max-width:520px">
-<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.recoveryTitle }}</div>
-<div class="m-g2" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px">
-<sc-for list="{{ recoveryCodes }}" as="c" hint-placeholder-count="8">
-<span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.04em">{{ c.code }}</span>
-</sc-for>
-</div>
-<div style="font-size:12px;color:var(--s-mute);margin-top:12px">{{ ui.recoveryNote }}</div>
-<div style="display:flex;gap:8px;margin-top:14px">
-<button onClick="{{ copyRecovery }}" style="min-height:42px;padding:0 16px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.recoveryCopy }}</button>
-<button onClick="{{ disableTwofa }}" style="min-height:42px;padding:0 16px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--color-accent);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.twofaDisable }}</button>
-</div>
-</div>
-</sc-if>
-</div>
-
-<div style="margin-top:26px;padding-top:20px;border-top:1px solid var(--s-rule);display:flex;align-items:center;gap:16px">
-<div style="flex:1"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.alertsTitle }}</div><div style="font-size:13px;color:var(--s-mute);margin-top:5px">{{ ui.alertsNote }}</div></div>
-<button onClick="{{ toggleAlerts }}" style="flex:none;min-width:72px;min-height:38px;padding:0 14px;text-align:left;background:{{ alertsBg }};border:1px solid {{ alertsEdge }};color:{{ alertsInk }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ alertsLabel }}</button>
-</div>
-
 <div style="margin-top:22px;padding-top:20px;border-top:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.timeoutTitle }}</div>
 <div style="font-size:13px;color:var(--s-mute);margin-top:5px">{{ ui.timeoutNote }}</div>
@@ -778,37 +731,8 @@
 
 <div style="margin-top:26px;padding-top:20px;border-top:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.sessionsTitle }}</div>
-<div style="margin-top:12px;border-top:1px solid var(--s-rule)">
-<sc-for list="{{ sessions }}" as="x" hint-placeholder-count="4">
-<div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)">
-<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ x.device }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px">{{ x.meta }}</div></div>
-<sc-if value="{{ x.canRevoke }}" hint-placeholder-val="{{ true }}">
-<button onClick="{{ x.revoke }}" style="flex:none;min-height:34px;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.revoke }}</button>
-</sc-if>
-<sc-if value="{{ x.isCurrent }}" hint-placeholder-val="{{ false }}">
-<span style="flex:none;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent)">{{ ui.thisDevice }}</span>
-</sc-if>
-</div>
-</sc-for>
-</div>
+<div style="font-size:13px;color:var(--s-mute);margin-top:5px;max-width:56ch;text-wrap:pretty">{{ ui.signOutAllNote }}</div>
 <button onClick="{{ signOutAll }}" style="min-height:42px;margin-top:14px;padding:0 16px;font-size:12px;background:transparent;border:1px solid var(--color-accent);color:var(--color-accent);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.signOutAll }}</button>
-</div>
-
-<div style="margin-top:26px;padding-top:20px;border-top:1px solid var(--s-rule)">
-<div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.connectedTitle }}</div>
-<div style="margin-top:12px;border-top:1px solid var(--s-rule)">
-<sc-for list="{{ connected }}" as="c" hint-placeholder-count="3">
-<div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ c.label }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px">{{ c.detail }}</div></div>
-<sc-if value="{{ c.isPrimary }}" hint-placeholder-val="{{ false }}">
-<span style="flex:none;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent)">{{ ui.primaryAcct }}</span>
-</sc-if>
-<sc-if value="{{ c.canToggle }}" hint-placeholder-val="{{ true }}">
-<button onClick="{{ c.toggle }}" style="flex:none;min-width:92px;min-height:34px;padding:0 12px;text-align:left;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ c.actionLabel }}</button>
-</sc-if>
-</div>
-</sc-for>
-</div>
 </div>
 
 <div style="margin-top:26px;padding-top:20px;border-top:1px solid var(--s-rule)">
@@ -1150,7 +1074,7 @@
 const STORE_KEY = 'hif.web.v2';
 // Keys that survive a reload. Live quotes and transient input (passwords, codes) never persist.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','overlays',
-  'screen','feedTab','selected','twofa','twofaSecret','recovery','loginAlerts','timeoutMin','revoked','links','locked','theme','alerts','positions','profiles','pfRange','dismissed','stack','stackOpen','events','accountId'];
+  'screen','feedTab','selected','timeoutMin','locked','theme','alerts','positions','profiles','pfRange','dismissed','stack','stackOpen','events','accountId'];
 // hif-store.js can finish loading after this logic is evaluated. Until the saved
 // record has been read, nothing may be written, or a reload would overwrite the
 // stored session with these defaults; see restoreLate().
@@ -1181,8 +1105,7 @@ class Component extends DCLogic {
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
     authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
-    twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
-    loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
+    timeoutMin:30, lockPw:'', lockErr:'',
     alerts:{ news:true, insider:false, filings:false, rating:false, earnings:false, move:false },
     positions:{}, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, roNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
     dismissed:[], detailTab:'overview',
@@ -1341,15 +1264,6 @@ class Component extends DCLogic {
     if (this.state.follows.indexOf(t) !== -1) return this.setState(st => ({ follows: st.follows.filter(x => x !== t) }));
     if (free && this.state.follows.length >= 3) return this.flash('3 / 3 — ' + (u.liftCap || '').toUpperCase());
     this.setState(st => ({ follows: st.follows.concat(t) }));
-  }
-  sessionList() {
-    const rv = this.state.revoked || [];
-    return [
-      { id:'this', device:'This browser · Chrome 129', meta:'Zürich, CH · 09:41', current:true },
-      { id:'ios', device:'iPhone · HIF 2.4', meta:'Zürich, CH · 04 Sep 21:12' },
-      { id:'mac', device:'MacBook Pro · Safari 18', meta:'Zug, CH · 04 Sep 18:04' },
-      { id:'win', device:'Windows 11 · Edge 129', meta:'Frankfurt, DE · 03 Sep 09:12' }
-    ].filter(x => rv.indexOf(x.id) === -1);
   }
   sharedReady() { return !!(window.HIF && window.HIFChart && window.HIFStore); }
   componentDidMount() {
@@ -2231,7 +2145,6 @@ class Component extends DCLogic {
     const signedIn = !!s.session;
     const provider = (s.session && s.session.provider) || 'Email';
     const sessionEmail = (s.session && s.session.email) || '';
-    const links = Object.assign({ Google:true, iCloud:false, Email:true }, s.links || {});
     const pw = HS ? HS.strength(s.authPw || '') : { score:0, breached:false, hints:[] };
     const authUp = s.authMode === 'up';
     const obQ = String(s.obQuery || '').trim().toUpperCase(), obPool = (!s.onboarded && s.session) ? this.searchPool(obQ) : [];
@@ -2800,20 +2713,6 @@ class Component extends DCLogic {
       }),
       themeNote: (s.theme || 'system') === 'light' ? u.themeNoteLight : ((s.theme || 'system') === 'dark' ? u.themeNoteDark : u.themeNoteSystem),
       goSecurity: () => this.go('security'),
-      twofaOn: !!s.twofa, twofaIdle: !s.twofa && !s.twofaSetup, twofaSetting: !!s.twofaSetup,
-      twofaStateLabel: s.twofa ? u.on : u.off,
-      twofaColor: s.twofa ? this.pal.accent : this.pal.mute,
-      twofaSecret: s.twofaSecret || '', twofaCode: s.twofaCode || '', twofaErr: s.twofaErr || '',
-      onTwofaCode: e => this.setState({ twofaCode: e.target.value.replace(/[^0-9]/g, '').slice(0, 6), twofaErr:'' }),
-      startTwofa: () => this.setState({ twofaSetup:true, twofaSecret: HS ? HS.secret() : 'ABCD EFGH JKLM NPQR', twofaCode:'', twofaErr:'' }),
-      cancelTwofa: () => this.setState({ twofaSetup:false, twofaCode:'', twofaErr:'' }),
-      verifyTwofa: () => {
-        if ((s.twofaCode || '').length !== 6) return this.setState({ twofaErr: u.twofaBadCode });
-        this.setState({ twofa:true, twofaSetup:false, twofaCode:'', twofaErr:'', recovery: HS ? HS.recoveryCodes(8) : [] });
-        this.logEvent('twofa_on');
-        this.flash(u.toastTwofaOn.toUpperCase());
-      },
-      disableTwofa: () => { this.setState({ twofa:false, recovery:null }); this.logEvent('twofa_off'); this.flash(u.toastTwofaOff.toUpperCase()); },
       auditRows: (s.events || []).slice(0, 12).map(ev => {
         const map = { signin:u.evSignin, signout:u.evSignout, signout_all:u.evSignoutAll, twofa_on:u.evTwofaOn,
           twofa_off:u.evTwofaOff, device_revoked:u.evDeviceRevoked, locked:u.evLocked,
@@ -2827,41 +2726,17 @@ class Component extends DCLogic {
         };
       }),
       auditEmpty: !(s.events || []).length,
-      recoveryCodes: (s.recovery || []).map(c => ({ code:c })),
-      copyRecovery: () => {
-        try { navigator.clipboard.writeText((s.recovery || []).join('\n')); } catch (e) {}
-        this.flash(u.toastCopied.toUpperCase());
-      },
-      alertsLabel: s.loginAlerts === false ? u.off : u.on,
-      alertsBg: s.loginAlerts === false ? 'transparent' : this.pal.accent,
-      alertsEdge: s.loginAlerts === false ? this.pal.rule : this.pal.accent,
-      alertsInk: s.loginAlerts === false ? this.pal.mute : this.pal.bg,
-      toggleAlerts: () => this.setState({ loginAlerts: s.loginAlerts === false }),
       timeouts: [[1.5, u.timeoutDemo], [15, '15 min'], [30, '30 min'], [60, '1 h'], [0, u.timeoutNever]].map(x => {
         const on = timeoutMin === x[0];
         return { label:x[1], bg: on ? this.pal.accent : 'transparent', edge: on ? this.pal.accent : this.pal.rule, ink: on ? this.pal.bg : this.pal.mute,
           set: () => { this.setState({ timeoutMin:x[0] }); this.touch(); } };
       }),
-      sessions: this.sessionList().map(x => Object.assign({}, x, {
-        isCurrent: !!x.current, canRevoke: !x.current,
-        revoke: () => { this.setState(st => ({ revoked:(st.revoked || []).concat(x.id) })); this.logEvent('device_revoked', x.device); this.flash(u.toastRevoked.toUpperCase()); }
-      })),
       signOutAll: () => {
         if (s.authLive) window.HIFAuth.signOut(true);
-        this.setState({ revoked:['ios','mac','win'], session:null, locked:false, screen:'portfolio', authPw:'', twofaSetup:false });
+        this.setState({ session:null, locked:false, screen:'portfolio', authPw:'' });
         this.logEvent('signout_all');
         this.flash(u.toastSignedOutAll.toUpperCase());
       },
-      connected: ['Google','iCloud','Email'].map(k => {
-        const isPrimary = k === provider, on = isPrimary || !!links[k];
-        return { label:k, isPrimary, canToggle: !isPrimary, actionLabel: on ? u.unlink : u.link,
-          detail: isPrimary ? sessionEmail : (on ? u.linked : '—'),
-          toggle: () => {
-            const next = Object.assign({}, links); next[k] = !on;
-            this.setState({ links: next });
-            this.flash((k + ' ' + (on ? u.toastUnlinked : u.toastLinked)).toUpperCase());
-          } };
-      }),
       lockEmail: sessionEmail, lockPw: s.lockPw || '', lockErr: s.lockErr || '',
       onLockPw: e => this.setState({ lockPw:e.target.value, lockErr:'' }),
       unlock: () => {

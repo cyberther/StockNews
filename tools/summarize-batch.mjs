@@ -30,6 +30,8 @@ import { join } from 'node:path';
 import https from 'node:https';
 import http from 'node:http';
 import zlib from 'node:zlib';
+import dns from 'node:dns';
+import net from 'node:net';
 import { ensureModel, pickThreads } from './lmstudio-model.mjs';
 
 const ENV_FILE = join(homedir(), '.config/market-pulse/summarizer.env');
@@ -107,13 +109,42 @@ const UA = 'Mozilla/5.0 (compatible; MarketPulseSummarizer/1.0; +https://github.
 const MAX_PAGE = 3 * 1024 * 1024;
 const MAX_TEXT = 3500;   // characters given to the model: the substance of a story, at CPU speed
 
+// Article links come from news feeds, so a link (or a redirect) could point at this PC or
+// its network: the router, LM Studio, the self-hosted server. Only public addresses are
+// fetched, checked when the name is resolved, for every redirect too, and the connection
+// goes to the address that was checked (no second DNS answer in between).
+const BLOCKED = new net.BlockList();
+[['0.0.0.0', 8], ['10.0.0.0', 8], ['100.64.0.0', 10], ['127.0.0.0', 8], ['169.254.0.0', 16], ['172.16.0.0', 12],
+  ['192.0.0.0', 24], ['192.0.2.0', 24], ['192.168.0.0', 16], ['198.18.0.0', 15], ['198.51.100.0', 24],
+  ['203.0.113.0', 24], ['224.0.0.0', 4], ['240.0.0.0', 4]].forEach(([a, n]) => BLOCKED.addSubnet(a, n, 'ipv4'));
+[['::', 128], ['::1', 128], ['fc00::', 7], ['fe80::', 10], ['ff00::', 8], ['64:ff9b::', 96], ['2001:db8::', 32]]
+  .forEach(([a, n]) => BLOCKED.addSubnet(a, n, 'ipv6'));
+export function isPublicAddress(ip) {
+  const v4 = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/i.exec(ip);
+  const addr = v4 ? v4[1] : ip, type = net.isIPv4(addr) ? 'ipv4' : net.isIPv6(addr) ? 'ipv6' : '';
+  return !!type && !BLOCKED.check(addr, type);
+}
+function publicLookup(host, opts, cb) {
+  if (typeof opts === 'function') { cb = opts; opts = {}; }
+  dns.lookup(host, { all: true, family: opts.family || 0 }, (err, addrs) => {
+    if (err) return cb(err);
+    const ok = (addrs || []).filter(a => isPublicAddress(a.address));
+    if (!ok.length || ok.length !== addrs.length) return cb(Object.assign(new Error('blocked address for ' + host), { code: 'EBLOCKED' }));
+    if (opts.all) return cb(null, ok);
+    cb(null, ok[0].address, ok[0].family);
+  });
+}
+
 // GET with redirects, decompression and a size cap. node:https rather than fetch, so large
 // response headers (Yahoo sends tens of kilobytes of cookies) don't fail the request.
 export function httpGet(url, { timeout = 15000, redirects = 5, accept = 'text/html' } = {}) {
   return new Promise((resolve, reject) => {
     const u = new URL(url);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return reject(new Error('not http'));
+    if (u.port && u.port !== '80' && u.port !== '443') return reject(new Error('port ' + u.port));
+    if (net.isIP(u.hostname.replace(/^\[|\]$/g, '')) && !isPublicAddress(u.hostname.replace(/^\[|\]$/g, ''))) return reject(new Error('blocked address'));
     const lib = u.protocol === 'http:' ? http : https;
-    const req = lib.get(u, { headers: { 'user-agent': UA, accept, 'accept-encoding': 'gzip, deflate, br', 'accept-language': 'en, ro;q=0.8' }, maxHeaderSize: 256 * 1024, timeout }, res => {
+    const req = lib.get(u, { lookup: publicLookup, headers: { 'user-agent': UA, accept, 'accept-encoding': 'gzip, deflate, br', 'accept-language': 'en, ro;q=0.8' }, maxHeaderSize: 256 * 1024, timeout }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirects > 0) {
         res.resume();
         return resolve(httpGet(new URL(res.headers.location, u).toString(), { timeout, redirects: redirects - 1, accept }));
