@@ -24,10 +24,17 @@ for (const directory of directories) {
 // The component runtime compiles its templates in the browser: 'unsafe-eval', 'unsafe-inline'.
 const m = /^https:\/\/([a-z0-9-]+\.supabase\.co)\/?$/i.exec(process.env.SUPABASE_URL || '');
 const supabase = m ? m[1] : '*.supabase.co';
+// The page runtime (templates/*/support.js) loads React and Babel from unpkg at these exact,
+// versioned addresses; only these files are allowed, not the rest of unpkg.
+const RUNTIME = [
+  'https://unpkg.com/react@18.3.1/umd/react.production.min.js',
+  'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js',
+  'https://unpkg.com/@babel/standalone@7.29.0/babel.min.js'
+];
 const csp = [
   "default-src 'self'", "base-uri 'none'", "object-src 'none'", "frame-ancestors 'none'", "form-action 'self'",
   "img-src 'self' data: blob:", "font-src 'self' data: blob:", "style-src 'self' 'unsafe-inline' blob:",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:", `connect-src 'self' data: blob: ${supabase}`,
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: ${RUNTIME.join(' ')}`, `connect-src 'self' data: blob: ${supabase}`,
   "worker-src 'self' blob:", "manifest-src 'self'"
 ].join('; ');
 writeFileSync(join(output, '_headers'), [
