@@ -14,7 +14,7 @@ if (window.HIFLive) return;
 const DIRECT = 'https://finnhub.io/api/v1';
 const PROXY = '/api/finnhub';
 const cache = new Map();
-const TTL = { profile: 24 * 3600000, quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000, edates: 6 * 3600000 };
+const TTL = { ronews: 600000, profile: 24 * 3600000, quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000, edates: 6 * 3600000 };
 let proxyState = 'unknown'; // 'unknown' | 'yes' | 'no'
 let batchQuotes = true;      // false once the proxy has turned /quotes down (an older server)
 
@@ -116,10 +116,22 @@ async function news(symbol, token, limit){
   const j = await get('/company-news', { symbol: symbol, from: isoDay(-30), to: isoDay(0) }, token);
   const rows = (Array.isArray(j) ? j : []).filter(n => n && n.headline)
     .sort((a,b) => b.datetime - a.datetime)
-    .map(n => ({ id: n.id, headline: n.headline, source: n.source || '', stamp: stamp(n.datetime), ts: n.datetime, url: n.url || '',
-      summary: (n.summary || '').replace(/\s+/g, ' ').trim().slice(0, 160) }));
+    .map(newsRow);
   put('news', symbol, rows);
   return rows.slice(0, limit || 5);
+}
+function newsRow(n){
+  return { id: n.id, related: n.related || '', headline: n.headline, source: n.source || '', stamp: stamp(n.datetime), ts: n.datetime,
+    url: n.url || '', summary: (n.summary || '').replace(/\s+/g, ' ').trim().slice(0, 160) };
+}
+// Romanian press stories about any company listed in Bucharest (the BVB feed tab), each
+// with the .RO symbol it is about in `related`. Proxy only.
+async function roNews(){
+  const hit = fresh('ronews', 'all'); if (hit) return hit;
+  if (proxyState === 'no') return null;
+  const j = await callProxy('/ro-news', {});
+  const rows = (Array.isArray(j) ? j : []).filter(n => n && n.headline && n.related).sort((a,b) => b.datetime - a.datetime).map(newsRow);
+  return put('ronews', 'all', rows);
 }
 
 // First visible bar of a warm (longer) series: the window the plain range would
@@ -256,15 +268,23 @@ async function recommendation(symbol, token){
   return put('recs', symbol, { buyPct: Math.round(buy / total * 100) + '%', detail: buy + ' / ' + hold + ' / ' + sell, period: r.period || '' });
 }
 
+// Bucharest listings come from the local BVB catalog (hif-bvb.js), US ones from Finnhub;
+// the catalog's matches go first when the query names a Romanian company or symbol.
 async function search(q, token){
-  if (!q || !available(token)) return null;
-  const hit = fresh('search', q); if (hit) return hit;
-  const j = await get('/search', { q: q }, token);
-  const rows = ((j && j.result) || [])
-    .filter(r => r.symbol && r.symbol.indexOf('.') < 0 && r.type !== 'Crypto')
-    .slice(0, 12)
-    .map(r => ({ ticker: r.symbol, name: r.description || r.displaySymbol || r.symbol }));
-  return put('search', q, rows);
+  if (!q) return null;
+  const local = window.HIFBVB ? window.HIFBVB.search(q, 6).map(r => ({ ticker: r.ticker, name: r.name, exchange: r.exchange })) : [];
+  if (!available(token)) return local.length ? local : null;
+  const hit = fresh('search', q);
+  let rows = hit;
+  if (!rows) {
+    let j = null;
+    try { j = await get('/search', { q: q }, token); } catch (e) { if (!local.length) throw e; }
+    rows = put('search', q, ((j && j.result) || [])
+      .filter(r => r.symbol && r.symbol.indexOf('.') < 0 && r.type !== 'Crypto')
+      .slice(0, 12)
+      .map(r => ({ ticker: r.symbol, name: r.description || r.displaySymbol || r.symbol })));
+  }
+  return local.concat(rows.filter(r => !local.some(x => x.ticker === r.ticker)));
 }
 
 // Batched. { quotes, news, recs, errors, mode }
@@ -310,7 +330,7 @@ function translatedUrl(url, lang){
   return 'https://translate.google.com/translate?sl=auto&tl=' + tl + '&hl=' + tl + '&u=' + encodeURIComponent(url);
 }
 
-window.HIFLive = { quote, quotes, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
+window.HIFLive = { quote, quotes, roNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();

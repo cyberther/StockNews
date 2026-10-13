@@ -9,7 +9,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news app — dark terminal" description="Executive/terminal variant of the stock news product: dark surfaces, numbers-forward rows, one decision per screen, separate app and content languages." -->
-<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
+<helmet><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">TERMINAL</text></svg></template>
 <div data-theme="{{ theme }}" style="min-height:100vh;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums">
 <div style="display:flex;align-items:baseline;gap:16px;padding:18px 24px;border-bottom:1px solid var(--s-rule)">
@@ -205,6 +205,10 @@
 <sc-if value="{{ feedMarketOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.market }}</span></sc-if>
 <sc-if value="{{ feedMarketOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.market }}</span></sc-if>
 </button>
+<button onClick="{{ setFeedBvb }}" style="position:relative;padding:0 0 9px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">
+<sc-if value="{{ feedBvbOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.bvbTab }}</span></sc-if>
+<sc-if value="{{ feedBvbOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.bvbTab }}</span></sc-if>
+</button>
 </div>
 </div>
 <div data-m="marquee" style="flex:none;overflow:hidden;border-bottom:1px solid var(--s-rule)">
@@ -230,6 +234,7 @@
 </div>
 </div>
 <div data-m="smooth" style="flex:1;overflow-y:auto">
+<sc-if value="{{ bvbEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:20px 16px;font-size:12px;color:var(--s-mute);line-height:1.45">{{ ui.bvbEmpty }}</div></sc-if>
 <sc-for list="{{ feed }}" as="item" hint-placeholder-count="4">
 <sc-if value="{{ item.hasDayHead }}" hint-placeholder-val="{{ false }}"><h3 style="margin:0;padding:12px 16px 6px;border-bottom:1px solid var(--s-rule);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ item.dayHead }}</h3></sc-if>
 <article data-m="rise" role="button" tabIndex="0" onClick="{{ item.open }}" onKeyDown="{{ item.keyOpen }}" style="display:block;width:100%;padding:13px 16px;border-bottom:1px solid var(--s-rule);cursor:pointer">
@@ -748,7 +753,7 @@ class Component extends DCLogic {
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
-    positions:{}, profiles:{}, summaries:{}, pfRange:'1mo', pfHover:null, pfCharts:{}, posEdit:null, posShares:'', posCost:'', posTicker:'',
+    positions:{}, profiles:{}, summaries:{}, roNews:[], pfRange:'1mo', pfHover:null, pfCharts:{}, posEdit:null, posShares:'', posCost:'', posTicker:'',
     liveHits:null, liveNames:{}, liveQuotes:{}, liveRecs:{}, liveNews:{}, charts:{}, liveEarnDates:{} });
   componentDidMount() {
     this.startIdleWatch();
@@ -757,7 +762,7 @@ class Component extends DCLogic {
     // and headlines from the server proxy; the feed falls back to demo stories without them.
     const startLive = () => {
       this.restoreLate();
-      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.syncTickers(this.liveTickers()); this.syncPositions(); if (this.state.feedTab === 'market') this.syncMarket(); this.startAutoRefresh(); }, 0);
+      setTimeout(() => { this._synced = (this.state.follows || []).slice(); this.syncTickers(this.liveTickers()); this.syncPositions(); if (this.state.feedTab === 'market') this.syncMarket(); if (this.state.feedTab === 'bvb') this.syncBvb(); this.startAutoRefresh(); }, 0);
     };
     if (window.HIFLive && window.HIFStore) startLive();
     else this._livePoll = setInterval(() => { if (window.HIFLive && window.HIFStore) { clearInterval(this._livePoll); startLive(); } }, 60);
@@ -894,6 +899,7 @@ class Component extends DCLogic {
     if (!P || !P.loadSummaries || !s.authLive || !s.session) return;
     const lang = String(this.lang || 'EN').toLowerCase(), LN = s.liveNews || {}, ids = [];
     Object.keys(LN).forEach(t => (LN[t] || []).forEach(n => { if (n && n.id) ids.push(t + ':' + n.id); }));
+    (s.roNews || []).forEach(n => { if (n && n.id && n.related) ids.push(n.related + ':' + n.id); });
     const sig = lang + '|' + ids.join(',');
     if (!ids.length || (!force && sig === this._sumSig)) return;
     this._sumSig = sig;
@@ -921,11 +927,15 @@ class Component extends DCLogic {
     return d.toLocaleDateString([], { day:'numeric', month:'short', year: range === '1y' || range === '6mo' ? '2-digit' : undefined });
   }
   // Value line with the cost basis as a dashed reference; hover or drag reads any point.
-  portfolioChartEl(series, range, compact) {
+  portfolioChartEl(series, range, compact, currencies, currency) {
     const pal = this.pal, h = React.createElement, ranges = [['1d','1D'],['5d','1W'],['1mo','1M'],['6mo','6M'],['1y','1Y']];
     const chips = h('div', { role:'group', 'aria-label':'Chart range', style:{ display:'flex', gap:6, flexWrap:'wrap', marginBottom:12 } },
       ...ranges.map(([k, label]) => h('button', { key:k, 'aria-pressed': range === k, onClick: () => this.setState({ pfRange:k, pfHover:null }),
-        style:Object.assign(this.chipStyle(range === k), { minHeight:32, padding:'0 12px', fontSize:10 }) }, label)));
+        style:Object.assign(this.chipStyle(range === k), { minHeight:32, padding:'0 12px', fontSize:10 }) }, label)),
+      // One chart per currency (no conversion): pick which positions it shows.
+      ...((currencies || []).length > 1 ? [h('span', { key:'sep', style:{ width:1, alignSelf:'stretch', background:pal.rule, margin:'0 4px' } })].concat(
+        currencies.map(c => h('button', { key:'c' + c, 'aria-pressed': c === currency, onClick: () => this.setState({ pfCur:c, pfHover:null }),
+          style:Object.assign(this.chipStyle(c === currency), { minHeight:32, padding:'0 12px', fontSize:10 }) }, c))) : []));
     const pts = series.points || [], n = pts.length;
     if (n < 2) return h('div', null, chips, h('div', { style:{ height: compact ? 160 : 220, display:'flex', alignItems:'center', justifyContent:'center', border:'1px dashed ' + pal.rule, color:pal.mute, fontSize:12, textAlign:'center', padding:16 } }, series.message || ''));
     const W = 1000, H = compact ? 160 : 220;
@@ -1010,6 +1020,7 @@ class Component extends DCLogic {
       this.syncSummaries(true);
       if (this.state.screen === 'portfolio') this.syncPortfolioCharts();
       if (this.state.feedTab === 'market') this.syncMarket();
+      if (this.state.feedTab === 'bvb') this.syncBvb();
     };
     this._auto = setInterval(tick, 5 * 60000);
     this._onVis = () => { if (!document.hidden && Date.now() - (this._lastAuto || 0) > 60000) tick(); };
@@ -1022,6 +1033,20 @@ class Component extends DCLogic {
   // The Market tab's headlines: the ten largest names, independent of the watchlist.
   syncMarket() {
     this.syncTickers((window.HIF && window.HIF.MARKET_TOP) || [], true);
+  }
+  // The BVB tab: Romanian press stories (/ro-news) and the quotes of the companies they
+  // name, plus the largest Bucharest listings, in one batch.
+  syncBvb() {
+    const L = window.HIFLive, B = window.HIFBVB;
+    if (!L || !L.roNews) return;
+    L.roNews().then(rows => {
+      if (!rows) return;
+      this.setState({ roNews: rows });
+      const syms = [...new Set(rows.map(r => r.related).concat((B && B.top) || []))].slice(0, 50);
+      return L.quotes(syms).then(qs => {
+        if (Object.keys(qs).length) this.setState(st => ({ liveQuotes: Object.assign({}, st.liveQuotes, qs) }));
+      });
+    }).catch(() => {});
   }
   // Live price history for the open ticker, once per ticker and range (the adapter
   // caches for 5 minutes). false marks a ticker the market feed has no history for.
@@ -1067,7 +1092,7 @@ class Component extends DCLogic {
   liveRecord(t) {
     const s = this.state, q = (s.liveQuotes || {})[t], r = (s.liveRecs || {})[t], u = UI[this.appLang] || {};
     const note = { EN:'Live quote only — no scored stories for this ticker yet.', RO:'Doar cotație live — încă nu există știri evaluate pentru acest simbol.', DE:'Nur Live-Kurs — für diesen Ticker gibt es noch keine bewerteten Meldungen.' };
-    return { ticker:t, name:(s.liveNames || {})[t] || t, price: q ? q.price : '—', move: q ? q.move : '—', up: q ? q.up : true,
+    return { ticker:t, name:(s.liveNames || {})[t] || (window.HIFBVB && window.HIFBVB.name(t)) || t, price: q ? q.price : '—', move: q ? q.move : '—', up: q ? q.up : true,
       score:'—', buyPct: r ? r.buyPct : '—', analystDetail: r ? r.detail : '—', earnDays:'—', earnDate:'—', perf6m:'—', lastEarn:'—',
       latest:(() => { const ln = (s.liveNews || {})[t], v = ln && ln.length ? ln.length + ' ' + (u.storiesWord || 'stories') : (u.liveReq || 'Live'); return { EN:v, RO:v, DE:v }; })(),
       call:note, liveOnly:true };
@@ -1410,12 +1435,17 @@ class Component extends DCLogic {
     // Market tab), newest first; demo stories only when nothing live has arrived.
     const LN = s.liveNews || {}, LQ = s.liveQuotes || {};
     const liveRows = [];
-    // Strictly newest first across tickers; Market draws on the ten largest names.
-    const market = s.feedTab !== 'following';
-    (market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows).forEach(t => (LN[t] || []).forEach(n => liveRows.push({
+    // Strictly newest first across tickers; Market draws on the ten largest names, BVB on
+    // the Romanian press stories, each filed under the company it names.
+    const market = s.feedTab !== 'following', bvb = s.feedTab === 'bvb';
+    const pairs = [];
+    if (bvb) (s.roNews || []).forEach(n => pairs.push([n.related, n]));
+    else (market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows).forEach(t => (LN[t] || []).forEach(n => pairs.push([t, n])));
+    pairs.forEach(([t, n]) => liveRows.push({
       ticker:t, storyId: n.id ? t + ':' + n.id : '', headline:n.headline, watch:n.summary || ((n.source ? 'Read at ' + n.source : 'Read the story') + ' ↗'), source:n.source || '', stamp:n.stamp, ts:n.ts, url:n.url || '',
-      delta:(LQ[t] || {}).move || '—', up:(LQ[t] || {}).up !== false, vol:'—', live:true })));
-    const feedLive = liveRows.length > 0;
+      delta:(LQ[t] || {}).move || '—', up:(LQ[t] || {}).up !== false, vol:'—', live:true }));
+    // No demo stand-ins on the BVB tab: the demo set has no Romanian companies.
+    const feedLive = liveRows.length > 0 || bvb;
     const feed = feedLive
       ? liveRows.sort((a,b) => b.ts - a.ts).slice(0, 40).map(n => Object.assign({}, n, {
           down: !n.up, outlier:false, volBadge:'',
@@ -1484,7 +1514,7 @@ class Component extends DCLogic {
     const HB = IN && IN.holdings ? IN.holdings(posMap, t => {
       const r = rec(t) || {}, q = (s.liveQuotes || {})[t] || {}, pr = PR[t] || {}, ch = (s.charts || {})[t + ':1d'];
       return { price: Number.isFinite(q.last) ? q.last : r.price, move: Number.isFinite(q.dp) ? q.dp : r.move,
-        name: pr.name || (r.name !== t ? r.name : ''), currency: pr.currency || (ch && ch.currency) || 'USD' };
+        name: (window.HIFBVB && window.HIFBVB.name(t)) || pr.name || (r.name !== t ? r.name : ''), currency: pr.currency || (ch && ch.currency) || 'USD' };
     }) : { rows:[], totals:[], empty:true };
     const holdAdding = s.posEdit === '__new';
     const am = /^\s*(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*$/.exec(String(stock.analystDetail || ''));
@@ -1690,6 +1720,9 @@ class Component extends DCLogic {
       scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '—'),
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
       setFeedMarket: () => { this.setState({ feedTab:'market' }); this.syncMarket(); },
+      setFeedBvb: () => { this.setState({ feedTab:'bvb' }); this.syncBvb(); },
+      feedBvbOn: s.feedTab === 'bvb', feedBvbOff: s.feedTab !== 'bvb',
+      bvbEmpty: s.feedTab === 'bvb' && !(s.roNews || []).length,
       feedFollowingOn: s.feedTab === 'following', feedFollowingOff: s.feedTab !== 'following',
       feedMarketOn: s.feedTab === 'market', feedMarketOff: s.feedTab !== 'market',
       feed,
@@ -1713,7 +1746,9 @@ class Component extends DCLogic {
       pf: (() => {
         const range = s.pfRange || '1mo', byCur = {};
         HB.rows.forEach(r => { byCur[r.currency] = (byCur[r.currency] || 0) + (r.value || 0); });
-        const cur = Object.keys(byCur).sort((a, b) => byCur[b] - byCur[a])[0] || 'USD';
+        // Largest currency by value, unless the reader picked another (USD / RON chips).
+        const curList = Object.keys(byCur).sort((a, b) => byCur[b] - byCur[a]);
+        const cur = s.pfCur && byCur[s.pfCur] != null ? s.pfCur : (curList[0] || 'USD');
         const curOf = t => { const r = HB.rows.filter(x => x.ticker === t)[0]; return r ? r.currency : 'USD'; };
         const chartOf = t => {
           const c = (s.pfCharts || {})[t + ':' + range];
@@ -1738,7 +1773,7 @@ class Component extends DCLogic {
           chgLabel: chg == null ? '' : IN.signedAmt(chg, cur) + ' \u00b7 ' + IN.pctL(chgPct),
           rangeName: ({ '1d':'1D', '5d':'1W', '1mo':'1M', '6mo':'6M', '1y':'1Y' })[range] || range,
           note: HB.empty ? '' : notes.join(' '),
-          chart: this.portfolioChartEl(PS, range, true)
+          chart: this.portfolioChartEl(PS, range, true, curList, cur)
         };
       })(),
       holdRows: HB.rows.map(r => Object.assign({}, r, {
