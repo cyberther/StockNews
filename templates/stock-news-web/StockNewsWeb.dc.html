@@ -8,7 +8,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:0 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(4,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:0 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -114,9 +114,11 @@
 </div>
 <div style="border-top:1px solid var(--s-rule);margin-top:0"></div>
 <sc-if value="{{ bvbEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.bvbEmpty }}</div></sc-if>
+<sc-if value="{{ feedLoading }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute)">{{ ui.feedLoading }}</div></sc-if>
+<sc-if value="{{ feedEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.feedEmpty }}</div></sc-if>
 <sc-for list="{{ feed }}" as="item" hint-placeholder-count="4">
 <sc-if value="{{ item.hasDayHead }}" hint-placeholder-val="{{ false }}"><h3 style="margin:0;padding:14px var(--gx) 8px;border-bottom:1px solid var(--s-rule);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ item.dayHead }}</h3></sc-if>
-<article data-m="rise spotlight" role="button" tabIndex="0" onClick="{{ item.open }}" onKeyDown="{{ item.keyOpen }}" style-hover="background:var(--s-panel)" class="m-feed" style="position:relative;display:grid;grid-template-columns:104px 1fr 168px;gap:24px;padding:20px var(--gx);border-bottom:1px solid var(--s-rule);cursor:pointer">
+<article data-m="rise spotlight" role="button" tabIndex="0" onClick="{{ item.open }}" onKeyDown="{{ item.keyOpen }}" style-hover="background:var(--s-panel)" class="m-feed" style="position:relative;display:grid;grid-template-columns:104px minmax(0,1fr) 168px;gap:24px;padding:20px var(--gx);border-bottom:1px solid var(--s-rule);cursor:pointer">
 <sc-if value="{{ item.onCursor }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--color-accent)"></span></sc-if>
 <div class="m-feed-meta">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:15px;letter-spacing:0.02em">{{ item.tickerLabel }}</div>
@@ -127,13 +129,13 @@
 <div>
 <sc-if value="{{ item.isAi }}" hint-placeholder-val="{{ false }}">
 <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">{{ item.watchLabel }}</div>
-<div style="font-size:16px;color:var(--s-ink);line-height:1.55;max-width:64ch;margin-top:6px;text-wrap:pretty">{{ item.watch }}</div>
+<div style="font-size:16px;color:var(--s-ink);line-height:1.55;margin-top:6px;text-wrap:pretty">{{ item.watch }}</div>
 </sc-if>
 <sc-if value="{{ item.notAi }}" hint-placeholder-val="{{ true }}">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:22px;line-height:1.2;letter-spacing:-0.02em;text-wrap:pretty;max-width:44ch">{{ item.headline }}</div>
 <div style="display:flex;gap:8px;align-items:baseline;margin-top:10px">
 <span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ item.watchLabel }}</span>
-<span style="font-size:14px;color:var(--s-ink);line-height:1.45;max-width:64ch">{{ item.watch }}</span>
+<span style="font-size:14px;color:var(--s-ink);line-height:1.45">{{ item.watch }}</span>
 </div>
 </sc-if>
 <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin-top:8px">
@@ -141,8 +143,7 @@
 <sc-if value="{{ item.hasTranslate }}" hint-placeholder-val="{{ false }}"><a href="{{ item.translateHref }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;font-size:11px;color:var(--s-mute);text-decoration:underline;text-underline-offset:3px">{{ item.translateLabel }}</a></sc-if>
 </div>
 </div>
-<div class="m-feed-side" style="display:grid;grid-template-columns:1fr;gap:1px;background:var(--s-rule)">
-<div style="background:var(--s-panel);padding:8px 10px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.volAvg }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ item.vol }}</div></div>
+<div class="m-feed-side" style="display:grid;grid-template-columns:1fr;gap:1px;background:var(--s-rule);align-self:start">
 <div style="background:var(--s-panel);padding:8px 10px;grid-column:1 / -1"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.source }}</div><div style="font-size:12px;font-weight:600;margin-top:1px">{{ item.source }}</div></div>
 <button onClick="{{ item.pin }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="grid-column:1 / -1;min-height:34px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;text-align:left;padding:0 10px;cursor:pointer;display:flex;align-items:center;gap:8px">
 <sc-if value="{{ item.pinned }}" hint-placeholder-val="{{ false }}"><span style="width:7px;height:7px;flex:none;background:var(--color-accent)"></span></sc-if>
@@ -917,10 +918,11 @@
 </div>
 </div>
 <div style="position:relative;display:flex;justify-content:flex-end">
+<sc-if value="{{ lpFeat.has }}" hint-placeholder-val="{{ true }}">
 <div data-m="beam rise" class="lp-feat" style="width:100%;max-width:640px;background:rgba(14,14,16,0.92);border:1px solid #3A3A3A;padding:26px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px">
 <div class="lp-feat-score" style="width:148px;background:#161616;border:1px solid var(--s-rule);padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:18px">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:22px">{{ lpFeat.tickerLabel }}</div>
-<div><div style="font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--s-mute)">{{ ui.score }}</div><div data-m-count="in" style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-accent);margin-top:4px">{{ lpFeat.score }}</div></div>
+<div><div style="font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--s-mute)">{{ ui.dayToday }}</div><div data-m-count="in" style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-accent);margin-top:4px">{{ lpFeat.score }}</div></div>
 <div style="font-size:13px;color:var(--s-mute)">{{ lpFeat.delta }}</div>
 </div>
 <div style="display:flex;flex-direction:column;min-width:0">
@@ -933,6 +935,7 @@
 </div>
 </div>
 </div>
+</sc-if>
 </div>
 </section>
 <div style="flex:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,236px),1fr));background:#101012;border-top:1px solid var(--s-rule);border-bottom:1px solid var(--s-rule)">
@@ -1167,7 +1170,7 @@ function hydrate(defaults) {
   return out;
 }
 class Component extends DCLogic {
-  state = hydrate({ screen:'portfolio', plan:null, lang:null, appLang:null, follows:['NVDA','AAPL','TSLA'], selected:'NVDA', feedTab:'following', query:'', toast:'', prev:'feed',
+  state = hydrate({ screen:'portfolio', plan:null, lang:null, appLang:null, follows:[], selected:'', feedTab:'following', query:'', toast:'', prev:'feed',
     quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, liveEarnDates:{}, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
     liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false, detailLoading:false,
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
@@ -1176,7 +1179,7 @@ class Component extends DCLogic {
     twofa:false, twofaSetup:false, twofaSecret:'', twofaCode:'', twofaErr:'', recovery:null,
     loginAlerts:true, timeoutMin:30, revoked:[], links:null, lockPw:'', lockErr:'',
     alerts:{ news:true, insider:false, filings:false, rating:false, earnings:false, move:false },
-    positions:{ NVDA:{ shares:40, cost:'151.20' }, AAPL:{ shares:75, cost:'214.60' } }, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, roNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
+    positions:{}, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, roNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
     dismissed:[], detailTab:'overview',
     stack:[], stackOpen:false, cmdOpen:false, cmdQ:'', cmdIx:0, cursor:0, events:[] });
   // Append-only security trail. The server mirrors this shape at POST /api/events,
@@ -1510,6 +1513,12 @@ class Component extends DCLogic {
     if (this._held !== undefined && held !== this._held) this.syncPositions();
     this._held = held;
     this.syncSummaries();
+    // The US Market and BVB tabs load their stories the first time the feed shows them,
+    // including when the app opens on one of them.
+    if (this.state.screen === 'feed' && this.state.session) {
+      if (this.state.feedTab === 'market' && !this._mktAsked) { this._mktAsked = true; this.syncMarket(); }
+      if (this.state.feedTab === 'bvb' && !this._bvbAsked) { this._bvbAsked = true; this.syncBvb(); }
+    }
     const pfSig = this.state.screen === 'portfolio' ? (this.state.pfRange || '1mo') + '|' + held : '';
     if (pfSig && pfSig !== this._pfSig) this.syncPortfolioCharts();
     this._pfSig = pfSig;
@@ -1630,8 +1639,21 @@ class Component extends DCLogic {
     }, 350);
   }
   // Demo-universe matches first, then live search hits; empty for an empty query.
+  // Real data only. The shared hif-data.js also carries the mobile app's demo set
+  // (stories, prices, calendars, filings, crowding figures); the web app never shows it.
+  // Company names stay, for search.
+  get data() {
+    const H = window.HIF;
+    if (!H) return null;
+    if (this._dataSrc !== H) {
+      this._dataSrc = H;
+      this._data = Object.assign({}, H, { NEWS:[], FOLLOWS:{}, EVENTS:{}, SIGNALS:{}, CROWD:{},
+        UNIVERSE:(H.UNIVERSE || []).map(x => ({ ticker:x.ticker, name:x.name, stories:'—' })) });
+    }
+    return this._data;
+  }
   searchPool(q) {
-    const H = window.HIF || {}, U = H.UNIVERSE || [];
+    const H = this.data || {}, U = H.UNIVERSE || [];
     if (!q) return [];
     const pool = U.filter(x => x.ticker.includes(q) || x.name.toUpperCase().includes(q));
     (this.state.liveHits || []).forEach(h => { if (!pool.some(x => x.ticker === h.ticker)) pool.push({ ticker:h.ticker, name:h.name, stories:'—' }); });
@@ -1674,7 +1696,7 @@ class Component extends DCLogic {
     this.flash(ticker + ' · ' + String(on ? (u.stackUnpin || 'Unpin') : (u.stackPin || 'Pin')).toUpperCase());
   }
   cmdResults(raw) {
-    const H = window.HIF || {}, U = H.UNIVERSE || [], u = this.copy;
+    const H = this.data || {}, U = H.UNIVERSE || [], u = this.copy;
     const q = String(raw || '').trim();
     if (!q) return [];
     const out = [];
@@ -1821,9 +1843,10 @@ class Component extends DCLogic {
         React.createElement('div', { style:Object.assign({ paddingTop:3 }, axisNote) }, 'TIME')));
   }
   rsiSeries(values, period) { return window.HIFChart.rsiSeries(values, period); }
-  seriesFor(ticker, range, priceStr, moveStr, cap) { return window.HIFChart.seriesFor(ticker, range, priceStr, moveStr, cap); }
+  // No made-up price walks: without a loaded series there is no line.
+  seriesFor() { return []; }
   earningsMarks(ticker, points) {
-    const H = window.HIF || {}, ev = ((H.EVENTS || {})[ticker] || []).filter(x => x.kind === 'evEarnings')[0];
+    const H = this.data || {}, ev = ((H.EVENTS || {})[ticker] || []).filter(x => x.kind === 'evEarnings')[0];
     const d = ev ? this.daysUntil(ev.date) : null;
     return window.HIFChart.earningsMarks(points, {
       live: this.state.liveEarnings[ticker] || [],
@@ -2146,7 +2169,7 @@ class Component extends DCLogic {
   }
   renderVals() { return this.withTickerLabels(this.renderValsRaw()); }
   renderValsRaw() {
-    const H = window.HIF;
+    const H = this.data;
     if (!H || !this.sharedReady()) return {};
     const NEWS = H.NEWS, FOLLOWS = H.FOLLOWS, UNIVERSE = H.UNIVERSE, UI = H.UI;
     const EVENTS = H.EVENTS || {}, SIGNALS = H.SIGNALS || {};
@@ -2158,7 +2181,7 @@ class Component extends DCLogic {
     const HS = window.HIFStore || null;
     const signedIn = !!s.session;
     const provider = (s.session && s.session.provider) || 'Email';
-    const sessionEmail = (s.session && s.session.email) || 'alex@email.com';
+    const sessionEmail = (s.session && s.session.email) || '';
     const links = Object.assign({ Google:true, iCloud:false, Email:true }, s.links || {});
     const pw = HS ? HS.strength(s.authPw || '') : { score:0, breached:false, hints:[] };
     const authUp = s.authMode === 'up';
@@ -2166,7 +2189,7 @@ class Component extends DCLogic {
     const hintText = { len:u.hintLen, case:u.hintCase, digit:u.hintDigit, symbol:u.hintSymbol };
     const timeoutMin = s.timeoutMin === undefined ? 30 : s.timeoutMin;
     const Q = s.quotes, LN = s.liveNews, RC = s.liveRecs, live = s.liveStatus === 'live';
-    const blank = { price:'—', move:'—', up:true, score:'—', buyPct:'—', analystDetail:'—', earnDays:'—', earnDate:'—', perf6m:'+0.0%' };
+    const blank = { price:'—', move:'—', up:true, score:'—', buyPct:'—', analystDetail:'—', earnDays:'—', earnDate:'—', perf6m:'—' };
     const PR = s.profiles || {};
     const rec = t => {
       const uni = UNIVERSE.filter(x => x.ticker === t)[0];
@@ -2195,11 +2218,7 @@ class Component extends DCLogic {
       else syms.forEach(t => (LN[t] || []).forEach(n => rows.push(row(t, n))));
       baseFeed = rows.sort((a,b) => b.ts - a.ts).slice(0, 40);
     }
-    // No demo stand-ins on the BVB tab: the demo set has no Romanian companies.
-    if (s.feedTab !== 'bvb' && (!baseFeed || !baseFeed.length)) {
-      baseFeed = (s.feedTab === 'following' ? NEWS.filter(n => s.follows.includes(n.ticker)) : NEWS)
-        .map(n => Object.assign({}, n, { headline:n.headline[L], watch:n.watch[L] }));
-    }
+    baseFeed = baseFeed || [];
     const skipKeys = {};
     (s.dismissed || []).forEach(d => { if (d.key) skipKeys[this.normKey(d.key)] = 1; });
     baseFeed = baseFeed.filter(n => !skipKeys[this.storyKey(n)]);
@@ -2329,10 +2348,15 @@ class Component extends DCLogic {
         toggle: () => this.toggleAlert(r.key, locked)
       });
     });
-    const calRows = (EVENTS[stock.ticker] || []).map(e => ({
-      date: e.date, dow: e.dow, detail: e.detail, label: u[e.kind] || e.kind,
-      accent: e.kind === 'evEarnings' ? 'var(--color-accent)' : 'var(--s-rule)'
-    }));
+    // The calendar: the next report date from the earnings calendar, when one is announced.
+    const calRows = ED && ED.next && ED.next.date ? [(() => {
+      const d = new Date(ED.next.date + 'T12:00:00Z');
+      const when = ({ bmo:u.edBmo, amc:u.edAmc, dmh:u.edDmh })[ED.next.hour] || '';
+      const est = ED.next.epsEstimate != null ? 'EPS est. ' + Number(ED.next.epsEstimate).toFixed(2) : '';
+      return { date: d.toLocaleDateString([], { month:'short', day:'2-digit', timeZone:'UTC' }),
+        dow: d.toLocaleDateString('en-US', { weekday:'short', timeZone:'UTC' }).toUpperCase(),
+        detail: [when, est].filter(Boolean).join(' · '), label: u.evEarnings || 'Earnings', accent: 'var(--color-accent)' };
+    })()] : [];
     const sigRows = (SIGNALS[stock.ticker] || []).map(x => x.type === 'insider'
       ? { stamp:x.stamp, tag:x.role, title:x.who + ' ' + (x.act === 'buy' ? u.sigBuy : u.sigSell) + ' ' + x.shares + ' ' + u.sigShares,
           detail:x.value, accent: x.act === 'buy' ? 'var(--s-ink)' : 'var(--color-accent)' }
@@ -2351,7 +2375,7 @@ class Component extends DCLogic {
     const liveSeries = (s.charts || {})[stock.ticker + ':' + s.chartRange];
     const trend = liveSeries && liveSeries.points && liveSeries.points.length > 15
       ? (liveSeries.lead || []).concat(liveSeries.points).map(p => p.close)
-      : live ? [] : window.HIFChart.seriesFor(stock.ticker, '1mo', stock.price, stock.move, 60).map(p => p.close);
+      : [];
     const rsiArr = window.HIFChart.rsiSeries(trend, 14).filter(v => v != null);
     const rsiNow = rsiArr.length ? rsiArr[rsiArr.length - 1] : null;
     const clashes = IN ? IN.conflicts({ analystDetail: stock.analystDetail, signals: SIGNALS[stock.ticker] || [], movePct: stock.move, rsi: rsiNow }) : [];
@@ -2404,8 +2428,8 @@ class Component extends DCLogic {
     const tone = [this.pal.accent, this.pal.ink, this.pal.mute, this.pal.weak, this.pal.faint];
     const stackSeries = stackList.map((t, i) => {
       const r = rec(t);
-      const pts = window.HIFChart.seriesFor(t, '1mo', r.price, r.move, 40)
-        .map(p => p.close).filter(v => typeof v === 'number' && isFinite(v) && v > 0);
+      const ch = (s.charts || {})[t + ':1mo'];
+      const pts = ((ch && ch.points) || []).map(p => p.close).filter(v => typeof v === 'number' && isFinite(v) && v > 0);
       const v0 = pts.length ? pts[0] : 0;
       return { ticker:t, r, color:tone[i % tone.length], norm: v0 ? pts.map(v => v / v0 * 100) : [] };
     }).filter(x => x.norm.length > 1);
@@ -2518,7 +2542,7 @@ class Component extends DCLogic {
         const cur = s.pfCur && byCur[s.pfCur] != null ? s.pfCur : (curList[0] || 'USD');
         const curOf = t => { const r = HB.rows.filter(x => x.ticker === t)[0]; return r ? r.currency : 'USD'; };
         const chartOf = t => {
-          if (!live) { const r = rec(t) || {}; return window.HIFChart.seriesFor(t, range, r.price, r.move, 80); }
+          if (!live) return null;
           const c = (s.pfCharts || {})[t + ':' + range];
           return c === undefined ? undefined : (c ? c.points : null);
         };
@@ -2673,13 +2697,27 @@ class Component extends DCLogic {
       closeAuth: () => this.setState({ authOpen:false, authErr:'', authBad:null }),
       stopProp: e => e.stopPropagation(),
       // Admin-edited featured story when one is set (H.FEATURED), else the top demo story.
-      lpFeat: (() => { const n = H.FEATURED || NEWS[0]; const loc = v => (v && (v[L] || v.EN)) || ''; return { ticker:n.ticker, source:n.source, stamp:n.stamp || '', score:n.score, delta:n.delta, headline:loc(n.headline), watch:loc(n.watch) }; })(),
-      // A configured symbol with neither demo data nor a live quote is skipped, not drawn empty.
-      lpTickers: (H.LANDING_TICKERS || ['NVDA','AAPL','MSFT','TSLA','AMZN']).filter(t => Q[t] || FOLLOWS[t]).map(t => {
-        const f = Q[t] || FOLLOWS[t]; let seed = 0; for (const ch of t) seed = (seed * 31 + ch.charCodeAt(0)) % 997;
-        const pts = []; let y = f.up ? 22 : 8;
-        for (let i = 0; i < 12; i++) { seed = (seed * 73 + 41) % 997; y += (f.up ? -1.6 : 1.6) + (seed / 997 - 0.5) * 7; y = Math.max(2, Math.min(26, y)); pts.push((i * 8).toFixed(0) + ',' + y.toFixed(1)); }
-        return { ticker:t, price:f.price, move:f.move, pts:pts.join(' '), col: f.up ? 'var(--s-ink)' : 'var(--color-accent)' };
+      // The featured story: the newest real one loaded, else the one set in the landing
+      // config; with neither, the card is left out.
+      lpFeat: (() => {
+        const loc = v => typeof v === 'string' ? v : ((v && (v[L] || v.EN)) || '');
+        let n = null;
+        Object.keys(LN).forEach(t => (LN[t] || []).forEach(x => { if (x && x.headline && (!n || (x.ts || 0) > (n.ts || 0))) n = Object.assign({ ticker:t }, x); }));
+        n = n || H.FEATURED;
+        if (!n) return { has:false };
+        const q = Q[n.ticker] || {};
+        return { has:true, ticker:n.ticker, source:n.source || '', stamp:n.stamp || '', score:q.move || n.delta || '—', delta:q.price || '',
+          headline:loc(n.headline), watch:loc(n.summary || n.watch) };
+      })(),
+      // Live quotes only; the line is the day's real intraday series when it has loaded.
+      lpTickers: (H.LANDING_TICKERS || ['NVDA','AAPL','MSFT','TSLA','AMZN']).filter(t => Q[t]).map(t => {
+        const f = Q[t], ch = (s.charts || {})[t + ':1d'], v = ((ch && ch.points) || []).map(p => p.close).filter(x => Number.isFinite(x));
+        let pts = '';
+        if (v.length > 1) {
+          const lo = Math.min(...v), hi = Math.max(...v), sp = Math.max(hi - lo, 1e-9);
+          pts = v.map((x, i) => (i * 88 / (v.length - 1)).toFixed(1) + ',' + (26 - (x - lo) / sp * 24).toFixed(1)).join(' ');
+        }
+        return { ticker:t, price:f.price, move:f.move, pts, col: f.up ? 'var(--s-ink)' : 'var(--color-accent)' };
       }),
       sourcesLabel: H.SOURCES_COUNT != null ? H.SOURCES_COUNT.toLocaleString() : '840',
       lpFeatures: [['lpF1t','lpF1d','M4 6h16M4 12h16M4 18h10'],['lpF2t','lpF2d','M3 5h18l-7 8v6l-4 2v-8z'],['lpF3t','lpF3d','M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z'],['lpF4t','lpF4d','M4 20V10M10 20V4M16 20v-7M22 20H2']].map(r => ({ t:u[r[0]], d:u[r[1]], path:r[2] })),
@@ -2811,6 +2849,10 @@ class Component extends DCLogic {
       scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '—'),
       feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : s.feedTab === 'bvb' ? u.bvbSub : u.topVolume,
       bvbEmpty: s.feedTab === 'bvb' && !(s.roNews || []).length,
+      // Stories still on their way (none of the tab's tickers answered yet) read as loading,
+      // not as "no stories".
+      feedLoading: s.feedTab !== 'bvb' && !feed.length && !((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t])) && (s.feedTab === 'market' || s.follows.length > 0),
+      feedEmpty: s.feedTab !== 'bvb' && !feed.length && ((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t]) || (s.feedTab !== 'market' && !s.follows.length)),
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
       setFeedMarket: () => { this.setState({ feedTab:'market' }); this.syncMarket(); },
       setFeedBvb: () => { this.setState({ feedTab:'bvb' }); this.syncBvb(); },
