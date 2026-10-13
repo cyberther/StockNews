@@ -240,11 +240,13 @@
 </div>
 </div>
 </sc-if>
+<sc-if value="{{ hasCall }}" hint-placeholder-val="{{ true }}">
 <div style="padding:18px var(--gx);border-top:1px solid var(--s-rule)">
 <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);margin-bottom:6px">{{ ui.theCall }}</div>
-<div style="font-family:var(--font-heading);font-weight:800;font-size:24px;line-height:1.28;letter-spacing:-0.02em;text-wrap:pretty;max-width:52ch">{{ stock.call }}</div>
+<div style="font-size:17px;font-weight:600;line-height:1.5;text-wrap:pretty;max-width:64ch">{{ stock.call }}</div>
 <div style="font-size:12px;color:var(--s-mute);margin-top:12px"><sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent)">{{ freqNote }}</span></sc-if><sc-if value="{{ isProTier }}" hint-placeholder-val="{{ false }}"><span>{{ freqNote }}</span></sc-if></div>
 </div>
+</sc-if>
 </sc-if>
 <sc-if value="{{ tabNews }}" hint-placeholder-val="{{ false }}">
 <div style="padding:14px var(--gx) 6px;border-top:1px solid var(--s-rule);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tape }} · {{ stock.tickerLabel }}</div>
@@ -2011,7 +2013,7 @@ class Component extends DCLogic {
       this.setState({ chartRange:r }); this.syncDetail(stock.ticker, false, r);
     };
     const header = React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:6, marginBottom:10, flexWrap:'wrap' } },
-      React.createElement('span', { style:{ marginRight:'auto', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:this.pal.mute } }, this.tickerLabel(stock.ticker) + ' · PRICE'),
+      React.createElement('span', { style:{ marginRight:'auto', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:this.pal.mute } }, this.tickerLabel(stock.ticker) + ' · ' + (this.copy.axPrice || 'Price').toUpperCase()),
       ...ranges.map(r => React.createElement('button', { key:r[0], onClick:() => pickRange(r[0]),
         style:Object.assign(this.chipStyle(range === r[0]), (isFree && gated[r[0]] && range !== r[0]) ? { color:this.pal.mute } : null) }, r[1])),
       React.createElement('span', { style:{ minWidth:68, textAlign:'right', fontSize:11, fontWeight:800, color:perf < 0 ? this.pal.accent : this.pal.ink } },
@@ -2344,6 +2346,8 @@ class Component extends DCLogic {
     const dayNews = ((live && LN[stock.ticker]) ? LN[stock.ticker] : NEWS.filter(n => n.ticker === stock.ticker))
       .slice(0, 3).map(n => ({ headline: typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN, source:n.source, url:n.url || '' }));
     const why = IN ? IN.attribute({ t:u, ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
+    // The newest story's AI summary (the source's English snippet is not a conclusion).
+    const callText = (stock.call && stock.call[L]) || (live && LN[stock.ticker] && LN[stock.ticker][0] && LN[stock.ticker][0].id ? this.aiText(stock.ticker + ':' + LN[stock.ticker][0].id) : '') || '';
     const whyTone = why && (why.kind === 'none' || why.kind === 'quiet') ? 'var(--s-mute)' : 'var(--color-accent)';
     // RSI for the conflict check: the loaded live series when there is one; the demo
     // series only in demo mode, so live tickers are never judged on made-up prices.
@@ -2443,7 +2447,7 @@ class Component extends DCLogic {
       clearStack: () => this.setState({ stack:[] }),
       stackToggleLabel: s.stackOpen ? u.stackHide : u.stackShow,
       detailPinned: pinned(stock.ticker), detailNotPinned: !pinned(stock.ticker),
-      detailPinLabel: pinned(stock.ticker) ? u.stackUnpin : u.stackPin,
+      detailPinLabel: (pinned(stock.ticker) ? u.unpinCompare || u.stackUnpin : u.pinCompare || u.stackPin).replace('{t}', stock.ticker),
       pinDetail: () => this.togglePin(stock.ticker),
       cmdShown: !!s.cmdOpen, cmdQ: s.cmdQ || '',
       onCmdQ: e => this.setState({ cmdQ:e.target.value, cmdIx:0 }),
@@ -2490,11 +2494,13 @@ class Component extends DCLogic {
         pick: () => this.setState({ detailTab:t[0] })
       })),
       tabOverview: dTab === 'overview', tabNews: dTab === 'news', tabResearch: dTab === 'research',
+      // Left out when it would repeat the "why it moved" card word for word.
+      hasCall: !!callText && callText !== (why && why.detail),
       why, hasWhy: !!why, whyLabel: why ? why.label : '', whyDetail: why ? why.detail : '',
       whyNote: why ? (why.note || '') : '', whyTone,
       whyHasLink: !!(why && why.url), whyLinkLabel: why && why.url ? (u.readAt || 'Read at %s').replace('%s', why.source || 'source') : '',
       openWhy: () => { if (why && why.url) this.openNews({ url: why.url, ticker: stock.ticker }); },
-      whyConf: why && why.confidence ? why.confidence.toUpperCase() + ' ' + u.whyConfidence.toUpperCase() : '',
+      whyConf: why && why.confidence ? (u.whyConfFmt || '{c} confidence').replace('{c}', (u['conf_' + why.confidence] || why.confidence)).toUpperCase() : '',
       clashes, hasClash: !!clashes.length, noClash: !clashes.length,
       clashRows: clashes.map(c => ({ title:c.title, detail:c.detail, accent: c.tone === 'warn' ? 'var(--color-accent)' : 'var(--s-mute)' })),
       hasPos: !!pos, noPos: !pos && !editing, posEditing: editing,
@@ -2831,7 +2837,8 @@ class Component extends DCLogic {
         buyW: am ? (am[1] / aTot * 100).toFixed(1) + '%' : '0%',
         holdW: am ? (am[2] / aTot * 100).toFixed(1) + '%' : '0%',
         sellW: am ? (am[3] / aTot * 100).toFixed(1) + '%' : '0%',
-        call: (stock.call && stock.call[L]) || (LN[stock.ticker] && LN[stock.ticker][0] && LN[stock.ticker][0].summary) || '',
+        // The newest story's AI summary (the source's English snippet is not a conclusion).
+        call: callText,
         score: live ? '#' + storyCount(stock.ticker) : stock.score,
         storiesLabel: storiesOf(stock.ticker) + ' ' + u.storiesWord
       }),

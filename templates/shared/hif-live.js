@@ -258,7 +258,7 @@ function earningsText(ed, u){
   }
   if (ed && ed.last) {
     const s = ed.last.surprisePct;
-    const res = s == null ? '' : Math.abs(s) < 0.5 ? t.edInline : (s > 0 ? t.edBeat : t.edMiss) + ' ' + Math.abs(s).toFixed(1) + '%';
+    const res = s == null ? '' : Math.abs(s) < 0.5 ? t.edInline : (s > 0 ? t.edBeat : t.edMiss) + ' ' + Math.abs(s).toLocaleString(window.HIF_LOCALE || [], { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%';
     const which = ed.last.date ? day(ed.last.date) : (ed.last.quarter && ed.last.year ? 'Q' + ed.last.quarter + ' FY' + ed.last.year : '');
     out.last = (t.edLast + ' ' + which).trim() + (res ? ' · ' + res : '');
   }
