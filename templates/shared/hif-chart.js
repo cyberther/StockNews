@@ -117,7 +117,7 @@ function earningsMarks(points, opts) {
     if (o.nextTs == null) return [];
     let ts = o.nextTs;
     for (let i = 0; i < 24 && ts > t0 - 86400; i++) {
-      list.push({ date: new Date(ts * 1000).toLocaleDateString([], { month:'short', day:'numeric', year:'numeric' }), ts, estimated:true });
+      list.push({ date: new Date(ts * 1000).toLocaleDateString(window.HIF_LOCALE || [], { month:'short', day:'numeric', year:'numeric' }), ts, estimated:true });
       ts -= 91 * 86400;
     }
   }
