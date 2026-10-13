@@ -44,7 +44,10 @@ const PROMPTS = {
   ro: 'Ești redactor financiar. Rezumă în limba română, în 2-3 propoziții scurte, DOAR informația din textul primit. ' +
       'Nu adăuga cifre, nume, cauze sau interpretări care nu apar în text și nu generaliza (de exemplu, livrările unei ' +
       'companii nu sunt livrările întregii piețe). Păstrează simbolurile bursiere și cifrele exact; scrie o scădere ca ' +
-      '„a scăzut cu 1,2%”, fără semnul minus. Nu folosi cuvinte în engleză când există echivalent românesc. ' +
+      '„a scăzut cu 1,2%”, fără semnul minus. Nu folosi cuvinte în engleză când există echivalent românesc: scrie ' +
+      '„închidere” (nu close), „tranzacționare” (nu trading), „avans” (nu rally), „val de vânzări” (nu sell-off), ' +
+      '„rezultate financiare” (nu earnings), „prognoză” (nu guidance), „perspective” (nu outlook), „preț-țintă” ' +
+      '(nu price target), „valoare de piață” (nu market cap), „program de răscumpărare” (nu buyback). ' +
       'Folosește diacriticele corecte (ă, â, î, ș, ț). Răspunde doar cu rezumatul, fără titlu și fără ghilimele.',
   en: 'You are a financial editor. Summarize in English, in 2-3 short sentences, ONLY the information in the text given. ' +
       'Do not add figures, names, causes or interpretation that are not in it. Keep tickers and figures exact. ' +
@@ -68,8 +71,63 @@ async function rpc(fn, body) {
   return text ? JSON.parse(text) : null;
 }
 
+// English finance terms small models leave in Romanian text. The Romanian keeps the
+// grammatical gender where it can (these terms are used as neuter nouns: "un rally
+// puternic" -> "un avans puternic"), and common article + adjective phrases are fixed as a
+// whole. Longest phrases first. Bare terms are matched in lowercase only, so names
+// ("Close Brothers", "Rally Health") are left alone; a capitalised form is replaced only
+// with a Romanian ending ("Sell-off-ul"), which no name has.
+const RO_TERMS = [
+  ['față de ultimul close', 'față de închiderea anterioară'],
+  ['ultimului close', 'închiderii anterioare'],
+  ['ultimul close', 'închiderea anterioară'],
+  ['close-ul', 'închiderea', true],
+  ['la close', 'la închidere'],
+  ['close', 'închidere'],
+  ['trading-ul', 'tranzacționarea', true],
+  ['de trading', 'de tranzacționare'],
+  ['rally-ul', 'avansul', true],
+  ['rally', 'avans'],
+  ['sell-off-ul', 'valul de vânzări', true],
+  ['selloff-ul', 'valul de vânzări', true],
+  ['sell-off', 'val de vânzări'],
+  ['selloff', 'val de vânzări'],
+  ['raportul de earnings', 'raportul de rezultate'],
+  ['earnings-urile', 'rezultatele financiare', true],
+  ['earnings', 'rezultatele financiare'],
+  ['noul guidance', 'noua prognoză'],
+  ['un guidance', 'o prognoză'],
+  ['guidance-ul', 'prognoza', true],
+  ['guidance', 'prognoza'],
+  ['outlook-ul', 'perspectivele', true],
+  ['outlook', 'perspectivele'],
+  ['price target-ul', 'prețul-țintă', true],
+  ['price target', 'preț-țintă'],
+  ['market cap-ul', 'valoarea de piață', true],
+  ['market cap', 'valoare de piață'],
+  ['buyback-ul', 'programul de răscumpărare', true],
+  ['buyback', 'program de răscumpărare'],
+  ['bullish', 'optimist'],
+  ['bearish', 'pesimist']
+];
+// A match may not start or end inside a word ("închidere", "enclosed", "closely").
+const LETTER = 'A-Za-zĂÂÎȘȚăâîșț';
+const esc = t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+const RO_RULES = [];
+RO_TERMS.forEach(([en, ro, suffixed]) => {
+  const around = body => new RegExp(`(?<![${LETTER}-])${body}(?![${LETTER}-])`, 'g');
+  RO_RULES.push([around(esc(en)), ro]);
+  if (suffixed) RO_RULES.push([around(esc(cap(en))), cap(ro)]);
+});
+export function fixRomanian(s) {
+  let out = s;
+  for (const [re, ro] of RO_RULES) out = out.replace(re, ro);
+  return out;
+}
+
 // Cedilla forms (ş ţ) to the correct comma-below letters, and tidy the model's reply.
-export function cleanSummary(text) {
+export function cleanSummary(text, lang = cfg.lang) {
   let s = String(text || '')
     .replace(/ş/g, 'ș').replace(/Ş/g, 'Ș').replace(/ţ/g, 'ț').replace(/Ţ/g, 'Ț')
     .replace(/<think>[\s\S]*?<\/think>/g, '')
@@ -78,7 +136,7 @@ export function cleanSummary(text) {
     .replace(/\s+/g, ' ')
     .trim();
   s = s.replace(/^["„“”«»']+|["„“”«»']+$/g, '').trim();
-  return s;
+  return lang === 'ro' ? fixRomanian(s) : s;
 }
 // A reply worth saving: prose of a sensible length, not a tool call or JSON.
 export function usable(s) {
