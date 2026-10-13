@@ -165,7 +165,7 @@
 <sc-if value="{{ obHasPicks }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
 <sc-for list="{{ obChosen }}" as="c" hint-placeholder-count="2">
-<button onClick="{{ c.remove }}" aria-label="{{ c.removeLabel }}" style="display:flex;align-items:center;gap:7px;min-height:34px;padding:0 9px 0 11px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.06em;cursor:pointer">{{ c.ticker }}<span aria-hidden="true" style="font-size:14px;line-height:1">×</span></button>
+<button onClick="{{ c.remove }}" aria-label="{{ c.removeLabel }}" style="display:flex;align-items:center;gap:7px;min-height:34px;padding:0 9px 0 11px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.06em;cursor:pointer">{{ c.tickerLabel }}<span aria-hidden="true" style="font-size:14px;line-height:1">×</span></button>
 </sc-for>
 </div>
 </sc-if>
@@ -177,7 +177,7 @@
 <sc-for list="{{ obResults }}" as="p" hint-placeholder-count="4">
 <button data-m="rise" onClick="{{ p.toggle }}" style="display:flex;width:100%;align-items:center;gap:12px;padding:13px 20px;border:0;border-bottom:1px solid var(--s-rule);background:transparent;text-align:left;cursor:pointer">
 <span style="flex:none;width:16px;height:16px;background:{{ p.box }};border:1px solid {{ p.boxEdge }}"></span>
-<span style="flex:1;min-width:0"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:15px;color:var(--s-ink)">{{ p.ticker }}</span><span style="display:block;font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span></span>
+<span style="flex:1;min-width:0"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:15px;color:var(--s-ink)">{{ p.tickerLabel }}</span><span style="display:block;font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span></span>
 </button>
 </sc-for>
 <sc-if value="{{ obHasQuery }}" hint-placeholder-val="{{ false }}">
@@ -216,7 +216,7 @@
 <div style="display:flex">
 <sc-for list="{{ tape }}" as="t" hint-placeholder-count="4">
 <div style="flex:none;border-right:1px solid var(--s-rule);padding:6px 12px;display:flex;gap:7px;align-items:baseline">
-<span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.04em">{{ t.ticker }}</span>
+<span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.04em">{{ t.tickerLabel }}</span>
 <span data-m-flash="1" style="font-size:11px;color:var(--s-mute)">{{ t.price }}</span>
 <span style="font-size:11px;font-weight:600"><sc-if value="{{ t.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.move }}</span></sc-if><sc-if value="{{ t.up }}" hint-placeholder-val="{{ true }}"><span>{{ t.move }}</span></sc-if></span>
 </div>
@@ -225,7 +225,7 @@
 <div aria-hidden="true" style="display:flex">
 <sc-for list="{{ tape }}" as="t" hint-placeholder-count="4">
 <div style="flex:none;border-right:1px solid var(--s-rule);padding:6px 12px;display:flex;gap:7px;align-items:baseline">
-<span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.04em">{{ t.ticker }}</span>
+<span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.04em">{{ t.tickerLabel }}</span>
 <span data-m-flash="1" style="font-size:11px;color:var(--s-mute)">{{ t.price }}</span>
 <span style="font-size:11px;font-weight:600"><sc-if value="{{ t.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.move }}</span></sc-if><sc-if value="{{ t.up }}" hint-placeholder-val="{{ true }}"><span>{{ t.move }}</span></sc-if></span>
 </div>
@@ -239,7 +239,7 @@
 <sc-if value="{{ item.hasDayHead }}" hint-placeholder-val="{{ false }}"><h3 style="margin:0;padding:12px 16px 6px;border-bottom:1px solid var(--s-rule);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ item.dayHead }}</h3></sc-if>
 <article data-m="rise" role="button" tabIndex="0" onClick="{{ item.open }}" onKeyDown="{{ item.keyOpen }}" style="display:block;width:100%;padding:13px 16px;border-bottom:1px solid var(--s-rule);cursor:pointer">
 <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
-<span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.02em">{{ item.ticker }}</span>
+<span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.02em">{{ item.tickerLabel }}</span>
 <span style="font-size:12px;font-weight:600;color:var(--s-ink)"><sc-if value="{{ item.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ item.delta }}</span></sc-if><sc-if value="{{ item.up }}" hint-placeholder-val="{{ true }}"><span>{{ item.delta }}</span></sc-if></span>
 <sc-if value="{{ item.outlier }}" hint-placeholder-val="{{ false }}"><span style="padding:1px 4px;border:1px solid var(--color-accent);color:var(--color-accent);font-size:8px;letter-spacing:0.1em;text-transform:uppercase">{{ item.volBadge }}</span></sc-if>
 <span style="margin-left:auto;font-size:10px;letter-spacing:0.08em;color:var(--s-mute)">{{ item.stamp }}</span>
@@ -253,7 +253,10 @@
 <span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ item.watchLabel }}</span>
 <span style="font-size:13px;color:var(--s-ink);line-height:1.4">{{ item.watch }}</span>
 </div>
-<sc-if value="{{ item.hasTranslate }}" hint-placeholder-val="{{ false }}"><a href="{{ item.translateHref }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;margin-top:6px;font-size:12px;font-weight:600;color:var(--s-mute);text-decoration:underline;text-underline-offset:3px">{{ item.translateLabel }} ↗</a></sc-if>
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin-top:6px">
+<sc-if value="{{ item.hasSource }}" hint-placeholder-val="{{ false }}"><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;font-size:12px;font-weight:700;color:var(--s-ink);text-decoration:underline;text-underline-offset:3px">{{ item.sourceLabel }} ↗</a></sc-if>
+<sc-if value="{{ item.hasTranslate }}" hint-placeholder-val="{{ false }}"><a href="{{ item.translateHref }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;font-size:11px;color:var(--s-mute);text-decoration:underline;text-underline-offset:3px">{{ item.translateLabel }}</a></sc-if>
+</div>
 </article>
 </sc-for>
 <sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}">
@@ -281,7 +284,7 @@
 <sc-for list="{{ follows }}" as="row" hint-placeholder-count="3">
 <article data-m="rise" role="button" tabIndex="0" onClick="{{ row.open }}" onKeyDown="{{ row.keyOpen }}" style="display:block;width:100%;padding:12px 16px;border-bottom:1px solid var(--s-rule);cursor:pointer">
 <div style="display:flex;align-items:baseline">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ row.ticker }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div></div>
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ row.tickerLabel }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ row.name }}</div></div>
 <div data-m-flash="1" style="width:66px;text-align:right;font-family:var(--font-heading);font-weight:800;font-size:15px">{{ row.price }}</div>
 <div style="width:56px;text-align:right;font-size:13px;font-weight:600"><sc-if value="{{ row.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ row.move }}</span></sc-if><sc-if value="{{ row.up }}" hint-placeholder-val="{{ true }}"><span>{{ row.move }}</span></sc-if></div>
 <div style="width:62px;align-self:center">{{ row.spark }}</div>
@@ -343,7 +346,7 @@
 <div data-m="rise" style="border-top:1px solid var(--s-rule)">
 <button onClick="{{ h.edit }}" aria-label="{{ h.editLabel }}" style="display:block;width:100%;padding:11px 16px;background:transparent;border:0;color:var(--s-ink);text-align:left;font:inherit;cursor:pointer">
 <div style="display:flex;align-items:baseline;gap:10px">
-<div style="flex:1;min-width:0"><span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ h.ticker }}</span><sc-if value="{{ h.showName }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;color:var(--s-mute);margin-left:6px">{{ h.name }}</span></sc-if></div>
+<div style="flex:1;min-width:0"><span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ h.tickerLabel }}</span><sc-if value="{{ h.showName }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;color:var(--s-mute);margin-left:6px">{{ h.name }}</span></sc-if></div>
 <div data-m-flash="1" style="font-family:var(--font-heading);font-weight:800;font-size:15px;white-space:nowrap">{{ h.valueLabel }}</div>
 </div>
 <div style="display:flex;align-items:baseline;gap:10px;margin-top:4px;font-size:12px">
@@ -387,7 +390,7 @@
 </sc-if>
 <sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
 <div data-m="rise" style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--s-rule)">
-<div role="button" tabIndex="0" aria-label="{{ r.openLabel }}" onClick="{{ r.open }}" onKeyDown="{{ r.keyOpen }}" style="flex:1;min-width:0;cursor:pointer"><div style="display:flex;align-items:center;gap:7px"><span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.ticker }}</span><sc-if value="{{ r.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:1px 5px">{{ ui.liveReq }}</span></sc-if></div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
+<div role="button" tabIndex="0" aria-label="{{ r.openLabel }}" onClick="{{ r.open }}" onKeyDown="{{ r.keyOpen }}" style="flex:1;min-width:0;cursor:pointer"><div style="display:flex;align-items:center;gap:7px"><span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.tickerLabel }}</span><sc-if value="{{ r.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:1px 5px">{{ ui.liveReq }}</span></sc-if></div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</div></div>
 <div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ r.stories }}</div><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stories24 }}</div></div>
 <button onClick="{{ r.toggle }}" style="position:relative;overflow:hidden;min-width:84px;min-height:38px;padding:0 12px;text-align:left;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
 <sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">{{ ui.add }}</span></sc-if>
@@ -405,12 +408,12 @@
 <div style="padding:6px 16px 12px;border-bottom:1px solid var(--s-rule)">
 <button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.backFeed }}</button>
 <div style="display:flex;align-items:flex-end;gap:10px;margin-top:4px">
-<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.035em;line-height:1">{{ stock.ticker }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ stock.name }}</div></div>
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.035em;line-height:1">{{ stock.tickerLabel }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ stock.name }}</div></div>
 <div style="text-align:right"><div data-m-count="1" data-m-flash="1" style="font-family:var(--font-heading);font-weight:800;font-size:22px;line-height:1">{{ stock.price }}</div><div style="font-size:13px;font-weight:600"><sc-if value="{{ stock.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ stock.move }}</span></sc-if><sc-if value="{{ stock.up }}" hint-placeholder-val="{{ true }}"><span>{{ stock.move }}</span></sc-if></div></div>
 </div>
 </div>
 <div data-m="smooth" style="flex:1;overflow-y:auto">
-<div data-m="wipe" data-m-key="{{ stock.ticker }}" style="padding:14px 16px 4px">{{ chart }}</div>
+<div data-m="wipe" data-m-key="{{ stock.tickerLabel }}" style="padding:14px 16px 4px">{{ chart }}</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--s-rule);border-top:1px solid var(--s-rule);border-bottom:1px solid var(--s-rule)">
 <div style="background:var(--s-bg);padding:12px 10px">
 <div style="display:flex;align-items:baseline;gap:6px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.analyst }}</div><sc-if value="{{ analystLocked }}" hint-placeholder-val="{{ true }}"><span style="font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent);border:1px solid var(--color-accent);padding:0 4px">{{ ui.pro }}</span></sc-if></div>
@@ -433,7 +436,7 @@
 <div style="font-size:11px;color:var(--s-mute)"><sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent)">{{ freqNote }}</span></sc-if><sc-if value="{{ isProTier }}" hint-placeholder-val="{{ false }}"><span>{{ freqNote }}</span></sc-if></div>
 <button onClick="{{ primaryDetailAction }}" style="width:100%;min-height:46px;margin-top:12px;text-align:left;padding:0 12px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ detailActionLabel }}</button>
 </div>
-<div style="padding:12px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tape }} · {{ stock.ticker }}</div>
+<div style="padding:12px 16px 6px;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tape }} · {{ stock.tickerLabel }}</div>
 <sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
 <div data-m="rise" style="padding:12px 16px;border-bottom:1px solid var(--s-rule)">
 <div style="display:flex;gap:8px;align-items:baseline;margin-bottom:4px"><span style="font-size:10px;letter-spacing:0.08em;color:var(--s-mute)">{{ n.stamp }}</span><span style="font-size:10px;color:var(--s-mute)">{{ n.source }}</span></div>
@@ -881,7 +884,7 @@ class Component extends DCLogic {
     }).catch(() => {})), Promise.resolve());
   }
   savePosition(ticker, remove) {
-    const u = UI[this.appLang] || {}, t = String(ticker || '').toUpperCase();
+    const u = UI[this.appLang] || {}, t = String(ticker || '').toUpperCase().replace(/\.US$/, '');
     const shares = parseFloat(this.state.posShares), cost = parseFloat(this.state.posCost);
     if (!remove && (!/^[A-Z0-9][A-Z0-9.\-]{0,11}$/.test(t) || !(shares > 0))) return this.flash((u.posInvalid || 'Enter a ticker and a quantity').toUpperCase());
     this.setState(st => {
@@ -1357,7 +1360,7 @@ class Component extends DCLogic {
     if (liveOn && !livePts) {
       return React.createElement('div', null, rangeChips,
         React.createElement('div', { style:{ minHeight:150, display:'grid', placeItems:'center', border:'1px solid #333333', fontSize:10, letterSpacing:'0.12em', color:this.pal.mute, textAlign:'center', padding:16 } },
-          data === undefined ? 'LOADING MARKET HISTORY…' : 'NO MARKET HISTORY FOR ' + stock.ticker));
+          data === undefined ? 'LOADING MARKET HISTORY…' : 'NO MARKET HISTORY FOR ' + this.tickerLabel(stock.ticker)));
     }
     const points = livePts || this.seriesFor(stock.ticker, range, stock.price, stock.move), values = points.map(p => p.close);
     const lead = livePts && Array.isArray(data.lead) ? data.lead.map(p => p.close) : [];
@@ -1384,7 +1387,7 @@ class Component extends DCLogic {
     if (showSma && p50) legend.push([this.pal.mute,'sma ' + p50,'dash']);
     return React.createElement('div', null,
       React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:6, marginBottom:8 } },
-        React.createElement('span', { style:{ marginRight:'auto', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:this.pal.mute } }, stock.ticker + ' · PRICE'),
+        React.createElement('span', { style:{ marginRight:'auto', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color:this.pal.mute } }, this.tickerLabel(stock.ticker) + ' · PRICE'),
         React.createElement('span', { style:{ fontSize:11, fontWeight:800, color:perf < 0 ? this.pal.accent : this.pal.ink } }, (perf < 0 ? '−' : '+') + Math.abs(perf).toFixed(1) + '%')),
       React.createElement('div', { style:{ display:'flex', gap:5, marginBottom:8, flexWrap:'wrap' } },
         ...ranges.map(r => React.createElement('button', { key:r[0], onClick:() => this.setState({ chartRange:r[0] }), style:this.chipStyle(range === r[0]) }, r[1])),
@@ -1415,7 +1418,16 @@ class Component extends DCLogic {
           React.createElement('line', { x1:0, y1:ry(30), x2:w, y2:ry(30), stroke:this.pal.rule, strokeWidth:1, strokeDasharray:'2 5' }),
           React.createElement('polyline', { points:rsiS.map((v,i) => v == null ? null : xOf(i).toFixed(1) + ',' + ry(v).toFixed(1)).filter(Boolean).join(' '), fill:'none', stroke:this.pal.accent, strokeWidth:1.25 }))));
   }
-  renderVals() {
+  // US listings show as "NVDA.US", like Bucharest ones as "TLV.RO". Only the label: the
+  // symbol itself (watchlist, positions, providers, the server) stays "NVDA".
+  tickerLabel(t) { const s = String(t || ''); return !s || /\.(RO|US)$/.test(s) ? s : s + '.US'; }
+  withTickerLabels(v) {
+    const label = o => { if (o && typeof o === 'object' && typeof o.ticker === 'string') o.tickerLabel = this.tickerLabel(o.ticker); };
+    Object.keys(v).forEach(k => { if (k === 'ui') return; const x = v[k]; if (Array.isArray(x)) x.forEach(label); else label(x); });
+    return v;
+  }
+  renderVals() { return this.withTickerLabels(this.renderValsRaw()); }
+  renderValsRaw() {
     if (!bindShared()) return {};
     const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen;
     const H_ALL = !!(window.HIF || {}).ALL_ACCESS;
@@ -1467,8 +1479,12 @@ class Component extends DCLogic {
       if (ai) { r.watch = ai; r.isAi = true; }
       r.watchLabel = ai ? (u.aiSummary || 'AI summary') : u.watch;
       // The whole article, translated, for readers whose content language isn't English.
+      // The publisher's own page first; Google's translated view of it as a small extra.
       const tr = window.HIFLive && window.HIFLive.translatedUrl ? window.HIFLive.translatedUrl(r.url, sumLang) : '';
-      r.translateHref = tr; r.hasTranslate = !!tr; r.translateLabel = u.readTranslated || 'Read translated';
+      r.translateHref = tr; r.hasTranslate = !!tr; r.translateLabel = u.readTranslated || 'translated by Google';
+      r.hasSource = /^https?:\/\//.test(r.url || '');
+      let host = ''; try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch (e) {}
+      r.sourceLabel = (u.sourceAt || 'Full article at {s}').replace('{s}', r.source || host || '');
       r.stopOpen = event => { if (event && event.stopPropagation) event.stopPropagation(); };
     });
     feed.forEach((r, i) => {
@@ -1820,7 +1836,7 @@ class Component extends DCLogic {
         ? ((s.liveNews || {})[stock.ticker] || []).slice(0, 3).map(n => ({ headline:n.headline, source:n.source, stamp:n.stamp }))
         : NEWS.filter(n => n.ticker === stock.ticker).concat(NEWS.slice(0,2)).slice(0,3).map(n => Object.assign({}, n, { headline: n.headline[L] })),
       freqNote: isFree ? u.freqFree : u.freqPro,
-      detailActionLabel: following ? (isFree ? u.enablePush : u.pushEnabled.replace('%s', stock.ticker)) : u.addToList.replace('%s', stock.ticker),
+      detailActionLabel: following ? (isFree ? u.enablePush : u.pushEnabled.replace('%s', this.tickerLabel(stock.ticker))) : u.addToList.replace('%s', this.tickerLabel(stock.ticker)),
       primaryDetailAction: () => {
         if (!following) {
           if (isFree && s.follows.length >= 3) { this.flash('3 / 3 - ' + u.liftCap.toUpperCase()); return this.go('paywall'); }

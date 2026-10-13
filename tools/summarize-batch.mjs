@@ -12,14 +12,21 @@
 //   LMSTUDIO_URL    default http://127.0.0.1:1234/v1
 //   LMSTUDIO_MODEL  default openai/gpt-oss-20b
 //   SUMMARY_LANG    default ro
-//   BATCH_LIMIT     default 15 stories a run
+//   BATCH_LIMIT     default 10 stories a run
 //   MAX_AGE_HOURS   default 24
+//   READ_ARTICLES   default 1: summarize the whole article; 0 = headline and snippet only
 //
-// The model only gets the headline and the source's own short summary: it never fetches
-// articles, so it can't add what the source didn't say or copy paywalled text.
+// The summary is written from the whole article when the publisher allows it: the job
+// fetches the page (identifying itself, and only where robots.txt permits), keeps the
+// article text in memory for the model, and stores nothing but the model's short summary.
+// Paywalled or blocked pages, and pages it can't read, fall back to the headline and the
+// source's own short summary.
 import { readFileSync, existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import https from 'node:https';
+import http from 'node:http';
+import zlib from 'node:zlib';
 
 const ENV_FILE = join(homedir(), '.config/market-pulse/summarizer.env');
 if (existsSync(ENV_FILE)) {
@@ -36,7 +43,8 @@ const cfg = {
   lmUrl: (env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1').replace(/\/$/, ''),
   model: env.LMSTUDIO_MODEL || 'openai/gpt-oss-20b',
   lang: env.SUMMARY_LANG || 'ro',
-  limit: Math.max(1, Math.min(Number(env.BATCH_LIMIT) || 15, 100)),
+  limit: Math.max(1, Math.min(Number(env.BATCH_LIMIT) || 10, 100)),
+  readArticles: env.READ_ARTICLES !== '0',
   hours: Math.max(1, Math.min(Number(env.MAX_AGE_HOURS) || 24, 168))
 };
 
@@ -57,7 +65,136 @@ const PROMPTS = {
       'Antworte nur mit der Zusammenfassung.'
 };
 
+// The same rules, for a whole article: a little longer, and only what the article says.
+const ARTICLE_PROMPTS = {
+  ro: PROMPTS.ro.replace('în 2-3 propoziții scurte, DOAR informația din textul primit.',
+    'în 3-4 propoziții, informațiile principale ale articolului primit: ce s-a întâmplat, cifrele importante și ' +
+    'de ce contează pentru companie. Folosește DOAR informația din articol.'),
+  en: PROMPTS.en.replace('in 2-3 short sentences, ONLY the information in the text given.',
+    'in 3-4 sentences, the main points of the article given: what happened, the key figures and why it matters for ' +
+    'the company. Use ONLY information from the article.'),
+  de: PROMPTS.de.replace('in 2-3 kurzen Sätzen NUR die Informationen aus dem Text zusammen.',
+    'in 3-4 Sätzen die wichtigsten Punkte des Artikels zusammen: was passiert ist, die wichtigen Zahlen und warum es ' +
+    'für das Unternehmen zählt. Nur Informationen aus dem Artikel.')
+};
+
 const log = (...a) => console.log(new Date().toISOString(), ...a);
+
+// ------------------------------------------------------------------ reading articles
+const UA = 'Mozilla/5.0 (compatible; MarketPulseSummarizer/1.0; +https://github.com/cyberther/StockNews)';
+const MAX_PAGE = 3 * 1024 * 1024;
+const MAX_TEXT = 3500;   // characters given to the model: the substance of a story, at CPU speed
+
+// GET with redirects, decompression and a size cap. node:https rather than fetch, so large
+// response headers (Yahoo sends tens of kilobytes of cookies) don't fail the request.
+export function httpGet(url, { timeout = 15000, redirects = 5, accept = 'text/html' } = {}) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const lib = u.protocol === 'http:' ? http : https;
+    const req = lib.get(u, { headers: { 'user-agent': UA, accept, 'accept-encoding': 'gzip, deflate, br', 'accept-language': 'en, ro;q=0.8' }, maxHeaderSize: 256 * 1024, timeout }, res => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirects > 0) {
+        res.resume();
+        return resolve(httpGet(new URL(res.headers.location, u).toString(), { timeout, redirects: redirects - 1, accept }));
+      }
+      const enc = String(res.headers['content-encoding'] || '');
+      const stream = enc.includes('br') ? res.pipe(zlib.createBrotliDecompress()) : enc.includes('gzip') ? res.pipe(zlib.createGunzip())
+        : enc.includes('deflate') ? res.pipe(zlib.createInflate()) : res;
+      const chunks = []; let size = 0;
+      stream.on('data', c => { size += c.length; if (size > MAX_PAGE) { req.destroy(); reject(new Error('page too large')); } else chunks.push(c); });
+      stream.on('end', () => resolve({ status: res.statusCode, url: u.toString(), type: String(res.headers['content-type'] || ''), body: Buffer.concat(chunks).toString('utf8') }));
+      stream.on('error', reject);
+    });
+    req.on('timeout', () => req.destroy(new Error('timeout')));
+    req.on('error', reject);
+  });
+}
+
+// robots.txt: the rules for "*" (or for this job by name), longest match wins, Allow beats
+// Disallow on a tie. A missing or unreadable file allows everything, as the convention says.
+const robotsCache = new Map();
+export function robotsAllow(txt, path, agent = 'marketpulsesummarizer') {
+  const groups = []; let cur = null, lastWasAgent = false;
+  for (const raw of String(txt || '').split(/\r?\n/)) {
+    const line = raw.replace(/#.*$/, '').trim();
+    const m = /^([A-Za-z-]+)\s*:\s*(.*)$/.exec(line);
+    if (!m) continue;
+    const key = m[1].toLowerCase(), val = m[2].trim();
+    if (key === 'user-agent') {
+      if (!lastWasAgent) { cur = { agents: [], rules: [] }; groups.push(cur); }
+      cur.agents.push(val.toLowerCase()); lastWasAgent = true;
+    } else if (cur && (key === 'allow' || key === 'disallow')) {
+      cur.rules.push({ allow: key === 'allow', path: val }); lastWasAgent = false;
+    } else lastWasAgent = false;
+  }
+  const mine = groups.filter(g => g.agents.some(a => a !== '*' && agent.includes(a)));
+  const rules = (mine.length ? mine : groups.filter(g => g.agents.includes('*'))).flatMap(g => g.rules);
+  let best = null;
+  for (const r of rules) {
+    if (!r.path) continue;   // "Disallow:" with nothing allows everything
+    const re = new RegExp('^' + r.path.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\\\$$/, '$'));
+    if (re.test(path) && (!best || r.path.length > best.path.length || (r.path.length === best.path.length && r.allow))) best = r;
+  }
+  return !best || best.allow;
+}
+async function allowedByRobots(url) {
+  const u = new URL(url);
+  if (!robotsCache.has(u.host)) {
+    let txt = '';
+    try { const r = await httpGet(`${u.protocol}//${u.host}/robots.txt`, { timeout: 8000, accept: 'text/plain' }); if (r.status === 200) txt = r.body; } catch {}
+    robotsCache.set(u.host, txt);
+  }
+  return robotsAllow(robotsCache.get(u.host), u.pathname + u.search);
+}
+
+const ENT = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', hellip: '…', ndash: '–', mdash: '—', rsquo: '’', lsquo: '‘', ldquo: '“', rdquo: '”', bdquo: '„' };
+const textOf = h => String(h || '')
+  .replace(/<(script|style|noscript|figure|figcaption|aside|nav|form|button)[\s\S]*?<\/\1>/gi, ' ')
+  .replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li|h[1-6])>/gi, '\n').replace(/<[^>]+>/g, ' ')
+  .replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(+n)).replace(/&#x([0-9a-f]+);/gi, (m, n) => String.fromCodePoint(parseInt(n, 16)))
+  .replace(/&([a-z]+);/gi, (m, n) => ENT[n.toLowerCase()] != null ? ENT[n.toLowerCase()] : m)
+  .replace(/[ \t\u00a0]+/g, ' ').replace(/\s*\n\s*/g, '\n').trim();
+// Lines that are page furniture rather than the story.
+const BOILER = /^(advertisement|reclam[aă]|citește (și|mai mult)|read more|related|sign up|subscribe|abonea|newsletter|cookie|share|distribuie|urmărește|follow us|copyright|©|all rights reserved|toate drepturile)/i;
+
+// The article's own text: the publisher's structured data (JSON-LD articleBody) when it
+// has it, else the paragraphs of the <article>, else the text of an article-body block.
+export function extractArticleText(html) {
+  let best = '';
+  for (const m of String(html).matchAll(/<script[^>]+application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)) {
+    try {
+      const j = JSON.parse(m[1]);
+      for (const x of [].concat(j, (j && j['@graph']) || [])) if (x && typeof x.articleBody === 'string' && x.articleBody.length > best.length) best = x.articleBody;
+    } catch {}
+  }
+  const clean = t => t.split('\n').map(l => l.trim()).filter(l => l.length > 40 && !BOILER.test(l)).join('\n');
+  if (best.length >= 400) return clean(textOf(best)).slice(0, MAX_TEXT);
+  const scope = (/<article[\s>][\s\S]*?<\/article>/i.exec(html) || [html])[0];
+  const paras = [...scope.matchAll(/<p[\s>][\s\S]*?<\/p>/gi)].map(m => textOf(m[0])).filter(p => p.length > 60 && !BOILER.test(p));
+  const fromParas = paras.join('\n');
+  if (fromParas.length >= 400) return fromParas.slice(0, MAX_TEXT);
+  const block = /<(div|section)[^>]+(class|itemprop)="[^"]*(article-body|articleBody|article__body|entry-content|post-content|story-body|content-body|article-content)[^"]*"[^>]*>/i.exec(html);
+  if (block) {
+    const t = clean(textOf(html.slice(block.index, block.index + 60000)));
+    if (t.length >= 400) return t.slice(0, MAX_TEXT);
+  }
+  return '';
+}
+
+// A subscription wall in place of the story: short text that asks the reader to subscribe.
+const PAYWALL = /(doar dac[aă] e[sș]ti abonat|pentru abona[tț]i|devino abonat|subscribe to (read|continue)|subscription required|subscribers only|to continue reading|premium (article|content))/i;
+export const isPaywall = t => t.length < 1500 && PAYWALL.test(t);
+
+// The whole article, or '' when it isn't there to read (blocked, paywalled, not HTML).
+async function readArticle(url) {
+  if (!cfg.readArticles || !/^https?:\/\//.test(url || '')) return { text: '', why: 'no link' };
+  if (!(await allowedByRobots(url))) return { text: '', why: 'robots.txt' };
+  const r = await httpGet(url);
+  if (r.status !== 200) return { text: '', why: 'HTTP ' + r.status };
+  if (!/html/i.test(r.type)) return { text: '', why: 'not HTML' };
+  const text = extractArticleText(r.body);
+  if (text && isPaywall(text)) return { text: '', why: 'paywall' };
+  return text ? { text, why: '' } : { text: '', why: 'no article text' };
+}
 
 async function rpc(fn, body) {
   const res = await fetch(`${cfg.supabaseUrl}/rest/v1/rpc/${fn}`, {
@@ -143,14 +280,18 @@ export function usable(s) {
   return s.length >= 40 && s.length <= 1200 && !/^[{[]/.test(s) && !/"(name|parameters)"\s*:/.test(s);
 }
 
-async function summarize(story) {
-  const input = `Ticker: ${story.ticker}\nTitlu: ${story.headline}\nRezumat sursă: ${story.summary || '(fără rezumat)'}`;
+export async function summarizeForTest(story, article) { return summarize(story, article); }
+async function summarize(story, article) {
+  const input = article
+    ? `Ticker: ${story.ticker}\nTitlu: ${story.headline}\nArticol:\n${article}`
+    : `Ticker: ${story.ticker}\nTitlu: ${story.headline}\nRezumat sursă: ${story.summary || '(fără rezumat)'}`;
+  const prompts = article ? ARTICLE_PROMPTS : PROMPTS;
   const res = await fetch(`${cfg.lmUrl}/chat/completions`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ model: cfg.model, temperature: 0.2, max_tokens: 600,
-      messages: [{ role: 'system', content: PROMPTS[cfg.lang] || PROMPTS.en }, { role: 'user', content: input }] }),
-    signal: AbortSignal.timeout(300_000)
+    body: JSON.stringify({ model: cfg.model, temperature: 0.2, max_tokens: 800,
+      messages: [{ role: 'system', content: prompts[cfg.lang] || prompts.en }, { role: 'user', content: input }] }),
+    signal: AbortSignal.timeout(600_000)
   });
   if (!res.ok) throw new Error(`model: ${res.status} ${(await res.text()).slice(0, 200)}`);
   const d = await res.json();
@@ -175,11 +316,15 @@ async function main() {
   for (const s of stories) {
     const t0 = Date.now();
     try {
-      const text = await summarize(s);
+      let article = { text: '', why: 'off' };
+      try { article = await readArticle(s.url); } catch (e) { article = { text: '', why: String(e.message || e) }; }
+      const text = await summarize(s, article.text);
       if (!usable(text)) { log('skipped', s.id, '- reply not usable'); continue; }
+      // The model field records what the summary was written from.
+      const basis = article.text ? 'article' : 'snippet';
       // Saved one at a time, so a slow batch still shows progress in the apps.
-      saved += await rpc('summaries_save', { p_secret: cfg.secret, p_rows: [{ story_id: s.id, lang: cfg.lang, summary: text, model: cfg.model }] }) || 0;
-      log('saved', s.id, `${Math.round((Date.now() - t0) / 1000)}s`);
+      saved += await rpc('summaries_save', { p_secret: cfg.secret, p_rows: [{ story_id: s.id, lang: cfg.lang, summary: text, model: cfg.model + ' · ' + basis }] }) || 0;
+      log('saved', s.id, basis + (article.why ? ` (${article.why})` : ` (${article.text.length} chars)`), `${Math.round((Date.now() - t0) / 1000)}s`);
     } catch (e) {
       log('failed', s.id, String(e.message || e));
     }

@@ -35,16 +35,19 @@ language sql stable security definer set search_path = public as $$
 $$;
 revoke all on function public.summary_secret_ok(text) from public, anon, authenticated;
 
--- Newest stories first, published in the last p_hours, without a summary in p_lang.
+-- Newest stories first, published in the last p_hours, without a summary in p_lang. The
+-- link lets the batch job read the whole article (it keeps only its own short summary).
+-- (Dropped first: Postgres can't change a function's result columns in place.)
+drop function if exists public.summaries_pending(text, text, integer, integer);
 create or replace function public.summaries_pending(p_secret text, p_lang text default 'ro', p_limit integer default 15, p_hours integer default 24)
-returns table (id text, ticker text, headline text, summary text, source text, published_at timestamptz)
+returns table (id text, ticker text, headline text, summary text, source text, url text, published_at timestamptz)
 language plpgsql stable security definer set search_path = public as $$
 begin
   if not public.summary_secret_ok(p_secret) then
     raise exception 'not allowed' using errcode = '42501';
   end if;
   return query
-    select s.id, s.ticker, s.headline, s.summary, s.source, s.published_at
+    select s.id, s.ticker, s.headline, s.summary, s.source, s.url, s.published_at
     from public.stories s
     where s.published_at > now() - make_interval(hours => least(greatest(coalesce(p_hours, 24), 1), 168))
       and not exists (select 1 from public.story_summaries x where x.story_id = s.id and x.lang = p_lang)
