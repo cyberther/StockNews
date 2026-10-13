@@ -1407,10 +1407,29 @@ class Component extends DCLogic {
     this.setState(Object.assign(landing, {
       session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
       accountId: sess.userId, authOpen:false, authPw:'', authPw2:'', authSent:'', authErr:''
-    }, fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, stack:[], events:[], selected:'', screen:'portfolio' } : {}));
+    }, this.langsFrom(sess), fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, stack:[], events:[], selected:'', screen:'portfolio' } : {}));
     this.loadPlan();
+    // A choice made in this browser before the account had one is saved to the account.
+    const p = sess.prefs || {}, A = window.HIFAuth;
+    const up = { contentLang: !p.contentLang && this.state.lang, appLang: !p.appLang && this.state.appLang };
+    if (A && A.updatePrefs && (up.contentLang || up.appLang)) A.updatePrefs(up).catch(() => {});
     if (this._wlUser !== sess.userId) { this._wlUser = sess.userId; this.loadServerWatchlist(); this.loadServerHoldings(); }
     this.refreshPush();
+  }
+  // The language choices saved with the account win over this browser's, so they hold on
+  // every device and after the browser's storage is cleared.
+  langsFrom(sess) {
+    const p = (sess && sess.prefs) || {}, out = {};
+    if (p.contentLang) out.lang = p.contentLang;
+    if (p.appLang) out.appLang = p.appLang;
+    return out;
+  }
+  setLanguage(key, value) {
+    this.setState({ [key]: value });
+    const A = window.HIFAuth;
+    if (A && A.updatePrefs && this.state.authLive && this.state.session) {
+      A.updatePrefs(key === 'lang' ? { contentLang: value } : { appLang: value }).catch(() => {});
+    }
   }
   // Push alerts on this device (real accounts only; hidden until the server has a key).
   refreshPush() {
@@ -2933,15 +2952,15 @@ class Component extends DCLogic {
       langRo: L === 'RO', langRoOff: L !== 'RO',
       langDe: L === 'DE', langDeOff: L !== 'DE',
       langNote: UI[L].langNote,
-      setLangEn: () => this.setState({ lang:'EN' }),
-      setLangRo: () => this.setState({ lang:'RO' }),
-      setLangDe: () => this.setState({ lang:'DE' }),
+      setLangEn: () => this.setLanguage('lang', 'EN'),
+      setLangRo: () => this.setLanguage('lang', 'RO'),
+      setLangDe: () => this.setLanguage('lang', 'DE'),
       appEn: A === 'EN', appEnOff: A !== 'EN',
       appRo: A === 'RO', appRoOff: A !== 'RO',
       appDe: A === 'DE', appDeOff: A !== 'DE',
-      setAppEn: () => this.setState({ appLang:'EN' }),
-      setAppRo: () => this.setState({ appLang:'RO' }),
-      setAppDe: () => this.setState({ appLang:'DE' }),
+      setAppEn: () => this.setLanguage('appLang', 'EN'),
+      setAppRo: () => this.setLanguage('appLang', 'RO'),
+      setAppDe: () => this.setLanguage('appLang', 'DE'),
       planRows: [
         { label:u.rowLatency, free:'24h', pro:'0m' },
         { label:u.rowTickers, free:'3', pro:u.unlimited },
