@@ -169,7 +169,9 @@ a reply in English or one that repeats the headline is retried once.
 
 On a 4-core CPU without a GPU, gpt-oss-20b takes 1-3 minutes per summary, so a run writes
 at most 10 summaries (`BATCH_LIMIT`) for stories from the last 24 hours (`MAX_AGE_HOURS`):
-stories for tickers someone follows or holds, and BVB stories, first, then the newest. A
+stories for tickers someone follows or holds, and BVB stories, first, then the newest. The
+scan also stores every story in the BVB feed tab (Romanian press, any listed company), so
+that tab gets summaries too; alerts still go only to users who follow the company. A
 story gets all its languages (`SUMMARY_LANG`, in that order) before the next one, and its
 article is read once for all of them. Stories without a summary keep showing the source's text.
 

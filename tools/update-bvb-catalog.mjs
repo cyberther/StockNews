@@ -41,7 +41,7 @@ const ALIASES = {
   ROCE: ['Romcarbon'], SNO: ['Santierul Naval Orsova'], ELMA: ['Electromagnetica'], OIL: ['Oil Terminal'],
   TBM: ['Turbomecanica'], DN: ['Dn Agrar', 'DN AGRAR'], HAI: ['Holde Agri', 'Holde'], AG: ['Agroland'],
   '2P': ['2Performant'], NRF: ['Norofert'], MILK: ['Lactate Natura'], CC: ['Cris-Tim'], SMTL: ['Simtel'],
-  PBK: ['Patria Bank'], AAG: ['Aages']
+  PBK: ['Patria Bank'], AAG: ['Aages'], IARV: ['IAR Brasov', 'IAR Brașov', 'IAR']
 };
 // The largest and most traded names: the "BVB" market tab and its quote strip.
 const TOP = ['TLV', 'H2O', 'SNP', 'SNG', 'BRD', 'SNN', 'TGN', 'EL', 'DIGI', 'M', 'TTS', 'ONE', 'AQ', 'TEL', 'PE', 'TRP', 'SFG', 'WINE', 'FP', 'BVB'];
