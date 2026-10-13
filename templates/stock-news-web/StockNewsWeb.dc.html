@@ -1887,15 +1887,15 @@ class Component extends DCLogic {
     }).catch(() => {});
   }
   // Portfolio chart: price history for every held ticker over the chosen range (the
-  // adapter caches charts for 5 minutes). null marks a ticker without history.
+  // adapter caches charts for 5 minutes). null marks a ticker without history; a failed
+  // request is not that, so it is retried twice before the ticker is marked.
   syncPortfolioCharts() {
     const L = window.HIFLive; if (!L) return;
     const range = this.state.pfRange || '1mo';
     const put = (key, v) => this.setState(st => ({ pfCharts: Object.assign({}, st.pfCharts, { [key]: v }) }));
-    Object.keys(this.state.positions || {}).forEach(t => {
-      const key = t + ':' + range;
-      L.chart(t, range).then(c => put(key, c && c.points && c.points.length ? c : null)).catch(() => put(key, null));
-    });
+    const load = (t, key, tries) => L.chart(t, range).then(c => put(key, c && c.points && c.points.length ? c : null))
+      .catch(() => tries > 0 ? setTimeout(() => load(t, key, tries - 1), 4000) : put(key, null));
+    Object.keys(this.state.positions || {}).forEach(t => load(t, t + ':' + range, 2));
   }
   pfStamp(ts, range) {
     const d = new Date(ts * 1000);
