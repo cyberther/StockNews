@@ -244,15 +244,16 @@
 <sc-if value="{{ item.outlier }}" hint-placeholder-val="{{ false }}"><span style="padding:1px 4px;border:1px solid var(--color-accent);color:var(--color-accent);font-size:8px;letter-spacing:0.1em;text-transform:uppercase">{{ item.volBadge }}</span></sc-if>
 <span style="margin-left:auto;font-size:10px;letter-spacing:0.08em;color:var(--s-mute)">{{ item.stamp }}</span>
 </div>
-<div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.2;letter-spacing:-0.015em;text-wrap:pretty">{{ item.headline }}</div>
+<sc-if value="{{ item.notAi }}" hint-placeholder-val="{{ true }}"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.2;letter-spacing:-0.015em;text-wrap:pretty">{{ item.headline }}</div></sc-if>
+<sc-if value="{{ item.isAi }}" hint-placeholder-val="{{ false }}"><div style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">{{ item.watchLabel }}</div><div style="font-size:14px;color:var(--s-ink);line-height:1.5;margin-top:5px;text-wrap:pretty">{{ item.watch }}</div></sc-if>
 <div style="display:flex;gap:1px;background:var(--s-rule);margin-top:10px">
 <div style="flex:1;background:var(--s-panel);padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.volAvg }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:14px">{{ item.vol }}</div></div>
 <div style="flex:1.6;background:var(--s-panel);padding:7px 9px"><div style="font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.source }}</div><div style="font-size:12px;font-weight:600;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ item.source }}</div></div>
 </div>
-<div style="display:flex;gap:6px;align-items:baseline;margin-top:9px">
+<sc-if value="{{ item.notAi }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:6px;align-items:baseline;margin-top:9px">
 <span style="font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ item.watchLabel }}</span>
 <span style="font-size:13px;color:var(--s-ink);line-height:1.4">{{ item.watch }}</span>
-</div>
+</div></sc-if>
 <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin-top:6px">
 <sc-if value="{{ item.hasSource }}" hint-placeholder-val="{{ false }}"><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;font-size:12px;font-weight:700;color:var(--s-ink);text-decoration:underline;text-underline-offset:3px">{{ item.sourceLabel }} ↗</a></sc-if>
 <sc-if value="{{ item.hasTranslate }}" hint-placeholder-val="{{ false }}"><a href="{{ item.translateHref }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;font-size:11px;color:var(--s-mute);text-decoration:underline;text-underline-offset:3px">{{ item.translateLabel }}</a></sc-if>
@@ -1476,7 +1477,9 @@ class Component extends DCLogic {
     const SUMS = s.summaries || {}, sumLang = String(this.lang || 'EN').toLowerCase();
     feed.forEach(r => {
       const ai = r.storyId ? SUMS[sumLang + '|' + r.storyId] : '';
-      if (ai) { r.watch = ai; r.isAi = true; }
+      // With a summary in the reader's language, it replaces the (English) headline.
+      if (ai) r.watch = ai;
+      r.isAi = !!ai; r.notAi = !ai;
       r.watchLabel = ai ? (u.aiSummary || 'AI summary') : u.watch;
       // The whole article, translated, for readers whose content language isn't English.
       // The publisher's own page first; Google's translated view of it as a small extra.
