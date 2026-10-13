@@ -10,7 +10,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:0 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#8E8880;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#666666;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:0 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -74,7 +74,7 @@
 
 <nav class="app-tabbar" aria-label="Sections" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--s-bg);border-top:1px solid var(--s-rule);padding-bottom:env(safe-area-inset-bottom)">
 <sc-for list="{{ tabNav }}" as="n" hint-placeholder-count="5">
-<button onClick="{{ n.go }}" aria-current="{{ n.current }}" style="position:relative;flex:1;min-width:0;min-height:56px;padding:0 2px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--s-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+<button onClick="{{ n.go }}" aria-current="{{ n.current }}" style="position:relative;flex:1;min-width:0;min-height:56px;padding:0 2px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:9.5px;letter-spacing:0.02em;text-transform:uppercase;color:var(--s-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
 <sc-if value="{{ n.on }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:-1px;left:10%;right:10%;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ n.label }}</span></sc-if>
 <sc-if value="{{ n.off }}" hint-placeholder-val="{{ true }}"><span>{{ n.label }}</span></sc-if>
 </button>
@@ -100,16 +100,16 @@
 <div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ feedSub }}</div>
 <div style="font-size:11px;color:var(--s-faint);margin-top:2px">{{ feedTz }}</div>
 </div>
-<div style="margin-left:auto;display:flex;gap:20px">
-<button onClick="{{ setFeedFollowing }}" style="position:relative;padding:0 0 10px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">
+<div style="margin-left:auto;display:flex;flex-wrap:wrap;gap:4px 20px">
+<button onClick="{{ setFeedFollowing }}" style="position:relative;padding:0 0 10px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute);white-space:nowrap">
 <sc-if value="{{ feedFollowingOn }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.following }}</span></sc-if>
 <sc-if value="{{ feedFollowingOff }}" hint-placeholder-val="{{ false }}"><span>{{ ui.following }}</span></sc-if>
 </button>
-<button onClick="{{ setFeedMarket }}" style="position:relative;padding:0 0 10px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">
+<button onClick="{{ setFeedMarket }}" style="position:relative;padding:0 0 10px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute);white-space:nowrap">
 <sc-if value="{{ feedMarketOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.market }}</span></sc-if>
 <sc-if value="{{ feedMarketOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.market }}</span></sc-if>
 </button>
-<button onClick="{{ setFeedBvb }}" style="position:relative;padding:0 0 10px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">
+<button onClick="{{ setFeedBvb }}" style="position:relative;padding:0 0 10px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute);white-space:nowrap">
 <sc-if value="{{ feedBvbOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.bvbTab }}</span></sc-if>
 <sc-if value="{{ feedBvbOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.bvbTab }}</span></sc-if>
 </button>
@@ -173,7 +173,7 @@
 <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
 <div data-m="fade">
 <div style="padding:18px var(--gx) 20px;border-bottom:1px solid var(--s-rule)">
-<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.backFeed }}</button>
+<button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ backLabel }}</button>
 <div class="m-dhead" style="display:flex;align-items:flex-end;gap:20px;margin-top:8px">
 <div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:42px;letter-spacing:-0.04em;line-height:1">{{ stock.tickerLabel }}</div>
@@ -515,10 +515,10 @@
 </div>
 </sc-if>
 <sc-if value="{{ holdTable }}" hint-placeholder-val="{{ true }}">
-<div role="table" aria-labelledby="hold-title" style="overflow-x:auto;font-variant-numeric:tabular-nums">
-<div style="min-width:1080px">
+<div role="table" aria-labelledby="hold-title" data-compact="{{ holdCompact }}" style="overflow-x:auto;font-variant-numeric:tabular-nums">
+<div style="min-width:{{ holdMin }}">
 <div role="row" style="display:grid;grid-template-columns:{{ holdCols }};gap:12px;padding:8px var(--gx);border-top:1px solid var(--s-rule);border-bottom:1px solid var(--s-rule);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute)">
-<div role="columnheader">{{ ui.hdSymbol }}</div><div role="columnheader">{{ ui.hdCcy }}</div><div role="columnheader" style="text-align:right">{{ ui.hdPL }}</div><div role="columnheader" style="text-align:right">{{ ui.hdValue }}</div><div role="columnheader" style="text-align:right">{{ ui.hdCost }}</div><div role="columnheader" style="text-align:right">{{ ui.hdToday }}</div><div role="columnheader" style="text-align:right">{{ ui.hdLast }}</div><div role="columnheader" style="text-align:right">{{ ui.hdAvg }}</div><div role="columnheader" style="text-align:right">{{ ui.hdPLPct }}</div><div role="columnheader" style="text-align:right">{{ ui.hdQty }}</div><div role="columnheader" style="text-align:right">{{ ui.hdWeight }}</div><div></div>
+<div role="columnheader">{{ ui.hdSymbol }}</div><div role="columnheader">{{ ui.hdCcy }}</div><div role="columnheader" style="text-align:right">{{ ui.hdPL }}</div><div role="columnheader" style="text-align:right">{{ ui.hdValue }}</div><div role="columnheader" class="hc-opt" style="text-align:right">{{ ui.hdCost }}</div><div role="columnheader" style="text-align:right">{{ ui.hdToday }}</div><div role="columnheader" style="text-align:right">{{ ui.hdLast }}</div><div role="columnheader" class="hc-opt" style="text-align:right">{{ ui.hdAvg }}</div><div role="columnheader" style="text-align:right">{{ ui.hdPLPct }}</div><div role="columnheader" style="text-align:right">{{ ui.hdQty }}</div><div role="columnheader" class="hc-opt" style="text-align:right">{{ ui.hdWeight }}</div><div></div>
 </div>
 <sc-for list="{{ holdRows }}" as="h" hint-placeholder-count="2">
 <div data-m="rise">
@@ -527,13 +527,13 @@
 <div role="cell" style="font-size:11px;color:var(--s-mute)">{{ h.currency }}</div>
 <div role="cell" style="text-align:right;font-weight:700"><sc-if value="{{ h.plDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ h.plLabel }}</span></sc-if><sc-if value="{{ h.plUp }}" hint-placeholder-val="{{ true }}"><span>{{ h.plLabel }}</span></sc-if></div>
 <div role="cell" data-m-flash="1" style="text-align:right;font-weight:700">{{ h.valueLabel }}</div>
-<div role="cell" style="text-align:right;color:var(--s-mute)">{{ h.costLabel }}</div>
+<div role="cell" class="hc-opt" style="text-align:right;color:var(--s-mute)">{{ h.costLabel }}</div>
 <div role="cell" style="text-align:right"><sc-if value="{{ h.moveDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ h.moveLabel }}</span></sc-if><sc-if value="{{ h.moveUp }}" hint-placeholder-val="{{ true }}"><span>{{ h.moveLabel }}</span></sc-if></div>
 <div role="cell" data-m-flash="1" style="text-align:right">{{ h.priceLabel }}</div>
-<div role="cell" style="text-align:right;color:var(--s-mute)">{{ h.avgLabel }}</div>
+<div role="cell" class="hc-opt" style="text-align:right;color:var(--s-mute)">{{ h.avgLabel }}</div>
 <div role="cell" style="text-align:right;font-weight:700"><sc-if value="{{ h.plDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ h.plPctLabel }}</span></sc-if><sc-if value="{{ h.plUp }}" hint-placeholder-val="{{ true }}"><span>{{ h.plPctLabel }}</span></sc-if></div>
 <div role="cell" style="text-align:right">{{ h.qtyLabel }}</div>
-<div role="cell" style="text-align:right;color:var(--s-mute)">{{ h.weightLabel }}</div>
+<div role="cell" class="hc-opt" style="text-align:right;color:var(--s-mute)">{{ h.weightLabel }}</div>
 <div role="cell" style="text-align:right"><button onClick="{{ h.edit }}" aria-label="{{ h.editLabel }}" style-hover="color:var(--color-accent)" style="min-height:30px;padding:0 4px;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.posEdit }}</button></div>
 </div>
 <sc-if value="{{ h.editing }}" hint-placeholder-val="{{ false }}">
@@ -553,11 +553,11 @@
 <div role="cell" style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute)">{{ t.label }}</div><div></div>
 <div role="cell" style="text-align:right"><sc-if value="{{ t.plDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.plLabel }}</span></sc-if><sc-if value="{{ t.plUp }}" hint-placeholder-val="{{ true }}"><span>{{ t.plLabel }}</span></sc-if></div>
 <div role="cell" style="text-align:right">{{ t.valueLabel }}</div>
-<div role="cell" style="text-align:right;color:var(--s-mute)">{{ t.costLabel }}</div>
+<div role="cell" class="hc-opt" style="text-align:right;color:var(--s-mute)">{{ t.costLabel }}</div>
 <div role="cell" style="text-align:right"><sc-if value="{{ t.dayDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.dayPctLabel }}</span></sc-if><sc-if value="{{ t.dayUp }}" hint-placeholder-val="{{ true }}"><span>{{ t.dayPctLabel }}</span></sc-if></div>
-<div></div><div></div>
+<div></div><div class="hc-opt"></div>
 <div role="cell" style="text-align:right"><sc-if value="{{ t.plDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ t.plPctLabel }}</span></sc-if><sc-if value="{{ t.plUp }}" hint-placeholder-val="{{ true }}"><span>{{ t.plPctLabel }}</span></sc-if></div>
-<div></div><div role="cell" style="text-align:right;color:var(--s-mute)">100%</div><div></div>
+<div></div><div role="cell" class="hc-opt" style="text-align:right;color:var(--s-mute)">100%</div><div></div>
 </div>
 </sc-for>
 </div>
@@ -1640,7 +1640,7 @@ class Component extends DCLogic {
     this.openTicker(item.ticker);
   }
   openTicker(ticker) {
-    this.setState({ selected:ticker, screen:'detail', prev:this.state.screen });
+    this.setState({ selected:ticker, screen:'detail', prev: this.state.screen === 'detail' ? this.state.prev : this.state.screen });
     this.syncLive([ticker]);
     this.syncDetail(ticker);
   }
@@ -1724,7 +1724,8 @@ class Component extends DCLogic {
     return React.createElement('svg', { viewBox:'0 0 ' + W + ' ' + H, preserveAspectRatio:'none', style:{ display:'block', width:'100%', height:H } }, kids);
   }
   navItem(key, label, count) {
-    const on = this.state.screen === key || (key === 'feed' && this.state.screen === 'detail');
+    // A ticker page belongs to the section it was opened from.
+    const on = this.state.screen === key || (this.state.screen === 'detail' && (this.state.prev || 'feed') === key);
     return { key, label, count: count || '', on, off: !on, go: () => this.go(key) };
   }
   chartPath(values, width, height, min, max) {
@@ -1755,26 +1756,27 @@ class Component extends DCLogic {
   sentimentFor(pct) {
     const n = parseFloat(String(pct).replace('%',''));
     if (!isFinite(n)) return '—';
-    return n >= 80 ? 'STRONG BUY' : n >= 65 ? 'BUY' : n >= 45 ? 'HOLD' : n >= 30 ? 'REDUCE' : 'SELL';
+    const u = this.copy;
+    return (n >= 80 ? u.rStrongBuy || 'Strong buy' : n >= 65 ? u.rBuy || 'Buy' : n >= 45 ? u.rHold || 'Hold' : n >= 30 ? u.rReduce || 'Reduce' : u.rSell || 'Sell').toUpperCase();
   }
   analystSplit(detail) {
     const m = String(detail || '').match(/^\s*(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)\s*$/);
-    return m ? m[1] + ' buy · ' + m[2] + ' hold · ' + m[3] + ' sell' : (detail || '—');
+    return m ? (this.copy.analystSplitT || '{b} buy · {h} hold · {s} sell').replace('{b}', m[1]).replace('{h}', m[2]).replace('{s}', m[3]) : (detail || '—');
   }
   fmtTime(ts) {
     const dt = new Date(ts * 1000), r = this.state.chartRange;
-    if (r === '1d') return dt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-    if (r === '5d') return dt.toLocaleDateString([], { weekday:'short' }) + ' ' + dt.toLocaleTimeString([], { hour:'2-digit' });
-    if (r === '5y') return dt.toLocaleDateString([], { month:'short', year:'2-digit' });
-    return dt.toLocaleDateString([], { month:'short', day:'numeric' });
+    if (r === '1d') return dt.toLocaleTimeString(this.appLocale, { hour:'2-digit', minute:'2-digit' });
+    if (r === '5d') return dt.toLocaleDateString(this.appLocale, { weekday:'short' }) + ' ' + dt.toLocaleTimeString(this.appLocale, { hour:'2-digit' });
+    if (r === '5y') return dt.toLocaleDateString(this.appLocale, { month:'short', year:'2-digit' });
+    return dt.toLocaleDateString(this.appLocale, { month:'short', day:'numeric' });
   }
   // Full timestamp for the hover readout: time of day on intraday ranges, the date otherwise.
   fmtCursor(ts) {
     const dt = new Date(ts * 1000), r = this.state.chartRange;
-    const day = dt.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
-    if (r === '1d' || r === '5d' || r === '1mo') return day + ' · ' + dt.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-    if (r === '5y') return 'Week of ' + dt.toLocaleDateString([], { month:'short', day:'numeric', year:'numeric' });
-    return dt.toLocaleDateString([], { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+    const day = dt.toLocaleDateString(this.appLocale, { weekday:'short', month:'short', day:'numeric' });
+    if (r === '1d' || r === '5d' || r === '1mo') return day + ' · ' + dt.toLocaleTimeString(this.appLocale, { hour:'2-digit', minute:'2-digit' });
+    if (r === '5y') return (this.copy.weekOf || 'Week of {d}').replace('{d}', dt.toLocaleDateString(this.appLocale, { month:'short', day:'numeric', year:'numeric' }));
+    return dt.toLocaleDateString(this.appLocale, { weekday:'short', month:'short', day:'numeric', year:'numeric' });
   }
   legendEl(items) {
     return React.createElement('div', { style:{ display:'flex', gap:18, alignItems:'center', flexWrap:'wrap', marginBottom:10 } },
@@ -1797,11 +1799,11 @@ class Component extends DCLogic {
         React.createElement('div', { style:{ position:'relative', height:h } },
           ...yTicks.map((t,i) => React.createElement('div', { key:i, style:{ position:'absolute', right:0, top:t.top + '%', transform:'translateY(-50%)', fontSize:10, color:this.pal.mute, fontVariantNumeric:'tabular-nums' } }, t.label))),
         o.svg,
-        React.createElement('div', { style:Object.assign({ paddingTop:8 }, axisNote) }, 'PRICE'),
+        React.createElement('div', { style:Object.assign({ paddingTop:8 }, axisNote) }, (this.copy.axPrice || 'Price').toUpperCase()),
         React.createElement('div', { style:{ display:'flex', justifyContent:'space-between', paddingTop:8, fontSize:10, color:this.pal.mute, fontVariantNumeric:'tabular-nums' } },
           ...idx.map((i,k) => React.createElement('span', { key:k }, pts[i] && pts[i].ts ? this.fmtTime(pts[i].ts) : ''))),
         React.createElement('div', null),
-        React.createElement('div', { style:Object.assign({ paddingTop:3 }, axisNote) }, 'TIME')));
+        React.createElement('div', { style:Object.assign({ paddingTop:3 }, axisNote) }, (this.copy.axTime || 'Time').toUpperCase())));
   }
   rsiSeries(values, period) { return window.HIFChart.rsiSeries(values, period); }
   // No made-up price walks: without a loaded series there is no line.
@@ -1835,10 +1837,10 @@ class Component extends DCLogic {
     this.setState(st => ({ dismissed: [{ ticker:item.ticker, headline:item.headline, source:item.source, stamp:item.stamp, key,
       id: Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
       up: item.up !== false, price: priceStr, ts: Date.now(),
-      when: new Date().toLocaleDateString([], { month:'short', day:'numeric' }) }].concat(st.dismissed || []).slice(0, 60) }));
+      when: new Date().toLocaleDateString(this.appLocale, { month:'short', day:'numeric' }) }].concat(st.dismissed || []).slice(0, 60) }));
     this.flash((u.dismissed || 'Skipped').toUpperCase());
   }
-  clearLedger() { this.setState({ dismissed: [] }); this.flash('LEDGER CLEARED'); }
+  clearLedger() { this.setState({ dismissed: [] }); this.flash((this.copy.ledgerCleared || 'Ledger cleared').toUpperCase()); }
   // Undo puts the story back in the feed — a skip you regret shouldn't be permanent.
   // Removes exactly one entry: match on the stable id, falling back to a
   // single splice for pre-id entries so same-millisecond skips can't both go.
@@ -1851,7 +1853,7 @@ class Component extends DCLogic {
       list.splice(i, 1);
       return { dismissed: list };
     });
-    this.flash('SKIP UNDONE');
+    this.flash((this.copy.skipUndone || 'Story back in the feed').toUpperCase());
   }
   savePosition(ticker, remove) {
     const u = this.copy, t = String(ticker || '').toUpperCase().replace(/\.US$/, '');
@@ -1899,9 +1901,9 @@ class Component extends DCLogic {
   }
   pfStamp(ts, range) {
     const d = new Date(ts * 1000);
-    if (range === '1d') return d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-    if (range === '5d') return d.toLocaleDateString([], { weekday:'short', day:'numeric' }) + ' ' + d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-    return d.toLocaleDateString([], { day:'numeric', month:'short', year: range === '1y' || range === '6mo' ? '2-digit' : undefined });
+    if (range === '1d') return d.toLocaleTimeString(this.appLocale, { hour:'2-digit', minute:'2-digit' });
+    if (range === '5d') return d.toLocaleDateString(this.appLocale, { weekday:'short', day:'numeric' }) + ' ' + d.toLocaleTimeString(this.appLocale, { hour:'2-digit', minute:'2-digit' });
+    return d.toLocaleDateString(this.appLocale, { day:'numeric', month:'short', year: range === '1y' || range === '6mo' ? '2-digit' : undefined });
   }
   // Value line with the cost basis as a dashed reference; hover or drag reads any point.
   portfolioChartEl(series, range, compact, currencies, currency) {
@@ -2005,7 +2007,7 @@ class Component extends DCLogic {
     const w = Math.max(220, Math.round(this.state.chartW || 640)), h = 250, loading = this.state.detailLoading;
     const perf = values.length > 1 ? ((values[values.length-1] / values[0] - 1) * 100) : 0;
     const pickRange = r => {
-      if (isFree && gated[r]) { this.flash('CHART HISTORY · PRO'); return this.go('paywall'); }
+      if (isFree && gated[r]) { this.flash((this.copy.chartPro || 'Chart history · Pro').toUpperCase()); return this.go('paywall'); }
       this.setState({ chartRange:r }); this.syncDetail(stock.ticker, false, r);
     };
     const header = React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:6, marginBottom:10, flexWrap:'wrap' } },
@@ -2020,11 +2022,11 @@ class Component extends DCLogic {
     if (values.length < 2 || loading || (liveOn && livePts.length < 2)) {
       return React.createElement('div', null, header,
         React.createElement('div', { style:{ minHeight:h, display:'grid', placeItems:'center', alignContent:'center', gap:12, border:'1px solid #333333', padding:20, textAlign:'center' } },
-          React.createElement('div', { style:{ fontSize:11, letterSpacing:'0.12em', color:this.pal.mute } }, loading ? 'LOADING MARKET HISTORY…' : 'NO MARKET HISTORY FOR THIS RANGE'),
+          React.createElement('div', { style:{ fontSize:11, letterSpacing:'0.12em', color:this.pal.mute } }, (loading ? this.copy.ldHistory || 'Loading market history…' : this.copy.noHistory || 'No market history for this range').toUpperCase()),
           loading ? null : React.createElement('button', { onClick:() => this.syncDetail(stock.ticker, true),
             style:{ minHeight:38, padding:'0 16px', background:'transparent', border:'1px solid #D4AF37', color:this.pal.accent, fontFamily:'var(--font-heading)', fontWeight:800, fontSize:12, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer' } }, 'retry'),
           loading ? null : React.createElement('div', { style:{ fontSize:10, letterSpacing:'0.1em', color:this.pal.mute } },
-            this.state.liveStatus === 'live' ? 'LIVE FEED CONNECTED' : 'NO LIVE MARKET DATA')));
+            (this.state.liveStatus === 'live' ? this.copy.liveConnected || 'Live feed connected' : this.copy.noLive || 'No live market data').toUpperCase())));
     }
     // Periods are in bars of the loaded series (days from 6M up), not in thinned samples.
     const p20 = fullValues.length >= 30 ? 20 : null;
@@ -2044,7 +2046,8 @@ class Component extends DCLogic {
     const rsiS = rsiOk ? atKeep(this.rsiSeries(fullValues, rsiP)) : values.map(() => null);
     const rsiNow = rsiS.filter(v => v != null).slice(-1)[0];
     const last = values[values.length-1], m20 = sma20[sma20.length-1], m50 = sma50[sma50.length-1];
-    const signal = (smaOn && m20 && m50) ? (last > m20 && m20 > m50 ? 'BULLISH' : last < m20 && m20 < m50 ? 'BEARISH' : 'MIXED') : 'BUILDING';
+    const cu = this.copy;
+    const signal = ((smaOn && m20 && m50) ? (last > m20 && m20 > m50 ? cu.sigBullish || 'Bullish' : last < m20 && m20 < m50 ? cu.sigBearish || 'Bearish' : cu.sigMixed || 'Mixed') : cu.sigBuilding || 'SMA off').toUpperCase();
     const hover = this.state.chartHover;
     // Crosshair: the bar nearest the pointer, in drawn-sample indices.
     const n = values.length;
@@ -2072,18 +2075,18 @@ class Component extends DCLogic {
         minWidth:150, padding:'9px 11px', background:this.pal.bg, border:'1px solid ' + this.pal.rule, fontSize:11, lineHeight:1.55, pointerEvents:'none', whiteSpace:'nowrap', zIndex:2 } },
       React.createElement('div', { style:{ fontFamily:'var(--font-heading)', fontWeight:800, fontSize:16, color:this.pal.ink, fontVariantNumeric:'tabular-nums' } }, money(curV)),
       React.createElement('div', { style:{ fontSize:10, letterSpacing:'0.04em', color:this.pal.mute, marginBottom:4 } }, points[cur] && points[cur].ts ? this.fmtCursor(points[cur].ts) : ''),
-      curChg == null ? null : curRow('vs range start', (curChg < 0 ? '−' : '+') + Math.abs(curChg).toFixed(2) + '%', curChg < 0 ? this.pal.accent : null),
+      curChg == null ? null : curRow(cu.vsStart || 'vs range start', (curChg < 0 ? '−' : '+') + Math.abs(curChg).toFixed(2) + '%', curChg < 0 ? this.pal.accent : null),
       smaOn && sma20[cur] != null ? curRow('SMA ' + p20, money(sma20[cur])) : null,
       smaOn && p50 && sma50[cur] != null ? curRow('SMA ' + p50, money(sma50[cur])) : null,
       rsiS[cur] != null ? curRow('RSI ' + rsiP, rsiS[cur].toFixed(1)) : null);
-    const legend = [[this.pal.accent,'price','solid']];
+    const legend = [[this.pal.accent,cu.lgPrice || 'price','solid']];
     if (smaOn) { legend.push([this.pal.ink,'sma ' + p20,'solid']); if (p50) legend.push([this.pal.mute,'sma ' + p50,'dash']); }
-    if (markers.length) legend.push([this.pal.accent,'earnings','dash']);
+    if (markers.length) legend.push([this.pal.accent,cu.lgEarnings || 'earnings','dash']);
     const controls = React.createElement('div', { style:{ display:'flex', gap:8, alignItems:'center', marginBottom:10 } },
-      React.createElement('button', { onClick:() => p20 ? this.toggleOverlay('sma') : this.flash('SMA NEEDS A LONGER RANGE'),
-        style:Object.assign(this.chipStyle(smaOn), p20 ? null : { opacity:0.45 }) }, 'sma overlay'),
-      React.createElement('button', { onClick:() => barRange ? this.toggleOverlay('earn') : this.flash('EARNINGS BARS FROM 6M UP'),
-        style:Object.assign(this.chipStyle(!!ov.earn && !!barRange), barRange ? null : { opacity:0.45 }) }, 'earnings'),
+      React.createElement('button', { onClick:() => p20 ? this.toggleOverlay('sma') : this.flash((cu.smaNeedsRange || 'SMA needs a longer range').toUpperCase()),
+        style:Object.assign(this.chipStyle(smaOn), p20 ? null : { opacity:0.45 }) }, cu.smaChip || 'SMA overlay'),
+      React.createElement('button', { onClick:() => barRange ? this.toggleOverlay('earn') : this.flash((cu.earnBarsFrom || 'Earnings bars from 6M up').toUpperCase()),
+        style:Object.assign(this.chipStyle(!!ov.earn && !!barRange), barRange ? null : { opacity:0.45 }) }, cu.earnChip || 'Earnings'),
       React.createElement('span', { style:{ marginLeft:'auto', fontFamily:'var(--font-heading)', fontSize:11, fontWeight:800 } }, signal),
       React.createElement('span', { style:{ fontSize:11, color:this.pal.mute } }, 'RSI ' + (rsiNow == null ? '—' : rsiNow.toFixed(1))));    const plot = React.createElement('div', { style:{ position:'relative' } },
       React.createElement('svg', { viewBox:'0 0 ' + w + ' ' + h, preserveAspectRatio:'none',
@@ -2101,13 +2104,13 @@ class Component extends DCLogic {
         ...crosshair),
       readout,
       hover ? React.createElement('div', { style:{ position:'absolute', right:10, top:10, padding:'10px 12px', background:this.pal.bg, border:'1px solid #D4AF37', fontSize:11, lineHeight:1.5 } },
-        React.createElement('div', { style:{ fontWeight:800, color:this.pal.accent } }, 'EARNINGS · ' + hover.date),
+        React.createElement('div', { style:{ fontWeight:800, color:this.pal.accent } }, (cu.evEarnings || 'Earnings').toUpperCase() + ' · ' + hover.date),
         hover.estimated
-          ? React.createElement('div', { style:{ color:this.pal.mute } }, 'Scheduled quarter · no reported figures')
+          ? React.createElement('div', { style:{ color:this.pal.mute } }, cu.earnScheduled || 'Scheduled quarter · no reported figures')
           : React.createElement('div', null,
-              React.createElement('div', null, 'EPS actual: ' + (hover.actual == null ? '—' : hover.actual)),
-              React.createElement('div', null, 'Estimate: ' + (hover.estimate == null ? '—' : hover.estimate)),
-              React.createElement('div', null, 'Surprise: ' + (hover.surprisePercent == null ? '—' : Number(hover.surprisePercent).toFixed(1) + '%')))) : null);
+              React.createElement('div', null, (cu.epsActual || 'EPS actual') + ': ' + (hover.actual == null ? '—' : hover.actual)),
+              React.createElement('div', null, (cu.epsEst || 'Estimate') + ': ' + (hover.estimate == null ? '—' : hover.estimate)),
+              React.createElement('div', null, (cu.epsSurprise || 'Surprise') + ': ' + (hover.surprisePercent == null ? '—' : Number(hover.surprisePercent).toFixed(1) + '%')))) : null);
     const rh = 66, ry = v => rh - 4 - (v / 100) * (rh - 8);
     const rsiPath = rsiS.map((v,i) => v == null ? null : xOf(i).toFixed(1) + ',' + ry(v).toFixed(1)).filter(Boolean).join(' ');
     const rsiBand = React.createElement('div', { style:{ display:'grid', gridTemplateColumns:'64px 1fr', columnGap:10, marginTop:12 } },
@@ -2136,6 +2139,8 @@ class Component extends DCLogic {
   renderValsRaw() {
     const H = this.data;
     if (!H || !this.sharedReady()) return {};
+    // Numbers and dates in the shared modules follow the app language ("1.238,49" in Romanian).
+    window.HIF_LOCALE = this.appLocale;
     const NEWS = H.NEWS, FOLLOWS = H.FOLLOWS, UNIVERSE = H.UNIVERSE, UI = H.UI;
     const EVENTS = H.EVENTS || {}, SIGNALS = H.SIGNALS || {};
     const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen;
@@ -2192,13 +2197,15 @@ class Component extends DCLogic {
     const feed = baseFeed.map(n => Object.assign({}, n, {
       down: !n.up,
       pinned: pinned(n.ticker), notPinned: !pinned(n.ticker),
-      pinLabel: pinned(n.ticker) ? u.stackUnpin : u.stackPin,
+      pinLabel: (pinned(n.ticker) ? u.unpinCompare || u.stackUnpin : u.pinCompare || u.stackPin).replace('{t}', n.ticker),
       pin: event => { if (event && event.stopPropagation) event.stopPropagation(); this.togglePin(n.ticker); },
       outlier: volNum(n.vol) >= 2,
       volBadge: volNum(n.vol).toFixed(1) + '× volume',
-      open: () => this.openNews(n),
+      // The card opens the ticker's page in the app; only the source link leaves it. A click
+      // that ends a text selection (copying a summary) opens nothing.
+      open: () => { if (window.getSelection && String(window.getSelection())) return; this.openTicker(n.ticker); },
       dismiss: event => { event.stopPropagation(); this.dismissStory(n, (Q[n.ticker] || {}).price || (FOLLOWS[n.ticker] || {}).price); },
-      keyOpen: event => this.activateFromKeyboard(() => this.openNews(n), event)
+      keyOpen: event => this.activateFromKeyboard(() => this.openTicker(n.ticker), event)
     })).sort((a,b) => (b.ts || 0) - (a.ts || 0) || String(b.stamp).localeCompare(String(a.stamp)));
     // The AI summary, when the batch job has written one in the content language.
     const SUMS = s.summaries || {}, sumLang = String(this.lang || 'EN').toLowerCase();
@@ -2210,7 +2217,7 @@ class Component extends DCLogic {
       // A recent story on a tab the batch job covers, in a language it writes, without its
       // summary yet: say one is coming (the card switches to it when it arrives).
       const pending = !ai && AI_LANGS.includes(sumLang) && s.feedTab !== 'market' && r.ts && Date.now() / 1000 - r.ts < AI_WINDOW;
-      r.watchLabel = ai ? (u.aiSummary || 'AI summary') : pending ? (u.aiPending || 'AI summary in progress…') : u.watch;
+      r.watchLabel = ai ? (u.aiSummary || 'AI summary') : pending ? (u.aiPending || 'AI summary in progress…') : (u.fromSource || u.watch);
       // The whole article, translated, for readers whose content language isn't English.
       // The publisher's own page first; Google's translated view of it as a small extra.
       const tr = window.HIFLive && window.HIFLive.translatedUrl ? window.HIFLive.translatedUrl(r.url, sumLang) : '';
@@ -2294,7 +2301,8 @@ class Component extends DCLogic {
     const ED = (s.liveEarnDates || {})[stock.ticker];
     const edText = ED && (ED.next || ED.last) && window.HIFLive && window.HIFLive.earningsText ? window.HIFLive.earningsText(ED, u) : null;
     const lastEarn = edText && edText.last ? edText.last : earnRows.length
-      ? ((Number(earnRows[0].surprisePercent) >= 0 ? 'Beat by ' : 'Missed by ') + Math.abs(Number(earnRows[0].surprisePercent)).toFixed(1) + '% · ' + earnRows[0].date)
+      ? (Number(earnRows[0].surprisePercent) >= 0 ? u.beatBy || 'Beat by {p} · {d}' : u.missedBy || 'Missed by {p} · {d}')
+          .replace('{p}', Math.abs(Number(earnRows[0].surprisePercent)).toLocaleString(this.appLocale, { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%').replace('{d}', earnRows[0].date)
       : (stock.lastEarn || '—');
     const AL = s.alerts || {};
     const alertRows = [
@@ -2320,7 +2328,7 @@ class Component extends DCLogic {
       const d = new Date(ED.next.date + 'T12:00:00Z');
       const when = ({ bmo:u.edBmo, amc:u.edAmc, dmh:u.edDmh })[ED.next.hour] || '';
       const est = ED.next.epsEstimate != null ? 'EPS est. ' + Number(ED.next.epsEstimate).toFixed(2) : '';
-      return { date: d.toLocaleDateString([], { month:'short', day:'2-digit', timeZone:'UTC' }),
+      return { date: d.toLocaleDateString(this.appLocale, { month:'short', day:'2-digit', timeZone:'UTC' }),
         dow: d.toLocaleDateString('en-US', { weekday:'short', timeZone:'UTC' }).toUpperCase(),
         detail: [when, est].filter(Boolean).join(' · '), label: u.evEarnings || 'Earnings', accent: 'var(--color-accent)' };
     })()] : [];
@@ -2335,7 +2343,7 @@ class Component extends DCLogic {
     const peers = peerList.map(t => ({ ticker:t, move:(rec(t) || {}).move })).filter(p => p.move);
     const dayNews = ((live && LN[stock.ticker]) ? LN[stock.ticker] : NEWS.filter(n => n.ticker === stock.ticker))
       .slice(0, 3).map(n => ({ headline: typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN, source:n.source, url:n.url || '' }));
-    const why = IN ? IN.attribute({ ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
+    const why = IN ? IN.attribute({ t:u, ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
     const whyTone = why && (why.kind === 'none' || why.kind === 'quiet') ? 'var(--s-mute)' : 'var(--color-accent)';
     // RSI for the conflict check: the loaded live series when there is one; the demo
     // series only in demo mode, so live tickers are never judged on made-up prices.
@@ -2345,7 +2353,7 @@ class Component extends DCLogic {
       : [];
     const rsiArr = window.HIFChart.rsiSeries(trend, 14).filter(v => v != null);
     const rsiNow = rsiArr.length ? rsiArr[rsiArr.length - 1] : null;
-    const clashes = IN ? IN.conflicts({ analystDetail: stock.analystDetail, signals: SIGNALS[stock.ticker] || [], movePct: stock.move, rsi: rsiNow }) : [];
+    const clashes = IN ? IN.conflicts({ t:u, analystDetail: stock.analystDetail, signals: SIGNALS[stock.ticker] || [], movePct: stock.move, rsi: rsiNow }) : [];
     const posMap = s.positions || {};
     const curSign = window.HIFBVB && window.HIFBVB.is(stock.ticker) ? 'RON ' : undefined;
     const pos = IN ? IN.position(posMap[stock.ticker], stock.price, stock.move, curSign) : null;
@@ -2455,6 +2463,7 @@ class Component extends DCLogic {
       bookCrowdPct: bookCrowd ? bookCrowd.pctLabel : '', hasBookCrowd: !!bookCrowd,
       bookCrowdFill: bookCrowd ? bookCrowd.fill + '%' : '0%', bookCrowdInk: bookCrowd ? toneInk(bookCrowd.tone) : 'var(--s-mute)',
       ledgerRows: lRows.map(r => Object.assign({}, r, {
+        when: r.ts ? new Date(r.ts).toLocaleDateString(this.appLocale, { month:'short', day:'numeric' }) : r.when,
         accent: r.verdict === 'missed' ? 'var(--color-accent)' : r.verdict === 'dodged' ? 'var(--s-ink)' : 'var(--s-rule)',
         ink: r.verdict === 'pending' ? 'var(--s-mute)' : r.up ? 'var(--s-ink)' : 'var(--color-accent)',
         open: () => this.openTicker(r.ticker),
@@ -2540,7 +2549,13 @@ class Component extends DCLogic {
       holdTable: !HB.empty && vw > 760, holdCards: !HB.empty && vw <= 760,
       holdCount: HB.rows.length ? String(HB.rows.length) : '',
       holdWhere: s.authLive && s.session && s.holdServer ? u.holdSynced : u.holdLocal,
-      holdCols: 'minmax(150px,1.5fr) 46px minmax(100px,1fr) minmax(108px,1fr) minmax(100px,1fr) 70px minmax(92px,0.9fr) 78px 72px 64px 64px 54px',
+      // Below 1400 px the cost, average-price and weight columns step aside so the table fits
+      // beside the side rail without scrolling sideways; the position editor still shows the average.
+      holdCompact: vw < 1400 ? 'true' : 'false',
+      holdMin: vw < 1400 ? '860px' : '1080px',
+      holdCols: vw < 1400
+        ? 'minmax(150px,1.5fr) 46px minmax(100px,1fr) minmax(108px,1fr) 70px minmax(92px,0.9fr) 72px 64px 54px'
+        : 'minmax(150px,1.5fr) 46px minmax(100px,1fr) minmax(108px,1fr) minmax(100px,1fr) 70px minmax(92px,0.9fr) 78px 72px 64px 64px 54px',
       posTickerVal: s.posTicker || '',
       onPosTicker: ev => this.setState({ posTicker: String(ev.target.value || '').toUpperCase().replace(/[^A-Z0-9.\-]/g, '').slice(0, 12) }),
       holdAdd: () => this.setState({ posEdit:'__new', posShares:'', posCost:'', posTicker: (s.follows || []).filter(t => !posMap[t])[0] || '' }),
@@ -2723,7 +2738,7 @@ class Component extends DCLogic {
         const warn = ev.kind === 'unlock_failed' || ev.kind === 'twofa_off' || ev.kind === 'device_revoked';
         return {
           label: map[ev.kind] || ev.kind, detail: ev.detail || '',
-          when: d.toLocaleDateString([], { month:'short', day:'numeric' }) + ' · ' + d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }),
+          when: d.toLocaleDateString(this.appLocale, { month:'short', day:'numeric' }) + ' · ' + d.toLocaleTimeString(this.appLocale, { hour:'2-digit', minute:'2-digit' }),
           accent: warn ? 'var(--color-accent)' : 'var(--s-rule)'
         };
       }),
@@ -2774,8 +2789,10 @@ class Component extends DCLogic {
       goPaywall: () => this.go('paywall'),
       goSearch: () => this.go('search'),
       back: () => this.go(s.prev || 'feed'),
+      // "← Watchlist" when the ticker was opened from the watchlist, and so on.
+      backLabel: (() => { const n = navList.filter(x => x.key === (s.prev || 'feed'))[0]; return n && n.label ? '← ' + n.label : u.backFeed; })(),
       upgrade: () => { if (s.authLive) return this.flash((u.payComing || 'Payments are coming soon').toUpperCase()); this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
-      scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '—'),
+      scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString(this.appLocale, { hour:'2-digit', minute:'2-digit' }) : '—'),
       feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : s.feedTab === 'bvb' ? u.bvbSub : u.topVolume,
       feedTz: (u.timesLocal || 'Times in your local time ({z})').replace('{z}', this.zoneName() || Intl.DateTimeFormat().resolvedOptions().timeZone || ''),
       bvbEmpty: s.feedTab === 'bvb' && !(s.roNews || []).length,

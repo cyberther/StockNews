@@ -8,10 +8,13 @@ function num(s) {
   return isFinite(v) ? v : null;
 }
 function pctNum(s) { const v = num(s); return v == null ? null : v; }
+// Display locale for numbers and dates: the web app sets window.HIF_LOCALE to its UI
+// language ("ro-RO": 1.238,49); without it, the browser's own.
+const LOC = () => (typeof window !== 'undefined' && window.HIF_LOCALE) || undefined;
 function money(v, cur) {
   const c = cur || '$';
   const a = Math.abs(v);
-  const s = a >= 1000 ? a.toLocaleString(undefined, { maximumFractionDigits:0 }) : a.toFixed(2);
+  const s = a.toLocaleString(LOC(), a >= 1000 ? { maximumFractionDigits:0 } : { minimumFractionDigits:2, maximumFractionDigits:2 });
   return (v < 0 ? '\u2212' : '') + c + s;
 }
 function signed(v, cur) { return (v > 0 ? '+' : v < 0 ? '\u2212' : '') + money(Math.abs(v), cur).replace('\u2212',''); }
@@ -20,12 +23,20 @@ function signed(v, cur) { return (v > 0 ? '+' : v < 0 ? '\u2212' : '') + money(M
 // Answers "why did it move?" — and, just as importantly, says so when nothing
 // in the available evidence explains it. Ranked: company news > filing/insider >
 // sector move > unexplained.
+// i.t: the UI strings (whyQuiet, whyNews, ...) in the reader's language; English without.
 function attribute(input) {
   const i = input || {};
+  const t = Object.assign({ whyQuiet:'Quiet session', whyQuietD:'Move is inside the normal daily range.', whyNews:'Company news',
+    whyOutran:'Outran the sector by {n} pts.', whySector:'{s} move', whySectorD:'{k} of {n} peers moved the same way, median {m}.',
+    whyNotCo:'Not company-specific.', whyInsider:'Insider activity', whyFiling:'Regulatory filing',
+    whyTiming:'Timing lines up; causation unproven.', whyNone:'No attributable cause',
+    whyNoneD:'No company news, filing or sector move explains today\u2019s {m}.', whyFlow:'Most likely flow or positioning.', sectorWord:'Sector' }, i.t || {});
+  const fill = (tpl, o) => String(tpl).replace(/\{(\w)\}/g, (m, k) => o[k] != null ? o[k] : m);
+  const pctS = v => (v > 0 ? '+' : '\u2212') + Math.abs(v).toLocaleString(LOC(), { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%';
   const move = pctNum(i.movePct);
   if (move == null) return null;
   const mag = Math.abs(move);
-  if (mag < 0.75) return { kind:'quiet', label:'Quiet session', detail:'Move is inside the normal daily range.', confidence:'', weight:0 };
+  if (mag < 0.75) return { kind:'quiet', label:t.whyQuiet, detail:t.whyQuietD, confidence:'', weight:0 };
 
   const news = (i.news || []).filter(n => n.sameDay !== false);
   const top = news[0];
@@ -41,27 +52,27 @@ function attribute(input) {
     // Company news beats sector when the stock clearly outran its peers.
     const excess = peerMed == null ? mag : mag - Math.abs(peerMed);
     if (!sectorDriven || excess >= mag * 0.5) {
-      return { kind:'news', label:'Company news', detail:top.headline, source:top.source, url:top.url || '',
+      return { kind:'news', label:t.whyNews, detail:top.headline, source:top.source, url:top.url || '',
         confidence: excess >= mag * 0.6 ? 'high' : 'medium',
-        note: peerMed == null ? '' : 'Outran the sector by ' + Math.abs(excess).toFixed(1) + ' pts.', weight:3 };
+        note: peerMed == null ? '' : fill(t.whyOutran, { n: Math.abs(excess).toLocaleString(LOC(), { minimumFractionDigits:1, maximumFractionDigits:1 }) }), weight:3 };
     }
   }
   if (sectorDriven) {
-    return { kind:'sector', label:(i.sector || 'Sector') + ' move', confidence:'high', weight:2,
-      detail: sameWay.length + ' of ' + peers.length + ' peers moved the same way, median ' + (peerMed > 0 ? '+' : '\u2212') + Math.abs(peerMed).toFixed(1) + '%.',
-      note:'Not company-specific.' };
+    return { kind:'sector', label:fill(t.whySector, { s: i.sector || t.sectorWord }), confidence:'high', weight:2,
+      detail: fill(t.whySectorD, { k: sameWay.length, n: peers.length, m: pctS(peerMed) }),
+      note:t.whyNotCo };
   }
   if (sig.length) {
     const s = sig[0];
-    return { kind:'filing', label: s.type === 'insider' ? 'Insider activity' : 'Regulatory filing', confidence:'low', weight:1,
+    return { kind:'filing', label: s.type === 'insider' ? t.whyInsider : t.whyFiling, confidence:'low', weight:1,
       detail: s.type === 'insider'
         ? s.who + ' (' + s.role + ') ' + (s.act === 'buy' ? 'bought' : 'sold') + ' ' + s.shares + ' shares'
         : 'Form ' + s.form + ' \u00b7 ' + s.item,
-      note:'Timing lines up; causation unproven.' };
+      note:t.whyTiming };
   }
-  return { kind:'none', label:'No attributable cause', confidence:'', weight:0,
-    detail:'No company news, filing or sector move explains today\u2019s ' + (move > 0 ? '+' : '\u2212') + mag.toFixed(1) + '%.',
-    note:'Most likely flow or positioning.' };
+  return { kind:'none', label:t.whyNone, confidence:'', weight:0,
+    detail:fill(t.whyNoneD, { m: pctS(move) }),
+    note:t.whyFlow };
 }
 
 // ------------------------------------------------------------------ positions
@@ -82,7 +93,7 @@ function position(pos, priceStr, movePct, currency) {
     valueLabel: money(value, currency),
     dayPL, dayLabel: signed(dayPL, currency), dayUp: dayPL >= 0,
     totalPL, totalLabel: totalPL == null ? null : signed(totalPL, currency), totalUp: totalPL != null && totalPL >= 0,
-    plPct, plPctLabel: plPct == null ? null : (plPct >= 0 ? '+' : '\u2212') + Math.abs(plPct).toFixed(1) + '%'
+    plPct, plPctLabel: plPct == null ? null : (plPct >= 0 ? '+' : '\u2212') + Math.abs(plPct).toLocaleString(LOC(), { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%'
   };
 }
 
@@ -109,14 +120,14 @@ function portfolio(positions, priceOf, moveOf, currency) {
 // A broker-style positions table: one row per position, each in its listing's own
 // currency (no conversion), so totals are kept per currency. quoteOf(t) returns
 // { price, move, name, currency } with price/move as the app displays them.
-const fmt = (v, d) => v.toLocaleString('en-US', { minimumFractionDigits:d, maximumFractionDigits:d });
+const fmt = (v, d) => v.toLocaleString(LOC() || 'en-US', { minimumFractionDigits:d, maximumFractionDigits:d });
 const NONE = '—';
 const sgn = v => v > 0 ? '+' : v < 0 ? '−' : '';
 const amt = (v, cur) => v == null ? NONE : (v < 0 ? '−' : '') + fmt(Math.abs(v), 2) + ' ' + cur;
 const signedAmt = (v, cur) => v == null ? NONE : sgn(v) + fmt(Math.abs(v), 2) + ' ' + cur;
-const pctL = v => v == null ? NONE : sgn(v) + Math.abs(v).toFixed(2) + '%';
+const pctL = v => v == null ? NONE : sgn(v) + fmt(Math.abs(v), 2) + '%';
 const priceL = v => v == null ? NONE : fmt(v, v < 10 ? 4 : 2);
-const qtyL = v => v.toLocaleString('en-US', { maximumFractionDigits:4 });
+const qtyL = v => v.toLocaleString(LOC() || 'en-US', { maximumFractionDigits:4 });
 
 function holdings(positions, quoteOf) {
   const rows = [];
@@ -210,6 +221,13 @@ const portfolioLabels = (p, cur) => p ? {
 // the whole point of this function.
 function conflicts(input) {
   const i = input || {}, out = [];
+  const t = Object.assign({ cfBullSell:'Analysts bullish, insiders selling',
+    cfBullSellD:'{b} of {n} analysts say buy, but {k} officers sold in the last 30 days \u2014 including {w}.',
+    cfCautBuy:'Analysts cautious, insiders buying', cfCautBuyD:'{s} of {n} analysts say sell, yet {w} bought {k} shares.',
+    cfBuyFall:'Consensus buy, price falling', cfBuyFallD:'Down {m} today against a {p} buy consensus.',
+    cfExtended:'Extended', cfExtendedD:'RSI {r} on a rising day \u2014 stretched versus its own recent range.',
+    cfWashed:'Washed out', cfWashedD:'RSI {r} on a falling day \u2014 oversold versus its own recent range.' }, i.t || {});
+  const fill = (tpl, o) => String(tpl).replace(/\{(\w)\}/g, (m, k) => o[k] != null ? o[k] : m);
   const move = pctNum(i.movePct);
   const am = /(\d+)\s*\/\s*(\d+)\s*\/\s*(\d+)/.exec(String(i.analystDetail || ''));
   const buys = am ? +am[1] : null, holds = am ? +am[2] : null, sells = am ? +am[3] : null;
@@ -220,20 +238,17 @@ function conflicts(input) {
   const bought = insider.filter(s => s.act === 'buy');
 
   if (tot && buys / tot >= 0.6 && sold.length >= 2) {
-    out.push({ tone:'warn', title:'Analysts bullish, insiders selling',
-      detail: buys + ' of ' + tot + ' analysts say buy, but ' + sold.length + ' officers sold in the last 30 days \u2014 including ' + sold[0].who + ' (' + sold[0].role + ').' });
+    out.push({ tone:'warn', title:t.cfBullSell, detail: fill(t.cfBullSellD, { b: buys, n: tot, k: sold.length, w: sold[0].who + ' (' + sold[0].role + ')' }) });
   }
   if (tot && sells / tot >= 0.3 && bought.length) {
-    out.push({ tone:'note', title:'Analysts cautious, insiders buying',
-      detail: sells + ' of ' + tot + ' analysts say sell, yet ' + bought[0].who + ' (' + bought[0].role + ') bought ' + bought[0].shares + ' shares.' });
+    out.push({ tone:'note', title:t.cfCautBuy, detail: fill(t.cfCautBuyD, { s: sells, n: tot, w: bought[0].who + ' (' + bought[0].role + ')', k: bought[0].shares }) });
   }
   if (move != null && tot && buys / tot >= 0.6 && move <= -2) {
-    out.push({ tone:'warn', title:'Consensus buy, price falling',
-      detail:'Down ' + Math.abs(move).toFixed(1) + '% today against a ' + Math.round(buys / tot * 100) + '% buy consensus.' });
+    out.push({ tone:'warn', title:t.cfBuyFall, detail: fill(t.cfBuyFallD, { m: Math.abs(move).toLocaleString(LOC(), { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%', p: Math.round(buys / tot * 100) + '%' }) });
   }
   if (i.rsi != null && move != null) {
-    if (i.rsi >= 70 && move > 0) out.push({ tone:'note', title:'Extended', detail:'RSI ' + i.rsi.toFixed(0) + ' on a rising day \u2014 stretched versus its own recent range.' });
-    if (i.rsi <= 30 && move < 0) out.push({ tone:'note', title:'Washed out', detail:'RSI ' + i.rsi.toFixed(0) + ' on a falling day \u2014 oversold versus its own recent range.' });
+    if (i.rsi >= 70 && move > 0) out.push({ tone:'note', title:t.cfExtended, detail: fill(t.cfExtendedD, { r: i.rsi.toFixed(0) }) });
+    if (i.rsi <= 30 && move < 0) out.push({ tone:'note', title:t.cfWashed, detail: fill(t.cfWashedD, { r: i.rsi.toFixed(0) }) });
   }
   return out;
 }
