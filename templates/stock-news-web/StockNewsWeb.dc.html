@@ -96,6 +96,7 @@
 <div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.feed }}</div>
 <div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ feedSub }}</div>
+<div style="font-size:11px;color:var(--s-faint);margin-top:2px">{{ feedTz }}</div>
 </div>
 <div style="margin-left:auto;display:flex;gap:20px">
 <button onClick="{{ setFeedFollowing }}" style="position:relative;padding:0 0 10px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">
@@ -1639,6 +1640,23 @@ class Component extends DCLogic {
     }, 350);
   }
   // Demo-universe matches first, then live search hits; empty for an empty query.
+  // When a story was published, in the reader's own time zone and the app's language:
+  // "13 oct., 15:14 EEST" (the year only for another year). Without a time, the source's stamp.
+  storyTime(ts, fallback) {
+    if (!ts) return fallback || '';
+    const d = new Date(ts * 1000);
+    const opts = { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit', hourCycle:'h23', timeZoneName:'short' };
+    if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
+    try { return new Intl.DateTimeFormat(this.appLocale, opts).format(d); } catch (e) { return fallback || ''; }
+  }
+  get appLocale() { return ({ RO:'ro-RO', DE:'de-DE' })[this.appLang] || 'en-GB'; }
+  // The reader's time zone, named for the note under the feed title ("Ora Europei de Est").
+  zoneName() {
+    try {
+      const part = new Intl.DateTimeFormat(this.appLocale, { timeZoneName:'longGeneric' }).formatToParts(new Date()).find(p => p.type === 'timeZoneName');
+      return part ? part.value : '';
+    } catch (e) { return ''; }
+  }
   // Real data only. The shared hif-data.js also carries the mobile app's demo set
   // (stories, prices, calendars, filings, crowding figures); the web app never shows it.
   // Company names stay, for search.
@@ -2211,7 +2229,7 @@ class Component extends DCLogic {
       const syms = market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows;
       const rows = [];
       const row = (t, n) => ({
-        ticker:t, storyId: n.id ? t + ':' + n.id : '', source:n.source, stamp:n.stamp, ts:n.ts, headline:n.headline, watch:n.summary || '', url:n.url || '',
+        ticker:t, storyId: n.id ? t + ':' + n.id : '', source:n.source, stamp:this.storyTime(n.ts, n.stamp), ts:n.ts, headline:n.headline, watch:n.summary || '', url:n.url || '',
         score:'#' + storyCount(t), vol:'—', delta:(Q[t] || {}).move || '—', up:(Q[t] || {}).up !== false
       });
       if (bvb) (s.roNews || []).forEach(n => rows.push(row(n.related, n)));
@@ -2706,7 +2724,7 @@ class Component extends DCLogic {
         n = n || H.FEATURED;
         if (!n) return { has:false };
         const q = Q[n.ticker] || {};
-        return { has:true, ticker:n.ticker, source:n.source || '', stamp:n.stamp || '', score:q.move || n.delta || '—', delta:q.price || '',
+        return { has:true, ticker:n.ticker, source:n.source || '', stamp:this.storyTime(n.ts, n.stamp || ''), score:q.move || n.delta || '—', delta:q.price || '',
           headline:loc(n.headline), watch:loc(n.summary || n.watch) };
       })(),
       // Live quotes only; the line is the day's real intraday series when it has loaded.
@@ -2848,6 +2866,7 @@ class Component extends DCLogic {
       upgrade: () => { if (s.authLive) return this.flash((u.payComing || 'Payments are coming soon').toUpperCase()); this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
       scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : '—'),
       feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : s.feedTab === 'bvb' ? u.bvbSub : u.topVolume,
+      feedTz: (u.timesLocal || 'Times in your local time ({z})').replace('{z}', this.zoneName() || Intl.DateTimeFormat().resolvedOptions().timeZone || ''),
       bvbEmpty: s.feedTab === 'bvb' && !(s.roNews || []).length,
       // Stories still on their way (none of the tab's tickers answered yet) read as loading,
       // not as "no stories".
@@ -2891,7 +2910,7 @@ class Component extends DCLogic {
       dataless: dataless(stock.ticker), hasData: !dataless(stock.ticker),
       chart: dataless(stock.ticker) ? null : this.chartEl(stock),
       stockNews: ((live && LN[stock.ticker] && LN[stock.ticker].length)
-        ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, headline:n.headline, source:n.source, stamp:n.stamp, score:'', url:n.url || '' }))
+        ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, headline:n.headline, source:n.source, stamp:this.storyTime(n.ts, n.stamp), score:'', url:n.url || '' }))
         : NEWS.filter(n => n.ticker === stock.ticker).slice(0,5).map(n => Object.assign({}, n, { headline: n.headline[L] })))
         .map(n => Object.assign({}, n, {
           hasUrl: /^https?:\/\//i.test(n.url || ''),
