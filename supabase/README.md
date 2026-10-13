@@ -159,7 +159,15 @@ Blocked or paywalled pages fall back to the headline and the source's own snippe
 summary's `model` field ends in `· article` or `· snippet` to show which. Set
 `READ_ARTICLES=0` to always use the snippet.
 
-On a 4-core CPU without a GPU, gpt-oss-20b takes 2-5 minutes per summary, so a run writes
+LM Studio's headless server picks its own CPU thread count (it chose 1 of 4 cores here).
+Before each batch the job reloads the model, through the SDK that ships with LM Studio, with
+3 threads, flash attention and one session at a time (`LMSTUDIO_THREADS`, 0 to leave it to LM
+Studio): on the 4-core i5 that took a summary from ~250 s to ~150 s; 4 threads were slower,
+as the model then competes with the desktop for every core. The rules and a style example sit
+in one system prompt that LM Studio keeps cached, so only the article is read for each story;
+a reply in English or one that repeats the headline is retried once.
+
+On a 4-core CPU without a GPU, gpt-oss-20b takes 1-3 minutes per summary, so a run writes
 at most 10 summaries (`BATCH_LIMIT`) for stories from the last 24 hours (`MAX_AGE_HOURS`):
 stories for tickers someone follows or holds, and BVB stories, first, then the newest. A
 story gets all its languages (`SUMMARY_LANG`, in that order) before the next one, and its
