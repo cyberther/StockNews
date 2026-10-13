@@ -142,8 +142,11 @@ function session() {
   if (!current || !current.user || !current.user.id) return null;
   const u = current.user, meta = u.user_metadata || {}, app = u.app_metadata || {};
   const provider = app.provider === 'google' ? 'Google' : app.provider === 'apple' ? 'iCloud' : 'Email';
+  const lang = v => ['EN', 'RO', 'DE'].includes(v) ? v : null;
   return { userId: u.id, email: u.email || '', name: meta.full_name || meta.name || null, provider,
-    since: Date.parse(u.last_sign_in_at || u.created_at || '') || Date.now() };
+    since: Date.parse(u.last_sign_in_at || u.created_at || '') || Date.now(),
+    // Language choices saved with the account, so they follow the user to every device.
+    prefs: { contentLang: lang(meta.content_lang), appLang: lang(meta.app_lang) } };
 }
 
 async function signUp(email, password, name) {
@@ -184,6 +187,18 @@ async function updatePassword(password) {
   if (!r.ok) return { error: errorCode(r) };
   if (info) info.recovery = false;
   if (r.body && r.body.id && current) { current.user = r.body; save(current); emit(); }
+  return { ok: true };
+}
+
+// Saves preferences in the account's user metadata: { contentLang, appLang }.
+async function updatePrefs(prefs) {
+  const t = await token(); if (!t) return { error: 'failed' };
+  const data = {};
+  if (prefs.contentLang) data.content_lang = prefs.contentLang;
+  if (prefs.appLang) data.app_lang = prefs.appLang;
+  const r = await call('/auth/v1/user', { method: 'PUT', headers: { authorization: 'Bearer ' + t }, body: { data } });
+  if (!r.ok) return { error: errorCode(r) };
+  if (r.body && r.body.id && current) { current.user = r.body; save(current); }
   return { ok: true };
 }
 
@@ -228,7 +243,7 @@ async function rest(path, opts) {
 
 function onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; }
 
-window.HIFAuth = { ready, session, signUp, signIn, resend, recover, updatePassword, oauth, signOut, plan, token, onChange, rest,
+window.HIFAuth = { ready, session, signUp, signIn, resend, recover, updatePassword, updatePrefs, oauth, signOut, plan, token, onChange, rest,
   enabled: () => !!(info && info.enabled), info: () => info,
   publicConfig: () => cfg ? { supabaseUrl: cfg.supabaseUrl, vapidPublicKey: cfg.vapidPublicKey || null } : null };
 })();
