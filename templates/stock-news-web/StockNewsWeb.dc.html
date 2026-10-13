@@ -125,11 +125,17 @@
 <div style="font-size:10px;letter-spacing:0.08em;color:var(--s-mute);margin-top:8px">{{ item.stamp }}</div>
 </div>
 <div>
+<sc-if value="{{ item.isAi }}" hint-placeholder-val="{{ false }}">
+<div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">{{ item.watchLabel }}</div>
+<div style="font-size:16px;color:var(--s-ink);line-height:1.55;max-width:64ch;margin-top:6px;text-wrap:pretty">{{ item.watch }}</div>
+</sc-if>
+<sc-if value="{{ item.notAi }}" hint-placeholder-val="{{ true }}">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:22px;line-height:1.2;letter-spacing:-0.02em;text-wrap:pretty;max-width:44ch">{{ item.headline }}</div>
 <div style="display:flex;gap:8px;align-items:baseline;margin-top:10px">
 <span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);flex:none">{{ item.watchLabel }}</span>
 <span style="font-size:14px;color:var(--s-ink);line-height:1.45;max-width:64ch">{{ item.watch }}</span>
 </div>
+</sc-if>
 <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin-top:8px">
 <sc-if value="{{ item.hasSource }}" hint-placeholder-val="{{ false }}"><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;font-size:12px;font-weight:700;color:var(--s-ink);text-decoration:underline;text-underline-offset:3px">{{ item.sourceLabel }} ↗</a></sc-if>
 <sc-if value="{{ item.hasTranslate }}" hint-placeholder-val="{{ false }}"><a href="{{ item.translateHref }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;font-size:11px;color:var(--s-mute);text-decoration:underline;text-underline-offset:3px">{{ item.translateLabel }}</a></sc-if>
@@ -2215,7 +2221,9 @@ class Component extends DCLogic {
     const SUMS = s.summaries || {}, sumLang = String(this.lang || 'EN').toLowerCase();
     feed.forEach(r => {
       const ai = r.storyId ? SUMS[sumLang + '|' + r.storyId] : '';
-      if (ai) { r.watch = ai; r.isAi = true; }
+      // With a summary in the reader's language, it replaces the (English) headline.
+      if (ai) r.watch = ai;
+      r.isAi = !!ai; r.notAi = !ai;
       r.watchLabel = ai ? (u.aiSummary || 'AI summary') : u.watch;
       // The whole article, translated, for readers whose content language isn't English.
       // The publisher's own page first; Google's translated view of it as a small extra.

@@ -35,8 +35,9 @@ language sql stable security definer set search_path = public as $$
 $$;
 revoke all on function public.summary_secret_ok(text) from public, anon, authenticated;
 
--- Newest stories first, published in the last p_hours, without a summary in p_lang. The
--- link lets the batch job read the whole article (it keeps only its own short summary).
+-- Stories published in the last p_hours without a summary in p_lang: first those someone
+-- follows or holds and the Bucharest listings (.RO), then the rest; newest first in each.
+-- The link lets the batch job read the whole article (it keeps only its own short summary).
 -- (Dropped first: Postgres can't change a function's result columns in place.)
 drop function if exists public.summaries_pending(text, text, integer, integer);
 create or replace function public.summaries_pending(p_secret text, p_lang text default 'ro', p_limit integer default 15, p_hours integer default 24)
@@ -51,7 +52,10 @@ begin
     from public.stories s
     where s.published_at > now() - make_interval(hours => least(greatest(coalesce(p_hours, 24), 1), 168))
       and not exists (select 1 from public.story_summaries x where x.story_id = s.id and x.lang = p_lang)
-    order by s.published_at desc
+    order by (s.ticker like '%.RO'
+              or exists (select 1 from public.watchlist w where w.ticker = s.ticker)
+              or exists (select 1 from public.holdings h where h.ticker = s.ticker)) desc,
+             s.published_at desc
     limit least(greatest(coalesce(p_limit, 15), 1), 100);
 end $$;
 
