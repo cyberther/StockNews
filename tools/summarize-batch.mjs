@@ -68,7 +68,7 @@ const PROMPTS = {
 };
 
 // The same rules, for a whole article: a little longer, and only what the article says.
-const ARTICLE_PROMPTS = {
+export const ARTICLE_PROMPTS = {
   ro: PROMPTS.ro.replace('în 2-3 propoziții scurte, DOAR informația din textul primit.',
     'în cel mult 4 propoziții (sub 600 de caractere în total), informațiile principale ale articolului primit: ce s-a ' +
     'întâmplat, cele 2-3 cifre cele mai importante și de ce contează pentru companie. Nu enumera toți indicatorii. ' +
@@ -188,7 +188,7 @@ const PAYWALL = /(doar dac[aă] e[sș]ti abonat|pentru abona[tț]i|devino abonat
 export const isPaywall = t => t.length < 1500 && PAYWALL.test(t);
 
 // The whole article, or '' when it isn't there to read (blocked, paywalled, not HTML).
-async function readArticle(url) {
+export async function readArticle(url) {
   if (!cfg.readArticles || !/^https?:\/\//.test(url || '')) return { text: '', why: 'no link' };
   if (!(await allowedByRobots(url))) return { text: '', why: 'robots.txt' };
   const r = await httpGet(url);
@@ -336,28 +336,44 @@ export function usable(s) {
   return s.length >= 40 && s.length <= 1200 && !/^[{[]/.test(s) && !/"(name|parameters)"\s*:/.test(s);
 }
 
-// Field labels in the language of the summary.
-const LABELS = {
-  ro: ['Titlu', 'Articol', 'Rezumat sursă', '(fără rezumat)'],
-  en: ['Title', 'Article', 'Source summary', '(no summary)'],
-  de: ['Titel', 'Artikel', 'Kurzfassung der Quelle', '(keine Kurzfassung)']
-};
+// A POST that waits as long as the model needs. fetch() gives up after 300 s without
+// response headers, and LM Studio sends none until the whole reply is written.
+function postJson(url, body, timeout) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url), data = Buffer.from(JSON.stringify(body));
+    const req = (u.protocol === 'https:' ? https : http).request(u, { method: 'POST', timeout,
+      headers: { 'content-type': 'application/json', 'content-length': data.length } }, res => {
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve({ status: res.statusCode, body: Buffer.concat(chunks).toString('utf8') }));
+      res.on('error', reject);
+    });
+    req.on('timeout', () => req.destroy(new Error('model: no reply in ' + Math.round(timeout / 1000) + ' s')));
+    req.on('error', reject);
+    req.end(data);
+  });
+}
+
+// The same for every language, so the prompt cache can share the story between them.
+const SYSTEM = 'You are a financial news editor. You write short, accurate summaries of news stories, using only ' +
+  'the information in the story, in the language and form the instructions after the story ask for.';
+// Field labels. English for every language: the start of the prompt must not depend on it.
+const LABEL = ['Title', 'Article', 'Source summary', '(no summary)'];
 export async function summarizeForTest(story, article, lang = 'ro') { return summarize(story, article, lang); }
 async function summarize(story, article, lang) {
-  const [T, A, S, none] = LABELS[lang] || LABELS.en;
+  const [T, A, S, none] = LABEL;
   const input = article
     ? `Ticker: ${story.ticker}\n${T}: ${story.headline}\n${A}:\n${article}`
     : `Ticker: ${story.ticker}\n${T}: ${story.headline}\n${S}: ${story.summary || none}`;
   const prompts = article ? ARTICLE_PROMPTS : PROMPTS;
-  const res = await fetch(`${cfg.lmUrl}/chat/completions`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ model: cfg.model, temperature: 0.2, max_tokens: 800,
-      messages: [{ role: 'system', content: prompts[lang] || prompts.en }, { role: 'user', content: input }] }),
-    signal: AbortSignal.timeout(600_000)
-  });
-  if (!res.ok) throw new Error(`model: ${res.status} ${(await res.text()).slice(0, 200)}`);
-  const d = await res.json();
+  const res = await postJson(`${cfg.lmUrl}/chat/completions`, { model: cfg.model, temperature: 0.2, max_tokens: 800,
+    // The story comes first and the language's instructions last, so the summaries of one
+    // story in each language start with the same tokens and LM Studio reads the article
+    // only once (its prompt cache keeps the longest shared start). On a CPU, reading the
+    // article is most of the time.
+    messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: input + '\n\n---\n' + (prompts[lang] || prompts.en) }] }, 600_000);
+  if (res.status !== 200) throw new Error(`model: ${res.status} ${res.body.slice(0, 200)}`);
+  const d = JSON.parse(res.body);
   return cleanSummary(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content, lang);
 }
 
