@@ -31,9 +31,12 @@ function qs(params){
 
 // The gateway serves quota-spending requests only to signed-in users: the session token
 // goes in x-hif-auth (not Authorization, so the CDN keeps caching the answers).
+// Waits for the saved session to be restored first: calls made while the app starts would
+// otherwise go out without the token and be refused.
 async function authHeader(){
   try {
     const A = window.HIFAuth;
+    if (A && A.ready) await A.ready;
     const t = A && A.session && A.session() && A.token ? await A.token() : null;
     return t ? { 'x-hif-auth': t } : {};
   } catch (e) { return {}; }
