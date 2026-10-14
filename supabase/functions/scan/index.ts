@@ -169,7 +169,7 @@ async function pressMarketNews(path: string, label: string, errors: string[]): P
     if (!Array.isArray(rows)) return [];
     const since = Date.now() - 2 * 86400000;
     return rows.filter(n => n && n.id && n.headline && n.datetime * 1000 > since && viaGateway(String(n.related || '')) && TICKER_RE.test(n.related))
-      .slice(0, 40).map(n => ({
+      .slice(0, 100).map(n => ({
         id: `${n.related}:${n.id}`,
         ticker: n.related,
         headline: String(n.headline).slice(0, 500),
