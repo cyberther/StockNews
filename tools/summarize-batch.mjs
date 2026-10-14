@@ -389,6 +389,16 @@ export function dropEnglish(s) {
   return kept.length && kept.length < parts.length ? kept.join('').trim() : s;
 }
 
+// A sentence about what the article leaves out ("Nicio altă informație financiară nu a
+// fost furnizată în articol."): removed when the summary has other sentences.
+const LACKING = /(?<!\p{L})(?:nici(?:o|un) (?:alt|alte|altă)\p{L}* (?:informați|cifr|detal|date)|nu (?:a|au) fost (?:furnizat|menționat|oferit|precizat|specificat)|nu (?:sunt|este|se) (?:menționat|furnizat|oferit|precizat|specificat|dau)|articolul nu |nu există (?:alte|informații|detalii))/iu;
+export function dropLacking(s) {
+  const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)|$)/g);
+  if (!parts || parts.length < 2) return s;
+  const kept = parts.filter(p => !LACKING.test(p));
+  return kept.length && kept.length < parts.length ? kept.join('').trim() : s;
+}
+
 export function dropFiller(s) {
   const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)|$)/g);
   if (!parts || parts.length < 2) return s;
@@ -420,7 +430,7 @@ export function cleanSummary(text, lang = 'ro') {
     .replace(/\s+/g, ' ')
     .trim();
   s = s.replace(/^["„“”«»']+|["„“”«»']+$/g, '').trim();
-  return trimSentences(lang === 'ro' ? dropFiller(dropEnglish(fixRomanian(s))) : s);
+  return trimSentences(lang === 'ro' ? dropFiller(dropLacking(dropEnglish(fixRomanian(s)))) : s);
 }
 // A reply worth saving: prose of a sensible length, not a tool call or JSON.
 export function usable(s) {
