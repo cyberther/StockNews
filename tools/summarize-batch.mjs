@@ -371,7 +371,7 @@ export function fixRomanian(s) {
 // A closing sentence that only comments ("Această schimbare reflectă...", "Aceste cifre
 // arată...", "...poate influența deciziile investitorilor"), which the model adds even when
 // told not to. Dropped when the summary has other sentences.
-const FILLER = /^(?:(?:Această|Acest|Aceste|Acestea|Aceasta)(?:\s+\p{L}+)?\s+(?:reflectă|indică|arată|evidențiază|subliniază|sugerează|consolidează|demonstrează|confirmă)|.*\bpoate (?:influența|afecta) (?:deciziile|percepția|sentimentul) investitorilor)/u;
+const FILLER = /^(?:(?:Această|Acest|Aceste|Acestea|Aceasta)(?:\s+\p{L}+)?\s+(?:reflectă|indică|arată|evidențiază|subliniază|sugerează|consolidează|demonstrează|confirmă)|.*\bpoate (?:influența|afecta) (?:deciziile|percepția|sentimentul) investitorilor|Concluzia(?:\s+\p{L}+)? (?:este|e) că)/u;
 // A sentence in English inside a Romanian summary ("No other figures given."): mostly
 // common English words and no Romanian letters.
 const EN_COMMON = new Set(('the a an and or of to in on at is are was were be been with for its it this that these ' +

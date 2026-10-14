@@ -169,3 +169,8 @@ test('a closing sentence about what the article lacks is dropped (real ASTS summ
   assert.equal(cleanSummary('Tesla a livrat 400.000 de vehicule. Compania nu a oferit o prognoză pentru 2026.'),
     'Tesla a livrat 400.000 de vehicule. Compania nu a oferit o prognoză pentru 2026.');
 });
+
+test('a closing "Concluzia ... este că" comment is dropped (real TSLA summary)', () => {
+  assert.equal(dropFiller('Musk a acumulat 696 de miliarde de dolari. Concluzia prezentată este că contribuțiile politice ale lui Musk ar putea influența reputația companiei.'),
+    'Musk a acumulat 696 de miliarde de dolari.');
+});
