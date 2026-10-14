@@ -121,15 +121,16 @@ async function pool<T, R>(items: T[], n: number, fn: (x: T) => Promise<R>): Prom
   return out;
 }
 
-// Bucharest listings (.RO) have no Finnhub news. Their stories come from the app's own
-// market gateway (APP_URL), which reads the Romanian press and already files each story
-// under the company it names.
+// Bucharest (.RO), XETRA (.DE) and London (.L) listings have no Finnhub news. Their stories
+// come from the app's own market gateway (APP_URL), which reads the Romanian, German and
+// British press and already files each story under the company it names.
 const isBvb = (t: string) => /\.RO$/.test(t);
+const viaGateway = (t: string) => /\.(RO|DE|L)$/.test(t);
 
 async function companyNews(ticker: string, name: string, errors: string[]): Promise<Story[]> {
   const now = Date.now();
   const range = `from=${ymd(now - 2 * 86400000)}&to=${ymd(now + 86400000)}`;
-  const bvb = isBvb(ticker);
+  const bvb = viaGateway(ticker);
   const url = bvb
     ? new URL(`api/finnhub?path=/company-news&symbol=${encodeURIComponent(ticker)}&${range}`, env('APP_URL') || 'http://invalid/').toString()
     : `${env('FINNHUB_BASE') || 'https://finnhub.io/api/v1'}/company-news?symbol=${encodeURIComponent(ticker)}&${range}`;
@@ -216,7 +217,7 @@ Deno.serve(async (req) => {
   const names = new Map<string, string>();
   const { data: nameRows } = await db.from('ticker_names').select('ticker,name').in('ticker', tickers);
   (nameRows || []).forEach(r => names.set(r.ticker, r.name || ''));
-  const unnamed = tickers.filter(t => !names.has(t) && !isBvb(t)).slice(0, 10);
+  const unnamed = tickers.filter(t => !names.has(t) && !viaGateway(t)).slice(0, 10);
   for (const t of unnamed) {
     try {
       const res = await fetch(`${env('FINNHUB_BASE') || 'https://finnhub.io/api/v1'}/stock/profile2?symbol=${encodeURIComponent(t)}`, { headers: { 'X-Finnhub-Token': env('FINNHUB_KEY') } });
