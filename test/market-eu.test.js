@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { handleMarketRequest, resetGatewayForTests } from '../netlify/functions/_shared/market/gateway.js';
-import { euCompanyNews, resetEuNewsForTests, EU_FEEDS } from '../netlify/functions/_shared/market/eu-news.js';
+import { euCompanyNews, euMarketNews, resetEuNewsForTests, EU_FEEDS } from '../netlify/functions/_shared/market/eu-news.js';
 import { yahoo } from '../netlify/functions/_shared/market/providers/yahoo.js';
 
 const originalFetch = globalThis.fetch;
@@ -66,4 +66,17 @@ test('London prices in pence become pounds, in quotes and charts', async () => {
   // Euros are left alone.
   const eur = { chart: { result: [{ meta: { currency: 'EUR', regularMarketPrice: 197.3, chartPreviousClose: 194.5 } }] } };
   assert.equal((await yahoo.transform('quote', eur, { symbol: 'SAP.DE' })).c, 197.3);
+});
+
+test('the EU Market feed files each story under the company named first, and is public', async () => {
+  feeds([
+    { title: 'BASF will Evonik übernehmen', link: 'https://a.de/1' },
+    { title: 'Inflation in Deutschland sinkt', link: 'https://a.de/2' },
+    { title: 'Markets wrap', desc: 'Shares in Tesco and Vodafone rose.', link: 'https://a.co.uk/3' }
+  ]);
+  const rows = await euMarketNews(60);
+  assert.deepEqual(rows.map(x => [x.url, x.related]), [['https://a.de/1', 'BAS.DE'], ['https://a.co.uk/3', 'TSCO.L']]);
+  const r = await handleMarketRequest(req('path=/eu-news'), { keys: {}, log: () => {}, auth: { supabaseUrl: 'https://x.supabase.co', anonKey: 'k' } });
+  assert.equal(r.status, 200);
+  assert.equal(JSON.parse(await r.text()).length, 2);
 });

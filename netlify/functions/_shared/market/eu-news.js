@@ -65,5 +65,25 @@ export async function euCompanyNews(symbol, from, to, log) {
     .slice(0, 20).map(x => shape(x, symbol));
 }
 
+// Every story that names a listed company (the EU Market tab). Each is filed under the
+// company named first in its headline, or else first in its text.
+export async function euMarketNews(limit, log) {
+  const out = [];
+  for (const x of await allEuItems(log)) {
+    let best = null, bestAt = Infinity;
+    for (const part of [x.headline, x.summary]) {
+      for (const [sym] of EU_SHARES) {
+        const m = matcherFor(sym);
+        const at = m ? m(part) : -1;
+        if (at >= 0 && at < bestAt) { best = sym; bestAt = at; }
+      }
+      if (best) break;
+    }
+    if (best) out.push(shape(x, best));
+    if (out.length >= (limit || 60)) break;
+  }
+  return out;
+}
+
 export function resetEuNewsForTests() { allEuItems.reset(); matchers.clear(); }
 export const EU_SYMBOLS = EU_SHARES.map(r => r[0]);

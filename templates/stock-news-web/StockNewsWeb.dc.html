@@ -113,10 +113,15 @@
 <sc-if value="{{ feedBvbOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.bvbTab }}</span></sc-if>
 <sc-if value="{{ feedBvbOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.bvbTab }}</span></sc-if>
 </button>
+<button onClick="{{ setFeedEu }}" style="position:relative;padding:0 0 10px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute);white-space:nowrap">
+<sc-if value="{{ feedEuOn }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--color-accent)"></span><span style="color:var(--s-ink)">{{ ui.euTab }}</span></sc-if>
+<sc-if value="{{ feedEuOff }}" hint-placeholder-val="{{ true }}"><span>{{ ui.euTab }}</span></sc-if>
+</button>
 </div>
 </div>
 <div style="border-top:1px solid var(--s-rule);margin-top:0"></div>
 <sc-if value="{{ bvbEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.bvbEmpty }}</div></sc-if>
+<sc-if value="{{ euEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.euEmpty }}</div></sc-if>
 <sc-if value="{{ feedLoading }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute)">{{ ui.feedLoading }}</div></sc-if>
 <sc-if value="{{ feedEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.feedEmpty }}</div></sc-if>
 <sc-for list="{{ feed }}" as="item" hint-placeholder-count="4">
@@ -1099,7 +1104,7 @@ class Component extends DCLogic {
     authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     timeoutMin:30, lockPw:'', lockErr:'',
-    positions:{}, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, roNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
+    positions:{}, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, roNews:[], euNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
     dismissed:[], detailTab:'overview',
     stack:[], stackOpen:false, cmdOpen:false, cmdQ:'', cmdIx:0, cursor:0, events:[] });
   // Append-only security trail. The server mirrors this shape at POST /api/events,
@@ -1273,6 +1278,7 @@ class Component extends DCLogic {
       this.syncPositions();
       if (this.state.feedTab === 'market') this.syncMarket();
       if (this.state.feedTab === 'bvb') this.syncBvb();
+      if (this.state.feedTab === 'eu') this.syncEu();
       this.startAutoRefresh();
       this.syncDetail(this.state.selected);
       this.state.follows.forEach(t => this.syncSpark(t));
@@ -1443,6 +1449,7 @@ class Component extends DCLogic {
     if (this.state.screen === 'feed' && this.state.session) {
       if (this.state.feedTab === 'market' && !this._mktAsked) { this._mktAsked = true; this.syncMarket(); }
       if (this.state.feedTab === 'bvb' && !this._bvbAsked) { this._bvbAsked = true; this.syncBvb(); }
+      if (this.state.feedTab === 'eu' && !this._euAsked) { this._euAsked = true; this.syncEu(); }
     }
     const pfSig = this.state.screen === 'portfolio' ? (this.state.pfRange || '1mo') + '|' + held : '';
     if (pfSig && pfSig !== this._pfSig) this.syncPortfolioCharts();
@@ -1501,6 +1508,7 @@ class Component extends DCLogic {
       if (this.state.screen === 'portfolio') this.syncPortfolioCharts();
       if (this.state.feedTab === 'market') this.syncMarket();
       if (this.state.feedTab === 'bvb') this.syncBvb();
+      if (this.state.feedTab === 'eu') this.syncEu();
     };
     this._auto = setInterval(tick, 5 * 60000);
     // New summaries for recent stories, every 2 minutes while the feed is open (only the last
@@ -1535,6 +1543,20 @@ class Component extends DCLogic {
       if (!rows) return;
       this.setState({ roNews: rows });
       const syms = [...new Set(rows.map(r => r.related).concat((B && B.top) || []))].slice(0, 50);
+      return L.quotes(syms, this.token).then(qs => {
+        if (Object.keys(qs).length) this.setState(st => ({ quotes: Object.assign({}, st.quotes, qs) }));
+      });
+    }).catch(() => {});
+  }
+  // The EU Market tab: German and British press stories (/eu-news) and the quotes of the
+  // XETRA and London companies they name.
+  syncEu() {
+    const L = window.HIFLive;
+    if (!L || !L.euNews) return;
+    L.euNews().then(rows => {
+      if (!rows) return;
+      this.setState({ euNews: rows });
+      const syms = [...new Set(rows.map(r => r.related))].slice(0, 50);
       return L.quotes(syms, this.token).then(qs => {
         if (Object.keys(qs).length) this.setState(st => ({ quotes: Object.assign({}, st.quotes, qs) }));
       });
@@ -1877,7 +1899,7 @@ class Component extends DCLogic {
     const fresh = n => n.ts && Date.now() / 1000 - n.ts < AI_WINDOW;
     const add = (id, n) => { ids.push(id); if (fresh(n)) recent.push(id); };
     Object.keys(LN).forEach(t => (LN[t] || []).forEach(n => { if (n && n.id) add(t + ':' + n.id, n); }));
-    (s.roNews || []).forEach(n => { if (n && n.id && n.related) add(n.related + ':' + n.id, n); });
+    (s.roNews || []).concat(s.euNews || []).forEach(n => { if (n && n.id && n.related) add(n.related + ':' + n.id, n); });
     const sig = lang + '|' + ids.join(',');
     if (!ids.length || (!force && sig === this._sumSig)) return;
     this._sumSig = sig;
@@ -2175,7 +2197,8 @@ class Component extends DCLogic {
       // Real stories whenever any have loaded (even if a quote call failed), strictly
       // newest first across tickers. Market draws on the ten largest names.
       // The BVB tab: Romanian press stories, each filed under the company it names.
-      const market = s.feedTab !== 'following', bvb = s.feedTab === 'bvb';
+      // The EU Market tab: German and British press stories about XETRA and London listings.
+      const market = s.feedTab !== 'following', bvb = s.feedTab === 'bvb', eu = s.feedTab === 'eu';
       const syms = market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows;
       const rows = [];
       const row = (t, n) => ({
@@ -2183,6 +2206,7 @@ class Component extends DCLogic {
         score:'#' + storyCount(t), vol:'—', delta:(Q[t] || {}).move || '—', up:(Q[t] || {}).up !== false
       });
       if (bvb) (s.roNews || []).forEach(n => rows.push(row(n.related, n)));
+      else if (eu) (s.euNews || []).forEach(n => rows.push(row(n.related, n)));
       else syms.forEach(t => (LN[t] || []).forEach(n => rows.push(row(t, n))));
       baseFeed = rows.sort((a,b) => b.ts - a.ts).slice(0, 40);
     }
@@ -2807,17 +2831,20 @@ class Component extends DCLogic {
       backLabel: (() => { const n = navList.filter(x => x.key === (s.prev || 'feed'))[0]; return n && n.label ? '← ' + n.label : u.backFeed; })(),
       upgrade: () => { if (s.authLive) return this.flash((u.payComing || 'Payments are coming soon').toUpperCase()); this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
       scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString(this.appLocale, { hour:'2-digit', minute:'2-digit' }) : '—'),
-      feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : s.feedTab === 'bvb' ? u.bvbSub : u.topVolume,
+      feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : s.feedTab === 'bvb' ? u.bvbSub : s.feedTab === 'eu' ? u.euSub : u.topVolume,
       feedTz: (u.timesLocal || 'Times in your local time ({z})').replace('{z}', this.zoneName() || Intl.DateTimeFormat().resolvedOptions().timeZone || ''),
       bvbEmpty: s.feedTab === 'bvb' && !(s.roNews || []).length,
+      euEmpty: s.feedTab === 'eu' && !(s.euNews || []).length,
       // Stories still on their way (none of the tab's tickers answered yet) read as loading,
       // not as "no stories".
-      feedLoading: s.feedTab !== 'bvb' && !feed.length && !((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t])) && (s.feedTab === 'market' || s.follows.length > 0),
-      feedEmpty: s.feedTab !== 'bvb' && !feed.length && ((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t]) || (s.feedTab !== 'market' && !s.follows.length)),
+      feedLoading: s.feedTab !== 'bvb' && s.feedTab !== 'eu' && !feed.length && !((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t])) && (s.feedTab === 'market' || s.follows.length > 0),
+      feedEmpty: s.feedTab !== 'bvb' && s.feedTab !== 'eu' && !feed.length && ((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t]) || (s.feedTab !== 'market' && !s.follows.length)),
       setFeedFollowing: () => this.setState({ feedTab:'following' }),
       setFeedMarket: () => { this.setState({ feedTab:'market' }); this.syncMarket(); },
       setFeedBvb: () => { this.setState({ feedTab:'bvb' }); this.syncBvb(); },
       feedBvbOn: s.feedTab === 'bvb', feedBvbOff: s.feedTab !== 'bvb',
+      setFeedEu: () => { this.setState({ feedTab:'eu' }); this.syncEu(); },
+      feedEuOn: s.feedTab === 'eu', feedEuOff: s.feedTab !== 'eu',
       feedFollowingOn: s.feedTab === 'following', feedFollowingOff: s.feedTab !== 'following',
       feedMarketOn: s.feedTab === 'market', feedMarketOff: s.feedTab !== 'market',
       feed, follows,
