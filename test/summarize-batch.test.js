@@ -161,3 +161,16 @@ test('an English closing sentence and "demovat" are cleaned from the real ASTS s
   assert.equal(cleanSummary('Piper Sandler a demovat AST SpaceMobile de la Overweight la Neutral, cu o țintă de 54 de dolari. No other figures given.'),
     'Piper Sandler a retrogradat AST SpaceMobile de la Overweight la Neutral, cu o țintă de 54 de dolari.');
 });
+
+test('a closing sentence about what the article lacks is dropped (real ASTS summary)', () => {
+  assert.equal(cleanSummary('Piper Sandler a retrogradat compania AST SpaceMobile (NASDAQ:ASTS) din Overweight în Neutral și a redus ținta de preț de la 98 la 54 dolari. Acțiunile AST SpaceMobile au închis la 51,46 dolari luni. Nicio altă informație financiară nu a fost furnizată în articol.'),
+    'Piper Sandler a retrogradat compania AST SpaceMobile (NASDAQ:ASTS) din Overweight în Neutral și a redus ținta de preț de la 98 la 54 dolari. Acțiunile AST SpaceMobile au închis la 51,46 dolari luni.');
+  // A fact that uses a negation stays.
+  assert.equal(cleanSummary('Tesla a livrat 400.000 de vehicule. Compania nu a oferit o prognoză pentru 2026.'),
+    'Tesla a livrat 400.000 de vehicule. Compania nu a oferit o prognoză pentru 2026.');
+});
+
+test('a closing "Concluzia ... este că" comment is dropped (real TSLA summary)', () => {
+  assert.equal(dropFiller('Musk a acumulat 696 de miliarde de dolari. Concluzia prezentată este că contribuțiile politice ale lui Musk ar putea influența reputația companiei.'),
+    'Musk a acumulat 696 de miliarde de dolari.');
+});

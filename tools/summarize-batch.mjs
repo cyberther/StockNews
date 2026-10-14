@@ -371,7 +371,7 @@ export function fixRomanian(s) {
 // A closing sentence that only comments ("Această schimbare reflectă...", "Aceste cifre
 // arată...", "...poate influența deciziile investitorilor"), which the model adds even when
 // told not to. Dropped when the summary has other sentences.
-const FILLER = /^(?:(?:Această|Acest|Aceste|Acestea|Aceasta)(?:\s+\p{L}+)?\s+(?:reflectă|indică|arată|evidențiază|subliniază|sugerează|consolidează|demonstrează|confirmă)|.*\bpoate (?:influența|afecta) (?:deciziile|percepția|sentimentul) investitorilor)/u;
+const FILLER = /^(?:(?:Această|Acest|Aceste|Acestea|Aceasta)(?:\s+\p{L}+)?\s+(?:reflectă|indică|arată|evidențiază|subliniază|sugerează|consolidează|demonstrează|confirmă)|.*\bpoate (?:influența|afecta) (?:deciziile|percepția|sentimentul) investitorilor|Concluzia(?:\s+\p{L}+)? (?:este|e) că)/u;
 // A sentence in English inside a Romanian summary ("No other figures given."): mostly
 // common English words and no Romanian letters.
 const EN_COMMON = new Set(('the a an and or of to in on at is are was were be been with for its it this that these ' +
@@ -386,6 +386,16 @@ export function dropEnglish(s) {
     return words.length >= 3 && words.filter(w => EN_COMMON.has(w)).length / words.length >= 0.5;
   };
   const kept = parts.filter(p => !english(p));
+  return kept.length && kept.length < parts.length ? kept.join('').trim() : s;
+}
+
+// A sentence about what the article leaves out ("Nicio altă informație financiară nu a
+// fost furnizată în articol."): removed when the summary has other sentences.
+const LACKING = /(?<!\p{L})(?:nici(?:o|un) (?:alt|alte|altă)\p{L}* (?:informați|cifr|detal|date)|nu (?:a|au) fost (?:furnizat|menționat|oferit|precizat|specificat)|nu (?:sunt|este|se) (?:menționat|furnizat|oferit|precizat|specificat|dau)|articolul nu |nu există (?:alte|informații|detalii))/iu;
+export function dropLacking(s) {
+  const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)|$)/g);
+  if (!parts || parts.length < 2) return s;
+  const kept = parts.filter(p => !LACKING.test(p));
   return kept.length && kept.length < parts.length ? kept.join('').trim() : s;
 }
 
@@ -420,7 +430,7 @@ export function cleanSummary(text, lang = 'ro') {
     .replace(/\s+/g, ' ')
     .trim();
   s = s.replace(/^["„“”«»']+|["„“”«»']+$/g, '').trim();
-  return trimSentences(lang === 'ro' ? dropFiller(dropEnglish(fixRomanian(s))) : s);
+  return trimSentences(lang === 'ro' ? dropFiller(dropLacking(dropEnglish(fixRomanian(s)))) : s);
 }
 // A reply worth saving: prose of a sensible length, not a tool call or JSON.
 export function usable(s) {
