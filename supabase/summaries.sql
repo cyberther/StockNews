@@ -37,9 +37,10 @@ revoke all on function public.summary_secret_ok(text) from public, anon, authent
 
 -- Stories published in the last p_hours without a summary in p_lang: first those someone
 -- follows or holds and the Bucharest listings (.RO), then the rest; newest first in each.
--- Romanian is written for every story. Another language only for the tickers followed or
--- held by an account that reads that language (content_lang in its user metadata), so a
--- second language doesn't halve the pace of the Romanian summaries on the summary PC.
+-- Romanian is written for every story. Another language only where an account reads it
+-- (content_lang in its user metadata): for the tickers such an account follows or holds, and
+-- for the EU Market tab's stories (XETRA .DE and London .L listings), so a second language
+-- doesn't halve the pace of the Romanian summaries on the summary PC.
 -- The link lets the batch job read the whole article (it keeps only its own short summary).
 -- (Dropped first: Postgres can't change a function's result columns in place.)
 drop function if exists public.summaries_pending(text, text, integer, integer);
@@ -58,7 +59,8 @@ begin
       and (p_lang = 'ro' or exists (
         select 1 from auth.users u
         where upper(u.raw_user_meta_data->>'content_lang') = upper(p_lang)
-          and (exists (select 1 from public.watchlist w where w.user_id = u.id and w.ticker = s.ticker)
+          and (s.ticker ~ '\.(DE|L)$'
+               or exists (select 1 from public.watchlist w where w.user_id = u.id and w.ticker = s.ticker)
                or exists (select 1 from public.holdings h where h.user_id = u.id and h.ticker = s.ticker))))
     order by (s.ticker like '%.RO'
               or exists (select 1 from public.watchlist w where w.ticker = s.ticker)

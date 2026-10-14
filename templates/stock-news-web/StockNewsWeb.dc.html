@@ -149,6 +149,7 @@
 </sc-if>
 <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin-top:8px">
 <sc-if value="{{ item.hasSource }}" hint-placeholder-val="{{ false }}"><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;font-size:12px;font-weight:700;color:var(--s-ink);text-decoration:underline;text-underline-offset:3px">{{ item.sourceLabel }} ↗</a></sc-if>
+<sc-if value="{{ item.hasMore }}" hint-placeholder-val="{{ false }}"><span style="flex-basis:100%;font-size:11px;color:var(--s-mute)">{{ item.moreLabel }}</span></sc-if>
 <sc-if value="{{ item.hasTranslate }}" hint-placeholder-val="{{ false }}"><a href="{{ item.translateHref }}" target="_blank" rel="noopener noreferrer" onClick="{{ item.stopOpen }}" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;font-size:11px;color:var(--s-mute);text-decoration:underline;text-underline-offset:3px">{{ item.translateLabel }}</a></sc-if>
 </div>
 </div>
@@ -2202,7 +2203,7 @@ class Component extends DCLogic {
       const syms = market ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows;
       const rows = [];
       const row = (t, n) => ({
-        ticker:t, storyId: n.id ? t + ':' + n.id : '', source:n.source, stamp:this.storyTime(n.ts, n.stamp), ts:n.ts, headline:n.headline, watch:n.summary || '', url:n.url || '',
+        ticker:t, storyId: n.id ? t + ':' + n.id : '', source:n.source, stamp:this.storyTime(n.ts, n.stamp), ts:n.ts, headline:n.headline, watch:n.summary || '', snippet:n.summary || '', url:n.url || '',
         score:'#' + storyCount(t), vol:'—', delta:(Q[t] || {}).move || '—', up:(Q[t] || {}).up !== false
       });
       if (bvb) (s.roNews || []).forEach(n => rows.push(row(n.related, n)));
@@ -2246,8 +2247,8 @@ class Component extends DCLogic {
       r.isAi = !!ai; r.notAi = !ai;
       // A recent story on a tab the batch job covers, in a language it writes, without its
       // summary yet: say one is coming (the card switches to it when it arrives).
-      // German is written only for followed and held tickers (supabase/summaries.sql).
-      const pending = !ai && AI_LANGS.includes(sumLang) && (sumLang === 'ro' ? s.feedTab !== 'market' : s.feedTab === 'following') && r.ts && Date.now() / 1000 - r.ts < AI_WINDOW;
+      // German is written for followed and held tickers and the EU Market tab (supabase/summaries.sql).
+      const pending = !ai && AI_LANGS.includes(sumLang) && (sumLang === 'ro' ? s.feedTab !== 'market' : s.feedTab === 'following' || s.feedTab === 'eu') && r.ts && Date.now() / 1000 - r.ts < AI_WINDOW;
       r.watchLabel = ai ? (u.aiSummary || 'AI summary') : pending ? (u.aiPending || 'AI summary in progress…') : (u.fromSource || u.watch);
       // The whole article, translated, for readers whose content language isn't English.
       // The publisher's own page first; Google's translated view of it as a small extra.
@@ -2270,12 +2271,31 @@ class Component extends DCLogic {
       (keep.twins = keep.twins || []).push(r);
       feed.splice(i, 1);
     }
+    // One card per event: several outlets on the same story (Lufthansa wins TAP, in FAZ,
+    // Spiegel, n-tv...) under one ticker (hif-insight.js sameEvent). The card with an AI
+    // summary stays, else the newest; it names the other sources, and skipping it skips all.
+    const INS = window.HIFInsight;
+    if (INS && INS.sameEvent) {
+      const nameOf = t => (window.HIFEU && window.HIFEU.name(t)) || (window.HIFBVB && window.HIFBVB.name(t)) || ((s.profiles || {})[t] || {}).name || '';
+      const groups = INS.sameEvent(feed.map(r => ({ ticker:r.ticker, headline:r.headline, snippet:r.snippet, ts:r.ts })), nameOf);
+      const gone = new Set();
+      groups.filter(g => g.length > 1).forEach(g => {
+        const keep = feed[g.find(i => feed[i].isAi) != null ? g.find(i => feed[i].isAi) : g[0]];
+        keep.sameEvent = g.map(i => feed[i]).filter(r => r !== keep);
+        keep.sameEvent.forEach(r => gone.add(r));
+      });
+      for (let i = feed.length - 1; i >= 0; i--) if (gone.has(feed[i])) feed.splice(i, 1);
+    }
     feed.forEach(r => {
-      if (!r.twins) { r.hasAlso = false; return; }
-      const others = r.twins.map(x => x.ticker).filter((t, i, a) => t !== r.ticker && a.indexOf(t) === i);
+      const more = (r.sameEvent || []).map(x => x.source).filter((x, i, a) => x && x !== r.source && a.indexOf(x) === i);
+      r.hasMore = (r.sameEvent || []).length > 0;
+      r.moreLabel = more.length ? (u.moreSources || 'Also reported by: {s}').replace('{s}', more.join(', '))
+        : (u.moreSame || '+{n} similar articles').replace('{n}', (r.sameEvent || []).length);
+      if (!r.twins && !r.sameEvent) { r.hasAlso = false; return; }
+      const others = (r.twins || []).map(x => x.ticker).filter((t, i, a) => t !== r.ticker && a.indexOf(t) === i);
       r.hasAlso = others.length > 0;
       r.alsoLabel = (u.alsoAbout || 'Also about {t}').replace('{t}', others.map(t => this.tickerLabel(t)).join(', '));
-      const one = r.dismiss, all = r.twins;
+      const one = r.dismiss, all = (r.twins || []).concat(r.sameEvent || []);
       r.dismiss = event => { one(event); all.forEach(x => this.dismissStory(x, (Q[x.ticker] || {}).price || (FOLLOWS[x.ticker] || {}).price)); };
     });
     // A date header above the first story of each day.
