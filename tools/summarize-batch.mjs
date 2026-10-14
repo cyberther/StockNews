@@ -371,14 +371,14 @@ export function fixRomanian(s) {
 // A closing sentence that only comments ("Această schimbare reflectă...", "Aceste cifre
 // arată...", "...poate influența deciziile investitorilor"), which the model adds even when
 // told not to. Dropped when the summary has other sentences.
-const FILLER = /^(?:(?:Această|Acest|Aceste|Acestea|Aceasta)(?:\s+\p{L}+)?\s+(?:reflectă|indică|arată|evidențiază|subliniază|sugerează|consolidează|demonstrează|confirmă)|.*\bpoate (?:influența|afecta) (?:deciziile|percepția|sentimentul) investitorilor|Concluzia(?:\s+\p{L}+)? (?:este|e) că)/u;
+const FILLER = /^(?:(?:Această|Acest|Aceste|Acestea|Aceasta)(?:\s+\p{L}+)?\s+(?:reflectă|indică|arată|evidențiază|subliniază|sugerează|consolidează|demonstrează|confirmă)|.*\bpoate (?:influența|afecta) (?:deciziile|percepția|sentimentul) investitorilor|Concluzia(?:\s+\p{L}+)? (?:este|e) că|(?:Dies|Das|Diese|Dieser)\s+(?:zeigt|unterstreicht|verdeutlicht|spiegelt|deutet|signalisiert|bestätigt)|.*\bkönnte (?:die )?(?:Entscheidungen|Stimmung) (?:der )?(?:Anleger|Investoren))/u;
 // A sentence in English inside a Romanian summary ("No other figures given."): mostly
 // common English words and no Romanian letters.
 const EN_COMMON = new Set(('the a an and or of to in on at is are was were be been with for its it this that these ' +
   'no not other figures figure given provided mentioned mention article story company shares stock said says ' +
   'reported has have had will would which also further more details information available').split(' '));
 export function dropEnglish(s) {
-  const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)|$)/g);
+  const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚÄÖÜ„"(]|\s*$)|$)/g);
   if (!parts || parts.length < 2) return s;
   const english = p => {
     if (/[ăâîșțĂÂÎȘȚ]/.test(p)) return false;
@@ -391,16 +391,16 @@ export function dropEnglish(s) {
 
 // A sentence about what the article leaves out ("Nicio altă informație financiară nu a
 // fost furnizată în articol."): removed when the summary has other sentences.
-const LACKING = /(?<!\p{L})(?:nici(?:o|un) (?:alt|alte|altă)\p{L}* (?:informați|cifr|detal|date)|nu (?:a|au) fost (?:furnizat|menționat|oferit|precizat|specificat)|nu (?:sunt|este|se) (?:menționat|furnizat|oferit|precizat|specificat|dau)|articolul nu |nu există (?:alte|informații|detalii))/iu;
+const LACKING = /(?<!\p{L})(?:nici(?:o|un) (?:alt|alte|altă)\p{L}* (?:informați|cifr|detal|date)|nu (?:a|au) fost (?:furnizat|menționat|oferit|precizat|specificat)|nu (?:sunt|este|se) (?:menționat|furnizat|oferit|precizat|specificat|dau)|articolul nu |nu există (?:alte|informații|detalii)|keine (?:weiteren |anderen )?(?:Angaben|Informationen|Zahlen|Details)|nicht (?:genannt|erwähnt|angegeben)|(?:der|im) Artikel (?:enthält|nennt|macht) keine)/iu;
 export function dropLacking(s) {
-  const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)|$)/g);
+  const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚÄÖÜ„"(]|\s*$)|$)/g);
   if (!parts || parts.length < 2) return s;
   const kept = parts.filter(p => !LACKING.test(p));
   return kept.length && kept.length < parts.length ? kept.join('').trim() : s;
 }
 
 export function dropFiller(s) {
-  const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)|$)/g);
+  const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚÄÖÜ„"(]|\s*$)|$)/g);
   if (!parts || parts.length < 2) return s;
   const last = parts[parts.length - 1].trim();
   // A sentence with a figure carries facts, so it stays.
@@ -410,7 +410,7 @@ export function dropFiller(s) {
 export function trimSentences(s, max = 650) {
   if (s.length <= max) return s;
   const ends = [];
-  const re = /[.!?](?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)/g;
+  const re = /[.!?](?=\s+[A-ZĂÂÎȘȚÄÖÜ„"(]|\s*$)/g;
   let m;
   while ((m = re.exec(s))) ends.push(m.index + 1);
   const fit = ends.filter(i => i <= max).pop();
@@ -430,7 +430,9 @@ export function cleanSummary(text, lang = 'ro') {
     .replace(/\s+/g, ' ')
     .trim();
   s = s.replace(/^["„“”«»']+|["„“”«»']+$/g, '').trim();
-  return trimSentences(lang === 'ro' ? dropFiller(dropLacking(dropEnglish(fixRomanian(s)))) : s);
+  if (lang === 'ro') s = dropFiller(dropLacking(dropEnglish(fixRomanian(s))));
+  else if (lang === 'de') s = dropFiller(dropLacking(s));
+  return trimSentences(s);
 }
 // A reply worth saving: prose of a sensible length, not a tool call or JSON.
 export function usable(s) {
@@ -460,7 +462,7 @@ const EN_WORDS = /(?<![\p{L}])(the|and|of|to|is|are|was|with|for|its|shares|stoc
 const fold = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 // A reply that is about the article rather than a summary of it: "Nu există informații
 // relevante în articol.", "...și nu menționează compania VRT".
-const NO_CONTENT = /(?<!\p{L})(?:nu (?:menționează|conține|oferă|există|include|precizează|specifică)(?!\p{L})[^.]*?(?<!\p{L})(?:compani|informați|detali|date|cifre|articol)|articolul nu(?!\p{L})|does not (?:mention|contain|provide)|no (?:other |further )?(?:figures|details|information)(?!\p{L})|not mentioned)/iu;
+const NO_CONTENT = /(?<!\p{L})(?:nu (?:menționează|conține|oferă|există|include|precizează|specifică)(?!\p{L})[^.]*?(?<!\p{L})(?:compani|informați|detali|date|cifre|articol)|articolul nu(?!\p{L})|does not (?:mention|contain|provide)|no (?:other |further )?(?:figures|details|information)(?!\p{L})|not mentioned|erwähnt (?:das Unternehmen|die Firma|den Konzern)?\s*\S*\s*nicht(?!\p{L})|keine relevanten (?:Informationen|Angaben)|enthält keine (?:Informationen|Angaben))/iu;
 export function looksWrong(text, story, lang) {
   if (!usable(text)) return 'not usable';
   if (NO_CONTENT.test(text)) return 'says what the story lacks';
