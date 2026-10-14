@@ -174,7 +174,10 @@ On a 4-core CPU without a GPU, gpt-oss-20b takes 1-3 minutes per summary, so a r
 at most 10 summaries (`BATCH_LIMIT`) for stories from the last 24 hours (`MAX_AGE_HOURS`):
 stories for tickers someone follows or holds, and BVB stories, first, then the newest. The
 scan also stores every story in the BVB feed tab (Romanian press, any listed company), so
-that tab gets summaries too; alerts still go only to users who follow the company. A
+that tab gets summaries too; alerts still go only to users who follow the company. German
+(.DE) and London (.L) listings get their stories from the German and British press's RSS
+feeds through the gateway (`eu-news.js`, catalog from `tools/update-eu-catalog.mjs`); their
+summaries are written in the content language from the German or English article. A
 story gets all its languages (`SUMMARY_LANG`, in that order) before the next one, and its
 article is read once for all of them. Stories without a summary keep showing the source's text.
 

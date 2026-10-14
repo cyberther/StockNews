@@ -28,6 +28,7 @@ TARGETS = {
             './ds-base.js': 'e28c8dbf-cca6-4619-a20e-28e41cc2e168',
             '../shared/hif-data.js': '51260e3d-ca06-4f11-8bb4-255f8df7487d',
             '../shared/hif-bvb.js': '764aa715-57ef-4900-8de8-a09b048dd1e3',
+            '../shared/hif-eu.js': '48afc0df-cd74-41a4-b1dd-50fd562a952f',
             '../shared/hif-chart.js': 'c2cb1d5a-7eb5-4f7b-ae9b-20657e2ba262',
             '../shared/hif-insight.js': '9cf08d53-172d-43a0-9618-2b7d30215898',
             '../shared/hif-live.js': 'c3512b4d-940f-4c6c-be48-a62e195d9a3c',
