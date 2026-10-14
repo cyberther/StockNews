@@ -29,6 +29,8 @@ function decode(s) {
     .replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(Number(n)))
     .replace(/&#x([0-9a-f]+);/gi, (m, n) => String.fromCodePoint(parseInt(n, 16)))
     .replace(/&([a-z]+);/gi, (m, n) => ENTITIES[n.toLowerCase()] != null ? ENTITIES[n.toLowerCase()] : m)
+    // Feeds that escape their HTML (The Guardian: &lt;p&gt;) have tags again only now.
+    .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ').trim();
 }
 const tag = (xml, name) => { const m = new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`, 'i').exec(xml); return m ? m[1] : ''; };

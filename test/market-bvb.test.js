@@ -110,3 +110,10 @@ test('IAR Brașov is IARV, not the exchange named later in the headline', async 
   assert.equal(m.find(x => x.url === 'https://zf.ro/iar').related, 'IARV.RO');
   assert.equal(m.find(x => x.url === 'https://zf.ro/iar2').related, 'BVB.RO');
 });
+
+test('HTML escaped inside a feed (The Guardian) is stripped too', () => {
+  const xml = '<rss><channel><item><title>Mercedes boss warns</title><link>https://www.theguardian.com/a</link>' +
+    '<description>&lt;p&gt;Ola Källenius says it will &lt;a href="x"&gt;weaken&lt;/a&gt; the industry&lt;/p&gt;</description>' +
+    '<pubDate>' + new Date().toUTCString() + '</pubDate></item></channel></rss>';
+  assert.equal(parseRss(xml, 'The Guardian')[0].summary, 'Ola Källenius says it will weaken the industry');
+});
