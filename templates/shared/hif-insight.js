@@ -344,5 +344,42 @@ function ledger(entries, priceOf, labels) {
   };
 }
 
-window.HIFInsight = { attribute, position, portfolio, holdings, portfolioSeries, portfolioLabels, amt, signedAmt, pctL, conflicts, crowding, bookCrowding, ledger, money, signed, num };
+// ------------------------------------------------------------ same event
+// Several outlets report the same event ("Lufthansa wins the TAP bid" from FAZ, Spiegel,
+// n-tv...). Two stories about the same ticker within 36 hours are one event when they share
+// at least two words that are uncommon in the whole list ("TAP", "Bieterrennen"), one of them
+// in both headlines. The company's own name doesn't count, nor do
+// the words of a person's title, so two different stories about one company stay apart.
+// rows: [{ ticker, headline, snippet, ts }]; namesOf(ticker) -> the company's name words.
+// Returns arrays of row indexes, one per event, in the order of their first row.
+const EVENT_STOP = new Set(('der die das den dem des ein eine einer einen einem und oder aber fur mit von vom zum zur auf aus bei nach uber unter vor gegen ist sind wird werden hat haben nicht noch auch nur wie was wer als bis durch ohne um an am im in zu es sie er wir ihr sich so ' +
+  'the a an and or of to in on at for with from by is are was were be has have had will its it this that as after over new says said more than ' +
+  'de la si sau cu din pe in la pentru ca care este sunt mai un o al ale lui ce dupa prin ' +
+  'chef boss ceo konzern aktie aktien shares stock director directorul actiunile').split(' '));
+const eventWords = s => [...new Set(String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .split(/[^a-z0-9ß]+/).filter(w => w.length >= 3 && !EVENT_STOP.has(w) && !/^\d+$/.test(w)))];
+function sameEvent(rows, namesOf) {
+  const docs = rows.map(r => eventWords(r.headline + ' ' + (r.snippet || '')));
+  const heads = rows.map(r => eventWords(r.headline));
+  const df = {}; docs.forEach(d => d.forEach(w => { df[w] = (df[w] || 0) + 1; }));
+  // Uncommon: in at most 3 stories, or 15% of a long list.
+  const rare = w => df[w] <= Math.max(3, Math.ceil(rows.length * 0.15));
+  const parent = rows.map((r, i) => i);
+  const find = i => parent[i] === i ? i : (parent[i] = find(parent[i]));
+  const names = {};
+  const nameSet = t => names[t] || (names[t] = new Set(eventWords(String(t).replace(/\.[A-Z]+$/, '') + ' ' + ((namesOf && namesOf(t)) || ''))));
+  for (let i = 0; i < rows.length; i++) for (let j = i + 1; j < rows.length; j++) {
+    const a = rows[i], b = rows[j];
+    if (a.ticker !== b.ticker || !a.ts || !b.ts || Math.abs(a.ts - b.ts) > 36 * 3600) continue;
+    const own = nameSet(a.ticker), A = new Set(docs[i]), H = new Set(heads[i]);
+    const shared = docs[j].filter(w => A.has(w) && !own.has(w) && rare(w));
+    const inHead = heads[j].some(w => H.has(w) && !own.has(w) && rare(w));
+    if (shared.length >= 2 && inHead) parent[find(j)] = find(i);
+  }
+  const groups = new Map();
+  rows.forEach((r, i) => { const k = find(i); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(i); });
+  return [...groups.values()];
+}
+
+window.HIFInsight = { sameEvent, attribute, position, portfolio, holdings, portfolioSeries, portfolioLabels, amt, signedAmt, pctL, conflicts, crowding, bookCrowding, ledger, money, signed, num };
 })();
