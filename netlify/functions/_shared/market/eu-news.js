@@ -68,7 +68,7 @@ export async function euCompanyNews(symbol, from, to, log) {
   if (!m) return [];
   const lo = from ? Date.parse(from + 'T00:00:00Z') / 1000 : 0, hi = to ? Date.parse(to + 'T23:59:59Z') / 1000 : Infinity;
   return (await allEuItems(log)).filter(x => x.datetime >= lo && x.datetime <= hi && !isRoundup(x) && m(x.headline + ' \n ' + x.summary) >= 0)
-    .slice(0, 20).map(x => shape(x, symbol));
+    .slice(0, 40).map(x => shape(x, symbol));
 }
 
 // Every story whose headline names a listed company (the EU Market tab), filed under the

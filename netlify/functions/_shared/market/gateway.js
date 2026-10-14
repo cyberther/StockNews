@@ -25,13 +25,13 @@ import { euCompanyNews, euMarketNews, isEu } from './eu-news.js';
 const ronews = {
   name: 'ronews', needsKey: false, limits: {},
   supports: cap => cap === 'news' || cap === 'marketNewsRO',
-  load: (cap, p, ctx) => cap === 'news' ? companyNews(p.symbol, p.from, p.to, ctx.log) : marketNews(40, ctx.log)
+  load: (cap, p, ctx) => cap === 'news' ? companyNews(p.symbol, p.from, p.to, ctx.log) : marketNews(100, ctx.log)
 };
 // German and British company news from the press's RSS feeds (eu-news.js); no upstream key.
 const eunews = {
   name: 'eunews', needsKey: false, limits: {},
   supports: cap => cap === 'news' || cap === 'marketNewsEU',
-  load: (cap, p, ctx) => cap === 'news' ? euCompanyNews(p.symbol, p.from, p.to, ctx.log) : euMarketNews(60, ctx.log)
+  load: (cap, p, ctx) => cap === 'news' ? euCompanyNews(p.symbol, p.from, p.to, ctx.log) : euMarketNews(150, ctx.log)
 };
 
 // Default order per capability. A provider without a key is skipped; Alpha Vantage's
