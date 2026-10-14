@@ -174,3 +174,12 @@ test('a closing "Concluzia ... este că" comment is dropped (real TSLA summary)'
   assert.equal(dropFiller('Musk a acumulat 696 de miliarde de dolari. Concluzia prezentată este că contribuțiile politice ale lui Musk ar putea influența reputația companiei.'),
     'Musk a acumulat 696 de miliarde de dolari.');
 });
+
+test('German summaries: closing comments and "the article lacks" are handled too', () => {
+  assert.equal(cleanSummary('BMW verlagert die Produktion nach Ungarn. Der Konzern spart dadurch 1 Mrd. Euro. Weitere Angaben wurden nicht genannt.', 'de'),
+    'BMW verlagert die Produktion nach Ungarn. Der Konzern spart dadurch 1 Mrd. Euro.');
+  assert.equal(cleanSummary('Siemens hat den Umsatz um 5% gesteigert. Dies unterstreicht die starke Position des Konzerns.', 'de'),
+    'Siemens hat den Umsatz um 5% gesteigert.');
+  assert.equal(looksWrong('Der Artikel behandelt den Markt für Kältemaschinen und erwähnt Vertiv nicht.', { headline: 'x' }, 'de'), 'says what the story lacks');
+  assert.equal(looksWrong('Siemens hat den Umsatz im dritten Quartal um 5% auf 20 Mrd. Euro gesteigert.', { headline: 'x' }, 'de'), '');
+});
