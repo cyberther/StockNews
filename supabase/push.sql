@@ -2,7 +2,7 @@
 --
 -- Run this once in the Supabase SQL editor (Dashboard → SQL Editor → New query), after
 -- server/schema.sql. It is safe to run again. The scan itself is the Edge Function in
--- supabase/functions/scan; the schedule at the bottom calls it every 30 minutes.
+-- supabase/functions/scan; the schedule at the bottom calls it every 10 minutes.
 -- Setup, secrets and testing: supabase/README.md.
 
 -- ---------------------------------------------------------------------------------------
@@ -136,7 +136,7 @@ create extension if not exists pg_net  with schema extensions;
 
 select cron.unschedule(jobid) from cron.job where jobname in ('market-pulse-scan', 'market-pulse-prune');
 
-select cron.schedule('market-pulse-scan', '*/30 * * * *', $job$
+select cron.schedule('market-pulse-scan', '*/10 * * * *', $job$
   select net.http_post(
     url     := (select decrypted_secret from vault.decrypted_secrets where name = 'scan_url'),
     headers := jsonb_build_object(

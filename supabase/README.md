@@ -1,6 +1,6 @@
 # Background scan and push alerts
 
-Every 30 minutes a Supabase cron job calls the `scan` Edge Function. It looks up the
+Every 10 minutes a Supabase cron job calls the `scan` Edge Function. It looks up the
 tickers on every user's watchlist, fetches their latest Finnhub company news, stores new
 stories in `public.stories`, and sends each user one web-push alert for new stories on
 tickers they have push turned on for.
