@@ -53,6 +53,12 @@ function matcherFor(symbol) {
   return m;
 }
 
+// Round-ups: running tickers and live blogs ("Business-Ticker", "+++ ... +++"), whose
+// headline is one item and whose text lists many companies. Filed under any of them, the
+// card (and its AI summary, written from the whole page) would be about something else.
+const ROUNDUP = /(?:^|[\s:-])(?:(?:business|börsen|news|wirtschafts|live)-?ticker|liveblog|live-blog|newsblog|newsticker|im überblick|auf einen blick|kompakt|markets? live|business live|as it happened)(?![\p{L}])/iu;
+export const isRoundup = x => ROUNDUP.test(x.headline) || /\+\+\+/.test(x.headline + ' ' + x.summary);
+
 const shape = (x, symbol) => ({ category: 'company', datetime: x.datetime, headline: x.headline, id: storyId(x.url),
   image: '', related: symbol, source: x.source, summary: x.summary, url: x.url });
 
@@ -61,23 +67,21 @@ export async function euCompanyNews(symbol, from, to, log) {
   const m = matcherFor(symbol);
   if (!m) return [];
   const lo = from ? Date.parse(from + 'T00:00:00Z') / 1000 : 0, hi = to ? Date.parse(to + 'T23:59:59Z') / 1000 : Infinity;
-  return (await allEuItems(log)).filter(x => x.datetime >= lo && x.datetime <= hi && m(x.headline + ' \n ' + x.summary) >= 0)
+  return (await allEuItems(log)).filter(x => x.datetime >= lo && x.datetime <= hi && !isRoundup(x) && m(x.headline + ' \n ' + x.summary) >= 0)
     .slice(0, 20).map(x => shape(x, symbol));
 }
 
-// Every story that names a listed company (the EU Market tab). Each is filed under the
-// company named first in its headline, or else first in its text.
+// Every story whose headline names a listed company (the EU Market tab), filed under the
+// company named first. A company only mentioned further down is not what the story is about.
 export async function euMarketNews(limit, log) {
   const out = [];
   for (const x of await allEuItems(log)) {
+    if (isRoundup(x)) continue;
     let best = null, bestAt = Infinity;
-    for (const part of [x.headline, x.summary]) {
-      for (const [sym] of EU_SHARES) {
-        const m = matcherFor(sym);
-        const at = m ? m(part) : -1;
-        if (at >= 0 && at < bestAt) { best = sym; bestAt = at; }
-      }
-      if (best) break;
+    for (const [sym] of EU_SHARES) {
+      const m = matcherFor(sym);
+      const at = m ? m(x.headline) : -1;
+      if (at >= 0 && at < bestAt) { best = sym; bestAt = at; }
     }
     if (best) out.push(shape(x, best));
     if (out.length >= (limit || 60)) break;
