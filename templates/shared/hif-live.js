@@ -77,7 +77,7 @@ function stamp(sec){
   const d = new Date(sec * 1000), p = n => String(n).padStart(2,'0');
   const opts = { day:'numeric', month:'short' };
   if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
-  return d.toLocaleDateString([], opts) + ' · ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  return d.toLocaleDateString(window.HIF_LOCALE || [], opts) + ' · ' + p(d.getHours()) + ':' + p(d.getMinutes());
 }
 function isoDay(off){ return new Date(Date.now() + off * 86400000).toISOString().slice(0,10); }
 
@@ -250,7 +250,7 @@ function earningsText(ed, u){
   const day = iso => {
     const d = new Date(iso + 'T12:00:00Z'), opts = { month:'short', day:'numeric', timeZone:'UTC' };
     if (d.getUTCFullYear() !== new Date().getUTCFullYear()) opts.year = 'numeric';
-    return d.toLocaleDateString([], opts);
+    return d.toLocaleDateString(window.HIF_LOCALE || [], opts);
   };
   const when = h => ({ bmo:t.edBmo, amc:t.edAmc, dmh:t.edDmh })[h] || '';
   const out = { days:'—', date: ed && ed.last ? t.edTba : '—', last:'' };
@@ -261,7 +261,7 @@ function earningsText(ed, u){
   }
   if (ed && ed.last) {
     const s = ed.last.surprisePct;
-    const res = s == null ? '' : Math.abs(s) < 0.5 ? t.edInline : (s > 0 ? t.edBeat : t.edMiss) + ' ' + Math.abs(s).toFixed(1) + '%';
+    const res = s == null ? '' : Math.abs(s) < 0.5 ? t.edInline : (s > 0 ? t.edBeat : t.edMiss) + ' ' + Math.abs(s).toLocaleString(window.HIF_LOCALE || [], { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%';
     const which = ed.last.date ? day(ed.last.date) : (ed.last.quarter && ed.last.year ? 'Q' + ed.last.quarter + ' FY' + ed.last.year : '');
     out.last = (t.edLast + ' ' + which).trim() + (res ? ' · ' + res : '');
   }
@@ -335,7 +335,7 @@ function dayHead(sec, u){
   if (diff === 1) return (u && u.dayYesterday) || 'Yesterday';
   const opts = { weekday:'short', day:'numeric', month:'short' };
   if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
-  return d.toLocaleDateString([], opts);
+  return d.toLocaleDateString(window.HIF_LOCALE || [], opts);
 }
 
 // The original article through Google Translate's web view, in the reader's language. The
