@@ -1,6 +1,6 @@
 // Supabase Edge Function "scan": the Market Pulse background scan.
 //
-// pg_cron calls it every 30 minutes (supabase/push.sql). Each run:
+// pg_cron calls it every 10 minutes (supabase/push.sql). Each run:
 //   1. collects the tickers on every user's watchlist,
 //   2. asks Finnhub for each ticker's latest company news,
 //   3. stores stories it has not seen before in public.stories,
@@ -209,7 +209,7 @@ Deno.serve(async (req) => {
   let tickers = [...new Set((wl || []).map(r => r.ticker).filter(t => TICKER_RE.test(t)))].sort();
   if (tickers.length > MAX_TICKERS) {
     const slots = Math.ceil(tickers.length / MAX_TICKERS);
-    const slot = Math.floor(Date.now() / (30 * 60000)) % slots;
+    const slot = Math.floor(Date.now() / (10 * 60000)) % slots;
     tickers = tickers.slice(slot * MAX_TICKERS, (slot + 1) * MAX_TICKERS);
   }
 
