@@ -204,7 +204,7 @@ function search(q, limit) {
   const hits = [];
   LIST.forEach(r => {
     const sym = fold(r[0]).replace(/\\.(de|l)$/, ''), name = fold(r[1]);
-    const rank = sym === f ? 0 : sym.startsWith(f) ? 1 : name.startsWith(f) ? 2 : name.indexOf(' ' + f) >= 0 ? 3 : f.length >= 3 && name.indexOf(f) >= 0 ? 4 : -1;
+    const rank = sym === f || name === f ? 0 : sym.startsWith(f) ? 1 : name.startsWith(f) ? 2 : name.indexOf(' ' + f) >= 0 ? 3 : f.length >= 3 && name.indexOf(f) >= 0 ? 4 : -1;
     if (rank >= 0) hits.push([rank, r]);
   });
   return hits.sort((a, b) => a[0] - b[0] || a[1][0].localeCompare(b[1][0]))
