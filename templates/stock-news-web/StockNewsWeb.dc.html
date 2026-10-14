@@ -2278,14 +2278,17 @@ class Component extends DCLogic {
     // One card per event: several outlets on the same story (Lufthansa wins TAP, in FAZ,
     // Spiegel, n-tv...) under one ticker (hif-insight.js sameEvent). The card with an AI
     // summary stays, else the newest; it names the other sources, and skipping it skips all.
+    // Only the European and Romanian press (.DE, .L, .RO): the US feed is mostly commentary
+    // on a few recurring themes, where shared words don't mean the same event.
     const INS = window.HIFInsight;
     if (INS && INS.sameEvent) {
       const nameOf = t => (window.HIFEU && window.HIFEU.name(t)) || (window.HIFBVB && window.HIFBVB.name(t)) || ((s.profiles || {})[t] || {}).name || '';
-      const groups = INS.sameEvent(feed.map(r => ({ ticker:r.ticker, headline:r.headline, snippet:r.snippet, ts:r.ts })), nameOf);
+      const press = feed.filter(r => /\.(DE|L|RO)$/.test(r.ticker));
+      const groups = INS.sameEvent(press.map(r => ({ ticker:r.ticker, headline:r.headline, snippet:r.snippet, ts:r.ts })), nameOf);
       const gone = new Set();
       groups.filter(g => g.length > 1).forEach(g => {
-        const keep = feed[g.find(i => feed[i].isAi) != null ? g.find(i => feed[i].isAi) : g[0]];
-        keep.sameEvent = g.map(i => feed[i]).filter(r => r !== keep);
+        const keep = press[g.find(i => press[i].isAi) != null ? g.find(i => press[i].isAi) : g[0]];
+        keep.sameEvent = g.map(i => press[i]).filter(r => r !== keep);
         keep.sameEvent.forEach(r => gone.add(r));
       });
       for (let i = feed.length - 1; i >= 0; i--) if (gone.has(feed[i])) feed.splice(i, 1);
