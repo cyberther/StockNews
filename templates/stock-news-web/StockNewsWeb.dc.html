@@ -120,6 +120,7 @@
 </div>
 </div>
 <div style="border-top:1px solid var(--s-rule);margin-top:0"></div>
+<sc-if value="{{ hasFeedFilter }}" hint-placeholder-val="{{ false }}">{{ feedFilter }}</sc-if>
 <sc-if value="{{ bvbEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.bvbEmpty }}</div></sc-if>
 <sc-if value="{{ euEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.euEmpty }}</div></sc-if>
 <sc-if value="{{ feedLoading }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);font-size:13px;color:var(--s-mute)">{{ ui.feedLoading }}</div></sc-if>
@@ -2294,6 +2295,25 @@ class Component extends DCLogic {
       for (let i = feed.length - 1; i >= 0; i--) if (gone.has(feed[i])) feed.splice(i, 1);
     }
     // 40 cards, and 40 more each time "More stories" is pressed (reset when the tab changes).
+    // Ticker filter (chips above the feed): every ticker in this tab, most stories first. A
+    // card merged from several tickers ("Also FLY") counts for each of them.
+    const feedTickers = {};
+    feed.forEach(r => [r.ticker].concat((r.twins || []).map(x => x.ticker))
+      .filter((t, i, a) => a.indexOf(t) === i).forEach(t => { feedTickers[t] = (feedTickers[t] || 0) + 1; }));
+    const fT = s.feedTicker && feedTickers[s.feedTicker] ? s.feedTicker : '', allCards = feed.length;
+    if (fT) for (let i = feed.length - 1; i >= 0; i--) {
+      if (feed[i].ticker !== fT && !(feed[i].twins || []).some(x => x.ticker === fT)) feed.splice(i, 1);
+    }
+    const feedFilter = Object.keys(feedTickers).length < 2 ? null : (() => {
+      const h = React.createElement, pick = t => this.setState({ feedTicker: t, feedPages: 0 });
+      const chip = (t, label) => h('button', { key: t || 'all', 'aria-pressed': fT === t, onClick: () => pick(t),
+        style: Object.assign(this.chipStyle(fT === t), { flex: 'none', minHeight: 30, padding: '0 11px', fontSize: 10, whiteSpace: 'nowrap' }) }, label);
+      const order = Object.keys(feedTickers).sort((a, b) => feedTickers[b] - feedTickers[a] || a.localeCompare(b));
+      return h('div', { role: 'group', 'aria-label': u.filterTicker || 'Filter by ticker',
+        style: { display: 'flex', gap: 6, overflowX: 'auto', padding: '12px var(--gx)', borderBottom: '1px solid ' + this.pal.rule, scrollbarWidth: 'thin' } },
+        chip('', (u.filterAll || 'All') + ' · ' + allCards),
+        ...order.map(t => chip(t, this.tickerLabel(t) + ' · ' + feedTickers[t])));
+    })();
     const feedCap = 40 * (1 + (s.feedPages || 0)), feedTotal = feed.length;
     if (feed.length > feedCap) feed.length = feedCap;
     feed.forEach(r => {
@@ -2869,11 +2889,12 @@ class Component extends DCLogic {
       // not as "no stories".
       feedLoading: s.feedTab !== 'bvb' && s.feedTab !== 'eu' && !feed.length && !((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t])) && (s.feedTab === 'market' || s.follows.length > 0),
       feedEmpty: s.feedTab !== 'bvb' && s.feedTab !== 'eu' && !feed.length && ((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t]) || (s.feedTab !== 'market' && !s.follows.length)),
-      setFeedFollowing: () => this.setState({ feedTab:'following', feedPages:0 }),
-      setFeedMarket: () => { this.setState({ feedTab:'market', feedPages:0 }); this.syncMarket(); },
-      setFeedBvb: () => { this.setState({ feedTab:'bvb', feedPages:0 }); this.syncBvb(); },
+      setFeedFollowing: () => this.setState({ feedTab:'following', feedPages:0, feedTicker:'' }),
+      setFeedMarket: () => { this.setState({ feedTab:'market', feedPages:0, feedTicker:'' }); this.syncMarket(); },
+      setFeedBvb: () => { this.setState({ feedTab:'bvb', feedPages:0, feedTicker:'' }); this.syncBvb(); },
       feedBvbOn: s.feedTab === 'bvb', feedBvbOff: s.feedTab !== 'bvb',
-      setFeedEu: () => { this.setState({ feedTab:'eu', feedPages:0 }); this.syncEu(); },
+      setFeedEu: () => { this.setState({ feedTab:'eu', feedPages:0, feedTicker:'' }); this.syncEu(); },
+      feedFilter, hasFeedFilter: !!feedFilter,
       hasMoreFeed: feedTotal > feed.length,
       moreFeedLabel: (u.moreStories || 'More stories ({n})').replace('{n}', feedTotal - feed.length),
       showMoreFeed: () => this.setState(st => ({ feedPages: (st.feedPages || 0) + 1 })),
