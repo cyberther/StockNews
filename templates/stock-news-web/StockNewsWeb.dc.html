@@ -1079,7 +1079,7 @@ let pendingAuth = null;
 // True from the moment the saved record is handed to setState until React has applied it.
 let restoring = false;
 // Languages the AI summary job writes (SUMMARY_LANG on the PC, tools/summarize-batch.mjs).
-const AI_LANGS = ['ro'];
+const AI_LANGS = ['ro', 'de'];
 // How far back it writes them, in seconds (MAX_AGE_HOURS, default 24).
 const AI_WINDOW = 24 * 3600;
 function hydrate(defaults) {
@@ -2222,7 +2222,8 @@ class Component extends DCLogic {
       r.isAi = !!ai; r.notAi = !ai;
       // A recent story on a tab the batch job covers, in a language it writes, without its
       // summary yet: say one is coming (the card switches to it when it arrives).
-      const pending = !ai && AI_LANGS.includes(sumLang) && s.feedTab !== 'market' && r.ts && Date.now() / 1000 - r.ts < AI_WINDOW;
+      // German is written only for followed and held tickers (supabase/summaries.sql).
+      const pending = !ai && AI_LANGS.includes(sumLang) && (sumLang === 'ro' ? s.feedTab !== 'market' : s.feedTab === 'following') && r.ts && Date.now() / 1000 - r.ts < AI_WINDOW;
       r.watchLabel = ai ? (u.aiSummary || 'AI summary') : pending ? (u.aiPending || 'AI summary in progress…') : (u.fromSource || u.watch);
       // The whole article, translated, for readers whose content language isn't English.
       // The publisher's own page first; Google's translated view of it as a small extra.
