@@ -72,10 +72,14 @@ test('the EU Market feed files each story under the company named first, and is 
   feeds([
     { title: 'BASF will Evonik übernehmen', link: 'https://a.de/1' },
     { title: 'Inflation in Deutschland sinkt', link: 'https://a.de/2' },
-    { title: 'Markets wrap', desc: 'Shares in Tesco and Vodafone rose.', link: 'https://a.co.uk/3' }
+    { title: 'Markets wrap', desc: 'Shares in Tesco and Vodafone rose.', link: 'https://a.co.uk/3' },
+    { title: 'Tesco raises its profit outlook', link: 'https://a.co.uk/4' },
+    { title: 'Business-Ticker: Übernahme von 38 Tegut-Märkten durch Rewe genehmigt', desc: 'Huthi-Rakete +++ Lufthansa steht wohl kurz vor dem Einstieg bei TAP +++', link: 'https://a.de/5' }
   ]);
   const rows = await euMarketNews(60);
-  assert.deepEqual(rows.map(x => [x.url, x.related]), [['https://a.de/1', 'BAS.DE'], ['https://a.co.uk/3', 'TSCO.L']]);
+  // Named only in the text (Markets wrap), or a round-up: not in the tab.
+  assert.deepEqual(rows.map(x => [x.url, x.related]), [['https://a.de/1', 'BAS.DE'], ['https://a.co.uk/4', 'TSCO.L']]);
+  assert.deepEqual(await euCompanyNews('LHA.DE'), []);
   const r = await handleMarketRequest(req('path=/eu-news'), { keys: {}, log: () => {}, auth: { supabaseUrl: 'https://x.supabase.co', anonKey: 'k' } });
   assert.equal(r.status, 200);
   assert.equal(JSON.parse(await r.text()).length, 2);

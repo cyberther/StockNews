@@ -183,3 +183,12 @@ test('German summaries: closing comments and "the article lacks" are handled too
   assert.equal(looksWrong('Der Artikel behandelt den Markt für Kältemaschinen und erwähnt Vertiv nicht.', { headline: 'x' }, 'de'), 'says what the story lacks');
   assert.equal(looksWrong('Siemens hat den Umsatz im dritten Quartal um 5% auf 20 Mrd. Euro gesteigert.', { headline: 'x' }, 'de'), '');
 });
+
+test('a page marked as paid content is not read, however the flag is written (real Handelsblatt page)', async () => {
+  const { isPaidPage } = await import('../tools/summarize-batch.mjs');
+  assert.equal(isPaidPage('<script type="application/ld+json">{"@type":"NewsArticle","isAccessibleForFree":"False","articleBody":"…"}</script>'), true);
+  assert.equal(isPaidPage('<script type="application/ld+json">{"isAccessibleForFree": false}</script>'), true);
+  assert.equal(isPaidPage('<meta property="article:content_tier" content="locked">'), true);
+  assert.equal(isPaidPage('<script type="application/ld+json">{"isAccessibleForFree":true}</script>'), false);
+  assert.equal(isPaidPage('<meta property="article:content_tier" content="free">'), false);
+});
