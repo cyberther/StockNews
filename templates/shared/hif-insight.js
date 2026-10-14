@@ -320,7 +320,7 @@ function ledger(entries, priceOf, labels) {
     }
     return {
       id: e.id || ('t' + (e.ts || 0) + '-' + idx),
-      ticker: e.ticker, headline: e.headline, source: e.source || '',
+      ticker: e.ticker, headline: e.headline, source: e.source || '', storyId: e.storyId || '', summary: e.summary || '',
       when: e.when || '', ts: e.ts,
       priceThen: then == null ? '—' : then.toFixed(2),
       priceNow: now == null ? '—' : now.toFixed(2),

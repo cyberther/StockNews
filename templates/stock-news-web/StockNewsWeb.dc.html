@@ -125,6 +125,7 @@
 <sc-if value="{{ item.onCursor }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--color-accent)"></span></sc-if>
 <div class="m-feed-meta">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:15px;letter-spacing:0.02em">{{ item.tickerLabel }}</div>
+<sc-if value="{{ item.hasAlso }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;letter-spacing:0.08em;color:var(--s-mute);margin-top:2px">{{ item.alsoLabel }}</div></sc-if>
 <div style="font-size:13px;font-weight:600;margin-top:2px"><sc-if value="{{ item.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ item.delta }}</span></sc-if><sc-if value="{{ item.up }}" hint-placeholder-val="{{ true }}"><span>{{ item.delta }}</span></sc-if></div>
 <sc-if value="{{ item.outlier }}" hint-placeholder-val="{{ false }}"><span style="display:inline-block;margin-top:8px;padding:2px 5px;border:1px solid var(--color-accent);color:var(--color-accent);font-size:10px;letter-spacing:0.12em;text-transform:uppercase">{{ item.volBadge }}</span></sc-if>
 <div style="font-size:10px;letter-spacing:0.08em;color:var(--s-mute);margin-top:8px">{{ item.stamp }}</div>
@@ -253,7 +254,7 @@
 <sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
 <article role="button" tabIndex="0" onClick="{{ n.open }}" onKeyDown="{{ n.keyOpen }}" style-hover="background:var(--s-panel)" style="display:grid;grid-template-columns:96px 1fr;gap:16px;padding:14px var(--gx);border-top:1px solid var(--s-rule);align-items:baseline;cursor:pointer">
 <span style="font-size:11px;letter-spacing:0.06em;color:var(--s-mute)">{{ n.stamp }}</span>
-<div><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.25;text-wrap:pretty">{{ n.headline }}</div><div style="font-size:11px;color:var(--s-mute);margin-top:3px">{{ n.source }}<sc-if value="{{ n.hasUrl }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent);margin-left:6px" aria-hidden="true">↗</span></sc-if></div></div>
+<div><sc-if value="{{ n.isAi }}" hint-placeholder-val="{{ false }}"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">{{ ui.aiSummary }}</div><div style="font-size:14px;line-height:1.5;margin-top:4px;text-wrap:pretty">{{ n.summary }}</div></sc-if><sc-if value="{{ n.notAi }}" hint-placeholder-val="{{ true }}"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px;line-height:1.25;text-wrap:pretty">{{ n.headline }}</div></sc-if><div style="font-size:11px;color:var(--s-mute);margin-top:3px">{{ n.source }}<sc-if value="{{ n.hasUrl }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent);margin-left:6px" aria-hidden="true">↗</span></sc-if></div></div>
 </article>
 </sc-for>
 <sc-if value="{{ noStockNews }}" hint-placeholder-val="{{ false }}">
@@ -321,9 +322,9 @@
 </div>
 </sc-if>
 </div>
+<sc-if value="{{ hasCrowd }}" hint-placeholder-val="{{ true }}">
 <div style="background:var(--s-bg);padding:16px 18px">
 <div style="display:flex;align-items:baseline;gap:8px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.crowdTitle }}</div><div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:{{ crowdInk }}">{{ crowdZone }}</div></div>
-<sc-if value="{{ hasCrowd }}" hint-placeholder-val="{{ true }}">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:28px;line-height:1.1;margin-top:4px;color:{{ crowdInk }}">{{ crowdPct }}</div>
 <div style="font-size:11px;color:var(--s-mute)">{{ ui.crowdOf }}</div>
 <div style="position:relative;height:10px;margin-top:10px;background:var(--s-rule)">
@@ -341,8 +342,8 @@
 <div style="font-size:10px;color:var(--s-mute);margin-top:5px">{{ ui.crowdBookNote }}</div>
 </div>
 </sc-if>
-</sc-if>
 </div>
+</sc-if>
 <sc-if value="{{ hasAnalyst }}" hint-placeholder-val="{{ true }}">
 <div style="background:var(--s-bg);padding:16px 18px">
 <div style="display:flex;align-items:baseline;gap:8px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.analyst }}</div><sc-if value="{{ analystLocked }}" hint-placeholder-val="{{ true }}"><span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);border:1px solid var(--color-accent);padding:1px 5px">{{ ui.pro }}</span></sc-if></div>
@@ -390,7 +391,7 @@
 <div style="font-size:10px;letter-spacing:0.08em;color:var(--s-mute);margin-top:3px">{{ r.when }}</div>
 </div>
 <div>
-<div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.25;text-wrap:pretty;max-width:56ch">{{ r.headline }}</div>
+<sc-if value="{{ r.isAi }}" hint-placeholder-val="{{ false }}"><div style="font-size:15px;line-height:1.5;text-wrap:pretty;max-width:68ch">{{ r.summary }}</div></sc-if><sc-if value="{{ r.notAi }}" hint-placeholder-val="{{ true }}"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;line-height:1.25;text-wrap:pretty;max-width:56ch">{{ r.headline }}</div></sc-if>
 <div style="font-size:11px;color:var(--s-mute);margin-top:4px">{{ r.source }} · {{ r.priceThen }} → {{ r.priceNow }}</div>
 </div>
 <div style="text-align:right">
@@ -688,24 +689,12 @@
 </div>
 </div>
 <div style="margin-top:28px;border-top:1px solid var(--s-rule)">
-<div style="padding:20px 0 4px"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.alertTypes }}</div><div style="font-size:13px;color:var(--s-mute);margin-top:5px">{{ ui.alertTypesNote }}</div></div>
-<sc-for list="{{ alertRows }}" as="a" hint-placeholder-count="6">
-<div style="display:flex;align-items:center;gap:16px;padding:13px 0;border-top:1px solid var(--s-rule)">
-<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ a.label }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px;text-wrap:pretty">{{ a.note }}</div></div>
-<button onClick="{{ a.toggle }}" style="flex:none;min-width:64px;min-height:36px;padding:0 12px;text-align:left;background:{{ a.bg }};border:1px solid {{ a.edge }};color:{{ a.ink }};font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ a.stateLabel }}</button>
-</div>
-</sc-for>
-<div style="height:22px"></div>
+<div style="padding:20px 0 18px"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.alertTypes }}</div><div style="font-size:13px;color:var(--s-mute);margin-top:5px;max-width:64ch;text-wrap:pretty">{{ ui.alertsWhat }}</div></div>
 <sc-if value="{{ pushRow.show }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ ui.pushDevice }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px;text-wrap:pretty">{{ pushRow.note }}</div></div><sc-if value="{{ pushRow.canAct }}" hint-placeholder-val="{{ true }}"><button onClick="{{ pushRow.act }}" style="flex:none;min-height:36px;padding:0 14px;background:{{ pushRow.bg }};border:1px solid var(--color-accent);color:{{ pushRow.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ pushRow.actionLabel }}</button></sc-if></div>
 </sc-if>
-<sc-for list="{{ notifRows }}" as="s" hint-placeholder-count="3">
-<div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1"><div style="font-size:14px;font-weight:600">{{ s.label }}</div><div style="font-size:12px;color:var(--s-mute)">{{ s.note }}</div></div><span style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-mute)">{{ s.value }}</span></div>
-</sc-for>
 </div>
 <div style="display:flex;gap:10px;margin-top:20px">
-<button style="min-height:42px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.quiet }}</button>
-<button style="min-height:42px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.manageSub }}</button>
 <button onClick="{{ goSecurity }}" style="min-height:42px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.manageSecurity }}</button>
 <button onClick="{{ signOut }}" style="min-height:42px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.signOut }}</button>
 </div>
@@ -1078,7 +1067,7 @@
 const STORE_KEY = 'hif.web.v2';
 // Keys that survive a reload. Live quotes and transient input (passwords, codes) never persist.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','overlays',
-  'screen','feedTab','selected','timeoutMin','locked','theme','alerts','positions','profiles','pfRange','dismissed','stack','stackOpen','events','accountId'];
+  'screen','feedTab','selected','timeoutMin','locked','theme','positions','profiles','pfRange','dismissed','stack','stackOpen','events','accountId'];
 // hif-store.js can finish loading after this logic is evaluated. Until the saved
 // record has been read, nothing may be written, or a reload would overwrite the
 // stored session with these defaults; see restoreLate().
@@ -1110,7 +1099,6 @@ class Component extends DCLogic {
     authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     timeoutMin:30, lockPw:'', lockErr:'',
-    alerts:{ news:true, insider:false, filings:false, rating:false, earnings:false, move:false },
     positions:{}, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, roNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
     dismissed:[], detailTab:'overview',
     stack:[], stackOpen:false, cmdOpen:false, cmdQ:'', cmdIx:0, cursor:0, events:[] });
@@ -1257,11 +1245,6 @@ class Component extends DCLogic {
       this.logEvent('signin', 'Email · ' + email);
       this.flash((u.toastSignedIn || 'Signed in').toUpperCase());
     }).catch(() => this.setState({ authBusy:false, authErr:this.authMessage('failed') }));
-  }
-  toggleAlert(k, locked) {
-    const u = this.copy;
-    if (locked) { this.flash((u[k === 'insider' ? 'alInsider' : k === 'filings' ? 'alFilings' : 'alRating'] || '').toUpperCase() + ' · ' + (u.pro || '').toUpperCase()); return this.go('paywall'); }
-    this.setState(st => ({ alerts: Object.assign({}, st.alerts, { [k]: !(st.alerts || {})[k] }) }));
   }
   togglePick(t) {
     const u = this.copy, free = this.plan === 'free';
@@ -1822,9 +1805,22 @@ class Component extends DCLogic {
   // stories carry their publish time (ts), so the formatted stamp is left out of the
   // key: reformatting how times are shown must never resurrect a skipped story. Demo
   // stories have no ts and keep the stamp. The feed filters on this key.
+  // Live stories with an id use it: several stories can share ticker, source and time
+  // (Motley Fool posts many at 00:00), and skipping one must not hide the others.
   storyKey(item) {
     if (!item) return '';
-    return this.normKey([item.ticker || '', item.source || '', item.stamp || '', item.ts || ''].join('|'));
+    if (item.storyId) return 'id|' + item.storyId;
+    return this.legacyKey(item);
+  }
+  // The key skips were saved under before story ids; still honoured for those skips.
+  legacyKey(item) {
+    return item ? this.normKey([item.ticker || '', item.source || '', item.stamp || '', item.ts || ''].join('|')) : '';
+  }
+  // A story's AI summary in the content language, or '' while there is none. Every place
+  // that shows a story uses it, so it reads the same in the feed, the ticker page and the ledger.
+  aiText(storyId) {
+    const lang = String(this.lang || 'EN').toLowerCase();
+    return storyId ? (this.state.summaries || {})[lang + '|' + storyId] || '' : '';
   }
   // Saved skips from before this rule still hold the old stamp text; drop it the same way.
   normKey(key) {
@@ -1837,6 +1833,7 @@ class Component extends DCLogic {
     const key = this.storyKey(item);
     if ((this.state.dismissed || []).some(d => this.normKey(d.key) === key)) return;
     this.setState(st => ({ dismissed: [{ ticker:item.ticker, headline:item.headline, source:item.source, stamp:item.stamp, key,
+      storyId: item.storyId || '', summary: this.aiText(item.storyId),
       id: Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
       up: item.up !== false, price: priceStr, ts: Date.now(),
       when: new Date().toLocaleDateString(this.appLocale, { month:'short', day:'numeric' }) }].concat(st.dismissed || []).slice(0, 60) }));
@@ -1891,15 +1888,15 @@ class Component extends DCLogic {
     }).catch(() => {});
   }
   // Portfolio chart: price history for every held ticker over the chosen range (the
-  // adapter caches charts for 5 minutes). null marks a ticker without history.
+  // adapter caches charts for 5 minutes). null marks a ticker without history; a failed
+  // request is not that, so it is retried twice before the ticker is marked.
   syncPortfolioCharts() {
     const L = window.HIFLive; if (!L) return;
     const range = this.state.pfRange || '1mo';
     const put = (key, v) => this.setState(st => ({ pfCharts: Object.assign({}, st.pfCharts, { [key]: v }) }));
-    Object.keys(this.state.positions || {}).forEach(t => {
-      const key = t + ':' + range;
-      L.chart(t, range).then(c => put(key, c && c.points && c.points.length ? c : null)).catch(() => put(key, null));
-    });
+    const load = (t, key, tries) => L.chart(t, range).then(c => put(key, c && c.points && c.points.length ? c : null))
+      .catch(() => tries > 0 ? setTimeout(() => load(t, key, tries - 1), 4000) : put(key, null));
+    Object.keys(this.state.positions || {}).forEach(t => load(t, t + ':' + range, 2));
   }
   pfStamp(ts, range) {
     const d = new Date(ts * 1000);
@@ -2191,8 +2188,15 @@ class Component extends DCLogic {
     }
     baseFeed = baseFeed || [];
     const skipKeys = {};
-    (s.dismissed || []).forEach(d => { if (d.key) skipKeys[this.normKey(d.key)] = 1; });
-    baseFeed = baseFeed.filter(n => !skipKeys[this.storyKey(n)]);
+    // Older skips were saved under ticker|source|time, which several stories can share: those
+    // also have to match the skipped headline.
+    (s.dismissed || []).forEach(d => { if (d.key) skipKeys[this.normKey(d.key)] = d.key.indexOf('id|') === 0 ? true : (d.headline || true); });
+    const skipped = n => {
+      if (skipKeys[this.storyKey(n)]) return true;
+      const old = n.storyId && skipKeys[this.legacyKey(n)];
+      return !!old && (old === true || old === n.headline);
+    };
+    baseFeed = baseFeed.filter(n => !skipped(n));
     const volNum = v => { const m = /([\d.]+)x/.exec(String(v || '')); return m ? parseFloat(m[1]) : 0; };
     const stackList = (s.stack || []);
     const pinned = t => stackList.indexOf(t) !== -1;
@@ -2228,6 +2232,26 @@ class Component extends DCLogic {
       let host = ''; try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch (e) {}
       r.sourceLabel = (u.sourceAt || 'Full article at {s}').replace('{s}', r.source || host || '');
       r.stopOpen = event => { if (event && event.stopPropagation) event.stopPropagation(); };
+    });
+    // One card per article: Finnhub lists a story under every ticker it mentions ("AST
+    // SpaceMobile vs Firefly" under ASTS and FLY). The first copy stays (one with a summary
+    // if any has it), names the other tickers, and skipping it skips every copy.
+    const sameArticle = r => { const u2 = String(r.url || '').replace(/[?#].*$/, '').replace(/\/$/, '').toLowerCase(); return u2 || (r.headline ? 'h|' + r.headline : ''); };
+    const firstOf = {};
+    feed.forEach(r => { const k = sameArticle(r); if (k && (!firstOf[k] || (r.isAi && !firstOf[k].isAi))) firstOf[k] = r; });
+    for (let i = feed.length - 1; i >= 0; i--) {
+      const r = feed[i], k = sameArticle(r), keep = k && firstOf[k];
+      if (!keep || keep === r) continue;
+      (keep.twins = keep.twins || []).push(r);
+      feed.splice(i, 1);
+    }
+    feed.forEach(r => {
+      if (!r.twins) { r.hasAlso = false; return; }
+      const others = r.twins.map(x => x.ticker).filter((t, i, a) => t !== r.ticker && a.indexOf(t) === i);
+      r.hasAlso = others.length > 0;
+      r.alsoLabel = (u.alsoAbout || 'Also about {t}').replace('{t}', others.map(t => this.tickerLabel(t)).join(', '));
+      const one = r.dismiss, all = r.twins;
+      r.dismiss = event => { one(event); all.forEach(x => this.dismissStory(x, (Q[x.ticker] || {}).price || (FOLLOWS[x.ticker] || {}).price)); };
     });
     // A date header above the first story of each day.
     feed.forEach((r, i) => {
@@ -2306,25 +2330,6 @@ class Component extends DCLogic {
       ? (Number(earnRows[0].surprisePercent) >= 0 ? u.beatBy || 'Beat by {p} · {d}' : u.missedBy || 'Missed by {p} · {d}')
           .replace('{p}', Math.abs(Number(earnRows[0].surprisePercent)).toLocaleString(this.appLocale, { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%').replace('{d}', earnRows[0].date)
       : (stock.lastEarn || '—');
-    const AL = s.alerts || {};
-    const alertRows = [
-      { key:'news',     label:u.alNews,     note:u.alNewsNote,     pro:false },
-      { key:'insider',  label:u.alInsider,  note:u.alInsiderNote,  pro:true },
-      { key:'filings',  label:u.alFilings,  note:u.alFilingsNote,  pro:true },
-      { key:'rating',   label:u.alRating,   note:u.alRatingNote,   pro:true },
-      { key:'earnings', label:u.alEarnings, note:u.alEarningsNote, pro:false },
-      { key:'move',     label:u.alMove,     note:u.alMoveNote,     pro:false }
-    ].map(r => {
-      const locked = r.pro && isFree, on = !locked && !!AL[r.key];
-      return Object.assign({}, r, {
-        on, locked,
-        stateLabel: locked ? u.pro : (on ? 'ON' : 'OFF'),
-        bg: on ? 'var(--color-accent)' : 'transparent',
-        edge: on ? 'var(--color-accent)' : 'var(--s-rule)',
-        ink: on ? 'var(--s-on-accent)' : (locked ? 'var(--color-accent)' : 'var(--s-mute)'),
-        toggle: () => this.toggleAlert(r.key, locked)
-      });
-    });
     // The calendar: the next report date from the earnings calendar, when one is announced.
     const calRows = ED && ED.next && ED.next.date ? [(() => {
       const d = new Date(ED.next.date + 'T12:00:00Z');
@@ -2344,7 +2349,7 @@ class Component extends DCLogic {
     const peerList = ((H.SECTORS || {})[sector] || []).filter(t => t !== stock.ticker);
     const peers = peerList.map(t => ({ ticker:t, move:(rec(t) || {}).move })).filter(p => p.move);
     const dayNews = ((live && LN[stock.ticker]) ? LN[stock.ticker] : NEWS.filter(n => n.ticker === stock.ticker))
-      .slice(0, 3).map(n => ({ headline: typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN, source:n.source, url:n.url || '' }));
+      .slice(0, 3).map(n => ({ headline: (live && n.id && this.aiText(stock.ticker + ':' + n.id)) || (typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN), source:n.source, url:n.url || '' }));
     const why = IN ? IN.attribute({ t:u, ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
     // The newest story's AI summary (the source's English snippet is not a conclusion).
     const callText = (stock.call && stock.call[L]) || (live && LN[stock.ticker] && LN[stock.ticker][0] && LN[stock.ticker][0].id ? this.aiText(stock.ticker + ':' + LN[stock.ticker][0].id) : '') || '';
@@ -2467,6 +2472,8 @@ class Component extends DCLogic {
       bookCrowdPct: bookCrowd ? bookCrowd.pctLabel : '', hasBookCrowd: !!bookCrowd,
       bookCrowdFill: bookCrowd ? bookCrowd.fill + '%' : '0%', bookCrowdInk: bookCrowd ? toneInk(bookCrowd.tone) : 'var(--s-mute)',
       ledgerRows: lRows.map(r => Object.assign({}, r, {
+        // The summary the story had when it was skipped (or has now), like the feed showed it.
+        summary: this.aiText(r.storyId) || r.summary || '', isAi: !!(this.aiText(r.storyId) || r.summary), notAi: !(this.aiText(r.storyId) || r.summary),
         when: r.ts ? new Date(r.ts).toLocaleDateString(this.appLocale, { month:'short', day:'numeric' }) : r.when,
         accent: r.verdict === 'missed' ? 'var(--color-accent)' : r.verdict === 'dodged' ? 'var(--s-ink)' : 'var(--s-rule)',
         ink: r.verdict === 'pending' ? 'var(--s-mute)' : r.up ? 'var(--s-ink)' : 'var(--color-accent)',
@@ -2571,7 +2578,6 @@ class Component extends DCLogic {
       holdKey: ev => { if (ev.key === 'Enter') this.savePosition(adding ? s.posTicker : s.posEdit); else if (ev.key === 'Escape') this.setState({ posEdit:null }); },
       bookValue: book.valueLabel || '', bookDay: book.dayLabel || '', bookDayUp: book.dayUp, bookHas: !book.empty,
       ui: u,
-      alertRows,
       calRows, noCal: !calRows.length && !dataless(stock.ticker),
       sigRows, noSig: !sigRows.length && !dataless(stock.ticker),
       brand: this.props.brand || 'Market Pulse',
@@ -2690,12 +2696,12 @@ class Component extends DCLogic {
       lpFeat: (() => {
         const loc = v => typeof v === 'string' ? v : ((v && (v[L] || v.EN)) || '');
         let n = null;
-        Object.keys(LN).forEach(t => (LN[t] || []).forEach(x => { if (x && x.headline && (!n || (x.ts || 0) > (n.ts || 0))) n = Object.assign({ ticker:t }, x); }));
+        Object.keys(LN).forEach(t => (LN[t] || []).forEach(x => { if (x && x.headline && (!n || (x.ts || 0) > (n.ts || 0))) n = Object.assign({ ticker:t, storyId: x.id ? t + ':' + x.id : '' }, x); }));
         n = n || H.FEATURED;
         if (!n) return { has:false };
         const q = Q[n.ticker] || {};
         return { has:true, ticker:n.ticker, source:n.source || '', stamp:this.storyTime(n.ts, n.stamp || ''), score:q.move || n.delta || '—', delta:q.price || '',
-          headline:loc(n.headline), watch:loc(n.summary || n.watch) };
+          headline:this.aiText(n.storyId) || loc(n.headline), watch:this.aiText(n.storyId) ? '' : loc(n.summary || n.watch) };
       })(),
       // Live quotes only; the line is the day's real intraday series when it has loaded.
       lpTickers: (H.LANDING_TICKERS || ['NVDA','AAPL','MSFT','TSLA','AMZN']).filter(t => Q[t]).map(t => {
@@ -2845,9 +2851,11 @@ class Component extends DCLogic {
       dataless: dataless(stock.ticker), hasData: !dataless(stock.ticker),
       chart: dataless(stock.ticker) ? null : this.chartEl(stock),
       stockNews: ((live && LN[stock.ticker] && LN[stock.ticker].length)
-        ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, headline:n.headline, source:n.source, stamp:this.storyTime(n.ts, n.stamp), score:'', url:n.url || '' }))
+        ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, storyId: n.id ? stock.ticker + ':' + n.id : '', headline:n.headline, source:n.source, stamp:this.storyTime(n.ts, n.stamp), score:'', url:n.url || '' }))
         : NEWS.filter(n => n.ticker === stock.ticker).slice(0,5).map(n => Object.assign({}, n, { headline: n.headline[L] })))
         .map(n => Object.assign({}, n, {
+          // The AI summary replaces the headline here as it does in the feed.
+          summary: this.aiText(n.storyId), isAi: !!this.aiText(n.storyId), notAi: !this.aiText(n.storyId),
           hasUrl: /^https?:\/\//i.test(n.url || ''),
           open: () => this.openNews(n),
           keyOpen: event => this.activateFromKeyboard(() => this.openNews(n), event)
@@ -2902,11 +2910,6 @@ class Component extends DCLogic {
           act: () => this.togglePushDevice(),
           bg: dp === 'on' ? 'transparent' : 'var(--color-accent)', ink: dp === 'on' ? 'var(--color-accent)' : 'var(--s-on-accent)' };
       })(),
-      notifRows: [
-        { label:u.notifTickers, note:u.notifTickersNote, value: isFree ? u.pro : '✓' },
-        { label:u.notifMove, note:u.notifMoveNote, value: isFree ? u.pro : '5%' },
-        { label:u.notifQuiet, note:u.notifQuietNote, value:'22–07' }
-      ],
       toast: s.toast
     };
   }
