@@ -19,12 +19,19 @@ import { twelvedata } from './providers/twelvedata.js';
 import { fmp } from './providers/fmp.js';
 import { alphavantage } from './providers/alphavantage.js';
 import { companyNews, marketNews } from './ro-news.js';
+import { euCompanyNews, isEu } from './eu-news.js';
 
 // Romanian company news from the press's RSS feeds (ro-news.js); no upstream key.
 const ronews = {
   name: 'ronews', needsKey: false, limits: {},
   supports: cap => cap === 'news' || cap === 'marketNewsRO',
   load: (cap, p, ctx) => cap === 'news' ? companyNews(p.symbol, p.from, p.to, ctx.log) : marketNews(40, ctx.log)
+};
+// German and British company news from the press's RSS feeds (eu-news.js); no upstream key.
+const eunews = {
+  name: 'eunews', needsKey: false, limits: {},
+  supports: cap => cap === 'news',
+  load: (cap, p, ctx) => euCompanyNews(p.symbol, p.from, p.to, ctx.log)
 };
 
 // Default order per capability. A provider without a key is skipped; Alpha Vantage's
@@ -39,7 +46,7 @@ const PROVIDERS = {
   marketNewsRO: [ronews],  // /ro-news: every story naming a BVB-listed company
   news: [finnhub], search: [finnhub], recommendation: [finnhub], earningsCalendar: [finnhub]
 };
-const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage, ronews].map(p => [p.name, p]));
+const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage, ronews, eunews].map(p => [p.name, p]));
 // Keys by provider, from the environment (never sent anywhere but the provider itself).
 export const keysFromEnv = env => ({ finnhub: env.FINNHUB_KEY, twelvedata: env.TWELVEDATA_KEY, fmp: env.FMP_KEY, alphavantage: env.ALPHAVANTAGE_KEY });
 // Bucharest Stock Exchange listings (.RO): Yahoo has their prices and names, the Romanian
@@ -49,9 +56,18 @@ const RO_ROUTES = {
   quote: [yahoo, finnhub], profile: [yahoo], chart: [yahoo], news: [ronews],
   earnings: [finnhub], earningsCalendar: [finnhub], recommendation: [finnhub]
 };
+// German (.DE) and London (.L) listings: Yahoo for prices, charts and names, the German and
+// British press for news. Finnhub's free plan has neither.
+const EU_ROUTES = {
+  quote: [yahoo], profile: [yahoo], chart: [yahoo], news: [eunews],
+  earnings: [finnhub], earningsCalendar: [finnhub], recommendation: [finnhub]
+};
 export const isBvb = symbol => /\.RO$/.test(String(symbol || ''));
+// Listings outside the US, served by Yahoo and the press instead of the US providers.
+const isLocal = symbol => isBvb(symbol) || isEu(symbol);
 const providersFor = (cap, ctx, params) =>
-  (params && isBvb(params.symbol) && RO_ROUTES[cap]) || (ctx.order && ctx.order[cap]) || PROVIDERS[cap];
+  (params && isBvb(params.symbol) && RO_ROUTES[cap]) || (params && isEu(params.symbol) && EU_ROUTES[cap]) ||
+  (ctx.order && ctx.order[cap]) || PROVIDERS[cap];
 // { CHART: 'twelvedata,yahoo' } (from env MARKET_ORDER_*) -> { chart: [twelvedata, yahoo] }
 export function orderFromEnv(env) {
   const out = {};
@@ -314,7 +330,7 @@ function remember(key, cap, params, data, source) {
 async function fetchEarningsCalendar(params, ctx) {
   const r = await fetchCapability('earningsCalendar', params, ctx);
   const rows = r.status === 200 && r.data && Array.isArray(r.data.earningsCalendar) ? r.data.earningsCalendar : null;
-  if (!rows || isBvb(params.symbol) || rows.some(x => x && x.epsActual != null)) return r;
+  if (!rows || isLocal(params.symbol) || rows.some(x => x && x.epsActual != null)) return r;
   const h = await fetchCapability('earningsHistory', { symbol: params.symbol }, ctx);
   if (h.status !== 200 || !Array.isArray(h.data) || !h.data.length) return r;
   const have = new Set(rows.map(x => x.date));
@@ -380,7 +396,8 @@ const users = new Map(); // token -> { ok, until }
 export function publicRequest(cap, params, extraSymbols) {
   const open = new Set(PUBLIC_SYMBOLS.concat(String(extraSymbols || '').toUpperCase().split(',').map(x => x.trim()).filter(Boolean)));
   if (cap === 'marketNewsRO') return true;
-  if (cap === 'news') return /\.RO$/.test(params.symbol);
+  // Press stories (Romanian, German, British) cost no quota.
+  if (cap === 'news') return /\.(RO|DE|L)$/.test(params.symbol);
   if (cap === 'quotes') return params.symbols.length <= 8 && params.symbols.every(t => open.has(t));
   if (cap === 'quote') return open.has(params.symbol);
   return false;
