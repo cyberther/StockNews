@@ -15,7 +15,7 @@ const PENCE = new Set(['GBp', 'GBX']);
 function toPounds(data) {
   const r = data && data.chart && data.chart.result && data.chart.result[0];
   if (!r || !r.meta || !PENCE.has(r.meta.currency)) return data;
-  const p = v => (typeof v === 'number' ? v / 100 : v);
+  const p = v => (typeof v === 'number' ? +(v / 100).toFixed(6) : v);
   const meta = Object.assign({}, r.meta, { currency: 'GBP' });
   ['regularMarketPrice', 'chartPreviousClose', 'previousClose', 'regularMarketDayHigh', 'regularMarketDayLow',
     'fiftyTwoWeekHigh', 'fiftyTwoWeekLow'].forEach(k => { if (k in meta) meta[k] = p(meta[k]); });
