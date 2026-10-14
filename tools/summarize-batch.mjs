@@ -239,6 +239,17 @@ export function extractArticleText(html) {
 // A subscription wall in place of the story: short text that asks the reader to subscribe.
 const PAYWALL = /(doar dac[aă] e[sș]ti abonat|pentru abona[tț]i|devino abonat|subscribe to (read|continue)|subscription required|subscribers only|to continue reading|premium (article|content))/i;
 export const isPaywall = t => t.length < 1500 && PAYWALL.test(t);
+// A page its publisher marks as paid content: schema.org's isAccessibleForFree set to false
+// (as true/false or as text, "False" included) in its structured data, or a locked or metered
+// content tier. Such pages often carry the whole paid text in their structured data for search
+// engines; it is not read. The headline and the feed's own snippet are used instead.
+export function isPaidPage(html) {
+  const h = String(html || '');
+  if (/"isAccessibleForFree"\s*:\s*"?false"?/i.test(h)) return true;
+  if (/<meta[^>]+(?:property|name)=["'](?:article:content_tier|content_tier)["'][^>]+content=["'](?:locked|metered|premium)["']/i.test(h)) return true;
+  if (/<meta[^>]+content=["'](?:locked|metered|premium)["'][^>]+(?:property|name)=["'](?:article:content_tier|content_tier)["']/i.test(h)) return true;
+  return false;
+}
 
 // The whole article, or '' when it isn't there to read (blocked, paywalled, not HTML).
 export async function readArticle(url) {
@@ -247,6 +258,7 @@ export async function readArticle(url) {
   const r = await httpGet(url);
   if (r.status !== 200) return { text: '', why: 'HTTP ' + r.status };
   if (!/html/i.test(r.type)) return { text: '', why: 'not HTML' };
+  if (isPaidPage(r.body)) return { text: '', why: 'paywall' };
   const text = extractArticleText(r.body);
   if (text && isPaywall(text)) return { text: '', why: 'paywall' };
   return text ? { text, why: '' } : { text: '', why: 'no article text' };
