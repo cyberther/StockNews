@@ -141,13 +141,16 @@ function newsRow(n){
 }
 // Romanian press stories about any company listed in Bucharest (the BVB feed tab), each
 // with the .RO symbol it is about in `related`. Proxy only.
-async function roNews(){
-  const hit = fresh('ronews', 'all'); if (hit) return hit;
+async function pressNews(path, kind){
+  const hit = fresh(kind, 'all'); if (hit) return hit;
   if (proxyState === 'no') return null;
-  const j = await callProxy('/ro-news', {});
+  const j = await callProxy(path, {});
   const rows = (Array.isArray(j) ? j : []).filter(n => n && n.headline && n.related).sort((a,b) => b.datetime - a.datetime).map(newsRow);
-  return put('ronews', 'all', rows);
+  return put(kind, 'all', rows);
 }
+function roNews(){ return pressNews('/ro-news', 'ronews'); }
+// German and British press stories about XETRA and London listings (the EU Market tab).
+function euNews(){ return pressNews('/eu-news', 'eunews'); }
 
 // First visible bar of a warm (longer) series: the window the plain range would
 // have returned, computed in the exchange's own timezone.
@@ -348,7 +351,7 @@ function translatedUrl(url, lang){
   return 'https://translate.google.com/translate?sl=auto&tl=' + tl + '&hl=' + tl + '&u=' + encodeURIComponent(url);
 }
 
-window.HIFLive = { quote, quotes, roNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
+window.HIFLive = { quote, quotes, roNews, euNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();

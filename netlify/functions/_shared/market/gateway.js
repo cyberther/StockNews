@@ -19,7 +19,7 @@ import { twelvedata } from './providers/twelvedata.js';
 import { fmp } from './providers/fmp.js';
 import { alphavantage } from './providers/alphavantage.js';
 import { companyNews, marketNews } from './ro-news.js';
-import { euCompanyNews, isEu } from './eu-news.js';
+import { euCompanyNews, euMarketNews, isEu } from './eu-news.js';
 
 // Romanian company news from the press's RSS feeds (ro-news.js); no upstream key.
 const ronews = {
@@ -30,8 +30,8 @@ const ronews = {
 // German and British company news from the press's RSS feeds (eu-news.js); no upstream key.
 const eunews = {
   name: 'eunews', needsKey: false, limits: {},
-  supports: cap => cap === 'news',
-  load: (cap, p, ctx) => euCompanyNews(p.symbol, p.from, p.to, ctx.log)
+  supports: cap => cap === 'news' || cap === 'marketNewsEU',
+  load: (cap, p, ctx) => cap === 'news' ? euCompanyNews(p.symbol, p.from, p.to, ctx.log) : euMarketNews(60, ctx.log)
 };
 
 // Default order per capability. A provider without a key is skipped; Alpha Vantage's
@@ -44,6 +44,7 @@ const PROVIDERS = {
   earningsHistory: [fmp],   // internal: past reports that enrich the earnings calendar
   chart: [yahoo, twelvedata],
   marketNewsRO: [ronews],  // /ro-news: every story naming a BVB-listed company
+  marketNewsEU: [eunews],  // /eu-news: every story naming a XETRA or London listed company
   news: [finnhub], search: [finnhub], recommendation: [finnhub], earningsCalendar: [finnhub]
 };
 const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage, ronews, eunews].map(p => [p.name, p]));
@@ -83,10 +84,10 @@ export function orderFromEnv(env) {
 const ROUTES = {
   '/quote': 'quote', '/quotes': 'quotes', '/company-news': 'news', '/search': 'search',
   '/stock/recommendation': 'recommendation', '/stock/earnings': 'earnings',
-  '/calendar/earnings': 'earningsCalendar', '/stock/profile2': 'profile', '/chart': 'chart', '/ro-news': 'marketNewsRO'
+  '/calendar/earnings': 'earningsCalendar', '/stock/profile2': 'profile', '/chart': 'chart', '/ro-news': 'marketNewsRO', '/eu-news': 'marketNewsEU'
 };
 // Seconds an answer is fresh. Quotes go stale fast; company names hardly change.
-const TTL = { marketNewsRO: 600, quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
+const TTL = { marketNewsRO: 600, marketNewsEU: 600, quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
 // How long past its TTL an answer may still be served when every provider is failing.
 const STALE_FOR = { quote: 600 };
 const STALE_DEFAULT = 86400;
@@ -125,7 +126,7 @@ const isoDate = v => /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v
 // Rebuilds the parameters from validated values only, so nothing the client adds (a second
 // token=, a path in symbol) reaches a provider.
 function parse(cap, q) {
-  if (cap === 'marketNewsRO') return { params: {} };
+  if (cap === 'marketNewsRO' || cap === 'marketNewsEU') return { params: {} };
   if (cap === 'quotes') {
     const symbols = [...new Set(String(q.get('symbols') || '').toUpperCase().split(',').map(s => s.trim()).filter(Boolean))].sort();
     if (!symbols.length || symbols.length > MAX_BATCH || !symbols.every(validSymbol)) return { error: 'invalid symbols' };
@@ -395,7 +396,7 @@ const AUTH_TTL_MS = 5 * 60 * 1000;
 const users = new Map(); // token -> { ok, until }
 export function publicRequest(cap, params, extraSymbols) {
   const open = new Set(PUBLIC_SYMBOLS.concat(String(extraSymbols || '').toUpperCase().split(',').map(x => x.trim()).filter(Boolean)));
-  if (cap === 'marketNewsRO') return true;
+  if (cap === 'marketNewsRO' || cap === 'marketNewsEU') return true;
   // Press stories (Romanian, German, British) cost no quota.
   if (cap === 'news') return /\.(RO|DE|L)$/.test(params.symbol);
   if (cap === 'quotes') return params.symbols.length <= 8 && params.symbols.every(t => open.has(t));

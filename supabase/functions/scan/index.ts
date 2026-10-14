@@ -124,7 +124,6 @@ async function pool<T, R>(items: T[], n: number, fn: (x: T) => Promise<R>): Prom
 // Bucharest (.RO), XETRA (.DE) and London (.L) listings have no Finnhub news. Their stories
 // come from the app's own market gateway (APP_URL), which reads the Romanian, German and
 // British press and already files each story under the company it names.
-const isBvb = (t: string) => /\.RO$/.test(t);
 const viaGateway = (t: string) => /\.(RO|DE|L)$/.test(t);
 
 async function companyNews(ticker: string, name: string, errors: string[]): Promise<Story[]> {
@@ -156,19 +155,20 @@ async function companyNews(ticker: string, name: string, errors: string[]): Prom
   }
 }
 
-// The BVB feed tab: every Romanian press story that names a listed company, whoever follows
-// it. Stored like the rest so the AI summary job writes summaries for that tab too; alerts
-// still go only to users who follow the company. Ids match companyNews() for .RO tickers.
-async function bvbMarketNews(errors: string[]): Promise<Story[]> {
+// The BVB and EU Market feed tabs: every Romanian (or German and British) press story that
+// names a listed company, whoever follows it. Stored like the rest so the AI summary job
+// writes summaries for those tabs too; alerts still go only to users who follow the company.
+// Ids match companyNews() for .RO, .DE and .L tickers.
+async function pressMarketNews(path: string, label: string, errors: string[]): Promise<Story[]> {
   const appUrl = env('APP_URL');
   if (!appUrl) return [];
   try {
-    const res = await fetch(new URL('api/finnhub?path=/ro-news', appUrl).toString(), { signal: AbortSignal.timeout(15000) });
-    if (!res.ok) { errors.push(`bvb feed: gateway ${res.status}`); return []; }
+    const res = await fetch(new URL(`api/finnhub?path=${path}`, appUrl).toString(), { signal: AbortSignal.timeout(15000) });
+    if (!res.ok) { errors.push(`${label}: gateway ${res.status}`); return []; }
     const rows = await res.json();
     if (!Array.isArray(rows)) return [];
     const since = Date.now() - 2 * 86400000;
-    return rows.filter(n => n && n.id && n.headline && n.datetime * 1000 > since && isBvb(String(n.related || '')) && TICKER_RE.test(n.related))
+    return rows.filter(n => n && n.id && n.headline && n.datetime * 1000 > since && viaGateway(String(n.related || '')) && TICKER_RE.test(n.related))
       .slice(0, 40).map(n => ({
         id: `${n.related}:${n.id}`,
         ticker: n.related,
@@ -179,7 +179,7 @@ async function bvbMarketNews(errors: string[]): Promise<Story[]> {
         published_at: new Date(n.datetime * 1000).toISOString(),
       }));
   } catch (e) {
-    errors.push(`bvb feed: ${(e as Error).message}`);
+    errors.push(`${label}: ${(e as Error).message}`);
     return [];
   }
 }
@@ -229,7 +229,8 @@ Deno.serve(async (req) => {
 
   const followed = (await pool(tickers, CONCURRENCY, t => companyNews(t, names.get(t) || '', errors))).flat();
   const seen = new Set(followed.map(s => s.id));
-  const found = followed.concat((await bvbMarketNews(errors)).filter(s => !seen.has(s.id)));
+  const press = (await pressMarketNews('/ro-news', 'bvb feed', errors)).concat(await pressMarketNews('/eu-news', 'eu feed', errors));
+  const found = followed.concat(press.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; }));
 
   // Insert what is new; ON CONFLICT DO NOTHING returns only the rows actually inserted.
   const fresh: Story[] = [];
