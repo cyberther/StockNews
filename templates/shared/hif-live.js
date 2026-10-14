@@ -319,7 +319,7 @@ async function load(symbols, token, opts){
     try {
       const [q, n, r] = await Promise.all([
         out.quotes[sym] ? out.quotes[sym] : quote(sym, token),
-        o.news === false ? null : news(sym, token, o.newsLimit || 10),
+        o.news === false ? null : news(sym, token, o.newsLimit || 25),
         o.recs === false ? null : recommendation(sym, token)
       ]);
       if (q) out.quotes[sym] = q;

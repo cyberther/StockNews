@@ -154,7 +154,7 @@ export async function companyNews(symbol, from, to, log) {
   if (!m) return [];
   const lo = from ? Date.parse(from + 'T00:00:00Z') / 1000 : 0, hi = to ? Date.parse(to + 'T23:59:59Z') / 1000 : Infinity;
   return (await allItems(log)).filter(x => x.datetime >= lo && x.datetime <= hi && m(x.headline + ' \n ' + x.summary) >= 0)
-    .slice(0, 20).map(x => shape(x, symbol));
+    .slice(0, 40).map(x => shape(x, symbol));
 }
 
 // Every story that names a listed company (the BVB market tab). Each is filed under the
