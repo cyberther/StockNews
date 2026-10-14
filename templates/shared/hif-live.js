@@ -283,13 +283,14 @@ async function recommendation(symbol, token){
   return put('recs', symbol, { buyPct: Math.round(buy / total * 100) + '%', detail: buy + ' / ' + hold + ' / ' + sell, period: r.period || '' });
 }
 
-// Bucharest listings come from the local BVB catalog (hif-bvb.js), US ones from Finnhub;
-// the catalog's matches go first when the query names a Romanian company or symbol.
+// Bucharest, XETRA and London listings come from the local catalogs (hif-bvb.js, hif-eu.js),
+// US ones from Finnhub; the catalogs' matches go first.
 async function search(q, token){
   // "NVDA.US" is how the apps show US listings; the providers know it as "NVDA".
   q = String(q || '').replace(/\.us$/i, '');
   if (!q) return null;
-  const local = window.HIFBVB ? window.HIFBVB.search(q, 6).map(r => ({ ticker: r.ticker, name: r.name, exchange: r.exchange })) : [];
+  const local = (window.HIFBVB ? window.HIFBVB.search(q, 6) : []).concat(window.HIFEU ? window.HIFEU.search(q, 6) : [])
+    .map(r => ({ ticker: r.ticker, name: r.name, exchange: r.exchange }));
   if (!available(token)) return local.length ? local : null;
   const hit = fresh('search', q);
   let rows = hit;

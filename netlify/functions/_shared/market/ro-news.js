@@ -57,7 +57,6 @@ export function storyId(link) {
   return Number(h & 0x1fffffffffffffn);
 }
 
-let feedCache = { at: 0, items: [], pending: null };
 async function fetchFeed(f) {
   const res = await fetch(f.url, { headers: { 'user-agent': 'Mozilla/5.0 (StockNews news reader)', accept: 'application/rss+xml, application/xml, text/xml' }, signal: AbortSignal.timeout(6000) });
   if (!res.ok) throw new Error(f.url + ' ' + res.status);
@@ -65,26 +64,33 @@ async function fetchFeed(f) {
   if (text.length > MAX_BYTES) throw new Error(f.url + ' too large');
   return parseRss(text, f.source);
 }
-// Every feed, cached for 10 minutes and shared by concurrent requests. A feed that fails
-// is skipped; the others still count.
-export async function allItems(log) {
-  if (Date.now() - feedCache.at < FEED_TTL) return feedCache.items;
-  if (feedCache.pending) return feedCache.pending;
-  feedCache.pending = (async () => {
-    const results = await Promise.allSettled(RO_FEEDS.map(fetchFeed));
-    const seen = new Set(), items = [];
-    results.forEach((r, i) => {
-      if (r.status !== 'fulfilled') { if (log) log({ evt: 'market.upstream', provider: 'ronews', cap: 'feed', status: 'error', feed: RO_FEEDS[i].source }); return; }
-      r.value.forEach(x => { if (!seen.has(x.url)) { seen.add(x.url); items.push(x); } });
-    });
-    items.sort((a, b) => b.datetime - a.datetime);
-    // Keep the previous items if every feed failed this time.
-    if (items.length || !feedCache.items.length) feedCache = { at: Date.now(), items, pending: null };
-    else feedCache = { ...feedCache, at: Date.now() - FEED_TTL + 60_000, pending: null };
-    return feedCache.items;
-  })();
-  try { return await feedCache.pending; } finally { feedCache.pending = null; }
+// A reader for a list of feeds: every feed, cached for 10 minutes and shared by concurrent
+// requests. A feed that fails is skipped; the others still count. Also used for the German
+// and British press (eu-news.js).
+export function feedReader(feeds, provider) {
+  let feedCache = { at: 0, items: [], pending: null };
+  async function allItems(log) {
+    if (Date.now() - feedCache.at < FEED_TTL) return feedCache.items;
+    if (feedCache.pending) return feedCache.pending;
+    feedCache.pending = (async () => {
+      const results = await Promise.allSettled(feeds.map(fetchFeed));
+      const seen = new Set(), items = [];
+      results.forEach((r, i) => {
+        if (r.status !== 'fulfilled') { if (log) log({ evt: 'market.upstream', provider, cap: 'feed', status: 'error', feed: feeds[i].source }); return; }
+        r.value.forEach(x => { if (!seen.has(x.url)) { seen.add(x.url); items.push(x); } });
+      });
+      items.sort((a, b) => b.datetime - a.datetime);
+      // Keep the previous items if every feed failed this time.
+      if (items.length || !feedCache.items.length) feedCache = { at: Date.now(), items, pending: null };
+      else feedCache = { ...feedCache, at: Date.now() - FEED_TTL + 60_000, pending: null };
+      return feedCache.items;
+    })();
+    try { return await feedCache.pending; } finally { feedCache.pending = null; }
+  }
+  allItems.reset = () => { feedCache = { at: 0, items: [], pending: null }; };
+  return allItems;
 }
+export const allItems = feedReader(RO_FEEDS, 'ronews');
 
 // ------------------------------------------------------------------ matching
 const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[șş]/gi, 's').replace(/[țţ]/gi, 't');
@@ -169,4 +175,4 @@ export async function marketNews(limit, log) {
   return out;
 }
 
-export function resetRoNewsForTests() { feedCache = { at: 0, items: [], pending: null }; matchers.clear(); }
+export function resetRoNewsForTests() { allItems.reset(); matchers.clear(); }
