@@ -24,7 +24,7 @@
 // article text in memory for the model, and stores nothing but the model's short summary.
 // Paywalled or blocked pages, and pages it can't read, fall back to the headline and the
 // source's own short summary.
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import https from 'node:https';
@@ -78,6 +78,9 @@ export const SYSTEM = [
     'another company (a rival, a supplier), say so and name that company; never move its figures to the ticker\'s ' +
     'company. When more than one company appears, name the company in every sentence that gives a figure ' +
     '("Lucid a livrat 3.806 vehicule"), never just "the company".',
+  '- Summarize what the story says, never what it leaves out: no "the article does not mention...", "no other ' +
+    'figures are given" or "there is no relevant information". If the ticker\'s company only appears in passing, ' +
+    'summarize the story as it is.',
   '- Keep tickers, company names and figures exactly as in the story. Write a fall as "fell 1.2%", never with a minus sign.',
   '- Third person; past tense for what happened. Reply with the summary only: no title, no quotation marks, no ' +
     'bullet points, no introduction.',
@@ -328,6 +331,12 @@ const RO_TERMS = [
     'datorie', 'producție', 'cerere', 'întârziere', 'anchetă', 'amendă', 'licență', 'parte', 'serie']
     .map(n => ['un ' + n, 'o ' + n]),
   ['superând', 'depășind'],
+  // "Downgrade" made Romanian by sound.
+  ['a demovat', 'a retrogradat', true],
+  ['au demovat', 'au retrogradat'],
+  ['demovat', 'retrogradat'],
+  ['demovează', 'retrogradează', true],
+  ['demovare', 'retrogradare'],
   ['analistilor', 'analiștilor'],
   ['analistii', 'analiștii'],
   ['analisti', 'analiști']
@@ -363,6 +372,23 @@ export function fixRomanian(s) {
 // arată...", "...poate influența deciziile investitorilor"), which the model adds even when
 // told not to. Dropped when the summary has other sentences.
 const FILLER = /^(?:(?:Această|Acest|Aceste|Acestea|Aceasta)(?:\s+\p{L}+)?\s+(?:reflectă|indică|arată|evidențiază|subliniază|sugerează|consolidează|demonstrează|confirmă)|.*\bpoate (?:influența|afecta) (?:deciziile|percepția|sentimentul) investitorilor)/u;
+// A sentence in English inside a Romanian summary ("No other figures given."): mostly
+// common English words and no Romanian letters.
+const EN_COMMON = new Set(('the a an and or of to in on at is are was were be been with for its it this that these ' +
+  'no not other figures figure given provided mentioned mention article story company shares stock said says ' +
+  'reported has have had will would which also further more details information available').split(' '));
+export function dropEnglish(s) {
+  const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)|$)/g);
+  if (!parts || parts.length < 2) return s;
+  const english = p => {
+    if (/[ăâîșțĂÂÎȘȚ]/.test(p)) return false;
+    const words = p.toLowerCase().match(/[a-z]+/g) || [];
+    return words.length >= 3 && words.filter(w => EN_COMMON.has(w)).length / words.length >= 0.5;
+  };
+  const kept = parts.filter(p => !english(p));
+  return kept.length && kept.length < parts.length ? kept.join('').trim() : s;
+}
+
 export function dropFiller(s) {
   const parts = s.match(/[^.!?]+(?:[.!?]+(?=\s+[A-ZĂÂÎȘȚ„"(]|\s*$)|$)/g);
   if (!parts || parts.length < 2) return s;
@@ -394,7 +420,7 @@ export function cleanSummary(text, lang = 'ro') {
     .replace(/\s+/g, ' ')
     .trim();
   s = s.replace(/^["„“”«»']+|["„“”«»']+$/g, '').trim();
-  return trimSentences(lang === 'ro' ? dropFiller(fixRomanian(s)) : s);
+  return trimSentences(lang === 'ro' ? dropFiller(dropEnglish(fixRomanian(s))) : s);
 }
 // A reply worth saving: prose of a sensible length, not a tool call or JSON.
 export function usable(s) {
@@ -422,15 +448,19 @@ function postJson(url, body, timeout) {
 // What a Romanian summary should not look like: English sentences, or the headline repeated.
 const EN_WORDS = /(?<![\p{L}])(the|and|of|to|is|are|was|with|for|its|shares|stock|said)(?![\p{L}])/giu;
 const fold = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+// A reply that is about the article rather than a summary of it: "Nu există informații
+// relevante în articol.", "...și nu menționează compania VRT".
+const NO_CONTENT = /(?<!\p{L})(?:nu (?:menționează|conține|oferă|există|include|precizează|specifică)(?!\p{L})[^.]*?(?<!\p{L})(?:compani|informați|detali|date|cifre|articol)|articolul nu(?!\p{L})|does not (?:mention|contain|provide)|no (?:other |further )?(?:figures|details|information)(?!\p{L})|not mentioned)/iu;
 export function looksWrong(text, story, lang) {
   if (!usable(text)) return 'not usable';
+  if (NO_CONTENT.test(text)) return 'says what the story lacks';
   if (lang !== 'en' && (text.match(EN_WORDS) || []).length >= 4) return 'English words';
   const head = fold(story.headline);
   if (head.length > 30 && fold(text).startsWith(head.slice(0, 40))) return 'repeats the headline';
   return '';
 }
 
-export async function summarizeForTest(story, article, lang = 'ro') { return summarize(story, article, lang); }
+export async function summarizeForTest(story, article, lang = 'ro') { return (await summarize(story, article, lang)).text; }
 // One try, and a second (a little less conservative) when the first looks wrong; the
 // second reuses the cached prompt, so it costs only the writing.
 async function summarize(story, article, lang) {
@@ -446,10 +476,24 @@ async function summarize(story, article, lang) {
     const d = JSON.parse(res.body);
     text = cleanSummary(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content, lang);
     why = looksWrong(text, story, lang);
-    if (!why) return text;
+    if (!why) return { text, why: '' };
     log('retry', story.id, lang, '-', why);
   }
-  return text;
+  return { text, why };
+}
+
+// Stories whose replies were rejected twice: not retried for a day (each try costs
+// minutes), and in the apps they keep their headline and the source's snippet.
+const REJECTED_FILE = join(homedir(), '.cache/market-pulse/rejected.json');
+function loadRejected() {
+  try {
+    const all = JSON.parse(readFileSync(REJECTED_FILE, 'utf8')), now = Date.now(), out = {};
+    for (const [k, at] of Object.entries(all)) if (now - at < 24 * 3600_000) out[k] = at;
+    return out;
+  } catch { return {}; }
+}
+function saveRejected(r) {
+  try { mkdirSync(join(homedir(), '.cache/market-pulse'), { recursive: true }); writeFileSync(REJECTED_FILE, JSON.stringify(r)); } catch {}
 }
 
 async function main() {
@@ -466,10 +510,11 @@ async function main() {
   if (!cfg.langs.length) { log('SUMMARY_LANG has no supported language (ro, en, de)'); process.exitCode = 2; return; }
   // What each language still needs, in the server's priority order; then one queue in which
   // a story's languages sit together, in the order of its best position in any list.
-  const rank = new Map(), byId = new Map();
+  const rank = new Map(), byId = new Map(), rejected = loadRejected();
+  const extra = Object.keys(rejected).length;
   for (const lang of cfg.langs) {
-    const rows = await rpc('summaries_pending', { p_secret: cfg.secret, p_lang: lang, p_limit: cfg.limit, p_hours: cfg.hours }) || [];
-    rows.forEach((r, i) => {
+    const rows = await rpc('summaries_pending', { p_secret: cfg.secret, p_lang: lang, p_limit: Math.min(cfg.limit + extra, 100), p_hours: cfg.hours }) || [];
+    rows.filter(r => !rejected[r.id + '|' + lang]).forEach((r, i) => {
       byId.set(r.id, r);
       const e = rank.get(r.id) || { at: i, langs: [] };
       e.at = Math.min(e.at, i); e.langs.push(lang);
@@ -493,8 +538,11 @@ async function main() {
         articles.set(s.id, article);
       }
       const article = articles.get(s.id);
-      const text = await summarize(s, article.text, lang);
-      if (!usable(text)) { log('skipped', s.id, lang, '- reply not usable'); continue; }
+      const { text, why } = await summarize(s, article.text, lang);
+      if (why) {
+        rejected[s.id + '|' + lang] = Date.now(); saveRejected(rejected);
+        log('skipped', s.id, lang, '-', why, '(not retried for 24 h)'); continue;
+      }
       // The model field records what the summary was written from.
       const basis = article.text ? 'article' : 'snippet';
       // Saved one at a time, so a slow batch still shows progress in the apps.
