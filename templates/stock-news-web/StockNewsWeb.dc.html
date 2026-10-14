@@ -2209,7 +2209,8 @@ class Component extends DCLogic {
       if (bvb) (s.roNews || []).forEach(n => rows.push(row(n.related, n)));
       else if (eu) (s.euNews || []).forEach(n => rows.push(row(n.related, n)));
       else syms.forEach(t => (LN[t] || []).forEach(n => rows.push(row(t, n))));
-      baseFeed = rows.sort((a,b) => b.ts - a.ts).slice(0, 40);
+      // 80 stories, so 40 cards remain once stories about the same event are grouped.
+      baseFeed = rows.sort((a,b) => b.ts - a.ts).slice(0, 80);
     }
     baseFeed = baseFeed || [];
     const skipKeys = {};
@@ -2286,6 +2287,7 @@ class Component extends DCLogic {
       });
       for (let i = feed.length - 1; i >= 0; i--) if (gone.has(feed[i])) feed.splice(i, 1);
     }
+    if (feed.length > 40) feed.length = 40;
     feed.forEach(r => {
       const more = (r.sameEvent || []).map(x => x.source).filter((x, i, a) => x && x !== r.source && a.indexOf(x) === i);
       r.hasMore = (r.sameEvent || []).length > 0;
