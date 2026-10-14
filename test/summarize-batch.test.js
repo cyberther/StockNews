@@ -148,3 +148,16 @@ test('article links may not reach this PC or its network', async () => {
   await assert.rejects(httpGet('http://localhost/'), /blocked address/);
   await assert.rejects(httpGet('file:///etc/passwd'), /not http/);
 });
+
+test('replies about what the article lacks are rejected (real VRT and OKLO replies)', () => {
+  const story = { headline: 'Some headline' };
+  assert.equal(looksWrong('Firefly Aerospace a raportat venituri de 30 de milioane de dolari. Articolul compară cele două companii și nu menționează compania VRT.', story, 'ro'), 'says what the story lacks');
+  assert.equal(looksWrong('Nu există informații relevante în articol despre compania analizată.', story, 'ro'), 'says what the story lacks');
+  // A fact about the company that happens to use "nu oferă" is a summary.
+  assert.equal(looksWrong('Acțiunile Tesla au crescut cu 3%, iar compania nu oferă o prognoză nouă pentru livrări.', story, 'ro'), '');
+});
+
+test('an English closing sentence and "demovat" are cleaned from the real ASTS summary', () => {
+  assert.equal(cleanSummary('Piper Sandler a demovat AST SpaceMobile de la Overweight la Neutral, cu o țintă de 54 de dolari. No other figures given.'),
+    'Piper Sandler a retrogradat AST SpaceMobile de la Overweight la Neutral, cu o țintă de 54 de dolari.');
+});
