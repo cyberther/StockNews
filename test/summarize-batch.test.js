@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cleanSummary, dropFiller, fixRomanian, httpGet, isPublicAddress, looksWrong, trimSentences, usable } from '../tools/summarize-batch.mjs';
+import { cleanSummary, dedupeQueue, dropFiller, fixRomanian, httpGet, isPublicAddress, looksWrong, trimSentences, usable } from '../tools/summarize-batch.mjs';
 
 test('the real Tesla summary loses its English "close"', () => {
   assert.equal(fixRomanian('Tesla (TSLA) s-a încheiat la 378,03$, cu o scădere de 1,22% față de ultimul close.'),
@@ -191,4 +191,10 @@ test('a page marked as paid content is not read, however the flag is written (re
   assert.equal(isPaidPage('<meta property="article:content_tier" content="locked">'), true);
   assert.equal(isPaidPage('<script type="application/ld+json">{"isAccessibleForFree":true}</script>'), false);
   assert.equal(isPaidPage('<meta property="article:content_tier" content="free">'), false);
+});
+
+test('an article filed under several tickers is written once per language', () => {
+  const q = [['AAPL:142903568', 'ro'], ['NVDA:142903568', 'ro'], ['AAPL:142903568', 'de'], ['NVDA:142903568', 'de'], ['MSFT:1', 'ro']]
+    .map(([id, lang]) => ({ story: { id }, lang }));
+  assert.deepEqual(dedupeQueue(q).map(x => x.story.id + '|' + x.lang), ['AAPL:142903568|ro', 'AAPL:142903568|de', 'MSFT:1|ro']);
 });
