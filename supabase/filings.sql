@@ -8,7 +8,8 @@
 -- `data`. The ticker page's "Insider & filings" shows them as tables, newest first.
 --
 -- Run once in the Supabase SQL editor, after summaries.sql (it uses summary_secret_ok);
--- safe to run again. Unlike the news stories, filings are not pruned.
+-- safe to run again. Only the last 6 months are kept (undated documents are not stored), and
+-- figures are read only for the last month's documents.
 
 create table if not exists public.filings (
   id            bigint generated always as identity primary key,
@@ -69,6 +70,7 @@ begin
     insert into public.filings (ticker, url, title, published_at, kind, source, official)
     select ticker, url, title, published_at, kind, source, official from r
     where ticker ~ '\.RO$' and url ~ '^https://' and length(title) between 3 and 400
+      and published_at > now() - interval '6 months' and published_at < now() + interval '1 day'
       and kind in ('insider', 'results', 'dividend', 'agm', 'holding', 'report', 'other')
     on conflict (ticker, url) do update
       set published_at = coalesce(public.filings.published_at, excluded.published_at),
@@ -82,9 +84,9 @@ begin
   return n;
 end $$;
 
--- The batch job: documents whose figures haven't been read. The last month first, then the
--- last two years, then the rest; in each, dealings, holdings, dividends and results before
--- general meetings, newest first; undated documents last.
+-- The batch job: the last month's documents whose figures haven't been read; dealings,
+-- holdings, dividends and results before general meetings, newest first. Older ones are
+-- never read.
 create or replace function public.filings_pending(p_secret text, p_limit integer default 2)
 returns table (id bigint, ticker text, url text, title text, kind text, published_at timestamptz)
 language plpgsql stable security definer set search_path = public as $$
@@ -95,9 +97,8 @@ begin
   return query
     select f.id, f.ticker, f.url, f.title, f.kind, f.published_at from public.filings f
     where f.extract_status is null and f.kind in ('insider', 'results', 'dividend', 'agm', 'holding')
-    order by (f.published_at > now() - interval '1 month') desc nulls last,
-             (f.published_at > now() - interval '2 years') desc nulls last,
-             array_position(array['insider', 'holding', 'dividend', 'results', 'agm'], f.kind),
+      and f.published_at > now() - interval '1 month'
+    order by array_position(array['insider', 'holding', 'dividend', 'results', 'agm'], f.kind),
              f.published_at desc nulls last
     limit least(greatest(coalesce(p_limit, 2), 1), 50);
 end $$;
@@ -120,3 +121,11 @@ revoke all on function public.filings_save(text, bigint, text, jsonb, text) from
 grant execute on function public.filings_upsert(text, jsonb, jsonb) to anon, authenticated;
 grant execute on function public.filings_pending(text, integer) to anon, authenticated;
 grant execute on function public.filings_save(text, bigint, text, jsonb, text) to anon, authenticated;
+
+-- Documents older than 6 months (or without a date) are deleted every night.
+create or replace function public.filings_prune() returns void language sql security definer set search_path = public as $$
+  delete from public.filings where published_at is null or published_at < now() - interval '6 months';
+$$;
+revoke all on function public.filings_prune() from public, anon, authenticated;
+select cron.unschedule(jobid) from cron.job where jobname = 'market-pulse-filings-prune';
+select cron.schedule('market-pulse-filings-prune', '23 3 * * *', $job$ select public.filings_prune(); $job$);
