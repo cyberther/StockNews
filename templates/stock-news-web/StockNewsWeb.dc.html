@@ -2483,12 +2483,13 @@ class Component extends DCLogic {
       url:x.url || '', source:x.source || '', official: x.official !== false })) : null;
     const tickerSignals = liveSig || SIGNALS[stock.ticker] || [];
     const fromWhere = x => x.source + (x.official ? '' : ' \u00b7 ' + (u.sigPress || 'press'));
+    const stampTxt = st => String(st || '').replace(/^(\d+)d$/, '$1' + (u.agoD || 'd'));
     const sigRows = tickerSignals.map(x => x.type === 'insider'
-      ? { stamp:x.stamp, tag:x.role || u.sigInsider || 'Insider', url:x.url || '', hasUrl:!!x.url, noUrl:!x.url,
+      ? { stamp:stampTxt(x.stamp), tag:x.role || u.sigInsider || 'Insider', url:x.url || '', hasUrl:!!x.url, noUrl:!x.url,
           title: x.who ? x.who + ' ' + (x.act === 'buy' ? u.sigBuy : u.sigSell) + ' ' + x.shares + ' ' + u.sigShares : x.title,
           detail: x.who ? [x.value, x.source].filter(Boolean).join(' \u00b7 ') : fromWhere(x),
           accent: x.act === 'buy' ? 'var(--s-ink)' : 'var(--color-accent)' }
-      : { stamp:x.stamp, tag:u.sigFiling, url:x.url || '', hasUrl:!!x.url, noUrl:!x.url,
+      : { stamp:stampTxt(x.stamp), tag:u.sigFiling, url:x.url || '', hasUrl:!!x.url, noUrl:!x.url,
           title: x.title || 'Form ' + x.form,
           detail: x.form ? [((u.formNames || {})[x.form] || ''), x.item].filter(Boolean).join(' \u00b7 ') || x.source || '' : fromWhere(x),
           accent:'var(--s-mute)' });
