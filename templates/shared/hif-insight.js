@@ -53,7 +53,8 @@ function attribute(input) {
     const excess = peerMed == null ? mag : mag - Math.abs(peerMed);
     if (!sectorDriven || excess >= mag * 0.5) {
       return { kind:'news', label:t.whyNews, detail:top.headline, source:top.source, url:top.url || '',
-        confidence: excess >= mag * 0.6 ? 'high' : 'medium',
+        // Without peers to compare with, nothing shows the stock moved on its own news.
+        confidence: peerMed != null && excess >= mag * 0.6 ? 'high' : 'medium',
         note: peerMed == null ? '' : fill(t.whyOutran, { n: Math.abs(excess).toLocaleString(LOC(), { minimumFractionDigits:1, maximumFractionDigits:1 }) }), weight:3 };
     }
   }

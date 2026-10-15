@@ -15,7 +15,7 @@
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
 <div class="app-head" style="display:flex;align-items:center;gap:20px;padding:8px 20px;height:56px;border-bottom:1px solid var(--s-rule);flex:none">
-<div style="flex:none;display:flex;align-items:center;gap:10px"><img src="./assets/aa-logo.png" alt="" style="width:34px;height:auto;mix-blend-mode:lighten"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.02em">{{ brand }}</span></div>
+<div style="flex:none;display:flex;align-items:center;gap:10px"><img src="./assets/aa-logo.png" alt="" style="width:34px;height:auto"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.02em">{{ brand }}</span></div>
 <div class="app-term" style="flex:none;white-space:nowrap;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.terminal }}</div>
 <div data-m="marquee" style="flex:1 1 auto;min-width:0;display:flex;background:transparent;margin-left:12px;overflow:hidden">
 <div>
@@ -224,10 +224,11 @@
 <div style="padding:18px var(--gx);border-top:1px solid var(--s-rule)">
 <div style="display:flex;align-items:baseline;gap:10px">
 <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.whyTitle }}</span>
-<span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-left:auto">{{ whyConf }}</span>
+<span title="{{ ui.whyConfHelp }}" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-left:auto;cursor:help;text-decoration:underline dotted;text-underline-offset:3px">{{ whyConf }}</span>
 </div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:20px;line-height:1.2;letter-spacing:-0.02em;margin-top:6px;color:{{ whyTone }}">{{ whyLabel }}</div>
-<div style="font-size:14px;line-height:1.45;margin-top:6px;max-width:56ch;text-wrap:pretty">{{ whyDetail }}</div>
+<div style="font-size:16px;line-height:1.5;margin-top:6px;text-wrap:pretty">{{ whyDetail }}</div>
+<sc-if value="{{ whyConf }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);margin-top:6px;text-wrap:pretty">{{ ui.whyConfHelp }}</div></sc-if>
 <sc-if value="{{ whyHasLink }}" hint-placeholder-val="{{ false }}">
 <button onClick="{{ openWhy }}" style-hover="color:var(--s-ink)" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 0;min-height:32px;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.04em;cursor:pointer">{{ whyLinkLabel }}<span aria-hidden="true">↗</span></button>
 </sc-if>
@@ -250,7 +251,7 @@
 <sc-if value="{{ hasCall }}" hint-placeholder-val="{{ true }}">
 <div style="padding:18px var(--gx);border-top:1px solid var(--s-rule)">
 <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);margin-bottom:6px">{{ ui.theCall }}</div>
-<div style="font-size:17px;font-weight:600;line-height:1.5;text-wrap:pretty;max-width:64ch">{{ stock.call }}</div>
+<div style="font-size:17px;font-weight:600;line-height:1.5;text-wrap:pretty">{{ stock.call }}</div>
 <div style="font-size:12px;color:var(--s-mute);margin-top:12px"><sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent)">{{ freqNote }}</span></sc-if><sc-if value="{{ isProTier }}" hint-placeholder-val="{{ false }}"><span>{{ freqNote }}</span></sc-if></div>
 </div>
 </sc-if>
@@ -766,7 +767,7 @@
 <div data-m="smooth" data-screen-label="Landing" class="lp" style="position:fixed;inset:0;z-index:40;background:#0B0B0C;color:var(--s-ink);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column">
 <header class="lp-head" style="flex:none;display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:20px clamp(20px,4vw,64px);background:#0E0E10;border-bottom:1px solid var(--s-rule)">
 <div style="display:flex;align-items:center;gap:16px;min-width:0">
-<img src="./assets/aa-logo.png" alt="" class="lp-logo" style="width:64px;height:auto;mix-blend-mode:lighten;flex:none">
+<img src="./assets/aa-logo.png" alt="" class="lp-logo" style="width:64px;height:auto;flex:none">
 <div style="min-width:0">
 <div style="font-family:var(--font-heading);font-weight:700;font-size:clamp(22px,2.4vw,32px);letter-spacing:-0.02em;line-height:1">{{ brand }}</div>
 <div class="lp-tag" style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--s-mute);margin-top:8px">{{ ui.lpTag }}</div>
@@ -827,7 +828,7 @@
 <div data-m="fade" onClick="{{ closeAuth }}" style="position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.6);display:flex;justify-content:flex-end">
 <div data-m="slide" onClick="{{ stopProp }}" role="dialog" aria-modal="true" aria-label="{{ ui.authKicker }}" class="auth-panel" style="width:min(100%,460px);height:100%;overflow-y:auto;box-sizing:border-box;background:var(--s-bg);border-left:1px solid var(--s-rule);padding:36px">
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
-<img src="./assets/aa-logo.png" alt="" style="width:44px;height:auto;mix-blend-mode:lighten">
+<img src="./assets/aa-logo.png" alt="" style="width:44px;height:auto">
 <span style="font-family:var(--font-heading);font-weight:700;font-size:18px">{{ brand }}</span>
 <button onClick="{{ closeAuth }}" style="margin-left:auto;min-height:44px;padding:0 4px;background:transparent;border:0;color:var(--s-mute);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer" style-hover="color:var(--color-accent)">{{ ui.lpClose }}</button>
 </div>
@@ -2451,8 +2452,12 @@ class Component extends DCLogic {
     const sector = SEC[stock.ticker] || '';
     const peerList = ((H.SECTORS || {})[sector] || []).filter(t => t !== stock.ticker);
     const peers = peerList.map(t => ({ ticker:t, move:(rec(t) || {}).move })).filter(p => p.move);
+    // Candidate causes of today's move: news from the last 24 hours, not opinion pieces.
+    const isOpN = (window.HIF && window.HIF.isOpinion) || (() => false);
     const dayNews = ((live && LN[stock.ticker]) ? LN[stock.ticker] : NEWS.filter(n => n.ticker === stock.ticker))
-      .slice(0, 3).map(n => ({ headline: (live && n.id && this.aiText(stock.ticker + ':' + n.id)) || (typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN), source:n.source, url:n.url || '' }));
+      .filter(n => !isOpN(n.source, n.url)).slice(0, 3)
+      .map(n => ({ headline: (live && n.id && this.aiText(stock.ticker + ':' + n.id)) || (typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN), source:n.source, url:n.url || '',
+        sameDay: live && n.ts ? Date.now() / 1000 - n.ts < 86400 : true }));
     const why = IN ? IN.attribute({ t:u, ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
     // The newest story's AI summary (the source's English snippet is not a conclusion).
     const callText = (stock.call && stock.call[L]) || (live && LN[stock.ticker] && LN[stock.ticker][0] && LN[stock.ticker][0].id ? this.aiText(stock.ticker + ':' + LN[stock.ticker][0].id) : '') || '';
