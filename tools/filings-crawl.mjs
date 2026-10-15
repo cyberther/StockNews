@@ -108,14 +108,25 @@ export async function crawlCompany(ticker, site, source) {
     found.set(url, { ticker, url, title: t.slice(0, 400), published_at: day && day <= today() ? day + 'T12:00:00Z' : null, kind, source, official: true });
   };
   const hint = ISSUERS[ticker] || {};
-  const home = site ? site.replace(/\/$/, '') : '';
+  let home = site ? site.replace(/\/$/, '') : '';
   if (!home && !hint.feed && !hint.sitemap) return { rows: [], status: 'none' };
   if (home && !(await allowed(home + '/'))) return { rows: [], status: 'robots' };
-  // A site that turns programs away (403, a bot wall) is left alone.
   if (home) {
-    let st = 0;
-    try { st = (await httpGet(home + '/', { timeout: 15000, ua: UA })).status; } catch {}
+    // A site that turns programs away (403, a bot wall) is left alone. One that moved
+    // (a renamed company: sif1.ro -> lion-capital.ro, by redirect or meta refresh) is read
+    // at its new address.
+    let r = null;
+    try { r = await httpGet(home + '/', { timeout: 15000, ua: UA }); } catch {}
+    const st = r ? r.status : 0;
     if (st === 401 || st === 403 || st === 429 || st === 0) return { rows: [], status: st ? 'blocked' : 'unreachable' };
+    const refresh = /<meta[^>]+http-equiv=["']?refresh["']?[^>]+content=["'][^"']*url=([^"'>\s]+)/i.exec(r.body || '');
+    let moved = r.url;
+    if (refresh) { try { moved = new URL(refresh[1], r.url).toString(); } catch {} }
+    const origin = new URL(moved).origin;
+    if (origin !== new URL(home).origin) {
+      if (!(await allowed(origin + '/'))) return { rows: [], status: 'robots' };
+      home = origin;
+    }
   }
 
   // 1. RSS feed.

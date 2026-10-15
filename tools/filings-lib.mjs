@@ -11,7 +11,7 @@ export const fold = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, ''
 // dividends, general meetings, results, and any other current report.
 const KINDS = [
   ['insider', /\bpdmr\b|\bart(?:\.|icolul|-)?\s*19\b|responsabilitati de conducere|persoane(?:lor)? (?:cu|care exercita) (?:functii|responsabilitati)|tranzactii(?:le)?[ -](?:ale[ -]|efectuate[ -]de[ -])?(?:management|managementului|conducerii|persoanelor|administratorilor|directorilor|insider)|managers?'?[ -]transactions|directors?'?[ -]dealings|insider/],
-  ['holding', /notificare[ -](?:privind[ -])?(?:prag|detiner|drepturi de vot)|prag(?:uri|ului)?[ -]de[ -]detinere|detineri(?:\/|[ -])vot|depasire[ -]prag|major[ -]holding|voting[ -]rights|holding[ -]notification|\bart(?:\.|icolul|-)?\s*(?:69|71|72|73)\b/],
+  ['holding', /notificare[ -](?:privind[ -])?(?:prag|detiner|drepturi de vot)|prag(?:uri|ului)?[ -]de[ -]detinere|detineri(?:\/|[ -])vot|depasire[ -]prag|major[ -]holding|holding[ -]notification|notification[ -]of[ -](?:major[ -])?holding|\bart(?:\.|icolul|-)?\s*(?:69|71|72|73)\b/],
   ['dividend', /dividend/],
   // AGA, AGOA... only in capitals in titles ("Aga" is also a surname); lower case in file names.
   ['agm', /adunar(?:ea|ii|ilor|i)[ -]general|convoca(?:re|rea|tor)|hotarar(?:ea|ile|i)[ -](?:ag|adunar)|general[ -]meeting|\b(?:agoa|agea)\b/],
@@ -19,7 +19,7 @@ const KINDS = [
   ['report', /raport(?:ul)?[ -]curent|rapoart(?:e|ele)[ -]curente|ad[ -]?hoc|current[ -]report|comunicat|notificare|informare|press[ -]release|anunt/]
 ];
 // Documents that are not announcements: governance texts, forms, CVs, asset declarations.
-const NOISE = /plangeri|indicatori(?:i)?[ -]de[ -]performanta|standard(?:ul)?[ -]de[ -]performanta|tarif|power[ -]of[ -]attorney|proxy[ -](?:form|card)|ballot|voting[ -](?:form|by[ -]correspondence)|articles[ -]of[ -]association|\bmodel(?:ul)?[ -](?:de[ -])?(?:procura|imputernicire|special)|statut|act(?:ul)?[ -]constitutiv|cod(?:ul)?[ -](?:de[ -])?(?:guvernanta|etica|conduita)|regulament|politic(?:a|i)[ -](?:de|privind)(?![ -]dividend)|declarati(?:e|i|a|ile)[ -]de[ -](?:avere|interese)|\bcv\b|curriculum|formular|procura|imputernicire|buletin(?:ul)?[ -]de[ -]vot|vot[ -]prin[ -]corespondenta|cookie|gdpr|termeni|privacy|confidentialitate|cariere|achizitii[ -]publice|licitati|anunt[ -]de[ -](?:angajare|recrutare|concurs)|oferta[ -]de[ -]munca/;
+const NOISE = /frequently[ -]asked|intrebari[ -]frecvente|\bfaq\b|rules[ -]and[ -]procedure|procedura[ -](?:de[ -])?(?:vot|desfasurare)|information[ -]regarding[ -]the[ -]voting|informatii[ -]privind[ -]drepturile[ -]de[ -]vot|plangeri|indicatori(?:i)?[ -]de[ -]performanta|standard(?:ul)?[ -]de[ -]performanta|tarif|power[ -]of[ -]attorney|proxy[ -](?:form|card)|ballot|voting[ -](?:form|by[ -]correspondence)|articles[ -]of[ -]association|\bmodel(?:ul)?[ -](?:de[ -])?(?:procura|imputernicire|special)|statut|act(?:ul)?[ -]constitutiv|cod(?:ul)?[ -](?:de[ -])?(?:guvernanta|etica|conduita)|regulament|politic(?:a|i)[ -](?:de|privind)(?![ -]dividend)|declarati(?:e|i|a|ile)[ -]de[ -](?:avere|interese)|\bcv\b|curriculum|formular|procura|imputernicire|buletin(?:ul)?[ -]de[ -]vot|vot[ -]prin[ -]corespondenta|cookie|gdpr|termeni|privacy|confidentialitate|cariere|achizitii[ -]publice|licitati|anunt[ -]de[ -](?:angajare|recrutare|concurs)|oferta[ -]de[ -]munca/;
 
 // By the title; a document's address counts too (its title is often just its file name).
 export function classifyKind(title, url = '') {
