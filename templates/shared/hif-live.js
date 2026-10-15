@@ -271,6 +271,16 @@ function earningsText(ed, u){
   return out;
 }
 
+// Candles for the live chart page (the gateway's /candles): { t, o, h, l, c, v, currency,
+// tz, delay, price, prevClose, exchange, marketTime }. tail: today's bars only (a refresh).
+// Not cached here: the gateway and the CDN keep them for a few seconds.
+async function candles(symbol, interval, tail){
+  if (proxyState === 'no') return null;
+  const j = await callProxy('/candles', tail ? { symbol: symbol, interval: interval, tail: '1' } : { symbol: symbol, interval: interval });
+  if (!j || !Array.isArray(j.t)) return null;
+  return j;
+}
+
 // The last 30 days of filings and insider dealings (the gateway's /filings):
 //   { items: [{ type:'insider'|'filing', datetime, title, url, source, official, act, who, shares, value, form }],
 //     coverage: 'issuer'|'press'|'sec'|'none' }
@@ -364,7 +374,7 @@ function translatedUrl(url, lang){
   return 'https://translate.google.com/translate?sl=auto&tl=' + tl + '&hl=' + tl + '&u=' + encodeURIComponent(url);
 }
 
-window.HIFLive = { filings, quote, quotes, roNews, euNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
+window.HIFLive = { candles, filings, quote, quotes, roNews, euNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();
