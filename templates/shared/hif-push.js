@@ -222,5 +222,13 @@ async function loadStories(filter, since) {
   return out;
 }
 
-window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, supported };
+// The latest digest of a ticker's previous trading day in lang (supabase/digests.sql), or null.
+async function loadDigest(ticker, lang) {
+  if (!live() || !ticker || !lang) return null;
+  const r = await auth().rest('ticker_digests?select=day,digest,stories&ticker=eq.' + encodeURIComponent(ticker) +
+    '&lang=eq.' + encodeURIComponent(lang) + '&order=day.desc&limit=1');
+  return r.ok && Array.isArray(r.body) && r.body[0] ? r.body[0] : null;
+}
+
+window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, supported };
 })();

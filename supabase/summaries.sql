@@ -73,10 +73,10 @@ on conflict (story_id, lang) do nothing;
 -- templates/shared/hif-data.js.
 create or replace function public.is_opinion(p_source text, p_url text) returns boolean
 language sql immutable as $$
-  select lower(trim(coalesce(p_source, ''))) in ('motley fool', '24/7 wall st.', 'stocktwits', 'stocktwits.com', 'tikr', 'trefis', 'trefis.com',
+  select lower(trim(coalesce(p_source, ''))) in ('motley fool', '24/7 wall st.', 'tikr', 'trefis', 'trefis.com',
            'insider monkey', 'gurufocus', 'simply wall st', 'zacks', 'marketbeat', 'investorplace', 'chartmill', 'chartmill.com',
            'barchart', 'barchart.com', 'seeking alpha', 'seekingalpha', 'tipranks', 'kiplinger', 'investopedia')
-      or coalesce(p_url, '') ~* '^https?://([a-z0-9-]+\.)*(fool\.com|247wallst\.com|stocktwits\.com|tikr\.com|trefis\.com|insidermonkey\.com|gurufocus\.com|simplywall\.st|zacks\.com|marketbeat\.com|investorplace\.com|chartmill\.com|barchart\.com|seekingalpha\.com|tipranks\.com|kiplinger\.com|investopedia\.com)(/|$)'
+      or coalesce(p_url, '') ~* '^https?://([a-z0-9-]+\.)*(fool\.com|247wallst\.com|tikr\.com|trefis\.com|insidermonkey\.com|gurufocus\.com|simplywall\.st|zacks\.com|marketbeat\.com|investorplace\.com|chartmill\.com|barchart\.com|seekingalpha\.com|tipranks\.com|kiplinger\.com|investopedia\.com)(/|$)'
 $$;
 
 -- Stories published in the last p_hours without a summary in p_lang: first those someone
