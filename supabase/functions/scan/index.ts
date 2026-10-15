@@ -5,7 +5,8 @@
 //   2. asks Finnhub for each ticker's latest company news,
 //   3. stores stories it has not seen before in public.stories,
 //   4. sends each user one web-push alert listing new stories on the tickers they have
-//      push turned on for, and drops subscriptions the push service says are gone.
+//      push turned on for, and drops subscriptions the push service says are gone,
+//   5. alerts the admins (account_status.is_admin) of new accounts waiting for approval.
 //
 // Secrets (Dashboard → Edge Functions → Secrets, or `supabase secrets set`):
 //   FINNHUB_KEY        the same Finnhub key as on Netlify
@@ -295,6 +296,28 @@ Deno.serve(async (req) => {
         else errors.push(`push ${code || ''}: ${(e as Error).message}`.slice(0, 200));
       }
     });
+  }
+
+  // New accounts waiting for the owner's approval (supabase/approval.sql): one alert to the
+  // admins' devices, once per account.
+  const { data: waiting } = await db.from('account_status').select('user_id,email')
+    .eq('approved', false).is('notified_at', null).limit(20);
+  if (waiting && waiting.length && vapidOk) {
+    const { data: admins } = await db.from('account_status').select('user_id').eq('is_admin', true);
+    const ids = (admins || []).map(a => a.user_id);
+    const { data: adminSubs } = ids.length
+      ? await db.from('push_subscriptions').select('endpoint,p256dh,auth').in('user_id', ids) : { data: [] };
+    webpush.setVapidDetails(env('VAPID_SUBJECT'), env('VAPID_PUBLIC_KEY'), env('VAPID_PRIVATE_KEY'));
+    const payload = JSON.stringify({ title: waiting.length === 1 ? 'Cont nou de aprobat' : `${waiting.length} conturi noi de aprobat`,
+      body: waiting.map(w => w.email || '?').join(', ') + ' · Supabase → account_status → approved',
+      url: env('APP_URL') || '/', tag: 'market-pulse-signup' });
+    let sent = 0;
+    await pool(adminSubs || [], 4, async sub => {
+      try { await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload, { TTL: 86400, urgency: 'high' }); sent++; }
+      catch (e) { errors.push(`signup alert: ${(e as Error).message}`.slice(0, 200)); }
+    });
+    // Marked only once an admin device got it; until then it is tried again every run.
+    if (sent) await db.from('account_status').update({ notified_at: new Date().toISOString() }).in('user_id', waiting.map(w => w.user_id));
   }
 
   const summary = { started_at, tickers: tickers.length, new_stories: fresh.length, pushes,
