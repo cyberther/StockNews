@@ -1,0 +1,12 @@
+# Twice a day: announcements are published in the morning and after the close. The figures
+# are read by the summary job (FILINGS_LIMIT per run).
+[Unit]
+Description=Read the Bucharest listings' filings twice a day
+
+[Timer]
+OnCalendar=*-*-* 08,18:40:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
