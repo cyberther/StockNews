@@ -204,8 +204,13 @@
       return t == null || p == null ? null : { t, p: +p.toPrecision(8) };
     };
     const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    let lastClick = { at: 0, x: -1 };
     const onClick = param => {
       if (!tool) return;
+      // The same click reported twice (click, then double click): once.
+      const x = param && param.point ? Math.round(param.point.x) : -1;
+      if (Date.now() - lastClick.at < 60 && x === lastClick.x) return;
+      lastClick = { at: Date.now(), x };
       const pt = pointAt(param);
       if (!pt) return;
       if (tool === 'hline') { drawings.push({ id: newId(), type: 'hline', a: pt, b: pt }); syncHLines(); if (o.onDraw) o.onDraw(drawings.slice()); return; }
