@@ -2399,7 +2399,8 @@ class Component extends DCLogic {
   static get LC_INTERVALS() { return [['1m', 5000], ['5m', 10000], ['15m', 20000], ['30m', 20000], ['60m', 60000], ['1d', 60000], ['1wk', 300000], ['1mo', 300000]]; }
   openLiveChart(sym) {
     if (!sym) return;
-    this.setState({ lcSym: sym, lcIv: this.state.lcIv || '5m', lcErr: '', lcHover: null });
+    const iv = this.state.lcIv || '5m';
+    this.setState({ lcSym: sym, lcIv: /^\d+s$/.test(iv) && /\.(RO|DE|L)$/.test(sym) ? '1m' : iv, lcErr: '', lcHover: null });
     this.go('chart');
   }
   loadScriptOnce(path) {
@@ -2429,6 +2430,7 @@ class Component extends DCLogic {
     this.setState({ lcBusy: true, lcErr: '' });
     const iv = s.lcIv, sym = s.lcSym, intraday = !/^1(d|wk|mo)$/.test(iv);
     const L = window.HIFLive;
+    if (/^\d+s$/.test(iv)) return this.startSecondChart(key, host, sym, parseInt(iv, 10));
     Promise.all([this.loadScriptOnce('../shared/hif-livechart.js'), L && L.candles ? L.candles(sym, iv) : null])
       .then(async ([, data]) => {
         if (this._lcKey !== key) return;
@@ -2466,7 +2468,66 @@ class Component extends DCLogic {
       }).catch(() => {}).finally(() => this.pollLiveChart(key));
     }, every);
   }
+  // Second bars (US): the relay on the PC (tools/live-relay.mjs) streams 1-second bars;
+  // they are folded here into 5, 15 or 30 second ones. The header's price and previous
+  // close come from today's minute bars.
+  static foldSeconds(raw, sec) {
+    const out = [];
+    for (const b of raw) {
+      const t = Math.floor(b.t / sec) * sec, last = out[out.length - 1];
+      if (last && last.t === t) { last.h = Math.max(last.h, b.h); last.l = Math.min(last.l, b.l); last.c = b.c; last.v += b.v; }
+      else out.push({ t, o: b.o, h: b.h, l: b.l, c: b.c, v: b.v });
+    }
+    return out;
+  }
+  async startSecondChart(key, host, sym, sec) {
+    const L = window.HIFLive, A = window.HIFAuth, relay = A && A.liveRelay ? A.liveRelay() : '';
+    try {
+      const [, day, token] = await Promise.all([this.loadScriptOnce('../shared/hif-livechart.js'),
+        L.candles(sym, '1m', true).catch(() => null), A.token()]);
+      if (this._lcKey !== key) return;
+      if (!relay || !token) throw new Error('no relay');
+      if (this._lc) { this._lc.destroy(); this._lc = null; }
+      this._lc = await window.HIFLiveChart.create(host, { tz: (day && day.tz) || 'America/New_York', locale: this.appLocale, intraday: true, seconds: true,
+        onHover: b => this.setState({ lcHover: b }) });
+      this._lc.setAverages(this.state.lcAvg || {});
+      this._lcLoading = false;
+      this.setState({ lcBusy: false, lcMeta: day ? Object.assign({}, day) : { tz: 'America/New_York' }, lcLast: Date.now(), lcRelay: 'connecting' });
+      let raw = [];
+      const es = new EventSource(relay + '/stream?symbol=' + encodeURIComponent(sym) + '&token=' + encodeURIComponent(token));
+      this._lcStream = es;
+      const show = (bars, all) => {
+        if (this._lcKey !== key || !this._lc) return;
+        const folded = this.constructor.foldSeconds(all ? raw : raw.filter(b => b.t >= Math.floor(bars[0].t / sec) * sec), sec);
+        if (all) this._lc.setBars(folded); else this._lc.mergeBars(folded);
+        const last = raw[raw.length - 1];
+        this.setState(st => ({ lcLast: Date.now(), lcBars: folded.slice(-2), lcErr: '',
+          lcMeta: last ? Object.assign({}, st.lcMeta, { price: last.c, marketTime: last.t }) : st.lcMeta }));
+      };
+      es.addEventListener('history', ev => {
+        const d = JSON.parse(ev.data); raw = (d.bars || []).slice();
+        this.setState({ lcRelay: d.live ? 'live' : 'waiting' });
+        if (raw.length) show(raw, true);
+      });
+      es.addEventListener('bars', ev => {
+        const d = JSON.parse(ev.data), list = d.bars || [];
+        if (!list.length) return;
+        for (const b of list) {
+          const i = raw.length && raw[raw.length - 1].t >= b.t ? raw.findIndex(x => x.t === b.t) : -1;
+          if (i >= 0) raw[i] = b; else raw.push(b);
+        }
+        if (raw.length > 12000) raw = raw.slice(-10800);
+        show(list, false);
+        if (this.state.lcRelay !== 'live') this.setState({ lcRelay: 'live' });
+      });
+      es.onerror = () => { if (this._lcKey === key) this.setState({ lcRelay: 'offline' }); };
+    } catch (e) {
+      this._lcLoading = false;
+      if (this._lcKey === key) this.setState({ lcBusy: false, lcErr: this.copy.lcRelayOff || 'Second bars are not available right now.' });
+    }
+  }
   stopLiveChart() {
+    if (this._lcStream) { this._lcStream.close(); this._lcStream = null; }
     clearTimeout(this._lcTimer);
     if (this._lc) { this._lc.destroy(); this._lc = null; }
     this._lcKey = ''; this._lcLoading = false;
@@ -2480,15 +2541,17 @@ class Component extends DCLogic {
     const h = s.lcHover || (s.lcBars && s.lcBars[s.lcBars.length - 1]) || null;
     const ivLabel = k => (u['lcIv_' + k] || k);
     const local = /\.(RO|DE|L)$/.test(sym);
+    const secOk = !local && !!(window.HIFAuth && window.HIFAuth.liveRelay && window.HIFAuth.liveRelay());
+    const secMode = /^\d+s$/.test(s.lcIv || '');
     const age = s.lcLast ? Math.round((Date.now() - s.lcLast) / 1000) : null;
     const everyMs = (this.constructor.LC_INTERVALS.find(x => x[0] === s.lcIv) || [0, 60000])[1];
-    const when = m.marketTime ? new Date(m.marketTime * 1000).toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit', timeZone: m.tz || undefined }) : '';
+    const when = m.marketTime ? new Date(m.marketTime * 1000).toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit', second: secMode ? '2-digit' : undefined, timeZone: m.tz || undefined }) : '';
     return {
       tickerLabel: this.tickerLabel ? this.tickerLabel(sym) : sym, name, price: m.price != null ? dec(m.price) + (m.currency ? ' ' + m.currency : '') : '—',
       move: chg == null ? '' : (chg >= 0 ? '+' : '\u2212') + Math.abs(chg).toLocaleString(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%',
       down: chg != null && chg < 0, up: !(chg != null && chg < 0),
       backLabel: '\u2190 ' + (this.tickerLabel ? this.tickerLabel(sym) : sym),
-      intervals: this.constructor.LC_INTERVALS.map(([k]) => ({ label: ivLabel(k), on: s.lcIv === k,
+      intervals: (secOk ? [['1s'], ['5s'], ['15s'], ['30s']] : []).concat(this.constructor.LC_INTERVALS).map(([k]) => ({ label: ivLabel(k), on: s.lcIv === k,
         bg: s.lcIv === k ? 'var(--color-accent)' : 'transparent', ink: s.lcIv === k ? 'var(--s-on-accent)' : 'var(--s-mute)', edge: s.lcIv === k ? 'var(--color-accent)' : 'var(--s-rule)',
         pick: () => this.setState({ lcIv: k, lcHover: null }) })),
       avgs: [20, 50].map(n => { const on = !!(s.lcAvg || {})[n]; return { label: 'SMA ' + n, on, ink: on ? 'var(--s-ink)' : 'var(--s-mute)', edge: on ? 'var(--color-accent)' : 'var(--s-rule)',
@@ -2496,9 +2559,10 @@ class Component extends DCLogic {
       zoomIn: () => this._lc && this._lc.zoom(0.7), zoomOut: () => this._lc && this._lc.zoom(1.45), reset: () => this._lc && this._lc.reset(),
       legend: h ? ['O ' + dec(h.o), 'H ' + dec(h.h), 'L ' + dec(h.l), 'C ' + dec(h.c), 'V ' + Number(h.v || 0).toLocaleString(loc, { notation: 'compact' })].join('   ') : '',
       busy: !!s.lcBusy, err: s.lcErr || '',
-      dot: s.lcErr ? 'var(--color-accent)' : 'var(--s-ink)',
-      status: (u.lcEvery || 'Updates every {n}').replace('{n}', everyMs < 60000 ? Math.round(everyMs / 1000) + ' s' : Math.round(everyMs / 60000) + ' min') + (when ? ' \u00b7 ' + (u.lcLastTrade || 'last price {t}').replace('{t}', when) : ''),
-      note: local ? (u.lcNoteLocal || 'Bucharest, XETRA and London prices come from Yahoo and may be delayed up to 15 minutes.') : (u.lcNoteUs || 'Minute bars from Yahoo. Second bars come in the next version.')
+      dot: s.lcErr || (secMode && s.lcRelay === 'offline') ? 'var(--color-accent)' : 'var(--s-ink)',
+      status: secMode ? ({ live: u.lcRelayLive, waiting: u.lcRelayWaiting, offline: u.lcRelayOffline }[s.lcRelay] || u.lcRelayConnecting || 'Connecting…') + (when ? ' \u00b7 ' + (u.lcLastTrade || 'last price {t}').replace('{t}', when) : '')
+        : (u.lcEvery || 'Updates every {n}').replace('{n}', everyMs < 60000 ? Math.round(everyMs / 1000) + ' s' : Math.round(everyMs / 60000) + ' min') + (when ? ' \u00b7 ' + (u.lcLastTrade || 'last price {t}').replace('{t}', when) : ''),
+      note: secMode ? (u.lcNoteSec || 'Second bars from Finnhub trades, built from the moment the relay started listening to this symbol.') : local ? (u.lcNoteLocal || 'Bucharest, XETRA and London prices come from Yahoo and may be delayed up to 15 minutes.') : (u.lcNoteUs || 'Minute bars from Yahoo. Second bars come in the next version.')
     };
   }
   // The Administration screen's values: requests waiting, then the last 30 days' approvals.
