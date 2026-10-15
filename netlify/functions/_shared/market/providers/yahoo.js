@@ -8,6 +8,27 @@ const RANGES = { '1d': '5m', '5d': '15m', '1mo': '60m', '6mo': '1d', ytd: '1d', 
 const WARM = { '1d': '5d', '5d': '1mo', '1mo': '3mo', '6mo': '1y', ytd: '2y', '1y': '2y', '5y': '10y' };
 
 export const CHART_RANGES = Object.keys(RANGES);
+// Candles for the live chart page: bar size -> how far back Yahoo serves it (1m: 7 days,
+// minute bars up to 60 days, hourly up to two years).
+export const CANDLE_RANGE = { '1m': '5d', '2m': '1mo', '5m': '1mo', '15m': '1mo', '30m': '1mo', '60m': '6mo', '1d': '5y', '1wk': '10y', '1mo': 'max' };
+export const CANDLE_INTERVALS = Object.keys(CANDLE_RANGE);
+// Yahoo's chart -> { t, o, h, l, c, v } arrays (bars without a price dropped), plus what the
+// page labels: currency, the exchange's time zone and how many minutes the data is delayed.
+export function compactCandles(data) {
+  const r = data && data.chart && data.chart.result && data.chart.result[0];
+  if (!r) return { t: [], o: [], h: [], l: [], c: [], v: [] };
+  const q = (r.indicators && r.indicators.quote && r.indicators.quote[0]) || {}, ts = r.timestamp || [];
+  const out = { t: [], o: [], h: [], l: [], c: [], v: [] };
+  ts.forEach((t, i) => {
+    const o = num((q.open || [])[i]), h = num((q.high || [])[i]), l = num((q.low || [])[i]), c = num((q.close || [])[i]);
+    if (o == null || h == null || l == null || c == null) return;
+    out.t.push(t); out.o.push(o); out.h.push(h); out.l.push(l); out.c.push(c); out.v.push(num((q.volume || [])[i]) || 0);
+  });
+  const m = r.meta || {};
+  return Object.assign(out, { currency: m.currency || '', tz: m.exchangeTimezoneName || '', delay: num(m.exchangeDataDelayedBy) || 0,
+    price: num(m.regularMarketPrice), prevClose: num(m.chartPreviousClose != null ? m.chartPreviousClose : m.previousClose),
+    exchange: m.fullExchangeName || m.exchangeName || '', marketTime: num(m.regularMarketTime) });
+}
 
 const num = v => (v == null || !Number.isFinite(Number(v)) ? null : Number(v));
 // London prices come in pence ("GBp"); the apps show pounds, like every other currency.
@@ -31,12 +52,16 @@ export const yahoo = {
   name: 'yahoo',
   needsKey: false,
   limits: {},
-  supports: cap => cap === 'chart' || cap === 'quote' || cap === 'profile',
+  supports: cap => cap === 'chart' || cap === 'candles' || cap === 'quote' || cap === 'profile',
   url(cap, p) {
     const u = new URL(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(p.symbol)}`);
     if (cap === 'chart') {
       u.searchParams.set('range', p.warm ? WARM[p.range] : p.range);
       u.searchParams.set('interval', RANGES[p.range]);
+    } else if (cap === 'candles') {
+      // tail=1: just today's bars, for the page's refresh.
+      u.searchParams.set('range', p.tail ? '1d' : CANDLE_RANGE[p.interval]);
+      u.searchParams.set('interval', p.interval);
     } else {
       // One daily bar: its meta block carries today's price, the previous close and the name.
       u.searchParams.set('range', '1d');
@@ -49,6 +74,7 @@ export const yahoo = {
   async transform(cap, raw, p) {
     const data = toPounds(raw);
     if (cap === 'chart') return data;
+    if (cap === 'candles') return compactCandles(data);
     const m = metaOf(data) || {};
     if (cap === 'quote') {
       const c = num(m.regularMarketPrice), pc = num(m.chartPreviousClose != null ? m.chartPreviousClose : m.previousClose);

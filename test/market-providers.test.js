@@ -134,3 +134,25 @@ test('provider keys never appear in replies or logs', async () => {
   const text = JSON.stringify([...r.headers]) + await r.text() + logs.join('');
   assert.equal(/fk-secret|td-secret/.test(text), false);
 });
+
+test('candles for the live chart: compact arrays, gaps dropped, bar sizes checked', async () => {
+  const { compactCandles } = await import('../netlify/functions/_shared/market/providers/yahoo.js');
+  const { handleMarketRequest, resetGatewayForTests } = await import('../netlify/functions/_shared/market/gateway.js');
+  const yahooChart = { chart: { result: [{ meta: { currency: 'USD', exchangeTimezoneName: 'America/New_York', regularMarketPrice: 181.2, chartPreviousClose: 180 },
+    timestamp: [100, 160, 220], indicators: { quote: [{ open: [1, null, 3], high: [2, null, 4], low: [0.5, null, 2.5], close: [1.5, null, 3.5], volume: [10, null, 30] }] } }] } };
+  const c = compactCandles(yahooChart);
+  assert.deepEqual([c.t, c.o, c.c, c.v], [[100, 220], [1, 3], [1.5, 3.5], [10, 30]]);
+  assert.equal(c.tz, 'America/New_York');
+  resetGatewayForTests();
+  const orig = globalThis.fetch;
+  let asked = '';
+  globalThis.fetch = async url => { asked = String(url); return Response.json(yahooChart); };
+  try {
+    const r = await handleMarketRequest(new Request('http://localhost/api/finnhub?path=/candles&symbol=NVDA&interval=1m&tail=1'), { log: () => {} });
+    assert.equal(r.status, 200);
+    assert.match(asked, /interval=1m/); assert.match(asked, /range=1d/);
+    assert.equal(r.headers.get('cache-control'), 'public, max-age=5');
+    const bad = await handleMarketRequest(new Request('http://localhost/api/finnhub?path=/candles&symbol=NVDA&interval=3s'), { log: () => {} });
+    assert.equal(bad.status, 400);
+  } finally { globalThis.fetch = orig; resetGatewayForTests(); }
+});
