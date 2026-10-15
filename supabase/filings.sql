@@ -82,9 +82,9 @@ begin
   return n;
 end $$;
 
--- The batch job: documents whose figures haven't been read. The last two years first, and in
--- them dealings, holdings, dividends and results before general meetings; newest first,
--- undated documents last.
+-- The batch job: documents whose figures haven't been read. The last month first, then the
+-- last two years, then the rest; in each, dealings, holdings, dividends and results before
+-- general meetings, newest first; undated documents last.
 create or replace function public.filings_pending(p_secret text, p_limit integer default 2)
 returns table (id bigint, ticker text, url text, title text, kind text, published_at timestamptz)
 language plpgsql stable security definer set search_path = public as $$
@@ -95,7 +95,8 @@ begin
   return query
     select f.id, f.ticker, f.url, f.title, f.kind, f.published_at from public.filings f
     where f.extract_status is null and f.kind in ('insider', 'results', 'dividend', 'agm', 'holding')
-    order by (f.published_at > now() - interval '2 years') desc nulls last,
+    order by (f.published_at > now() - interval '1 month') desc nulls last,
+             (f.published_at > now() - interval '2 years') desc nulls last,
              array_position(array['insider', 'holding', 'dividend', 'results', 'agm'], f.kind),
              f.published_at desc nulls last
     limit least(greatest(coalesce(p_limit, 2), 1), 50);
