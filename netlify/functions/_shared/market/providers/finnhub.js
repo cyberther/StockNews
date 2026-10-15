@@ -12,7 +12,9 @@ const PATHS = {
   recommendation: '/stock/recommendation',
   earnings: '/stock/earnings',
   earningsCalendar: '/calendar/earnings',
-  profile: '/stock/profile2'
+  profile: '/stock/profile2',
+  insiderTx: '/stock/insider-transactions',
+  secFilings: '/stock/filings'
 };
 
 export const finnhub = {

@@ -283,7 +283,7 @@
 </sc-if>
 </sc-if>
 <sc-if value="{{ tabResearch }}" hint-placeholder-val="{{ false }}">
-<div style="display:grid;grid-template-columns:1fr;gap:1px;background:var(--s-rule);border-top:1px solid var(--s-rule);margin-top:14px">
+<div style="display:grid;grid-template-columns:minmax(0,1fr);gap:1px;background:var(--s-rule);border-top:1px solid var(--s-rule);margin-top:14px">
 <div style="background:var(--s-bg);padding:16px 18px">
 <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.calendarTitle }}</div>
 <sc-for list="{{ calRows }}" as="e" hint-placeholder-count="3">
@@ -299,13 +299,44 @@
 
 <div style="background:var(--s-bg);padding:16px 18px">
 <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.signalsTitle }}</div>
+<sc-if value="{{ roF }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;margin-top:6px;font-size:12px;color:var(--s-mute)"><span>{{ fx.meta }}</span><sc-if value="{{ fx.hasPending }}" hint-placeholder-val="{{ false }}"><span>{{ fx.pendingNote }}</span></sc-if></div>
+<div role="tablist" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">
+<sc-for list="{{ fx.tabs }}" as="t" hint-placeholder-count="5">
+<button role="tab" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" style-hover="border-color:var(--color-accent)" style="min-height:34px;padding:0 12px;background:{{ t.bg }};border:1px solid {{ t.edge }};color:{{ t.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ t.label }}</button>
+</sc-for>
+</div>
+<sc-for list="{{ fx.tables }}" as="tb" hint-placeholder-count="1">
+<div style="margin-top:18px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:14px;color:var(--s-ink)">{{ tb.title }}</div>
+<sc-if value="{{ tb.hasRows }}" hint-placeholder-val="{{ true }}">
+<div role="table" style="overflow-x:auto;margin-top:8px;font-variant-numeric:tabular-nums">
+<div style="min-width:{{ tb.min }}">
+<div role="row" style="display:grid;grid-template-columns:{{ tb.gridCols }};gap:12px;padding:8px 0;border-top:1px solid var(--s-rule);border-bottom:1px solid var(--s-rule);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute)">
+<sc-for list="{{ tb.cols }}" as="c" hint-placeholder-count="4"><div role="columnheader" style="text-align:{{ c.align }}">{{ c.label }}</div></sc-for>
+</div>
+<sc-for list="{{ tb.rows }}" as="r" hint-placeholder-count="3">
+<div role="row" style="display:grid;grid-template-columns:{{ tb.gridCols }};gap:12px;padding:9px 0;border-bottom:1px solid var(--s-rule);font-size:13px;align-items:baseline">
+<sc-for list="{{ r.cells }}" as="x" hint-placeholder-count="4"><div role="cell" style="min-width:0;text-align:{{ x.align }};color:{{ x.accent }};font-weight:{{ x.weight }};text-wrap:pretty;overflow-wrap:anywhere"><sc-if value="{{ x.hasUrl }}" hint-placeholder-val="{{ false }}"><a href="{{ x.url }}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline;text-decoration-color:var(--s-rule);text-underline-offset:3px">{{ x.text }}</a></sc-if><sc-if value="{{ x.noUrl }}" hint-placeholder-val="{{ true }}">{{ x.text }}</sc-if></div></sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ tb.noRows }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);margin-top:8px">{{ ui.fEmptyView }}</div></sc-if>
+</div>
+</sc-for>
+<sc-if value="{{ fx.more }}" hint-placeholder-val="{{ false }}"><button onClick="{{ fx.showMore }}" style-hover="border-color:var(--color-accent)" style="margin-top:12px;min-height:36px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ fx.moreLabel }}</button></sc-if>
+</sc-if>
+<sc-if value="{{ notRoF }}" hint-placeholder-val="{{ true }}">
 <sc-for list="{{ sigRows }}" as="g" hint-placeholder-count="3">
 <div style="display:grid;grid-template-columns:34px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--s-rule);align-items:baseline">
 <span style="font-size:11px;letter-spacing:0.06em;color:var(--s-mute)">{{ g.stamp }}</span>
-<span style="min-width:0"><span style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:{{ g.accent }}">{{ g.tag }}</span><span style="display:block;font-size:12px;font-weight:600;color:var(--s-ink);margin-top:3px;text-wrap:pretty">{{ g.title }}</span><span style="display:block;font-size:12px;color:var(--s-mute);margin-top:2px">{{ g.detail }}</span></span>
+<span style="min-width:0"><span style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:{{ g.accent }}">{{ g.tag }}</span><sc-if value="{{ g.hasUrl }}" hint-placeholder-val="{{ true }}"><a href="{{ g.url }}" target="_blank" rel="noopener noreferrer" style="display:block;font-size:12px;font-weight:600;color:var(--s-ink);margin-top:3px;text-wrap:pretty;text-decoration:underline;text-decoration-color:var(--s-rule);text-underline-offset:3px">{{ g.title }}</a></sc-if><sc-if value="{{ g.noUrl }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12px;font-weight:600;color:var(--s-ink);margin-top:3px;text-wrap:pretty">{{ g.title }}</span></sc-if><span style="display:block;font-size:12px;color:var(--s-mute);margin-top:2px">{{ g.detail }}</span></span>
 </div>
 </sc-for>
-<sc-if value="{{ noSig }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);margin-top:8px">{{ ui.signalsEmpty }}</div></sc-if>
+</sc-if>
+<sc-if value="{{ noSig }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);margin-top:8px">{{ sigEmpty }}</div></sc-if>
 <sc-if value="{{ dataless }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);margin-top:6px">{{ ui.noData }}</div></sc-if>
 </div>
 </div>
@@ -1058,7 +1089,7 @@ function hydrate(defaults) {
 }
 class Component extends DCLogic {
   state = hydrate({ screen:'portfolio', plan:null, lang:null, appLang:null, follows:[], selected:'', feedTab:'following', query:'', toast:'', prev:'feed',
-    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, liveEarnDates:{}, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
+    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, liveEarnDates:{}, liveFilings:{}, roFilings:{}, filingsView:'all', filingsMore:0, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
     liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false, detailLoading:false,
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
     authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
@@ -1538,6 +1569,20 @@ class Component extends DCLogic {
         liveEarnings: earnings ? Object.assign({}, this.state.liveEarnings, { [symbol]: earnings }) : this.state.liveEarnings
       }))
       .catch(() => this.setState({ detailLoading:false }));
+    this.syncFilings(symbol);
+  }
+  // Filings and insider dealings (gateway /filings); false when they couldn't be read.
+  syncFilings(symbol) {
+    // Bucharest listings: the filings kept in Supabase (years of them, with figures).
+    const P = window.HIFPush;
+    if (/\.RO$/.test(symbol) && P && P.loadFilings) {
+      P.loadFilings(symbol).then(rows => this.setState(st => ({ roFilings: Object.assign({}, st.roFilings, { [symbol]: rows || false }) })))
+        .catch(() => this.setState(st => ({ roFilings: Object.assign({}, st.roFilings, { [symbol]: false }) })));
+    }
+    const L = window.HIFLive;
+    if (!L || !L.filings) return;
+    L.filings(symbol).then(f => this.setState(st => ({ liveFilings: Object.assign({}, st.liveFilings, { [symbol]: f || false }) })))
+      .catch(() => this.setState(st => ({ liveFilings: Object.assign({}, st.liveFilings, { [symbol]: false }) })));
   }
   liveSearch(q) {
     clearTimeout(this._search);
@@ -2465,10 +2510,109 @@ class Component extends DCLogic {
         dow: d.toLocaleDateString('en-US', { weekday:'short', timeZone:'UTC' }).toUpperCase(),
         detail: [when, est].filter(Boolean).join(' · '), label: u.evEarnings || 'Earnings', accent: 'var(--color-accent)' };
     })()] : [];
-    const sigRows = (SIGNALS[stock.ticker] || []).map(x => x.type === 'insider'
-      ? { stamp:x.stamp, tag:x.role, title:x.who + ' ' + (x.act === 'buy' ? u.sigBuy : u.sigSell) + ' ' + x.shares + ' ' + u.sigShares,
-          detail:x.value, accent: x.act === 'buy' ? 'var(--s-ink)' : 'var(--color-accent)' }
-      : { stamp:x.stamp, tag:u.sigFiling, title:'Form ' + x.form, detail:x.item, accent:'var(--s-mute)' });
+    // Filings and insider dealings: the gateway's for this ticker (the demo set is empty).
+    const FL = (s.liveFilings || {})[stock.ticker];
+    const ago = sec => { const h = Math.max(0, Math.floor((Date.now() / 1000 - sec) / 3600)); return h < 24 ? h + 'h' : Math.floor(h / 24) + 'd'; };
+    const nfmt = n => Number(n).toLocaleString(this.appLocale);
+    const money = n => (n >= 1e6 ? '$' + (n / 1e6).toLocaleString(this.appLocale, { maximumFractionDigits:2 }) + 'M' : '$' + nfmt(Math.round(n)));
+    const liveSig = FL && FL.items ? FL.items.map(x => ({ type:x.type, stamp:ago(x.datetime), act:x.act || '', who:x.who || '', role:'',
+      shares: x.shares ? nfmt(x.shares) : '', value: x.value ? money(x.value) : '', form:x.form || '', item:'', title:x.title || '',
+      url:x.url || '', source:x.source || '', official: x.official !== false })) : null;
+    const tickerSignals = liveSig || SIGNALS[stock.ticker] || [];
+    const fromWhere = x => x.source + (x.official ? '' : ' \u00b7 ' + (u.sigPress || 'press'));
+    const stampTxt = st => String(st || '').replace(/^(\d+)d$/, '$1' + (u.agoD || 'd'));
+    const sigRows = tickerSignals.map(x => x.type === 'insider'
+      ? { stamp:stampTxt(x.stamp), tag:x.role || u.sigInsider || 'Insider', url:x.url || '', hasUrl:!!x.url, noUrl:!x.url,
+          title: x.who ? x.who + ' ' + (x.act === 'buy' ? u.sigBuy : u.sigSell) + ' ' + x.shares + ' ' + u.sigShares : x.title,
+          detail: x.who ? [x.value, x.source].filter(Boolean).join(' \u00b7 ') : fromWhere(x),
+          accent: x.act === 'buy' ? 'var(--s-ink)' : 'var(--color-accent)' }
+      : { stamp:stampTxt(x.stamp), tag:u.sigFiling, url:x.url || '', hasUrl:!!x.url, noUrl:!x.url,
+          title: x.title || 'Form ' + x.form,
+          detail: x.form ? [((u.formNames || {})[x.form] || ''), x.item].filter(Boolean).join(' \u00b7 ') || x.source || '' : fromWhere(x),
+          accent:'var(--s-mute)' });
+    // --- Bucharest filings: tables by kind, years of history ---------------------
+    const RF = (s.roFilings || {})[stock.ticker];
+    const roF = Array.isArray(RF) && RF.length > 0;
+    const fx = (() => {
+      if (!roF) return null;
+      const loc = this.appLocale;
+      const dayOf = r => String(r.published_at || '').slice(0, 10);
+      const dfmt = d => /^\d{4}-\d{2}-\d{2}$/.test(String(d || '')) ? new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { day:'2-digit', month:'short', year:'numeric', timeZone:'UTC' }) : '—';
+      const n0 = (v, d) => v == null || !isFinite(v) ? '—' : Number(v).toLocaleString(loc, { maximumFractionDigits: d == null ? 2 : d });
+      const pct = (a, b) => a == null || b == null || !b ? '' : ((a - b) / Math.abs(b) * 100);
+      const pctTxt = v => v === '' ? '—' : (v > 0 ? '+' : '\u2212') + Math.abs(v).toLocaleString(loc, { maximumFractionDigits:1 }) + '%';
+      const cell = (text, o) => { const c = Object.assign({ text: text == null || text === '' ? '—' : String(text), url:'', hasUrl:false, noUrl:true, right:false, accent:'var(--s-ink)', weight:'400' }, o || {}); c.align = c.right ? 'right' : 'left'; return c; };
+      const link = (text, url) => cell(text, { url, hasUrl: !!url, noUrl: !url, accent:'var(--s-ink)' });
+      const docCell = r => link(u.fDocOpen || 'PDF', r.url);
+      const kindName = k => (u['fk_' + k] || k);
+      const all = RF.slice();
+      // Management dealings: one row per transaction.
+      const ins = [];
+      all.filter(r => r.kind === 'insider' && r.data && Array.isArray(r.data.transactions)).forEach(r => r.data.transactions.forEach(t => ins.push({ r, t, d: t.date || dayOf(r) })));
+      ins.sort((a, b) => String(b.d).localeCompare(String(a.d)));
+      const typeTxt = t => t.type === 'buy' ? (u.fBuy || 'Buy') : t.type === 'sell' ? (u.fSell || 'Sell') : (u.fOther || 'Other');
+      const insT = { title: u.fView_insider, gridCols:'104px minmax(140px,1.4fr) minmax(110px,1fr) 90px 110px 100px 130px 56px', min:'860px',
+        cols: [u.fDate, u.fPerson, u.fRole, u.fType, u.fShares, u.fPrice, u.fValue, ''].map((l, i) => ({ label:l, align: i >= 4 && i <= 6 ? 'right' : 'left' })),
+        rows: ins.map(({ r, t, d }) => ({ cells: [cell(dfmt(d)), cell(t.person, { weight:'600' }), cell(t.role), cell(typeTxt(t), { accent: t.type === 'sell' ? 'var(--color-accent)' : 'var(--s-ink)', weight:'600' }),
+          cell(n0(t.shares, 0), { right:true }), cell(t.price == null ? '—' : n0(t.price, 4) + (t.currency ? ' ' + t.currency : ''), { right:true }),
+          cell(t.value == null ? '—' : n0(t.value, 0) + (t.currency ? ' ' + t.currency : ''), { right:true }), docCell(r)] })) };
+      // Results: one row per period (consolidated first when both were read).
+      const seenP = new Set(), res = [];
+      all.filter(r => r.kind === 'results' && r.data && (r.data.revenue != null || r.data.net_profit != null))
+        .sort((a, b) => String((b.data.period_end || dayOf(b))).localeCompare(String(a.data.period_end || dayOf(a))) || (b.data.consolidated ? 1 : 0) - (a.data.consolidated ? 1 : 0))
+        .forEach(r => { const k = (r.data.period || r.data.period_end || r.id) + ''; if (!seenP.has(k)) { seenP.add(k); res.push(r); } });
+      const resT = { title: u.fView_results, gridCols:'minmax(90px,1fr) 120px 80px 120px 80px 110px 80px 56px', min:'780px',
+        cols: [u.fPeriod, u.fRevenue, u.fYoY, u.fNetProfit, u.fYoY, u.fEbitda, u.fEps, ''].map((l, i) => ({ label:l, align: i >= 1 && i <= 6 ? 'right' : 'left' })),
+        rows: res.map(r => { const d = r.data, rv = pct(d.revenue, d.revenue_prev), np = pct(d.net_profit, d.net_profit_prev), cur = d.currency ? ' ' + d.currency : '';
+          return { cells: [cell((d.period || dfmt(d.period_end)) + (d.consolidated ? ' · ' + (u.fCons || 'cons.') : ''), { weight:'600' }),
+            cell(d.revenue == null ? '—' : n0(d.revenue, 1) + ' ' + (u.fMil || 'm') + cur, { right:true }), cell(pctTxt(rv), { right:true, accent: rv !== '' && rv < 0 ? 'var(--color-accent)' : 'var(--s-ink)' }),
+            cell(d.net_profit == null ? '—' : n0(d.net_profit, 1) + ' ' + (u.fMil || 'm') + cur, { right:true, weight:'600' }), cell(pctTxt(np), { right:true, accent: np !== '' && np < 0 ? 'var(--color-accent)' : 'var(--s-ink)' }),
+            cell(d.ebitda == null ? '—' : n0(d.ebitda, 1) + ' ' + (u.fMil || 'm'), { right:true }), cell(n0(d.eps, 4), { right:true }), docCell(r)] }; }) };
+      // Dividends, and the general meetings.
+      const divs = all.filter(r => r.kind === 'dividend' && r.data).sort((a, b) => (b.data.fiscal_year || 0) - (a.data.fiscal_year || 0) || dayOf(b).localeCompare(dayOf(a)));
+      const stTxt = st => u['fSt_' + st] || st;
+      const divT = { title: u.fDividends, gridCols:'80px 120px 100px 110px 110px 110px 56px', min:'700px',
+        cols: [u.fFiscalYear, u.fDps, u.fStatus, u.fExDate, u.fRecord, u.fPay, ''].map((l, i) => ({ label:l, align: i === 1 ? 'right' : 'left' })),
+        rows: divs.map(r => { const d = r.data; return { cells: [cell(d.fiscal_year || '—', { weight:'600' }), cell(d.gross_dps == null ? '—' : n0(d.gross_dps, 4) + (d.currency ? ' ' + d.currency : ''), { right:true, weight:'600' }),
+          cell(stTxt(d.status)), cell(dfmt(d.ex_date)), cell(dfmt(d.record_date)), cell(dfmt(d.payment_date)), docCell(r)] }; }) };
+      const agms = all.filter(r => r.kind === 'agm' && r.data && (r.data.meeting_date || (r.data.decisions || []).length))
+        .sort((a, b) => String(b.data.meeting_date || dayOf(b)).localeCompare(String(a.data.meeting_date || dayOf(a))));
+      const agmT = { title: u.fMeetings, gridCols:'110px 90px minmax(280px,1fr) 56px', min:'620px',
+        cols: [u.fMeeting, u.fType, u.fDecisions, ''].map(l => ({ label:l, align:'left' })),
+        rows: agms.map(r => { const d = r.data; return { cells: [cell(dfmt(d.meeting_date), { weight:'600' }), cell(d.meeting_type),
+          cell((d.decisions || []).join(' · ') + (d.dividend_dps != null ? ((d.decisions || []).length ? ' · ' : '') + (u.fDps || 'DPS') + ' ' + n0(d.dividend_dps, 4) : '')), docCell(r)] }; }) };
+      // Holdings.
+      const hold = all.filter(r => r.kind === 'holding' && r.data).sort((a, b) => String(b.data.date || dayOf(b)).localeCompare(String(a.data.date || dayOf(a))));
+      const holdT = { title: u.fView_holding, gridCols:'110px minmax(200px,1fr) 100px 100px 56px', min:'580px',
+        cols: [u.fDate, u.fHolder, u.fBefore, u.fAfter, ''].map((l, i) => ({ label:l, align: i === 2 || i === 3 ? 'right' : 'left' })),
+        rows: hold.map(r => { const d = r.data, up = d.before_pct != null && d.after_pct > d.before_pct;
+          return { cells: [cell(dfmt(d.date || dayOf(r))), cell(d.holder, { weight:'600' }), cell(d.before_pct == null ? '—' : n0(d.before_pct, 2) + '%', { right:true }),
+            cell(n0(d.after_pct, 2) + '%', { right:true, weight:'600', accent: up || d.before_pct == null ? 'var(--s-ink)' : 'var(--color-accent)' }), docCell(r)] }; }) };
+      // Every document, newest first.
+      const shown = 60 + (s.filingsMore || 0);
+      const docT = { title: u.fView_all, gridCols:'104px 150px minmax(240px,1fr) 150px', min:'640px',
+        cols: [u.fDate, u.fKind, u.fTitle, u.fSource].map(l => ({ label:l, align:'left' })),
+        rows: all.slice(0, shown).map(r => ({ cells: [cell(dayOf(r) ? dfmt(dayOf(r)) : (u.fNoDate || '—')), cell(kindName(r.kind), { accent: r.kind === 'insider' || r.kind === 'holding' ? 'var(--color-accent)' : 'var(--s-mute)' }),
+          link(r.title, r.url), cell(r.source + (r.official === false ? ' · ' + (u.sigPress || 'press') : ''), { accent:'var(--s-mute)' })] })) };
+      const views = { all:[docT], insider:[insT], results:[resT], dividend:[divT, agmT], holding:[holdT] };
+      const counts = { all: all.length, insider: ins.length, results: res.length, dividend: divs.length + agms.length, holding: hold.length };
+      const view = views[s.filingsView] ? s.filingsView : 'all';
+      const years = all.map(dayOf).filter(Boolean).sort();
+      const pending = all.filter(r => ['insider', 'results', 'dividend', 'agm', 'holding'].includes(r.kind) && !r.extract_status).length;
+      const tables = views[view].map(t => Object.assign({}, t, { hasRows: t.rows.length > 0, noRows: !t.rows.length }));
+      return {
+        tabs: ['all', 'insider', 'results', 'dividend', 'holding'].map(k => ({ label: (u['fView_' + k] || k) + ' · ' + counts[k], on: view === k,
+          bg: view === k ? 'var(--color-accent)' : 'transparent', ink: view === k ? 'var(--s-on-accent)' : 'var(--s-mute)', edge: view === k ? 'var(--color-accent)' : 'var(--s-rule)',
+          pick: () => this.setState({ filingsView:k, filingsMore:0 }) })),
+        tables, more: view === 'all' && all.length > shown, moreLabel: u.fMore || 'Show more', showMore: () => this.setState({ filingsMore: (s.filingsMore || 0) + 120 }),
+        meta: (u.fCount || '{n} documents since {y}').replace('{n}', nfmt(all.length)).replace('{y}', years.length ? years[0].slice(0, 4) : '—'),
+        pendingNote: pending ? (u.fPending || '{n} documents still being read for figures').replace('{n}', nfmt(pending)) : '', hasPending: pending > 0
+      };
+    })();
+    // Why the list is empty: still loading, no source for this market, nothing found, or unreadable.
+    const sigEmpty = FL === undefined ? '' : FL === false ? (u.signalsError || u.signalsEmpty)
+      : FL.coverage === 'none' ? (u.signalsNoSource || u.signalsEmpty)
+      : FL.coverage === 'press' ? (u.signalsPressOnly || u.signalsEmpty) : u.signalsEmpty;
     // --- insight layer (../shared/hif-insight.js) -----------------------------
     const IN = window.HIFInsight, SEC = H.SECTOR_OF || {};
     const sector = SEC[stock.ticker] || '';
@@ -2480,7 +2624,7 @@ class Component extends DCLogic {
       .filter(n => !isOpN(n.source, n.url)).slice(0, 3)
       .map(n => ({ headline: (live && n.id && this.aiText(stock.ticker + ':' + n.id)) || (typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN), source:n.source, url:n.url || '',
         sameDay: live && n.ts ? Date.now() / 1000 - n.ts < 86400 : true }));
-    const why = IN ? IN.attribute({ t:u, ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
+    const why = IN ? IN.attribute({ t:u, ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:tickerSignals, peers, sector }) : null;
     // The newest story's AI summary (the source's English snippet is not a conclusion).
     const callText = (stock.call && stock.call[L]) || (live && LN[stock.ticker] && LN[stock.ticker][0] && LN[stock.ticker][0].id ? this.aiText(stock.ticker + ':' + LN[stock.ticker][0].id) : '') || '';
     const whyTone = why && (why.kind === 'none' || why.kind === 'quiet') ? 'var(--s-mute)' : 'var(--color-accent)';
@@ -2492,7 +2636,7 @@ class Component extends DCLogic {
       : [];
     const rsiArr = window.HIFChart.rsiSeries(trend, 14).filter(v => v != null);
     const rsiNow = rsiArr.length ? rsiArr[rsiArr.length - 1] : null;
-    const clashes = IN ? IN.conflicts({ t:u, analystDetail: stock.analystDetail, signals: SIGNALS[stock.ticker] || [], movePct: stock.move, rsi: rsiNow }) : [];
+    const clashes = IN ? IN.conflicts({ t:u, analystDetail: stock.analystDetail, signals: tickerSignals, movePct: stock.move, rsi: rsiNow }) : [];
     const posMap = s.positions || {};
     // Amounts in the listing's currency: lei in Bucharest, euros on XETRA, pounds in London.
     const curSign = ({ RO:'RON ', DE:'EUR ', L:'GBP ' })[(/\.(RO|DE|L)$/.exec(stock.ticker) || [])[1]];
@@ -2674,7 +2818,7 @@ class Component extends DCLogic {
       bookValue: book.valueLabel || '', bookDay: book.dayLabel || '', bookDayUp: book.dayUp, bookHas: !book.empty,
       ui: u,
       calRows, noCal: !calRows.length && !dataless(stock.ticker),
-      sigRows, noSig: !sigRows.length && !dataless(stock.ticker),
+      sigRows, noSig: !roF && !sigRows.length && !dataless(stock.ticker) && !!sigEmpty, sigEmpty, roF, notRoF: !roF, fx: fx || { tabs:[], tables:[] },
       brand: this.props.brand || 'Market Pulse',
       planLabel: H_ALL ? (u.earlyAccess || 'Early access') : (isFree ? u.free : u.pro),
       allAccess: H_ALL, notAllAccess: !H_ALL,

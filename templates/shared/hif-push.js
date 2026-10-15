@@ -230,5 +230,14 @@ async function loadDigest(ticker, lang) {
   return r.ok && Array.isArray(r.body) && r.body[0] ? r.body[0] : null;
 }
 
-window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, supported };
+// A Bucharest listing's filings, kept for years (supabase/filings.sql), newest first, with
+// the figures the local model read from them (data) when it has.
+async function loadFilings(ticker) {
+  if (!live() || !ticker) return null;
+  const r = await auth().rest('filings?select=id,url,title,published_at,first_seen,kind,source,official,data,extract_status&ticker=eq.' +
+    encodeURIComponent(ticker) + '&order=published_at.desc.nullslast,first_seen.desc&limit=1000');
+  return r.ok && Array.isArray(r.body) ? r.body : null;
+}
+
+window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, supported };
 })();

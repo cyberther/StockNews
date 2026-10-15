@@ -1,0 +1,17 @@
+# The Bucharest listings' filings from their own websites and the press (tools/filings-crawl.mjs).
+# User unit:
+#   cp tools/systemd/market-pulse-filings.* ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now market-pulse-filings.timer
+# Edit WorkingDirectory if the repository lives elsewhere.
+[Unit]
+Description=Market Pulse filings reader (company websites)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/StockNews
+ExecStart=/usr/bin/env node tools/filings-crawl.mjs
+Nice=15
+CPUWeight=20
+IOSchedulingClass=idle
+TimeoutStartSec=3h
