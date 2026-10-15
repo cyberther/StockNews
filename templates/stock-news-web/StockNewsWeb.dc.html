@@ -220,6 +220,20 @@
 </div>
 </sc-if>
 </div>
+<sc-if value="{{ hasDigest }}" hint-placeholder-val="{{ false }}">
+<section aria-label="{{ ui.digestTitle }}" style="padding:18px var(--gx);border-top:1px solid var(--s-rule)">
+<div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px">
+<span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">{{ ui.digestTitle }}</span>
+<span style="font-size:11px;letter-spacing:0.08em;color:var(--s-mute);margin-left:auto">{{ digestMeta }}</span>
+</div>
+<ul style="list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ digestRows }}" as="b" hint-placeholder-count="4">
+<li style="display:grid;grid-template-columns:14px minmax(0,1fr);gap:8px;font-size:16px;line-height:1.5;text-wrap:pretty"><span aria-hidden="true" style="width:6px;height:6px;margin-top:10px;background:var(--color-accent)"></span><span>{{ b.text }}</span></li>
+</sc-for>
+</ul>
+<div style="font-size:12px;color:var(--s-mute);margin-top:12px;text-wrap:pretty">{{ ui.digestNote }}</div>
+</section>
+</sc-if>
 <sc-if value="{{ hasWhy }}" hint-placeholder-val="{{ true }}">
 <div style="padding:18px var(--gx);border-top:1px solid var(--s-rule)">
 <div style="display:flex;align-items:baseline;gap:10px">
@@ -1804,7 +1818,7 @@ class Component extends DCLogic {
   syncHistory(force) {
     const P = window.HIFPush, s = this.state;
     if (!P || !P.loadStories || !s.authLive || !s.session) return;
-    if (s.screen === 'detail' && s.selected) return this.loadHistory('tk:' + s.selected, 'ticker=eq.' + encodeURIComponent(s.selected), force);
+    if (s.screen === 'detail' && s.selected) { this.syncDigest(s.selected, force); return this.loadHistory('tk:' + s.selected, 'ticker=eq.' + encodeURIComponent(s.selected), force); }
     if (s.screen !== 'feed') return;
     const tab = s.feedTab || 'following';
     const list = tab === 'market' ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows;
@@ -1812,6 +1826,14 @@ class Component extends DCLogic {
     const filter = tab === 'bvb' ? 'ticker=like.*.RO' : tab === 'eu' ? 'or=(ticker.like.*.DE,ticker.like.*.L)'
       : 'ticker=in.(' + list.map(t => '"' + t + '"').join(',') + ')';
     this.loadHistory(tab, filter, force);
+  }
+  // The ticker's previous-day digest (supabase/digests.sql) in the content language.
+  syncDigest(ticker, force) {
+    const P = window.HIFPush, lang = String(this.lang || 'EN').toLowerCase(), key = ticker + '|' + lang;
+    if (!P || !P.loadDigest || (!force && this._digSig === key)) return;
+    this._digSig = key;
+    P.loadDigest(ticker, lang).then(d => this.setState(st => ({ digests: Object.assign({}, st.digests, { [key]: d }) })))
+      .catch(() => { this._digSig = ''; });
   }
   loadHistory(tab, filter, force) {
     const P = window.HIFPush;
@@ -2572,6 +2594,14 @@ class Component extends DCLogic {
       whyNote: why ? (why.note || '') : '', whyTone,
       whyHasLink: !!(why && why.url), whyLinkLabel: why && why.url ? (u.readAt || 'Read at %s').replace('%s', why.source || 'source') : '',
       openWhy: () => { if (why && why.url) this.openNews({ url: why.url, ticker: stock.ticker }); },
+      ...(() => {
+        const D = (s.digests || {})[stock.ticker + '|' + String(this.lang || 'EN').toLowerCase()];
+        if (!D || !D.digest) return { hasDigest:false, digestRows:[], digestMeta:'' };
+        const d = new Date(D.day + 'T12:00:00Z');
+        const day = d.toLocaleDateString(this.appLocale, { weekday:'long', day:'numeric', month:'long', timeZone:'UTC' });
+        return { hasDigest:true, digestRows: String(D.digest).split('\n').map(l => ({ text: l.replace(/^•\s*/, '') })).filter(b => b.text),
+          digestMeta: (u.digestMeta || '{d} · {n} stories').replace('{d}', day).replace('{n}', D.stories) };
+      })(),
       whyConf: why && why.confidence ? (u.whyConfFmt || '{c} confidence').replace('{c}', (u['conf_' + why.confidence] || why.confidence)).toUpperCase() : '',
       clashes, hasClash: !!clashes.length, noClash: !clashes.length,
       clashRows: clashes.map(c => ({ title:c.title, detail:c.detail, accent: c.tone === 'warn' ? 'var(--color-accent)' : 'var(--s-mute)' })),
