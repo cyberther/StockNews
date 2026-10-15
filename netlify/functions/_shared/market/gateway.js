@@ -14,7 +14,7 @@
 // Keys come from the caller (env vars) and appear only on upstream URLs: never in cache
 // keys, logs or responses.
 import { finnhub } from './providers/finnhub.js';
-import { yahoo, CHART_RANGES } from './providers/yahoo.js';
+import { yahoo, CHART_RANGES, CANDLE_INTERVALS } from './providers/yahoo.js';
 import { twelvedata } from './providers/twelvedata.js';
 import { fmp } from './providers/fmp.js';
 import { alphavantage } from './providers/alphavantage.js';
@@ -59,6 +59,7 @@ const PROVIDERS = {
   earnings: [finnhub, fmp],
   earningsHistory: [fmp],   // internal: past reports that enrich the earnings calendar
   chart: [yahoo, twelvedata],
+  candles: [yahoo],        // /candles: OHLCV bars for the live chart page, every listing
   marketNewsRO: [ronews],  // /ro-news: every story naming a BVB-listed company
   marketNewsEU: [eunews],  // /eu-news: every story naming a XETRA or London listed company
   marketNewsUS: [usnews],  // /us-news: US press releases, and press stories naming the companies given
@@ -104,15 +105,15 @@ const ROUTES = {
   '/quote': 'quote', '/quotes': 'quotes', '/company-news': 'news', '/search': 'search',
   '/stock/recommendation': 'recommendation', '/stock/earnings': 'earnings',
   '/calendar/earnings': 'earningsCalendar', '/stock/profile2': 'profile', '/chart': 'chart', '/ro-news': 'marketNewsRO', '/eu-news': 'marketNewsEU', '/us-news': 'marketNewsUS',
-  '/filings': 'filings'
+  '/filings': 'filings', '/candles': 'candles'
 };
 // Seconds an answer is fresh. Quotes go stale fast; company names hardly change.
-const TTL = { filings: 3600, filingsRO: 3600, insiderTx: 3600, secFilings: 3600, marketNewsRO: 600, marketNewsEU: 600, marketNewsUS: 600, quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
+const TTL = { candles: 60, filings: 3600, filingsRO: 3600, insiderTx: 3600, secFilings: 3600, marketNewsRO: 600, marketNewsEU: 600, marketNewsUS: 600, quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
 // How long past its TTL an answer may still be served when every provider is failing.
 const STALE_FOR = { quote: 600 };
 const STALE_DEFAULT = 86400;
 // The CDN keys cached answers on these query parameters only.
-const VARY = 'query=path|symbol|symbols|from|to|q|range|warm|limit|names';
+const VARY = 'query=path|symbol|symbols|from|to|q|range|warm|limit|names|interval|tail';
 
 const MAX_UPSTREAM_BYTES = 2 * 1024 * 1024;
 const REQUEST_TIMEOUT_MS = 8000;
@@ -174,6 +175,11 @@ function parse(cap, q) {
     if (!validSymbol(symbol) || !CHART_RANGES.includes(range)) return { error: 'invalid chart request' };
     return { params: { symbol, range, warm: q.get('warm') === '1' } };
   }
+  if (cap === 'candles') {
+    const interval = q.get('interval') || '5m';
+    if (!validSymbol(symbol) || !CANDLE_INTERVALS.includes(interval)) return { error: 'invalid candles request' };
+    return { params: { symbol, interval, tail: q.get('tail') === '1' } };
+  }
   if (!validSymbol(symbol)) return { error: 'invalid symbol' };
   const params = { symbol };
   if (cap === 'news' || cap === 'earningsCalendar') {
@@ -191,7 +197,9 @@ function parse(cap, q) {
   return { params };
 }
 
-const ttlFor = (cap, p) => cap === 'chart' && p.range === '1d' ? 60 : TTL[cap];
+// The live chart refreshes today's bars every few seconds: they are fresh for 5 seconds.
+const ttlFor = (cap, p) => cap === 'chart' && p.range === '1d' ? 60
+  : cap === 'candles' ? (p.tail || p.interval === '1m' ? 5 : ['2m', '5m', '15m', '30m'].includes(p.interval) ? 20 : TTL.candles) : TTL[cap];
 
 // ------------------------------------------------------------------ providers
 function breakerOpen(name) {
