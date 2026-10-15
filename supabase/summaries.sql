@@ -68,8 +68,20 @@ join public.stories o on public.story_article(o.id) = public.story_article(x.sto
 order by o.id, x.lang, x.created_at desc
 on conflict (story_id, lang) do nothing;
 
+-- Opinion and stock-picking publishers (Motley Fool and the like): hidden in the apps unless
+-- the reader asks for them, so their summaries come last. Same list as isOpinion() in
+-- templates/shared/hif-data.js.
+create or replace function public.is_opinion(p_source text, p_url text) returns boolean
+language sql immutable as $$
+  select lower(trim(coalesce(p_source, ''))) in ('motley fool', '24/7 wall st.', 'stocktwits', 'stocktwits.com', 'tikr', 'trefis', 'trefis.com',
+           'insider monkey', 'gurufocus', 'simply wall st', 'zacks', 'marketbeat', 'investorplace', 'chartmill', 'chartmill.com',
+           'barchart', 'barchart.com', 'seeking alpha', 'seekingalpha', 'tipranks', 'kiplinger', 'investopedia')
+      or coalesce(p_url, '') ~* '^https?://([a-z0-9-]+\.)*(fool\.com|247wallst\.com|stocktwits\.com|tikr\.com|trefis\.com|insidermonkey\.com|gurufocus\.com|simplywall\.st|zacks\.com|marketbeat\.com|investorplace\.com|chartmill\.com|barchart\.com|seekingalpha\.com|tipranks\.com|kiplinger\.com|investopedia\.com)(/|$)'
+$$;
+
 -- Stories published in the last p_hours without a summary in p_lang: first those someone
--- follows or holds and the Bucharest listings (.RO), then the rest; newest first in each.
+-- follows or holds and the Bucharest listings (.RO), then the rest; newest first in each;
+-- opinion pieces after all of those.
 -- Romanian is written for every story. Another language only where an account reads it
 -- (content_lang in its user metadata): for the tickers such an account follows or holds, and
 -- for the US and EU Market tabs' stories (the ten US names, XETRA .DE and London .L), so a second language
@@ -96,7 +108,8 @@ begin
                or s.ticker = any(array['NVDA','AAPL','MSFT','GOOGL','AMZN','META','AVGO','TSLA','TSM','JPM'])
                or exists (select 1 from public.watchlist w where w.user_id = u.id and w.ticker = s.ticker)
                or exists (select 1 from public.holdings h where h.user_id = u.id and h.ticker = s.ticker))))
-    order by (s.ticker like '%.RO'
+    order by public.is_opinion(s.source, s.url),
+             (s.ticker like '%.RO'
               or exists (select 1 from public.watchlist w where w.ticker = s.ticker)
               or exists (select 1 from public.holdings h where h.ticker = s.ticker)) desc,
              s.published_at desc
