@@ -1,7 +1,7 @@
 // Supabase Edge Function "scan": the Market Pulse background scan.
 //
 // pg_cron calls it every 10 minutes (supabase/push.sql). Each run:
-//   1. collects the tickers on every user's watchlist,
+//   1. collects the tickers on every user's watchlist, plus the US Market tab's ten names,
 //   2. asks Finnhub for each ticker's latest company news,
 //   3. stores stories it has not seen before in public.stories,
 //   4. sends each user one web-push alert listing new stories on the tickers they have
@@ -26,6 +26,9 @@ const MAX_TICKERS = 50;               // Finnhub's free tier allows 60 calls a m
 const CONCURRENCY = 4;
 const FRESH_MS = 3 * 3600 * 1000;     // alert only on stories published in the last 3 hours
 const TICKER_RE = /^[A-Z0-9][A-Z0-9.\-]{0,11}$/;
+// The app's US Market tab (templates/shared/hif-data.js MARKET_TOP): stored whoever follows
+// them, so the AI summary job writes their summaries too. No alerts unless followed.
+const MARKET_TOP = ['NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'AVGO', 'TSLA', 'TSM', 'JPM'];
 
 type Story = { id: string; ticker: string; headline: string; source: string | null; url: string | null;
   summary: string | null; published_at: string };
@@ -206,7 +209,7 @@ Deno.serve(async (req) => {
   if (wlErr) return Response.json({ error: 'watchlist: ' + wlErr.message }, { status: 500 });
 
   // Every distinct ticker; past the Finnhub budget, successive runs take turns.
-  let tickers = [...new Set((wl || []).map(r => r.ticker).filter(t => TICKER_RE.test(t)))].sort();
+  let tickers = [...new Set((wl || []).map(r => r.ticker).concat(MARKET_TOP).filter(t => TICKER_RE.test(t)))].sort();
   if (tickers.length > MAX_TICKERS) {
     const slots = Math.ceil(tickers.length / MAX_TICKERS);
     const slot = Math.floor(Date.now() / (10 * 60000)) % slots;
