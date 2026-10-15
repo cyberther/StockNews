@@ -41,7 +41,8 @@ export function parseRss(xml, source) {
   let m;
   while ((m = re.exec(xml))) {
     const it = m[0];
-    const link = decode(tag(it, 'link')) || decode(tag(it, 'guid'));
+    // Business Wire lists its pages over http; they are served over https too.
+    const link = (decode(tag(it, 'link')) || decode(tag(it, 'guid'))).replace(/^http:\/\/(?:www\.)?businesswire\.com\//, 'https://www.businesswire.com/');
     const headline = decode(tag(it, 'title'));
     const ts = Date.parse(decode(tag(it, 'pubDate')) || decode(tag(it, 'dc:date')));
     if (!/^https:\/\//.test(link) || !headline || !Number.isFinite(ts)) continue;
