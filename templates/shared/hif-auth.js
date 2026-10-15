@@ -251,8 +251,6 @@ async function rest(path, opts) {
 function onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; }
 
 window.HIFAuth = { ready, session, signUp, signIn, resend, recover, updatePassword, updatePrefs, oauth, signOut, plan, token, onChange, rest,
-  // The live chart relay's address (/api/config liveRelay), or ''.
-  liveRelay: () => (cfg && cfg.liveRelay) || '',
   enabled: () => !!(info && info.enabled), info: () => info,
   publicConfig: () => cfg ? { supabaseUrl: cfg.supabaseUrl, vapidPublicKey: cfg.vapidPublicKey || null } : null };
 })();

@@ -8,9 +8,6 @@
 // row-level security. Without these two, the apps fall back to their demo sign-in.
 //   VAPID_PUBLIC_KEY  = the public half of the web-push key pair (supabase/README.md);
 //                       without it the apps hide the push-alert switch.
-//   LIVE_RELAY_URL    = the live chart relay on the PC (tools/live-relay.mjs), its Tailscale
-//                       Funnel address, e.g. https://pc.tailnet.ts.net; without it the chart
-//                       page has no second bars.
 const URL_RE = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i;
 
 // Publish a key only if it is provably the public one: a legacy JWT whose role is
@@ -30,11 +27,9 @@ export default async () => {
   const ok = URL_RE.test(url) && isPublicKey(key);
   // A P-256 public key is 65 bytes: 87 base64url characters.
   const vapid = process.env.VAPID_PUBLIC_KEY || '';
-  const relay = String(process.env.LIVE_RELAY_URL || '').replace(/\/$/, '');
   return Response.json(
     { supabaseUrl: ok ? url : null, supabaseAnonKey: ok ? key : null, liveData: !!process.env.FINNHUB_KEY,
-      vapidPublicKey: /^[A-Za-z0-9_-]{87}$/.test(vapid) ? vapid : null,
-      liveRelay: /^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(relay) ? relay : null },
+      vapidPublicKey: /^[A-Za-z0-9_-]{87}$/.test(vapid) ? vapid : null },
     { headers: { 'cache-control': 'public, max-age=300' } }
   );
 };

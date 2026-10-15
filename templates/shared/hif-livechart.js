@@ -2,7 +2,7 @@
 // TradingView Lightweight Charts (vendor/lightweight-charts.standalone.production.js, loaded
 // the first time the page opens). The app owns the data and the refresh; this only draws.
 //
-//   const c = await HIFLiveChart.create(el, { tz: 'America/New_York', locale: 'ro-RO', intraday: true, seconds: false, onHover })
+//   const c = await HIFLiveChart.create(el, { tz: 'America/New_York', locale: 'ro-RO', intraday: true, onHover })
 //   c.setBars([{ t, o, h, l, c, v }, ...])   all bars (a new symbol or bar size)
 //   c.mergeBars([...])                       the latest bars (a refresh): updates the last, adds new ones
 //   c.zoom(0.7) / c.zoom(1.4) / c.reset()    narrower / wider / the last ~150 bars
@@ -52,7 +52,7 @@
 
   async function create(el, opts) {
     const LWC = await loadLib();
-    const o = Object.assign({ tz: '', locale: undefined, intraday: true, seconds: false, onHover: null }, opts || {});
+    const o = Object.assign({ tz: '', locale: undefined, intraday: true, onHover: null }, opts || {});
     const colors = () => ({ bg: css(el, '--s-bg', '#121212'), ink: css(el, '--s-ink', '#F5F5F7'), mute: css(el, '--s-mute', '#A0A0A0'),
       rule: css(el, '--s-rule', '#333333'), accent: css(el, '--color-accent', '#D4AF37') });
     let k = colors();
@@ -61,7 +61,7 @@
       layout: { background: { type: 'solid', color: 'transparent' }, textColor: k.mute, fontFamily: getComputedStyle(el).fontFamily, attributionLogo: true },
       grid: { vertLines: { color: fade(k.rule, 0.35) }, horzLines: { color: fade(k.rule, 0.35) } },
       rightPriceScale: { borderColor: k.rule },
-      timeScale: { borderColor: k.rule, timeVisible: o.intraday, secondsVisible: o.seconds, rightOffset: 6, minBarSpacing: 1 },
+      timeScale: { borderColor: k.rule, timeVisible: o.intraday, secondsVisible: false, rightOffset: 6, minBarSpacing: 1 },
       crosshair: { mode: LWC.CrosshairMode.Normal },
       localization: { locale: o.locale }
     });
