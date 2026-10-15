@@ -230,12 +230,13 @@ async function signOut(everywhere) {
 async function plan() {
   await ready;
   const t = await token(), s = session();
-  if (!cfg || !t || !s) return { plan: 'free', suspended: false, approved: true };
-  const r = await call('/rest/v1/account_status?select=plan,suspended,approved&user_id=eq.' + encodeURIComponent(s.userId),
+  if (!cfg || !t || !s) return { plan: 'free', suspended: false, approved: true, admin: false };
+  const r = await call('/rest/v1/account_status?select=plan,suspended,approved,is_admin&user_id=eq.' + encodeURIComponent(s.userId),
     { headers: { authorization: 'Bearer ' + t, accept: 'application/json' } });
-  if (!r.ok || !Array.isArray(r.body)) return { plan: 'free', suspended: false, approved: true };
+  if (!r.ok || !Array.isArray(r.body)) return { plan: 'free', suspended: false, approved: true, admin: false };
   const row = r.body[0] || null;
-  return { plan: row && row.plan === 'pro' ? 'pro' : 'free', suspended: !!(row && row.suspended), approved: !!(row && row.approved !== false) };
+  return { plan: row && row.plan === 'pro' ? 'pro' : 'free', suspended: !!(row && row.suspended), approved: !!(row && row.approved !== false),
+    admin: !!(row && row.is_admin) };
 }
 
 // PostgREST call as the signed-in user; row-level security limits it to their own rows.
