@@ -239,5 +239,22 @@ async function loadFilings(ticker) {
   return r.ok && Array.isArray(r.body) ? r.body : null;
 }
 
-window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, supported };
+// The user's drawings on one ticker's chart (supabase/drawings.sql), [] when none.
+async function loadDrawings(ticker) {
+  if (!live() || !ticker) return [];
+  const r = await auth().rest('chart_drawings?select=drawings&ticker=eq.' + encodeURIComponent(ticker) + '&limit=1');
+  return r.ok && Array.isArray(r.body) && r.body[0] && Array.isArray(r.body[0].drawings) ? r.body[0].drawings : [];
+}
+async function saveDrawings(ticker, list) {
+  if (!live() || !ticker) return false;
+  const s = auth().session();
+  if (!s) return false;
+  const r = await auth().rest('chart_drawings?on_conflict=user_id,ticker', { method: 'POST',
+    headers: { prefer: 'resolution=merge-duplicates,return=minimal', 'content-type': 'application/json' },
+    body: [{ user_id: s.userId, ticker, drawings: (list || []).slice(0, 100), updated_at: new Date().toISOString() }] });
+  if (!r.ok) throw new Error('save ' + r.status);
+  return true;
+}
+
+window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadDrawings, saveDrawings, supported };
 })();
