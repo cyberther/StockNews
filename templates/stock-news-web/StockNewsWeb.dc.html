@@ -46,7 +46,6 @@
 {{ liveLabel }}</span>
 <span class="app-hide-s" style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ scanLabel }}</span>
 <span class="app-hide-s" style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);border-left:1px solid var(--s-rule);padding-left:10px">{{ planLabel }}</span>
-<button onClick="{{ openCmd }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="display:flex;align-items:center;gap:8px;padding:8px 11px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer"><span>⌘K</span></button>
 <sc-if value="{{ showPlanToggle }}" hint-placeholder-val="{{ true }}"><button onClick="{{ togglePlan }}" style="padding:8px 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ planToggleLabel }}</button></sc-if>
 <sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}">
 <button onClick="{{ goPaywall }}" style="padding:8px 14px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.goPro }}</button>
@@ -431,7 +430,7 @@
 <div data-m="rise" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--s-rule)">
 <div role="button" tabIndex="0" aria-label="{{ r.openLabel }}" onClick="{{ r.open }}" onKeyDown="{{ r.keyOpen }}" style="flex:1;min-width:0;cursor:pointer" style-hover="color:var(--color-accent)"><div style="display:flex;align-items:center;gap:8px"><span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.tickerLabel }}</span><sc-if value="{{ r.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:2px 6px">{{ ui.liveReq }}</span></sc-if></div><div style="font-size:12px;color:var(--s-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</div></div>
 <sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><button onClick="{{ r.add }}" style="flex:none;min-height:36px;padding:0 16px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.add }}</button></sc-if>
-<sc-if value="{{ r.following }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-mute)"><span aria-hidden="true" style="color:var(--color-accent)">✓</span>{{ ui.added }}</span><button onClick="{{ r.remove }}" aria-label="{{ r.removeLabel }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="flex:none;min-height:36px;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.remove }}</button></sc-if>
+<sc-if value="{{ r.following }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-mute)"><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" style="color:var(--color-accent)"><path d="M2 6.5l2.6 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="1.8"></path></svg>{{ ui.added }}</span><button onClick="{{ r.remove }}" aria-label="{{ r.removeLabel }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="flex:none;min-height:36px;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.remove }}</button></sc-if>
 </div>
 </sc-for>
 <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 14px;border-top:1px solid var(--s-rule);font-size:13px;color:var(--s-mute)">{{ ui.noMatch }} · {{ ui.noMatchNote }}</div></sc-if>
@@ -738,27 +737,6 @@
 </div>
 
 
-<sc-if value="{{ cmdShown }}" hint-placeholder-val="{{ false }}">
-<div onClick="{{ closeCmd }}" style="position:fixed;inset:0;z-index:60;background:rgba(0,0,0,0.55);display:flex;align-items:flex-start;justify-content:center;padding:11vh 24px 24px">
-<div style="width:100%;max-width:620px;background:var(--s-bg);border:1px solid var(--s-rule);box-shadow:0 24px 60px rgba(0,0,0,0.45)">
-<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--s-rule)">
-<span style="flex:none;font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">⌘K</span>
-<input autoFocus="{{ true }}" aria-label="Command" placeholder="{{ ui.cmdPlaceholder }}" value="{{ cmdQ }}" onChange="{{ onCmdQ }}" onKeyDown="{{ cmdKey }}" style="flex:1;min-width:0;min-height:40px;padding:0;background:transparent;border:0;outline:none;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:20px;letter-spacing:0.02em">
-</div>
-<sc-for list="{{ cmdRows }}" as="c" hint-placeholder-count="3">
-<button onClick="{{ c.run }}" style-hover="background:var(--s-panel)" style="position:relative;display:flex;align-items:baseline;gap:12px;width:100%;min-height:46px;padding:0 16px;background:transparent;border:0;border-bottom:1px solid var(--s-rule);cursor:pointer;text-align:left">
-<sc-if value="{{ c.on }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--color-accent)"></span></sc-if>
-<span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:var(--s-ink)">{{ c.label }}</span>
-<span style="font-size:12px;color:var(--s-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.detail }}</span>
-</button>
-</sc-for>
-<sc-if value="{{ cmdNoMatch }}" hint-placeholder-val="{{ false }}">
-<div style="padding:18px 16px;font-size:13px;color:var(--s-mute)">{{ ui.cmdNone }}</div>
-</sc-if>
-<div style="padding:10px 16px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">{{ ui.cmdKeys }}</div>
-</div>
-</div>
-</sc-if>
 
 <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
 <div data-m="smooth" data-screen-label="Landing" class="lp" style="position:fixed;inset:0;z-index:40;background:#0B0B0C;color:var(--s-ink);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column">
@@ -1050,7 +1028,7 @@ class Component extends DCLogic {
     timeoutMin:30, lockPw:'', lockErr:'',
     positions:{}, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, hist:{}, roNews:[], euNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
     dismissed:[], detailTab:'overview',
-    cmdOpen:false, cmdQ:'', cmdIx:0, cursor:0, events:[] });
+    cursor:0, events:[] });
   // Append-only security trail. The server mirrors this shape at POST /api/events,
   // where the table has no update or delete policy — a user can read their log
   // and add to it, never quietly rewrite it.
@@ -1610,42 +1588,17 @@ class Component extends DCLogic {
     this.syncLive([ticker]);
     this.syncDetail(ticker);
   }
-  // --- command layer --------------------------------------------------------
-  cmdResults(raw) {
-    const H = this.data || {}, U = H.UNIVERSE || [], u = this.copy;
-    const q = String(raw || '').trim();
-    if (!q) return [];
-    const out = [];
-    const body = q.toLowerCase();
-    U.filter(x => x.ticker.toLowerCase().indexOf(body) === 0 || x.name.toLowerCase().indexOf(body) !== -1)
-      .slice(0, 5)
-      .forEach(h => out.push({ kind:'open', label:(u.cmdOpenHint || 'Open') + ' · ' + h.ticker, detail:h.name, run: () => this.openTicker(h.ticker) }));
-    [['portfolio', u.pfTitle], ['feed', u.feed], ['watchlist', u.watchlist], ['ledger', u.ledger], ['account', u.account], ['security', u.security]]
-      .forEach(sc => {
-        const label = String(sc[1] || '');
-        if (label.toLowerCase().indexOf(body) === 0 || sc[0].indexOf(body) === 0)
-          out.push({ kind:'nav', label:(u.cmdGoHint || 'Go to') + ' · ' + label, detail:'', run: () => this.go(sc[0]) });
-      });
-    return out.slice(0, 7);
-  }
-  runCmd(ix) {
-    const rows = this.cmdResults(this.state.cmdQ);
-    const row = rows[Math.max(0, Math.min(ix === undefined ? (this.state.cmdIx || 0) : ix, rows.length - 1))];
-    if (!row) return;
-    this.setState({ cmdOpen:false, cmdQ:'', cmdIx:0 });
-    row.run();
-  }
   onKey(event) {
     const tag = ((event.target && event.target.tagName) || '').toLowerCase();
     const typing = tag === 'input' || tag === 'textarea' || tag === 'select';
     const key = event.key || '';
-    if ((event.metaKey || event.ctrlKey) && key.toLowerCase() === 'k') {
-      event.preventDefault();
-      return this.setState(st => ({ cmdOpen: !st.cmdOpen, cmdQ:'', cmdIx:0 }));
-    }
-    if (this.state.cmdOpen) { if (key === 'Escape') { event.preventDefault(); this.setState({ cmdOpen:false }); } return; }
     if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
-    if (key === '/') { event.preventDefault(); return this.setState({ cmdOpen:true, cmdQ:'', cmdIx:0 }); }
+    // "/" jumps to the feed's filter box.
+    if (key === '/' && this.state.screen === 'feed') {
+      const el = document.querySelector('input[data-feed-filter]');
+      if (el) { event.preventDefault(); el.focus(); }
+      return;
+    }
     const rows = this._feedRows || [];
     if (this.state.screen !== 'feed' || !rows.length) return;
     const max = rows.length - 1, cur = Math.min(this.state.cursor || 0, max);
@@ -1929,6 +1882,98 @@ class Component extends DCLogic {
     return i < 0 ? t : t.slice(0, i + 1) + t.slice(i + 1).replace(/\./g, '');
   }
   toggleOverlay(k) { this.setState(st => ({ overlays: Object.assign({}, st.overlays, { [k]: !st.overlays[k] }) })); }
+  // The feed's filter: one box that finds a ticker by symbol or company name, or a word in the
+  // stories; the most active tickers one click away; "my watchlist" on the market tabs.
+  // Picked tickers and a kept word show as removable chips inside the box.
+  feedFilterEl(o) {
+    const h = React.createElement, u = this.copy, pal = this.pal, s = this.state;
+    const set = patch => this.setState(Object.assign({ feedPages:0 }, patch));
+    const label = t => this.tickerLabel(t);
+    const byCount = Object.keys(o.feedTickers).sort((a, b) => o.feedTickers[b] - o.feedTickers[a] || a.localeCompare(b));
+    // Suggestions: tickers whose symbol or company name matches, best match first; then the
+    // typed text as a word to look for in the stories. With nothing typed, every ticker.
+    const q = o.fold(o.fQ), bare = t => o.fold(t.replace(/\.(US|RO|DE|L)$/i, ''));
+    const rank = t => {
+      if (!q) return 1;
+      const sym = bare(t), nm = o.fold(o.nameOfT(t));
+      if (sym === q) return 5;
+      if (sym.indexOf(q) === 0) return 4;
+      if (nm.indexOf(q) === 0) return 3;
+      if ((' ' + nm).indexOf(' ' + q) >= 0) return 2;
+      return 0;
+    };
+    const tick = byCount.map(t => ({ t, r: rank(t) })).filter(x => x.r > 0)
+      .sort((a, b) => b.r - a.r || o.feedTickers[b.t] - o.feedTickers[a.t]).slice(0, q ? 8 : 60).map(x => ({ kind:'t', t:x.t }));
+    const opts = tick.concat(q && o.fQ.length >= 2 ? [{ kind:'w', w:o.fQ }] : []);
+    const ix = Math.min(s.feedIx || 0, Math.max(0, opts.length - 1));
+    const toggle = t => { const cur = s.feedSel || []; set({ feedSel: cur.indexOf(t) >= 0 ? cur.filter(x => x !== t) : cur.concat(t), feedQ:'', feedIx:0 }); };
+    const choose = x => x.kind === 't' ? toggle(x.t) : set({ feedKw: x.w, feedQ:'', feedIx:0, feedDrop:false });
+    const open = !!s.feedDrop && opts.length > 0;
+    const onKey = e => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); this.setState({ feedDrop:true, feedIx: Math.min(opts.length - 1, ix + 1) }); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); this.setState({ feedIx: Math.max(0, ix - 1) }); }
+      else if (e.key === 'Enter') { e.preventDefault(); if (opts[ix]) choose(opts[ix]); }
+      else if (e.key === 'Escape') { e.preventDefault(); if (s.feedDrop) this.setState({ feedDrop:false }); else { set({ feedQ:'' }); e.target.blur(); } }
+      else if (e.key === 'Backspace' && !o.fQ) {
+        if (o.fKw) set({ feedKw:'' }); else if (o.fSel.length) set({ feedSel: o.fSel.slice(0, -1) });
+      }
+    };
+    const tokenStyle = { display:'inline-flex', alignItems:'center', gap:6, flex:'none', minHeight:26, padding:'0 4px 0 9px', background:pal.accent, color:pal.bg,
+      fontFamily:'var(--font-heading)', fontWeight:800, fontSize:11, letterSpacing:'0.06em', textTransform:'uppercase' };
+    const xBtn = (what, onClick) => h('button', { type:'button', onClick, 'aria-label': (u.filterRemove || 'Remove filter {f}').replace('{f}', what),
+      style:{ display:'flex', alignItems:'center', justifyContent:'center', width:20, height:20, padding:0, border:0, background:'transparent', color:pal.bg, cursor:'pointer' } },
+      h('svg', { width:10, height:10, viewBox:'0 0 10 10', 'aria-hidden':true }, h('path', { d:'M1 1l8 8M9 1l-8 8', stroke:'currentColor', strokeWidth:1.6 })));
+    const tokens = o.fSel.map(t => h('span', { key:'t' + t, style:tokenStyle }, label(t), xBtn(label(t), () => toggle(t))))
+      .concat(o.fKw ? [h('span', { key:'kw', style:Object.assign({}, tokenStyle, { textTransform:'none', letterSpacing:0 }) }, '“' + o.fKw + '”', xBtn(o.fKw, () => set({ feedKw:'' })))] : []);
+    const icon = h('svg', { width:16, height:16, viewBox:'0 0 24 24', fill:'none', stroke:'currentColor', strokeWidth:2, strokeLinecap:'round', 'aria-hidden':true, style:{ flex:'none', color:pal.mute } },
+      h('circle', { cx:11, cy:11, r:7 }), h('path', { d:'M20 20l-3.5-3.5' }));
+    const box = h('div', { key:'box', style:{ position:'relative', flex:'1 1 360px', minWidth:0, maxWidth:620 } },
+      h('label', { style:{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:6, minHeight:44, padding:'6px 12px', background:'var(--s-panel)',
+        border:'1px solid ' + (s.feedDrop ? pal.accent : pal.rule), cursor:'text' } },
+        icon, ...tokens,
+        h('input', { type:'text', 'data-feed-filter':'1', role:'combobox', 'aria-expanded': open, 'aria-controls':'feed-filter-list', 'aria-autocomplete':'list',
+          'aria-activedescendant': open ? 'ff-opt-' + ix : undefined, 'aria-label': u.filterTicker || 'Filter the feed',
+          autoComplete:'off', spellCheck:false, value: s.feedQ || '', placeholder: tokens.length ? '' : (u.filterPh || 'Ticker, company or word'),
+          onChange: e => set({ feedQ: e.target.value, feedIx:0, feedDrop:true }), onFocus: () => this.setState({ feedDrop:true }),
+          onBlur: () => setTimeout(() => this.setState({ feedDrop:false }), 120), onKeyDown: onKey,
+          style:{ flex:'1 1 140px', minWidth:120, minHeight:30, padding:0, border:0, outline:'none', background:'transparent', color:pal.ink,
+            fontFamily:'var(--font-body)', fontSize:15 } })),
+      open ? h('div', { id:'feed-filter-list', role:'listbox', style:{ position:'absolute', left:0, right:0, top:'100%', zIndex:30, marginTop:4, maxHeight:340, overflowY:'auto',
+        background:pal.bg, border:'1px solid ' + pal.rule, boxShadow:'0 14px 32px rgba(0,0,0,0.28)' } },
+        !q ? h('div', { key:'hd', style:{ padding:'9px 14px 7px', fontSize:10, letterSpacing:'0.14em', textTransform:'uppercase', color:pal.mute } }, u.filterAllT || 'Every ticker in this tab') : null,
+        ...opts.map((x, i) => {
+          const on = i === ix, picked = x.kind === 't' && o.fSel.indexOf(x.t) >= 0;
+          return h('div', { key: x.kind + (x.t || x.w), id:'ff-opt-' + i, role:'option', 'aria-selected': on,
+            onMouseDown: e => { e.preventDefault(); choose(x); }, onMouseEnter: () => this.setState({ feedIx:i }),
+            style:{ display:'flex', alignItems:'center', gap:12, minHeight:42, padding:'0 14px', cursor:'pointer', borderTop:'1px solid ' + pal.rule,
+              background: on ? 'var(--s-panel)' : 'transparent', boxShadow: on ? 'inset 2px 0 0 ' + pal.accent : 'none' } },
+            x.kind === 't'
+              ? [h('span', { key:'s', style:{ flex:'none', minWidth:84, fontFamily:'var(--font-heading)', fontWeight:800, fontSize:13, letterSpacing:'0.04em', color:pal.ink } }, label(x.t)),
+                 h('span', { key:'n', style:{ flex:1, minWidth:0, fontSize:12, color:pal.mute, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' } }, o.nameOfT(x.t)),
+                 h('span', { key:'c', style:{ flex:'none', fontSize:11, color:pal.mute, fontVariantNumeric:'tabular-nums' } }, (u.filterCount || '{n} stories').replace('{n}', o.feedTickers[x.t])),
+                 h('span', { key:'k', style:{ flex:'none', display:'flex', width:14, color:pal.accent } }, picked ? h('svg', { width:12, height:12, viewBox:'0 0 12 12', 'aria-hidden':true }, h('path', { d:'M2 6.5l2.6 2.5L10 3.5', fill:'none', stroke:'currentColor', strokeWidth:1.8 })) : null)]
+              : [h('span', { key:'w', style:{ flex:1, minWidth:0, fontSize:13, color:pal.ink } }, (u.filterWord || 'Look for “{q}” in the stories').replace('{q}', x.w)),
+                 h('span', { key:'c', style:{ flex:'none', fontSize:11, color:pal.mute, fontVariantNumeric:'tabular-nums' } }, (u.filterCount || '{n} stories').replace('{n}', o.wordCount(x.w)))]);
+        })) : null);
+    // Quick picks: the five most active tickers, and the watchlist on the market tabs.
+    const quickStyle = on => Object.assign(this.chipStyle(on), { flex:'none', minHeight:32, padding:'0 11px', fontSize:10, whiteSpace:'nowrap' });
+    const quick = byCount.slice(0, 5).map(t => h('button', { key:'q' + t, type:'button', 'aria-pressed': o.fSel.indexOf(t) >= 0, onClick: () => toggle(t),
+      title: o.nameOfT(t), style: quickStyle(o.fSel.indexOf(t) >= 0) }, label(t) + ' · ' + o.feedTickers[t]));
+    const mine = s.feedTab !== 'following' && o.mineCount ? h('button', { key:'mine', type:'button', 'aria-pressed': o.fMine, onClick: () => set({ feedMine: !o.fMine }),
+      style: quickStyle(o.fMine) }, (u.filterMine || 'My watchlist') + ' · ' + o.mineCount) : null;
+    const active = o.fSel.length || o.fKw || o.fQ || o.fMine;
+    const status = active ? h('div', { key:'st', role:'status', style:{ display:'flex', alignItems:'center', gap:12, fontSize:12, color:pal.mute } },
+      h('span', { style:{ fontVariantNumeric:'tabular-nums' } }, (u.filterShown || '{n} of {t} stories').replace('{n}', o.shown).replace('{t}', o.allCards)),
+      h('button', { type:'button', onClick: () => set({ feedSel:[], feedKw:'', feedQ:'', feedMine:false }),
+        style:{ padding:'6px 0', border:0, background:'transparent', color:pal.accent, fontFamily:'var(--font-heading)', fontWeight:800, fontSize:10, letterSpacing:'0.1em', textTransform:'uppercase', cursor:'pointer' } },
+        u.filterClear || 'Clear filters')) : null;
+    return h('div', { role:'search', 'aria-label': u.filterTicker || 'Filter the feed', style:{ padding:'14px var(--gx)', borderBottom:'1px solid ' + pal.rule } },
+      h('div', { style:{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:'10px 16px' } }, box,
+        h('div', { key:'qp', style:{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:6 } },
+          h('span', { style:{ fontSize:10, letterSpacing:'0.14em', textTransform:'uppercase', color:pal.mute, marginRight:4 } }, u.filterTop || 'Most active'), ...quick, mine)),
+      status ? h('div', { style:{ marginTop:10 } }, status) : null,
+      active && !o.shown ? h('div', { style:{ marginTop:8, fontSize:13, color:pal.mute } }, u.filterEmpty || 'No story matches these filters.') : null);
+  }
   chipStyle(on) {
     return { padding:'5px 9px', border:'1px solid ' + (on ? this.pal.accent : this.pal.rule), background:on ? this.pal.accent : 'transparent',
       color:on ? this.pal.bg : this.pal.mute, fontFamily:'var(--font-heading)', fontSize:9, fontWeight:800, letterSpacing:'0.08em', textTransform:'uppercase', cursor:'pointer' };
@@ -2246,25 +2291,24 @@ class Component extends DCLogic {
       for (let i = feed.length - 1; i >= 0; i--) if (gone.has(feed[i])) feed.splice(i, 1);
     }
     // 40 cards, and 40 more each time "More stories" is pressed (reset when the tab changes).
-    // Ticker filter (chips above the feed): every ticker in this tab, most stories first. A
-    // card merged from several tickers ("Also FLY") counts for each of them.
-    const feedTickers = {};
-    feed.forEach(r => [r.ticker].concat((r.twins || []).map(x => x.ticker))
-      .filter((t, i, a) => a.indexOf(t) === i).forEach(t => { feedTickers[t] = (feedTickers[t] || 0) + 1; }));
-    const fT = s.feedTicker && feedTickers[s.feedTicker] ? s.feedTicker : '', allCards = feed.length;
-    if (fT) for (let i = feed.length - 1; i >= 0; i--) {
-      if (feed[i].ticker !== fT && !(feed[i].twins || []).some(x => x.ticker === fT)) feed.splice(i, 1);
-    }
-    const feedFilter = Object.keys(feedTickers).length < 2 ? null : (() => {
-      const h = React.createElement, pick = t => this.setState({ feedTicker: t, feedPages: 0 });
-      const chip = (t, label) => h('button', { key: t || 'all', 'aria-pressed': fT === t, onClick: () => pick(t),
-        style: Object.assign(this.chipStyle(fT === t), { flex: 'none', minHeight: 30, padding: '0 11px', fontSize: 10, whiteSpace: 'nowrap' }) }, label);
-      const order = Object.keys(feedTickers).sort((a, b) => feedTickers[b] - feedTickers[a] || a.localeCompare(b));
-      return h('div', { role: 'group', 'aria-label': u.filterTicker || 'Filter by ticker',
-        style: { display: 'flex', gap: 6, overflowX: 'auto', padding: '12px var(--gx)', borderBottom: '1px solid ' + this.pal.rule, scrollbarWidth: 'thin' } },
-        chip('', (u.filterAll || 'All') + ' · ' + allCards),
-        ...order.map(t => chip(t, this.tickerLabel(t) + ' · ' + feedTickers[t])));
-    })();
+    // The filter above the feed (feedFilterEl): tickers picked (any of them), "my watchlist",
+    // a word kept as a filter, and what is being typed, which filters as it is typed. Every
+    // ticker in this tab is counted first; a card merged from several tickers counts for each.
+    const feedTickers = {}, cardTickers = r => [r.ticker].concat((r.twins || []).map(x => x.ticker)).filter((t, i, a) => a.indexOf(t) === i);
+    feed.forEach(r => cardTickers(r).forEach(t => { feedTickers[t] = (feedTickers[t] || 0) + 1; }));
+    const fold = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const nameOfT = t => (window.HIFEU && window.HIFEU.name(t)) || (window.HIFBVB && window.HIFBVB.name(t)) || ((s.profiles || {})[t] || {}).name || (rec(t) || {}).name || '';
+    const textOf = r => fold([r.ticker, this.tickerLabel(r.ticker), nameOfT(r.ticker), r.headline, r.snippet, r.watch].concat((r.twins || []).map(x => x.ticker + ' ' + nameOfT(x.ticker))).join(' \n '));
+    const fSel = (s.feedSel || []).filter(t => feedTickers[t]), fKw = String(s.feedKw || ''), fQ = String(s.feedQ || '').trim();
+    const followSet = new Set(s.follows), mineCount = Object.keys(feedTickers).filter(t => followSet.has(t)).length;
+    const fMine = !!s.feedMine && s.feedTab !== 'following' && mineCount > 0;
+    const allCards = feed.length;
+    const passes = (r, q) => (!fSel.length || cardTickers(r).some(t => fSel.indexOf(t) >= 0))
+      && (!fMine || cardTickers(r).some(t => followSet.has(t)))
+      && (!fKw || textOf(r).indexOf(fold(fKw)) >= 0) && (!q || textOf(r).indexOf(fold(q)) >= 0);
+    if (fSel.length || fMine || fKw || fQ) for (let i = feed.length - 1; i >= 0; i--) if (!passes(feed[i], fQ)) feed.splice(i, 1);
+    const feedFilter = allCards ? this.feedFilterEl({ feedTickers, nameOfT, fold, fSel, fKw, fQ, fMine, mineCount, allCards, shown: feed.length,
+      wordCount: q => feed.length && q ? feed.filter(r => textOf(r).indexOf(fold(q)) >= 0).length : 0 }) : null;
     const feedCap = 40 * (1 + (s.feedPages || 0)), feedTotal = feed.length;
     if (feed.length > feedCap) feed.length = feedCap;
     feed.forEach(r => {
@@ -2297,7 +2341,7 @@ class Component extends DCLogic {
         following: on, notFollowing: !on, liveOnly: !FOLLOWS[x.ticker],
         open: () => this.openTicker(x.ticker),
         keyOpen: event => this.activateFromKeyboard(() => this.openTicker(x.ticker), event),
-        openLabel: (u.cmdOpenHint || 'Open') + ' ' + x.ticker + ' · ' + x.name,
+        openLabel: (u.open || 'Open') + ' ' + x.ticker + ' · ' + x.name,
         removeLabel: (u.removeTicker || 'Remove {t}').replace('{t}', this.tickerLabel(x.ticker)),
         remove: () => this.unfollow(x.ticker),
         add: () => {
@@ -2426,22 +2470,7 @@ class Component extends DCLogic {
     const lCount = k => k === 'all' ? led.rows.length : led.rows.filter(r => r.verdict === k).length;
     const toneInk = t => t === 'alarm' ? 'var(--color-accent)' : t === 'warn' ? 'var(--s-ink)' : t === 'edge' ? 'var(--s-faint)' : 'var(--s-mute)';
     const dTab = s.detailTab || 'overview';
-    const cmdRows = this.cmdResults(s.cmdQ).map((r, i) => ({
-      label:r.label, detail:r.detail, on: i === (s.cmdIx || 0), off: i !== (s.cmdIx || 0), run: () => this.runCmd(i)
-    }));
     return {
-      cmdShown: !!s.cmdOpen, cmdQ: s.cmdQ || '',
-      onCmdQ: e => this.setState({ cmdQ:e.target.value, cmdIx:0 }),
-      cmdKey: e => {
-        const rows = this.cmdResults(this.state.cmdQ);
-        if (e.key === 'ArrowDown') { e.preventDefault(); this.setState(st => ({ cmdIx: Math.min(rows.length - 1, (st.cmdIx || 0) + 1) })); }
-        else if (e.key === 'ArrowUp') { e.preventDefault(); this.setState(st => ({ cmdIx: Math.max(0, (st.cmdIx || 0) - 1) })); }
-        else if (e.key === 'Enter') { e.preventDefault(); this.runCmd(); }
-        else if (e.key === 'Escape') { e.preventDefault(); this.setState({ cmdOpen:false }); }
-      },
-      cmdRows, cmdNoMatch: !!(s.cmdQ || '').trim() && !cmdRows.length,
-      closeCmd: () => this.setState({ cmdOpen:false }),
-      openCmd: () => this.setState({ cmdOpen:true, cmdQ:'', cmdIx:0 }),
       crowdPct: crowd ? crowd.pctLabel : '', crowdNote: crowd ? crowd.note : '', hasCrowd: !!crowd,
       crowdZone: crowd ? crowd.zone : '',
       crowdFill: crowd ? crowd.fill + '%' : '0%', crowdInk: crowd ? toneInk(crowd.tone) : 'var(--s-mute)',
@@ -2794,13 +2823,13 @@ class Component extends DCLogic {
       euEmpty: s.feedTab === 'eu' && !(s.euNews || []).length,
       // Stories still on their way (none of the tab's tickers answered yet) read as loading,
       // not as "no stories".
-      feedLoading: s.feedTab !== 'bvb' && s.feedTab !== 'eu' && !feed.length && !((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t])) && (s.feedTab === 'market' || s.follows.length > 0),
-      feedEmpty: s.feedTab !== 'bvb' && s.feedTab !== 'eu' && !feed.length && ((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t]) || (s.feedTab !== 'market' && !s.follows.length)),
-      setFeedFollowing: () => this.setState({ feedTab:'following', feedPages:0, feedTicker:'' }),
-      setFeedMarket: () => { this.setState({ feedTab:'market', feedPages:0, feedTicker:'' }); this.syncMarket(); },
-      setFeedBvb: () => { this.setState({ feedTab:'bvb', feedPages:0, feedTicker:'' }); this.syncBvb(); },
+      feedLoading: s.feedTab !== 'bvb' && s.feedTab !== 'eu' && !allCards && !((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t])) && (s.feedTab === 'market' || s.follows.length > 0),
+      feedEmpty: s.feedTab !== 'bvb' && s.feedTab !== 'eu' && !allCards && ((s.feedTab === 'market' ? ((window.HIF || {}).MARKET_TOP || []) : s.follows).some(t => LN[t]) || (s.feedTab !== 'market' && !s.follows.length)),
+      setFeedFollowing: () => this.setState({ feedTab:'following', feedPages:0, feedSel:[], feedKw:'', feedQ:'', feedMine:false, feedDrop:false }),
+      setFeedMarket: () => { this.setState({ feedTab:'market', feedPages:0, feedSel:[], feedKw:'', feedQ:'', feedMine:false, feedDrop:false }); this.syncMarket(); },
+      setFeedBvb: () => { this.setState({ feedTab:'bvb', feedPages:0, feedSel:[], feedKw:'', feedQ:'', feedMine:false, feedDrop:false }); this.syncBvb(); },
       feedBvbOn: s.feedTab === 'bvb', feedBvbOff: s.feedTab !== 'bvb',
-      setFeedEu: () => { this.setState({ feedTab:'eu', feedPages:0, feedTicker:'' }); this.syncEu(); },
+      setFeedEu: () => { this.setState({ feedTab:'eu', feedPages:0, feedSel:[], feedKw:'', feedQ:'', feedMine:false, feedDrop:false }); this.syncEu(); },
       feedFilter, hasFeedFilter: !!feedFilter,
       hasMoreFeed: feedTotal > feed.length,
       moreFeedLabel: (u.moreStories || 'More stories ({n})').replace('{n}', feedTotal - feed.length),
