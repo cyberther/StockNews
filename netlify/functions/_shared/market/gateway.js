@@ -497,19 +497,32 @@ export function publicRequest(cap, params, extraSymbols) {
   if (cap === 'quote') return open.has(params.symbol);
   return false;
 }
+// true for a valid session of an account the owner has approved (supabase/approval.sql),
+// 'pending' for one still waiting, false otherwise. A refusal is remembered for a minute
+// only, so an approval takes effect quickly.
+const PENDING_TTL_MS = 60 * 1000;
 async function signedIn(request, auth, fetchImpl) {
   const token = (request.headers.get('x-hif-auth') || '').trim();
   if (!token || token.length > 4096) return false;
   const now = Date.now(), hit = users.get(token);
   if (hit && hit.until > now) return hit.ok;
+  const base = auth.supabaseUrl.replace(/\/$/, ''), f = fetchImpl || fetch;
+  const headers = { apikey: auth.anonKey, authorization: 'Bearer ' + token };
   let ok = false;
   try {
-    const res = await (fetchImpl || fetch)(auth.supabaseUrl.replace(/\/$/, '') + '/auth/v1/user', {
-      headers: { apikey: auth.anonKey, authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(5000) });
-    ok = res.ok;
+    const res = await f(base + '/auth/v1/user', { headers, signal: AbortSignal.timeout(5000) });
+    const user = res.ok ? await res.json() : null;
+    if (user && user.id) {
+      // The account's own row (row-level security); no row means not approved.
+      const st = await f(base + '/rest/v1/account_status?select=approved,suspended&user_id=eq.' + encodeURIComponent(user.id),
+        { headers: { ...headers, accept: 'application/json' }, signal: AbortSignal.timeout(5000) });
+      const rows = st.ok ? await st.json() : null;
+      if (!st.ok) return false; // can't tell: refuse, but don't remember it
+      ok = Array.isArray(rows) && !!rows[0] && rows[0].approved === true && !rows[0].suspended ? true : 'pending';
+    }
   } catch { return false; } // Supabase unreachable: refuse, but don't remember it.
   if (users.size > 5000) for (const [k, v] of users) if (v.until <= now) users.delete(k);
-  users.set(token, { ok, until: now + AUTH_TTL_MS });
+  users.set(token, { ok, until: now + (ok === true ? AUTH_TTL_MS : PENDING_TTL_MS) });
   return ok;
 }
 
@@ -529,9 +542,10 @@ export async function handleMarketRequest(request, options = {}) {
   const parsed = parse(cap, url.searchParams);
   if (parsed.error) return json({ error: parsed.error }, 400);
   const auth = options.auth;
-  if (auth && auth.supabaseUrl && auth.anonKey && !publicRequest(cap, parsed.params, auth.publicSymbols) &&
-      !(await signedIn(request, auth, auth.fetch))) {
-    return json({ error: 'sign in required' }, 401, { 'cache-control': 'no-store' });
+  if (auth && auth.supabaseUrl && auth.anonKey && !publicRequest(cap, parsed.params, auth.publicSymbols)) {
+    const who = await signedIn(request, auth, auth.fetch);
+    if (who === 'pending') return json({ error: 'account awaiting approval' }, 403, { 'cache-control': 'no-store' });
+    if (who !== true) return json({ error: 'sign in required' }, 401, { 'cache-control': 'no-store' });
   }
 
   const ctx = { keys: { finnhub: options.apiKey, ...(options.keys || {}) }, log: options.log || defaultLog, usage: options.usage || null, order: options.order || null };

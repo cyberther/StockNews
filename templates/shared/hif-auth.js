@@ -224,15 +224,18 @@ async function signOut(everywhere) {
 }
 
 // The server-owned plan from account_status (readable only for the caller's own row).
-// No row, or the table not created yet, means the free plan.
+// No row, or the table not created yet, means the free plan. approved: false while the
+// owner hasn't approved a new account (supabase/approval.sql); when the row can't be read
+// it is assumed approved, and the server still refuses what an unapproved account asks for.
 async function plan() {
   await ready;
   const t = await token(), s = session();
-  if (!cfg || !t || !s) return { plan: 'free', suspended: false };
-  const r = await call('/rest/v1/account_status?select=plan,suspended&user_id=eq.' + encodeURIComponent(s.userId),
+  if (!cfg || !t || !s) return { plan: 'free', suspended: false, approved: true };
+  const r = await call('/rest/v1/account_status?select=plan,suspended,approved&user_id=eq.' + encodeURIComponent(s.userId),
     { headers: { authorization: 'Bearer ' + t, accept: 'application/json' } });
-  const row = r.ok && Array.isArray(r.body) ? r.body[0] : null;
-  return { plan: row && row.plan === 'pro' ? 'pro' : 'free', suspended: !!(row && row.suspended) };
+  if (!r.ok || !Array.isArray(r.body)) return { plan: 'free', suspended: false, approved: true };
+  const row = r.body[0] || null;
+  return { plan: row && row.plan === 'pro' ? 'pro' : 'free', suspended: !!(row && row.suspended), approved: !!(row && row.approved !== false) };
 }
 
 // PostgREST call as the signed-in user; row-level security limits it to their own rows.

@@ -167,7 +167,15 @@ test('cache misses that spend quota need a signed-in user; RSS news and landing 
   const { handleMarketRequest: h, resetGatewayForTests: reset, publicRequest } = await import('../netlify/functions/_shared/market/gateway.js');
   reset();
   const seen = [];
-  const authFetch = async (url, init) => { seen.push(init.headers.authorization); return new Response('{}', { status: init.headers.authorization === 'Bearer good' ? 200 : 401 }); };
+  // good: an approved account; waiting: signed up, not approved yet.
+  const authFetch = async (url, init) => {
+    const tok = init.headers.authorization.replace('Bearer ', '');
+    if (String(url).includes('/auth/v1/user')) {
+      seen.push(init.headers.authorization);
+      return tok === 'good' || tok === 'waiting' ? Response.json({ id: tok + '-id' }) : new Response('{}', { status: 401 });
+    }
+    return Response.json([{ approved: tok === 'good', suspended: false }]);
+  };
   const auth = { supabaseUrl: 'https://x.supabase.co', anonKey: 'anon', fetch: authFetch };
   const q = (s, hdr) => new Request('http://localhost:8080/api/finnhub?' + s, { headers: hdr || {} });
   const opts = { keys: {}, log: () => {}, auth };
@@ -176,6 +184,10 @@ test('cache misses that spend quota need a signed-in user; RSS news and landing 
   assert.notEqual((await h(q('path=/stock/recommendation&symbol=NVDA', { 'x-hif-auth': 'good' }), opts)).status, 401);
   assert.notEqual((await h(q('path=/stock/recommendation&symbol=AAPL', { 'x-hif-auth': 'good' }), opts)).status, 401);
   assert.equal(seen.filter(x => x === 'Bearer good').length, 1, 'a good token is checked once, then remembered');
+  // An account that waits for the owner's approval gets nothing that costs quota.
+  const waiting = await h(q('path=/stock/recommendation&symbol=NVDA', { 'x-hif-auth': 'waiting' }), opts);
+  assert.equal(waiting.status, 403);
+  assert.equal((await waiting.json()).error, 'account awaiting approval');
   assert.equal(publicRequest('marketNewsRO', {}), true);
   assert.equal(publicRequest('news', { symbol: 'SNP.RO' }), true);
   assert.equal(publicRequest('news', { symbol: 'NVDA' }), false);
