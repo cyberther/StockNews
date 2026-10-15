@@ -256,7 +256,7 @@
 </sc-if>
 </sc-if>
 <sc-if value="{{ tabNews }}" hint-placeholder-val="{{ false }}">
-<div style="padding:14px var(--gx) 6px;border-top:1px solid var(--s-rule);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tape }} · {{ stock.tickerLabel }}</div>
+<div style="padding:14px var(--gx) 6px;border-top:1px solid var(--s-rule);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tape }} · {{ stock.tickerLabel }} · {{ stockNewsCount }}</div>
 <sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
 <article role="button" tabIndex="0" onClick="{{ n.open }}" onKeyDown="{{ n.keyOpen }}" style-hover="background:var(--s-panel)" style="display:grid;grid-template-columns:96px 1fr;gap:16px;padding:14px var(--gx);border-top:1px solid var(--s-rule);align-items:baseline;cursor:pointer">
 <span style="font-size:12px;letter-spacing:0.06em;color:var(--s-mute)">{{ n.stamp }}</span>
@@ -672,6 +672,14 @@
 </div>
 <div style="font-size:12px;color:var(--s-mute);margin-top:8px">{{ langNote }}</div>
 </div>
+</div>
+<div style="margin-top:26px;max-width:420px">
+<label style="display:block"><span style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:8px">{{ ui.phoneTitle }}</span>
+<span style="display:flex;gap:8px">
+<input type="tel" name="tel" autocomplete="tel" inputmode="tel" maxlength="24" placeholder="+40 712 345 678" value="{{ phoneDraft }}" onChange="{{ onPhone }}" onKeyDown="{{ phoneKey }}" aria-invalid="{{ phoneBad }}" aria-describedby="phone-note" style="flex:1;min-width:0;min-height:44px;padding:0 14px;background:var(--s-panel);border:1px solid {{ phoneEdge }};color:var(--s-ink);font-family:var(--font-body);font-size:15px">
+<button type="button" onClick="{{ savePhone }}" disabled="{{ phoneSame }}" style="flex:none;min-height:44px;padding:0 16px;background:{{ phoneBtnBg }};border:1px solid {{ phoneBtnEdge }};color:{{ phoneBtnInk }};font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ phoneSaveLabel }}</button>
+</span></label>
+<div id="phone-note" role="status" style="font-size:12px;color:{{ phoneNoteInk }};margin-top:8px;text-wrap:pretty">{{ phoneNote }}</div>
 </div>
 <div style="margin-top:26px;max-width:420px">
 <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:8px">{{ ui.opinionTitle }}</div>
@@ -1253,7 +1261,7 @@ class Component extends DCLogic {
     // Signing in (rather than a token refresh) lands on the portfolio.
     const landing = !this.state.session ? { screen:'portfolio' } : {};
     this.setState(Object.assign(landing, {
-      session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
+      session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId, phone:sess.phone || '' },
       accountId: sess.userId, authOpen:false, authPw:'', authPw2:'', authSent:'', authErr:''
     }, this.langsFrom(sess), fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, events:[], selected:'', screen:'portfolio' } : {}));
     this.loadPlan();
@@ -1790,15 +1798,22 @@ class Component extends DCLogic {
     return Math.floor(d.getTime() / 1000);
   }
   // The open feed tab's stories of that window from public.stories (stored by the scan every
-  // 10 minutes): the live sources only list the newest ones. Refreshed with the rest.
+  // 10 minutes), or the open ticker page's: the live sources only list the newest ones.
+  // Refreshed with the rest.
   syncHistory(force) {
     const P = window.HIFPush, s = this.state;
-    if (!P || !P.loadStories || !s.authLive || !s.session || s.screen !== 'feed') return;
+    if (!P || !P.loadStories || !s.authLive || !s.session) return;
+    if (s.screen === 'detail' && s.selected) return this.loadHistory('tk:' + s.selected, 'ticker=eq.' + encodeURIComponent(s.selected), force);
+    if (s.screen !== 'feed') return;
     const tab = s.feedTab || 'following';
     const list = tab === 'market' ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows;
     if ((tab === 'following' || tab === 'market') && !list.length) return;
     const filter = tab === 'bvb' ? 'ticker=like.*.RO' : tab === 'eu' ? 'or=(ticker.like.*.DE,ticker.like.*.L)'
       : 'ticker=in.(' + list.map(t => '"' + t + '"').join(',') + ')';
+    this.loadHistory(tab, filter, force);
+  }
+  loadHistory(tab, filter, force) {
+    const P = window.HIFPush;
     const since = new Date(this.feedSince() * 1000).toISOString(), sig = tab + '|' + filter + '|' + since;
     if (!force && this._histSig === sig) return;
     this._histSig = sig;
@@ -2479,6 +2494,24 @@ class Component extends DCLogic {
       this.navItem('watchlist', u.watchlist, isFree ? s.follows.length + '/3' : String(s.follows.length)),
       this.navItem('ledger', u.ledger, String((s.dismissed || []).length))
     ];
+    // The ticker page's Feed: every story about it in the feed's window (5 business days),
+    // newest first: live news, the press tabs and what the scan stored (syncHistory).
+    const tickerNews = (() => {
+      const t = stock.ticker, since = this.feedSince(), have = new Set(), out = [];
+      const add = n => {
+        const id = n.id ? t + ':' + n.id : '';
+        if (!n.ts || n.ts < since || (id && have.has(id))) return;
+        if (id) have.add(id);
+        out.push({ ticker:t, storyId:id, headline:n.headline, source:n.source || '', ts:n.ts, stamp:this.storyTime(n.ts, n.stamp), score:'', url:n.url || '' });
+      };
+      if (live) {
+        (LN[t] || []).forEach(add);
+        (s.roNews || []).concat(s.euNews || []).filter(n => n.related === t).forEach(add);
+        (((s.hist || {})['tk:' + t] || {}).rows || []).forEach(add);
+      } else NEWS.filter(n => n.ticker === t).forEach(n => out.push(Object.assign({}, n, { headline: n.headline[L] })));
+      const isOp = (window.HIF && window.HIF.isOpinion) || (() => false);
+      return out.filter(n => s.showOpinion || !isOp(n.source, n.url)).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    })();
     const myWeight = pos && book.value ? (pos.value / book.value * 100).toFixed(0) + '%' : '';
     const editing = s.posEdit === stock.ticker;
     const CROWD = H.CROWD || {};
@@ -2772,7 +2805,7 @@ class Component extends DCLogic {
       auditRows: (s.events || []).slice(0, 12).map(ev => {
         const map = { signin:u.evSignin, signout:u.evSignout, signout_all:u.evSignoutAll, twofa_on:u.evTwofaOn,
           twofa_off:u.evTwofaOff, device_revoked:u.evDeviceRevoked, locked:u.evLocked,
-          unlock_failed:u.evUnlockFailed, password_changed:u.evPasswordChanged };
+          unlock_failed:u.evUnlockFailed, password_changed:u.evPasswordChanged, phone:u.evPhone };
         const d = new Date(ev.ts);
         const warn = ev.kind === 'unlock_failed' || ev.kind === 'twofa_off' || ev.kind === 'device_revoked';
         return {
@@ -2897,17 +2930,14 @@ class Component extends DCLogic {
       }),
       dataless: dataless(stock.ticker), hasData: !dataless(stock.ticker),
       chart: dataless(stock.ticker) ? null : this.chartEl(stock),
-      stockNews: ((live && LN[stock.ticker] && LN[stock.ticker].length)
-        ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, storyId: n.id ? stock.ticker + ':' + n.id : '', headline:n.headline, source:n.source, stamp:this.storyTime(n.ts, n.stamp), score:'', url:n.url || '' }))
-        : NEWS.filter(n => n.ticker === stock.ticker).slice(0,5).map(n => Object.assign({}, n, { headline: n.headline[L] })))
-        .map(n => Object.assign({}, n, {
+      stockNews: tickerNews.map(n => Object.assign({}, n, {
           // The AI summary replaces the headline here as it does in the feed.
           summary: this.aiText(n.storyId), isAi: !!this.aiText(n.storyId), notAi: !this.aiText(n.storyId),
           hasUrl: /^https?:\/\//i.test(n.url || ''),
           open: () => this.openNews(n),
           keyOpen: event => this.activateFromKeyboard(() => this.openNews(n), event)
         })),
-      noStockNews: live ? !(LN[stock.ticker] && LN[stock.ticker].length) : !NEWS.some(n => n.ticker === stock.ticker),
+      noStockNews: !tickerNews.length, stockNewsCount: String(tickerNews.length),
       freqNote: isFree ? u.freqFree : u.freqPro,
       detailActionLabel: following ? (isFree ? u.enablePush : u.pushEnabled.replace('%s', this.tickerLabel(stock.ticker))) : u.addToList.replace('%s', this.tickerLabel(stock.ticker)),
       primaryDetailAction: () => {
@@ -2923,6 +2953,38 @@ class Component extends DCLogic {
       langRo: L === 'RO', langRoOff: L !== 'RO',
       langDe: L === 'DE', langDeOff: L !== 'DE',
       langNote: UI[L].langNote,
+      ...(() => {
+        // The phone number: "+40 712 345 678" is kept as +40712345678 (E.164); '' removes it.
+        const saved = (s.session && s.session.phone) || '';
+        const draft = s.phoneDraft == null ? saved : s.phoneDraft;
+        const norm = String(draft).replace(/[\s().-]/g, '');
+        const ok = norm === '' || /^\+[1-9]\d{6,14}$/.test(norm), same = norm === saved;
+        const err = s.phoneMsg === 'bad' || s.phoneMsg === 'failed';
+        const save = () => {
+          if (same || s.phoneBusy) return;
+          if (!ok) return this.setState({ phoneMsg:'bad' });
+          const done = () => {
+            this.setState(st => ({ phoneBusy:false, phoneMsg: norm ? 'saved' : 'removed', phoneDraft:null, session: Object.assign({}, st.session, { phone: norm }) }));
+            this.logEvent('phone', norm ? norm.slice(0, 4) + '…' + norm.slice(-2) : '—');
+          };
+          const A = window.HIFAuth;
+          if (!s.authLive || !A || !A.updatePrefs) return done();
+          this.setState({ phoneBusy:true, phoneMsg:'' });
+          A.updatePrefs({ phone: norm }).then(r => r && r.ok ? done() : this.setState({ phoneBusy:false, phoneMsg:'failed' }))
+            .catch(() => this.setState({ phoneBusy:false, phoneMsg:'failed' }));
+        };
+        return {
+          phoneDraft: draft, phoneBad: s.phoneMsg === 'bad', phoneSame: same || !!s.phoneBusy,
+          onPhone: e => this.setState({ phoneDraft: e.target.value, phoneMsg:'' }),
+          phoneKey: e => { if (e.key === 'Enter') { e.preventDefault(); save(); } },
+          savePhone: save, phoneSaveLabel: s.phoneBusy ? '…' : (u.phoneSave || 'Save'),
+          phoneEdge: err ? 'var(--color-accent)' : 'var(--s-rule)',
+          phoneBtnBg: same ? 'transparent' : 'var(--color-accent)', phoneBtnEdge: same ? 'var(--s-rule)' : 'var(--color-accent)',
+          phoneBtnInk: same ? 'var(--s-mute)' : 'var(--s-on-accent)',
+          phoneNote: ({ bad:u.phoneBad, failed:u.phoneFailed, saved:u.phoneSaved, removed:u.phoneRemoved })[s.phoneMsg] || u.phoneNote,
+          phoneNoteInk: err ? 'var(--color-accent)' : 'var(--s-mute)'
+        };
+      })(),
       opinionOpts: [[false, u.opinionHide || 'Hide'], [true, u.opinionShow || 'Show']].map(([v, label]) => {
         const on = !!s.showOpinion === v;
         return { label, on, bg: on ? 'var(--color-accent)' : 'transparent', ink: on ? 'var(--s-on-accent)' : 'var(--s-ink)', set: () => this.setState({ showOpinion: v }) };

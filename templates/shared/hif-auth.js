@@ -146,6 +146,7 @@ function session() {
   return { userId: u.id, email: u.email || '', name: meta.full_name || meta.name || null, provider,
     since: Date.parse(u.last_sign_in_at || u.created_at || '') || Date.now(),
     // Language choices saved with the account, so they follow the user to every device.
+    phone: typeof meta.phone_number === 'string' ? meta.phone_number : '',
     prefs: { contentLang: lang(meta.content_lang), appLang: lang(meta.app_lang) } };
 }
 
@@ -196,6 +197,8 @@ async function updatePrefs(prefs) {
   const data = {};
   if (prefs.contentLang) data.content_lang = prefs.contentLang;
   if (prefs.appLang) data.app_lang = prefs.appLang;
+  // The account's phone number ('' removes it), in international format.
+  if (typeof prefs.phone === 'string') data.phone_number = prefs.phone;
   const r = await call('/auth/v1/user', { method: 'PUT', headers: { authorization: 'Bearer ' + t }, body: { data } });
   if (!r.ok) return { error: errorCode(r) };
   if (r.body && r.body.id && current) { current.user = r.body; save(current); }
