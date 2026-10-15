@@ -302,10 +302,10 @@
 <sc-for list="{{ sigRows }}" as="g" hint-placeholder-count="3">
 <div style="display:grid;grid-template-columns:34px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--s-rule);align-items:baseline">
 <span style="font-size:11px;letter-spacing:0.06em;color:var(--s-mute)">{{ g.stamp }}</span>
-<span style="min-width:0"><span style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:{{ g.accent }}">{{ g.tag }}</span><span style="display:block;font-size:12px;font-weight:600;color:var(--s-ink);margin-top:3px;text-wrap:pretty">{{ g.title }}</span><span style="display:block;font-size:12px;color:var(--s-mute);margin-top:2px">{{ g.detail }}</span></span>
+<span style="min-width:0"><span style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:{{ g.accent }}">{{ g.tag }}</span><sc-if value="{{ g.hasUrl }}" hint-placeholder-val="{{ true }}"><a href="{{ g.url }}" target="_blank" rel="noopener noreferrer" style="display:block;font-size:12px;font-weight:600;color:var(--s-ink);margin-top:3px;text-wrap:pretty;text-decoration:underline;text-decoration-color:var(--s-rule);text-underline-offset:3px">{{ g.title }}</a></sc-if><sc-if value="{{ g.noUrl }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:12px;font-weight:600;color:var(--s-ink);margin-top:3px;text-wrap:pretty">{{ g.title }}</span></sc-if><span style="display:block;font-size:12px;color:var(--s-mute);margin-top:2px">{{ g.detail }}</span></span>
 </div>
 </sc-for>
-<sc-if value="{{ noSig }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);margin-top:8px">{{ ui.signalsEmpty }}</div></sc-if>
+<sc-if value="{{ noSig }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);margin-top:8px">{{ sigEmpty }}</div></sc-if>
 <sc-if value="{{ dataless }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);margin-top:6px">{{ ui.noData }}</div></sc-if>
 </div>
 </div>
@@ -1058,7 +1058,7 @@ function hydrate(defaults) {
 }
 class Component extends DCLogic {
   state = hydrate({ screen:'portfolio', plan:null, lang:null, appLang:null, follows:[], selected:'', feedTab:'following', query:'', toast:'', prev:'feed',
-    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, liveEarnDates:{}, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
+    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, liveEarnDates:{}, liveFilings:{}, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
     liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false, detailLoading:false,
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
     authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
@@ -1538,6 +1538,14 @@ class Component extends DCLogic {
         liveEarnings: earnings ? Object.assign({}, this.state.liveEarnings, { [symbol]: earnings }) : this.state.liveEarnings
       }))
       .catch(() => this.setState({ detailLoading:false }));
+    this.syncFilings(symbol);
+  }
+  // Filings and insider dealings (gateway /filings); false when they couldn't be read.
+  syncFilings(symbol) {
+    const L = window.HIFLive;
+    if (!L || !L.filings) return;
+    L.filings(symbol).then(f => this.setState(st => ({ liveFilings: Object.assign({}, st.liveFilings, { [symbol]: f || false }) })))
+      .catch(() => this.setState(st => ({ liveFilings: Object.assign({}, st.liveFilings, { [symbol]: false }) })));
   }
   liveSearch(q) {
     clearTimeout(this._search);
@@ -2465,10 +2473,29 @@ class Component extends DCLogic {
         dow: d.toLocaleDateString('en-US', { weekday:'short', timeZone:'UTC' }).toUpperCase(),
         detail: [when, est].filter(Boolean).join(' · '), label: u.evEarnings || 'Earnings', accent: 'var(--color-accent)' };
     })()] : [];
-    const sigRows = (SIGNALS[stock.ticker] || []).map(x => x.type === 'insider'
-      ? { stamp:x.stamp, tag:x.role, title:x.who + ' ' + (x.act === 'buy' ? u.sigBuy : u.sigSell) + ' ' + x.shares + ' ' + u.sigShares,
-          detail:x.value, accent: x.act === 'buy' ? 'var(--s-ink)' : 'var(--color-accent)' }
-      : { stamp:x.stamp, tag:u.sigFiling, title:'Form ' + x.form, detail:x.item, accent:'var(--s-mute)' });
+    // Filings and insider dealings: the gateway's for this ticker (the demo set is empty).
+    const FL = (s.liveFilings || {})[stock.ticker];
+    const ago = sec => { const h = Math.max(0, Math.floor((Date.now() / 1000 - sec) / 3600)); return h < 24 ? h + 'h' : Math.floor(h / 24) + 'd'; };
+    const nfmt = n => Number(n).toLocaleString(this.appLocale);
+    const money = n => (n >= 1e6 ? '$' + (n / 1e6).toLocaleString(this.appLocale, { maximumFractionDigits:2 }) + 'M' : '$' + nfmt(Math.round(n)));
+    const liveSig = FL && FL.items ? FL.items.map(x => ({ type:x.type, stamp:ago(x.datetime), act:x.act || '', who:x.who || '', role:'',
+      shares: x.shares ? nfmt(x.shares) : '', value: x.value ? money(x.value) : '', form:x.form || '', item:'', title:x.title || '',
+      url:x.url || '', source:x.source || '', official: x.official !== false })) : null;
+    const tickerSignals = liveSig || SIGNALS[stock.ticker] || [];
+    const fromWhere = x => x.source + (x.official ? '' : ' \u00b7 ' + (u.sigPress || 'press'));
+    const sigRows = tickerSignals.map(x => x.type === 'insider'
+      ? { stamp:x.stamp, tag:x.role || u.sigInsider || 'Insider', url:x.url || '', hasUrl:!!x.url, noUrl:!x.url,
+          title: x.who ? x.who + ' ' + (x.act === 'buy' ? u.sigBuy : u.sigSell) + ' ' + x.shares + ' ' + u.sigShares : x.title,
+          detail: x.who ? [x.value, x.source].filter(Boolean).join(' \u00b7 ') : fromWhere(x),
+          accent: x.act === 'buy' ? 'var(--s-ink)' : 'var(--color-accent)' }
+      : { stamp:x.stamp, tag:u.sigFiling, url:x.url || '', hasUrl:!!x.url, noUrl:!x.url,
+          title: x.title || 'Form ' + x.form,
+          detail: x.form ? [((u.formNames || {})[x.form] || ''), x.item].filter(Boolean).join(' \u00b7 ') || x.source || '' : fromWhere(x),
+          accent:'var(--s-mute)' });
+    // Why the list is empty: still loading, no source for this market, nothing found, or unreadable.
+    const sigEmpty = FL === undefined ? '' : FL === false ? (u.signalsError || u.signalsEmpty)
+      : FL.coverage === 'none' ? (u.signalsNoSource || u.signalsEmpty)
+      : FL.coverage === 'press' ? (u.signalsPressOnly || u.signalsEmpty) : u.signalsEmpty;
     // --- insight layer (../shared/hif-insight.js) -----------------------------
     const IN = window.HIFInsight, SEC = H.SECTOR_OF || {};
     const sector = SEC[stock.ticker] || '';
@@ -2480,7 +2507,7 @@ class Component extends DCLogic {
       .filter(n => !isOpN(n.source, n.url)).slice(0, 3)
       .map(n => ({ headline: (live && n.id && this.aiText(stock.ticker + ':' + n.id)) || (typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN), source:n.source, url:n.url || '',
         sameDay: live && n.ts ? Date.now() / 1000 - n.ts < 86400 : true }));
-    const why = IN ? IN.attribute({ t:u, ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
+    const why = IN ? IN.attribute({ t:u, ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:tickerSignals, peers, sector }) : null;
     // The newest story's AI summary (the source's English snippet is not a conclusion).
     const callText = (stock.call && stock.call[L]) || (live && LN[stock.ticker] && LN[stock.ticker][0] && LN[stock.ticker][0].id ? this.aiText(stock.ticker + ':' + LN[stock.ticker][0].id) : '') || '';
     const whyTone = why && (why.kind === 'none' || why.kind === 'quiet') ? 'var(--s-mute)' : 'var(--color-accent)';
@@ -2492,7 +2519,7 @@ class Component extends DCLogic {
       : [];
     const rsiArr = window.HIFChart.rsiSeries(trend, 14).filter(v => v != null);
     const rsiNow = rsiArr.length ? rsiArr[rsiArr.length - 1] : null;
-    const clashes = IN ? IN.conflicts({ t:u, analystDetail: stock.analystDetail, signals: SIGNALS[stock.ticker] || [], movePct: stock.move, rsi: rsiNow }) : [];
+    const clashes = IN ? IN.conflicts({ t:u, analystDetail: stock.analystDetail, signals: tickerSignals, movePct: stock.move, rsi: rsiNow }) : [];
     const posMap = s.positions || {};
     // Amounts in the listing's currency: lei in Bucharest, euros on XETRA, pounds in London.
     const curSign = ({ RO:'RON ', DE:'EUR ', L:'GBP ' })[(/\.(RO|DE|L)$/.exec(stock.ticker) || [])[1]];
@@ -2674,7 +2701,7 @@ class Component extends DCLogic {
       bookValue: book.valueLabel || '', bookDay: book.dayLabel || '', bookDayUp: book.dayUp, bookHas: !book.empty,
       ui: u,
       calRows, noCal: !calRows.length && !dataless(stock.ticker),
-      sigRows, noSig: !sigRows.length && !dataless(stock.ticker),
+      sigRows, noSig: !sigRows.length && !dataless(stock.ticker) && !!sigEmpty, sigEmpty,
       brand: this.props.brand || 'Market Pulse',
       planLabel: H_ALL ? (u.earlyAccess || 'Early access') : (isFree ? u.free : u.pro),
       allAccess: H_ALL, notAllAccess: !H_ALL,
