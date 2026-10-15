@@ -1940,7 +1940,7 @@ class Component extends DCLogic {
             fontFamily:'var(--font-body)', fontSize:15 } })),
       open ? h('div', { key:'list', id:'feed-filter-list', role:'listbox', style:{ position:'absolute', left:0, right:0, top:'100%', zIndex:30, marginTop:4, maxHeight:340, overflowY:'auto',
         background:pal.bg, border:'1px solid ' + pal.rule, boxShadow:'0 14px 32px rgba(0,0,0,0.28)' } },
-        !q ? h('div', { key:'hd', style:{ padding:'9px 14px 7px', fontSize:10, letterSpacing:'0.14em', textTransform:'uppercase', color:pal.mute } }, u.filterAllT || 'Every ticker in this tab') : null,
+        !q ? h('div', { key:'hd', style:{ padding:'9px 14px 7px', fontSize:11, letterSpacing:'0.14em', textTransform:'uppercase', color:pal.mute } }, u.filterAllT || 'Every ticker in this tab') : null,
         ...opts.map((x, i) => {
           const on = i === ix, picked = x.kind === 't' && o.fSel.indexOf(x.t) >= 0;
           return h('div', { key: x.kind + (x.t || x.w), id:'ff-opt-' + i, role:'option', 'aria-selected': on,
@@ -1956,7 +1956,7 @@ class Component extends DCLogic {
                  h('span', { key:'c', style:{ flex:'none', fontSize:11, color:pal.mute, fontVariantNumeric:'tabular-nums' } }, (u.filterCount || '{n} stories').replace('{n}', o.wordCount(x.w)))]);
         })) : null);
     // Quick picks: the five most active tickers, and the watchlist on the market tabs.
-    const quickStyle = on => Object.assign(this.chipStyle(on), { flex:'none', minHeight:32, padding:'0 11px', fontSize:10, whiteSpace:'nowrap' });
+    const quickStyle = on => Object.assign(this.chipStyle(on), { flex:'none', minHeight:32, padding:'0 11px', fontSize:11, whiteSpace:'nowrap' });
     const quick = byCount.slice(0, 5).map(t => h('button', { key:'q' + t, type:'button', 'aria-pressed': o.fSel.indexOf(t) >= 0, onClick: () => toggle(t),
       title: o.nameOfT(t), style: quickStyle(o.fSel.indexOf(t) >= 0) }, label(t) + ' · ' + o.feedTickers[t]));
     const mine = s.feedTab !== 'following' && o.mineCount ? h('button', { key:'mine', type:'button', 'aria-pressed': o.fMine, onClick: () => set({ feedMine: !o.fMine }),
@@ -1965,12 +1965,12 @@ class Component extends DCLogic {
     const status = active ? h('div', { key:'st', role:'status', style:{ display:'flex', alignItems:'center', gap:12, fontSize:12, color:pal.mute } },
       h('span', { style:{ fontVariantNumeric:'tabular-nums' } }, (u.filterShown || '{n} of {t} stories').replace('{n}', o.shown).replace('{t}', o.allCards)),
       h('button', { type:'button', onClick: () => set({ feedSel:[], feedKw:'', feedQ:'', feedMine:false }),
-        style:{ padding:'6px 0', border:0, background:'transparent', color:pal.accent, fontFamily:'var(--font-heading)', fontWeight:800, fontSize:10, letterSpacing:'0.1em', textTransform:'uppercase', cursor:'pointer' } },
+        style:{ padding:'6px 0', border:0, background:'transparent', color:pal.accent, fontFamily:'var(--font-heading)', fontWeight:800, fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', cursor:'pointer' } },
         u.filterClear || 'Clear filters')) : null;
     return h('div', { role:'search', 'aria-label': u.filterTicker || 'Filter the feed', style:{ padding:'14px var(--gx)', borderBottom:'1px solid ' + pal.rule } },
       h('div', { style:{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:'10px 16px' } }, box,
         h('div', { key:'qp', style:{ display:'flex', flexWrap:'wrap', alignItems:'center', gap:6 } },
-          h('span', { style:{ fontSize:10, letterSpacing:'0.14em', textTransform:'uppercase', color:pal.mute, marginRight:4 } }, u.filterTop || 'Most active'), ...quick, mine)),
+          h('span', { style:{ fontSize:11, letterSpacing:'0.12em', textTransform:'uppercase', color:pal.mute, marginRight:4 } }, u.filterTop || 'Most active'), ...quick, mine)),
       status ? h('div', { style:{ marginTop:10 } }, status) : null,
       active && !o.shown ? h('div', { style:{ marginTop:8, fontSize:13, color:pal.mute } }, u.filterEmpty || 'No story matches these filters.') : null);
   }
