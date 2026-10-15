@@ -1,0 +1,18 @@
+# The live chart relay (tools/live-relay.mjs): Finnhub trades -> 1-second bars -> the
+# browsers, through Tailscale Funnel (tailscale funnel --bg 8787). User unit:
+#   cp tools/systemd/market-pulse-relay.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now market-pulse-relay.service
+# It needs FINNHUB_KEY in ~/.config/market-pulse/relay.env (chmod 600).
+[Unit]
+Description=Market Pulse live chart relay
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/StockNews
+ExecStart=/usr/bin/env node tools/live-relay.mjs
+Restart=always
+RestartSec=5
+Nice=5
+
+[Install]
+WantedBy=default.target
