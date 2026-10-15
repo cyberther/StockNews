@@ -2440,7 +2440,12 @@ class Component extends DCLogic {
         this._lc.setBars(bars);
         this._lc.setAverages(this.state.lcAvg || {});
         this._lcLoading = false;
-        this.setState({ lcBusy: false, lcMeta: data, lcLast: Date.now(), lcBars: bars.slice(-2) });
+        // The day's change is against the previous session's close, which Yahoo's
+        // chartPreviousClose isn't for a range longer than a day: taken from the bars.
+        const dayOf = t => new Date(t * 1000).toLocaleDateString('en-CA', { timeZone: data.tz || 'UTC' });
+        const lastDay = dayOf(bars[bars.length - 1].t), before = intraday ? bars.filter(b => dayOf(b.t) !== lastDay) : [];
+        const prevClose = intraday ? (before.length ? before[before.length - 1].c : data.prevClose) : (iv === '1d' && bars.length > 1 ? bars[bars.length - 2].c : null);
+        this.setState({ lcBusy: false, lcMeta: Object.assign({}, data, { prevClose }), lcLast: Date.now(), lcBars: bars.slice(-2) });
         this.pollLiveChart(key);
       })
       .catch(() => { this._lcLoading = false; if (this._lcKey === key) this.setState({ lcBusy: false, lcErr: this.copy.lcErr || 'No chart data' }); });
@@ -2457,7 +2462,7 @@ class Component extends DCLogic {
         if (this._lcKey !== key || !this._lc || !data) return;
         const bars = data.t.map((t, i) => ({ t, o: data.o[i], h: data.h[i], l: data.l[i], c: data.c[i], v: data.v[i] }));
         this._lc.mergeBars(bars.slice(-30));
-        this.setState({ lcMeta: Object.assign({}, this.state.lcMeta, { price: data.price, prevClose: data.prevClose, marketTime: data.marketTime }), lcLast: Date.now(), lcBars: bars.slice(-2), lcErr: '' });
+        this.setState({ lcMeta: Object.assign({}, this.state.lcMeta, { price: data.price, marketTime: data.marketTime }), lcLast: Date.now(), lcBars: bars.slice(-2), lcErr: '' });
       }).catch(() => {}).finally(() => this.pollLiveChart(key));
     }, every);
   }
