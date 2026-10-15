@@ -1934,7 +1934,7 @@ class Component extends DCLogic {
         h('input', { key:'input', type:'text', 'data-feed-filter':'1', role:'combobox', 'aria-expanded': open, 'aria-controls':'feed-filter-list', 'aria-autocomplete':'list',
           'aria-activedescendant': open ? 'ff-opt-' + ix : undefined, 'aria-label': u.filterTicker || 'Filter the feed',
           autoComplete:'off', spellCheck:false, value: s.feedQ || '', placeholder: tokens.length ? '' : (u.filterPh || 'Ticker, company or word'),
-          onChange: e => set({ feedQ: e.target.value, feedIx:0, feedDrop:true }), onFocus: () => this.setState({ feedDrop:true }),
+          onChange: e => set({ feedQ: e.target.value, feedIx:0, feedDrop:true }), onFocus: () => this.setState({ feedDrop:true }), onClick: () => { if (!this.state.feedDrop) this.setState({ feedDrop:true }); },
           onBlur: () => setTimeout(() => this.setState({ feedDrop:false }), 120), onKeyDown: onKey,
           style:{ flex:'1 1 140px', minWidth:120, minHeight:30, padding:0, border:0, outline:'none', background:'transparent', color:pal.ink,
             fontFamily:'var(--font-body)', fontSize:15 } })),
