@@ -35,6 +35,39 @@ language sql stable security definer set search_path = public as $$
 $$;
 revoke all on function public.summary_secret_ok(text) from public, anon, authenticated;
 
+-- One article is often filed under several tickers (Finnhub lists "Can Apple overtake
+-- Nvidia?" under AAPL and NVDA; ids are '<TICKER>:<article id>'). It is summarized once:
+-- a saved summary is copied to the article's other tickers (summaries_save), and a story
+-- stored later under another ticker gets the summaries already written (trigger below).
+create or replace function public.story_article(p_id text) returns text
+language sql immutable as $$ select nullif(split_part(p_id, ':', 2), '') $$;
+create index if not exists stories_article on public.stories (public.story_article(id));
+create index if not exists story_summaries_article on public.story_summaries (public.story_article(story_id));
+
+create or replace function public.stories_copy_summaries() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.story_summaries (story_id, lang, summary, model)
+  select distinct on (x.lang) new.id, x.lang, x.summary, x.model
+  from public.story_summaries x
+  where public.story_article(x.story_id) = public.story_article(new.id) and x.story_id <> new.id
+  order by x.lang, x.created_at desc
+  on conflict (story_id, lang) do nothing;
+  return null;
+end $$;
+revoke all on function public.stories_copy_summaries() from public, anon, authenticated;
+drop trigger if exists stories_copy_summaries on public.stories;
+create trigger stories_copy_summaries after insert on public.stories
+  for each row execute function public.stories_copy_summaries();
+
+-- Once, for what is already there: summaries copied to the article's other tickers.
+insert into public.story_summaries (story_id, lang, summary, model)
+select distinct on (o.id, x.lang) o.id, x.lang, x.summary, x.model
+from public.story_summaries x
+join public.stories o on public.story_article(o.id) = public.story_article(x.story_id) and o.id <> x.story_id
+order by o.id, x.lang, x.created_at desc
+on conflict (story_id, lang) do nothing;
+
 -- Stories published in the last p_hours without a summary in p_lang: first those someone
 -- follows or holds and the Bucharest listings (.RO), then the rest; newest first in each.
 -- Romanian is written for every story. Another language only where an account reads it
@@ -86,7 +119,15 @@ begin
     select r->>'story_id', r->>'lang', r->>'summary', left(r->>'model', 80)
     where exists (select 1 from public.stories where id = r->>'story_id')
     on conflict (story_id, lang) do update set summary = excluded.summary, model = excluded.model, created_at = now();
-    if found then n := n + 1; end if;
+    if found then
+      n := n + 1;
+      -- The same article filed under other tickers gets the same summary.
+      insert into public.story_summaries (story_id, lang, summary, model)
+      select o.id, r->>'lang', r->>'summary', left(r->>'model', 80)
+      from public.stories o
+      where public.story_article(o.id) = public.story_article(r->>'story_id') and o.id <> r->>'story_id'
+      on conflict (story_id, lang) do nothing;
+    end if;
   end loop;
   return n;
 end $$;

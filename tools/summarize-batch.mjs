@@ -520,6 +520,17 @@ function saveRejected(r) {
   try { mkdirSync(join(homedir(), '.cache/market-pulse'), { recursive: true }); writeFileSync(REJECTED_FILE, JSON.stringify(r)); } catch {}
 }
 
+// One article filed under several tickers ('AAPL:142903568', 'NVDA:142903568') is written
+// once per language: the server copies the summary to the other tickers (summaries_save).
+export function dedupeQueue(items) {
+  const seen = new Set();
+  return items.filter(({ story, lang }) => {
+    const key = (String(story.id).split(':')[1] || story.id) + '|' + lang;
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+}
+
 async function main() {
   if (!cfg.supabaseUrl || !cfg.anonKey || cfg.secret.length < 32) {
     log('not configured: set SUPABASE_URL, SUPABASE_ANON_KEY and SUMMARY_SECRET in', ENV_FILE);
@@ -545,8 +556,8 @@ async function main() {
       rank.set(r.id, e);
     });
   }
-  const queue = [...rank.entries()].sort((a, b) => a[1].at - b[1].at)
-    .flatMap(([id, e]) => cfg.langs.filter(l => e.langs.includes(l)).map(lang => ({ story: byId.get(id), lang })))
+  const queue = dedupeQueue([...rank.entries()].sort((a, b) => a[1].at - b[1].at)
+    .flatMap(([id, e]) => cfg.langs.filter(l => e.langs.includes(l)).map(lang => ({ story: byId.get(id), lang }))))
     .slice(0, cfg.limit);
   if (!queue.length) { log('no stories waiting'); return; }
   log(`${queue.length} summaries to write (${cfg.langs.join(', ')}) with ${cfg.model}`);
