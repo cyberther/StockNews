@@ -117,9 +117,17 @@ grant select on public.scan_runs to authenticated;
 drop policy if exists "read scan runs" on public.scan_runs;
 create policy "read scan runs" on public.scan_runs for select to authenticated using (true);
 
--- Housekeeping: stories older than 30 days and scan rows older than 7 days.
+-- Housekeeping: stories older than 10 business days (with their AI summaries) and scan rows
+-- older than 7 days. The apps show 5 business days; the rest is margin.
+-- Start (UTC midnight) of the n-th business day back, today counting when it is one.
+create or replace function public.business_day_start(n integer) returns timestamptz
+language sql stable as $$
+  select (d::timestamp at time zone 'UTC') from (
+    select g::date d from generate_series(current_date::timestamp, current_date::timestamp - interval '40 days', interval '-1 day') g
+    where extract(isodow from g) < 6 order by g desc offset greatest(n, 1) - 1 limit 1) x
+$$;
 create or replace function public.scan_prune() returns void language sql security definer set search_path = public as $$
-  delete from public.stories   where published_at < now() - interval '30 days';
+  delete from public.stories   where published_at < public.business_day_start(10);
   delete from public.scan_runs where started_at   < now() - interval '7 days';
 $$;
 revoke all on function public.scan_prune() from public, anon, authenticated;
