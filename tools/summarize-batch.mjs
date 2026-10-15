@@ -18,8 +18,9 @@
 //   BATCH_LIMIT     default 10 summaries a run
 //   DIGEST_LIMIT    default 3 digests of the previous day per run and language (0 = none)
 //   MAX_AGE_HOURS   default 24
-//   FILINGS_LIMIT   default 1 filing whose figures are read per run (0 = none); FILINGS_NIGHT_LIMIT
-//                   default 8 per run between 00:00 and 07:00 Bucharest time (tools/filings-extract.mjs)
+//   FILINGS_LIMIT   default 3 filings whose figures are read per run (0 = none); FILINGS_NIGHT_LIMIT
+//                   default 8 per run between 00:00 and 07:00 Bucharest time (tools/filings-extract.mjs).
+//                   Only in runs with no summary to write, and none started after FILINGS_MINUTES (7)
 //   READ_ARTICLES   default 1: summarize the whole article; 0 = headline and snippet only
 //
 // The summary is written from the whole article when the publisher allows it: the job
@@ -57,8 +58,9 @@ const cfg = {
   limit: Math.max(1, Math.min(Number(env.BATCH_LIMIT) || 10, 100)),
   digests: Math.max(0, Math.min(env.DIGEST_LIMIT === undefined ? 3 : Number(env.DIGEST_LIMIT) || 0, 20)),
   // Filings whose figures the model reads per run (tools/filings-extract.mjs).
-  filings: Math.max(0, Math.min(env.FILINGS_LIMIT === undefined ? 1 : Number(env.FILINGS_LIMIT) || 0, 20)),
+  filings: Math.max(0, Math.min(env.FILINGS_LIMIT === undefined ? 3 : Number(env.FILINGS_LIMIT) || 0, 20)),
   filingsNight: Math.max(0, Math.min(Number(env.FILINGS_NIGHT_LIMIT) || 8, 50)),
+  filingsMinutes: Math.max(1, Math.min(Number(env.FILINGS_MINUTES) || 7, 120)),
   readArticles: env.READ_ARTICLES !== '0',
   hours: Math.max(1, Math.min(Number(env.MAX_AGE_HOURS) || 24, 168))
 };
@@ -569,7 +571,9 @@ async function writeDigest(row, lang) {
 const FILINGS_UA = 'Mozilla/5.0 (compatible; MarketPulseFilings/1.0; +https://github.com/cyberther/StockNews)';
 // At night (00-07 in Bucharest) there is little news to summarize: more filings per run.
 const nightHour = () => Number(new Date().toLocaleString('en-GB', { hour: '2-digit', hour12: false, timeZone: 'Europe/Bucharest' })) < 7;
+// A run stops starting new filings after FILINGS_MINUTES, so the next run's summaries wait little.
 const filingsRun = () => runFilings(cfg.filings && nightHour() ? Math.max(cfg.filings, cfg.filingsNight) : cfg.filings, { cfg, rpc, postJson, httpGet, log, ua: FILINGS_UA,
+  deadline: Date.now() + cfg.filingsMinutes * 60_000,
   allowed: url => allowedByRobots(url, 'marketpulsefilings') });
 // Up to DIGEST_LIMIT digests per language this run (or the one ticker asked for).
 async function runDigests(onlyTicker) {
@@ -673,6 +677,7 @@ async function main() {
   const queue = dedupeQueue([...rank.entries()].sort((a, b) => a[1].at - b[1].at)
     .flatMap(([id, e]) => cfg.langs.filter(l => e.langs.includes(l)).map(lang => ({ story: byId.get(id), lang }))))
     .slice(0, cfg.limit);
+  // Filings only in a run that had no summaries to write, so they never hold up the news.
   if (!queue.length) { log('no stories waiting'); await runDigests(); return filingsRun(); }
   log(`${queue.length} summaries to write (${cfg.langs.join(', ')}) with ${cfg.model}`);
 
@@ -703,7 +708,6 @@ async function main() {
   }
   log(`done: ${saved} of ${queue.length} saved`);
   await runDigests();
-  await filingsRun();
 }
 
 // The LM Studio SDK keeps a socket open, so the job exits explicitly when it is done.

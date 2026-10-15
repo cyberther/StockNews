@@ -103,7 +103,7 @@ const AGM_READ = /convoca|hotarar|decizi|resolution|decision|convening|rezultat(
 const foldName = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 // ------------------------------------------------------------------ run
-// deps: { cfg: { secret, lmUrl, model }, rpc, postJson, httpGet, allowed(url), log }
+// deps: { cfg: { secret, lmUrl, model }, rpc, postJson, httpGet, allowed(url), log, ua, deadline (ms) }
 export async function runFilings(limit, deps) {
   const { cfg, rpc, postJson, httpGet, allowed, log } = deps;
   if (!limit) return;
@@ -111,6 +111,7 @@ export async function runFilings(limit, deps) {
   try { rows = await rpc('filings_pending', { p_secret: cfg.secret, p_limit: limit }) || []; }
   catch (e) { log('filings:', String(e.message || e)); return; }
   for (const f of rows) {
+    if (deps.deadline && Date.now() > deps.deadline) { log('filings: time is up for this run'); break; }
     const t0 = Date.now();
     const save = (status, data) => rpc('filings_save', { p_secret: cfg.secret, p_id: f.id, p_status: status, p_data: data || null, p_model: cfg.model });
     try {
