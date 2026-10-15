@@ -2540,7 +2540,7 @@ class Component extends DCLogic {
       autoToggle: () => { const on = !s.lcAuto; this.setState({ lcAuto: on }); if (this._lc) this._lc.setAutoLevels(on); },
       hasLevels: !!s.lcAuto && !!this._lc && this._lc.autoLevels().length > 0,
       levels: s.lcAuto && this._lc ? this._lc.autoLevels().map(x => ({ label: x.label, price: dec(x.p), ink: x.label[0] === 'R' ? 'var(--color-accent)' : 'var(--s-ink)',
-        touches: (u.lcTouches || '{n} touches').replace('{n}', x.touches) })) : [],
+        touches: x.touches === 1 ? (u.lcTouch1 || '1 touch') : (u.lcTouches || '{n} touches').replace('{n}', x.touches) })) : [],
       drawings: ((s.lcDrawings || {})[sym] || []).map(d => {
         const day = t => new Date(t * 1000).toLocaleDateString(loc, { day: 'numeric', month: 'short' });
         const what = { hline: u.lcToolH, trend: u.lcToolTrend, zone: u.lcToolZone, fib: u.lcToolFib }[d.type] || d.type;

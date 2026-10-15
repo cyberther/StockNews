@@ -204,7 +204,7 @@
       return t == null || p == null ? null : { t, p: +p.toPrecision(8) };
     };
     const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    chart.subscribeClick(param => {
+    const onClick = param => {
       if (!tool) return;
       const pt = pointAt(param);
       if (!pt) return;
@@ -216,7 +216,10 @@
       if (tool === 'measure') { measure = d; drawings = drawings.filter(x => x.type !== 'measure').concat([d]); redraw(); return; }
       drawings.push(d); redraw();
       if (o.onDraw) o.onDraw(drawings.filter(x => x.type !== 'measure'));
-    });
+    };
+    chart.subscribeClick(onClick);
+    // Two quick clicks (both ends of a line) arrive as a click and a double click.
+    if (chart.subscribeDblClick) chart.subscribeDblClick(onClick);
     let measure = null;
     chart.subscribeCrosshairMove(p => { if (first && tool) { const pt = pointAt(p); if (pt) { hover = pt; redraw(); } } });
     candles.attachPrimitive(layer);
