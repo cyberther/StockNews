@@ -6,7 +6,8 @@
 //   - its RSS feed (/feed/), its sitemap's investor pages, and the documents and pages
 //     linked from its investor section (found from the home page, two clicks deep);
 //   - each link becomes a row: title, day, link and kind (insider, holding, dividend, agm,
-//     results, report). Pages already seen are not read again (~/.cache/market-pulse).
+//     results, report), from the last 6 months only. Pages already seen are not read again
+//     (~/.cache/market-pulse).
 // The figures in the documents are read later by tools/summarize-batch.mjs.
 //
 //   node tools/filings-crawl.mjs                 every company, saved
@@ -44,6 +45,7 @@ const cfg = { supabaseUrl: (process.env.SUPABASE_URL || '').replace(/\/$/, ''), 
 const log = (...a) => console.log(new Date().toISOString().slice(11, 19), ...a);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const today = () => new Date().toISOString().slice(0, 10);
+const KEEP_FROM = new Date(Date.now() - 183 * 86400000).toISOString().slice(0, 10);
 
 let seen = {};
 try { seen = JSON.parse(readFileSync(SEEN_FILE, 'utf8')); } catch {}
@@ -98,14 +100,15 @@ export async function crawlCompany(ticker, site, source) {
   const add = (url, title, day, viaPath) => {
     if (!/^https:\/\//.test(url) || offLimits(url) || found.has(url) || isEnglishCopy(url, title)) return;
     const t = String(title || '').replace(/\s+/g, ' ').trim();
-    if (t.length < 4) return;
+    // Only the last 6 months are kept (supabase/filings.sql); an undated link isn't stored.
+    if (t.length < 4 || !day || day < KEEP_FROM || day > today()) return;
     const kind = classifyKind(t, url);
     if (!kind) return;
     // The same announcement as a page and as its PDF: once.
     const key = fold(t) + '|' + (day || '');
     if (dupes.has(key)) return;
     dupes.add(key);
-    found.set(url, { ticker, url, title: t.slice(0, 400), published_at: day && day <= today() ? day + 'T12:00:00Z' : null, kind, source, official: true });
+    found.set(url, { ticker, url, title: t.slice(0, 400), published_at: day + 'T12:00:00Z', kind, source, official: true });
   };
   const hint = ISSUERS[ticker] || {};
   let home = site ? site.replace(/\/$/, '') : '';
@@ -146,7 +149,7 @@ export async function crawlCompany(ticker, site, source) {
   let urls = [];
   for (const m of maps) { urls = urls.concat(await sitemapUrls(m)); if (urls.length && !hint.sitemap) break; }
   const pathOk = u => hint.path ? hint.path.test(u) : (looksLikeFiling(u) || isIrLink({ text: '', url: u }));
-  const cand = urls.filter(x => x.url.startsWith('https://') && pathOk(x.url) && !isEnglishCopy(x.url))
+  const cand = urls.filter(x => x.url.startsWith('https://') && pathOk(x.url) && !isEnglishCopy(x.url) && (!x.at || x.at >= KEEP_FROM))
     .sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
   let titles = 0;
   for (const x of cand) {
