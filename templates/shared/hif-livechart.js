@@ -204,13 +204,9 @@
       return t == null || p == null ? null : { t, p: +p.toPrecision(8) };
     };
     const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    let lastClick = { at: 0, x: -1 };
     const onClick = param => {
       if (!tool) return;
-      // The same click reported twice (click, then double click): once.
-      const x = param && param.point ? Math.round(param.point.x) : -1;
-      if (Date.now() - lastClick.at < 60 && x === lastClick.x) return;
-      lastClick = { at: Date.now(), x };
+
       const pt = pointAt(param);
       if (!pt) return;
       if (tool === 'hline') { drawings.push({ id: newId(), type: 'hline', a: pt, b: pt }); syncHLines(); if (o.onDraw) o.onDraw(drawings.slice()); return; }
@@ -222,9 +218,21 @@
       drawings.push(d); redraw();
       if (o.onDraw) o.onDraw(drawings.filter(x => x.type !== 'measure'));
     };
-    chart.subscribeClick(onClick);
-    // Two quick clicks (both ends of a line) arrive as a click and a double click.
-    if (chart.subscribeDblClick) chart.subscribeDblClick(onClick);
+    // Clicks are read from the page rather than the library, which swallows a second click
+    // that comes quickly (both ends of a line). A press that moved isn't a click (a pan).
+    let down = null;
+    const local = ev => { const r = el.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
+    const onDown = ev => { down = local(ev); };
+    const onUp = ev => {
+      const p = local(ev), d = down;
+      down = null;
+      if (!tool || !d || Math.hypot(p.x - d.x, p.y - d.y) > 6) return;
+      // Only on the plot itself, not on the price or time axis.
+      if (p.x < 0 || p.x > chart.timeScale().width() || p.y < 0 || p.y > el.clientHeight - chart.timeScale().height()) return;
+      onClick({ point: p });
+    };
+    el.addEventListener('pointerdown', onDown);
+    el.addEventListener('pointerup', onUp);
     let measure = null;
     chart.subscribeCrosshairMove(p => { if (first && tool) { const pt = pointAt(p); if (pt) { hover = pt; redraw(); } } });
     candles.attachPrimitive(layer);
@@ -292,7 +300,7 @@
         syncAuto(); redraw();
       },
       get element() { return el; },
-      destroy() { try { chart.remove(); } catch (e) {} }
+      destroy() { el.removeEventListener('pointerdown', onDown); el.removeEventListener('pointerup', onUp); try { chart.remove(); } catch (e) {} }
     };
     return api;
   }
