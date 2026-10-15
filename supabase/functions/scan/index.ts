@@ -162,7 +162,7 @@ async function companyNews(ticker: string, name: string, errors: string[]): Prom
 // names a listed company, whoever follows it. Stored like the rest so the AI summary job
 // writes summaries for those tabs too; alerts still go only to users who follow the company.
 // Ids match companyNews() for .RO, .DE and .L tickers.
-async function pressMarketNews(path: string, label: string, errors: string[]): Promise<Story[]> {
+async function pressMarketNews(path: string, label: string, errors: string[], keep: (t: string) => boolean = viaGateway): Promise<Story[]> {
   const appUrl = env('APP_URL');
   if (!appUrl) return [];
   try {
@@ -171,7 +171,7 @@ async function pressMarketNews(path: string, label: string, errors: string[]): P
     const rows = await res.json();
     if (!Array.isArray(rows)) return [];
     const since = Date.now() - 2 * 86400000;
-    return rows.filter(n => n && n.id && n.headline && n.datetime * 1000 > since && viaGateway(String(n.related || '')) && TICKER_RE.test(n.related))
+    return rows.filter(n => n && n.id && n.headline && n.datetime * 1000 > since && TICKER_RE.test(String(n.related || '')) && keep(n.related))
       .slice(0, 100).map(n => ({
         id: `${n.related}:${n.id}`,
         ticker: n.related,
@@ -209,7 +209,8 @@ Deno.serve(async (req) => {
   if (wlErr) return Response.json({ error: 'watchlist: ' + wlErr.message }, { status: 500 });
 
   // Every distinct ticker; past the Finnhub budget, successive runs take turns.
-  let tickers = [...new Set((wl || []).map(r => r.ticker).concat(MARKET_TOP).filter(t => TICKER_RE.test(t)))].sort();
+  const allTickers = [...new Set((wl || []).map(r => r.ticker).concat(MARKET_TOP).filter(t => TICKER_RE.test(t)))].sort();
+  let tickers = allTickers;
   if (tickers.length > MAX_TICKERS) {
     const slots = Math.ceil(tickers.length / MAX_TICKERS);
     const slot = Math.floor(Date.now() / (10 * 60000)) % slots;
@@ -232,7 +233,15 @@ Deno.serve(async (req) => {
 
   const followed = (await pool(tickers, CONCURRENCY, t => companyNews(t, names.get(t) || '', errors))).flat();
   const seen = new Set(followed.map(s => s.id));
-  const press = (await pressMarketNews('/ro-news', 'bvb feed', errors)).concat(await pressMarketNews('/eu-news', 'eu feed', errors));
+  // US press releases and CNBC / MarketWatch stories (us-news.js) for every followed US ticker,
+  // named as in public.ticker_names.
+  const usTickers = new Set(allTickers.filter(t => !viaGateway(t)));
+  const { data: usNameRows } = await db.from('ticker_names').select('ticker,name').in('ticker', [...usTickers]);
+  const usNames = (usNameRows || []).filter(r => r.name).slice(0, 80)
+    .map(r => r.ticker + ':' + String(r.name).replace(/[^\w .,&'()-]/g, ' ').slice(0, 80)).join('|');
+  const press = (await pressMarketNews('/ro-news', 'bvb feed', errors))
+    .concat(await pressMarketNews('/eu-news', 'eu feed', errors))
+    .concat(await pressMarketNews('/us-news&names=' + encodeURIComponent(usNames), 'us press', errors, t => usTickers.has(t)));
   const found = followed.concat(press.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; }));
 
   // Insert what is new; ON CONFLICT DO NOTHING returns only the rows actually inserted.

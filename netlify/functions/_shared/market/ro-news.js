@@ -22,13 +22,15 @@ const MAX_BYTES = 3 * 1024 * 1024;
 // ------------------------------------------------------------------ RSS
 const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', hellip: '…', ndash: '–', mdash: '—',
   laquo: '«', raquo: '»', bdquo: '„', ldquo: '“', rdquo: '”', lsquo: '‘', rsquo: '’' };
+const entities = s => s
+  .replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(Number(n)))
+  .replace(/&#x([0-9a-f]+);/gi, (m, n) => String.fromCodePoint(parseInt(n, 16)))
+  .replace(/&([a-z]+);/gi, (m, n) => ENTITIES[n.toLowerCase()] != null ? ENTITIES[n.toLowerCase()] : m);
 function decode(s) {
-  return String(s || '')
+  // Twice: some feeds escape their text twice (PR Newswire: "Marine &amp;amp; Energy").
+  return entities(entities(String(s || '')
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(Number(n)))
-    .replace(/&#x([0-9a-f]+);/gi, (m, n) => String.fromCodePoint(parseInt(n, 16)))
-    .replace(/&([a-z]+);/gi, (m, n) => ENTITIES[n.toLowerCase()] != null ? ENTITIES[n.toLowerCase()] : m)
+    .replace(/<[^>]+>/g, ' ')))
     // Feeds that escape their HTML (The Guardian: &lt;p&gt;) have tags again only now.
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ').trim();
@@ -41,7 +43,8 @@ export function parseRss(xml, source) {
   let m;
   while ((m = re.exec(xml))) {
     const it = m[0];
-    const link = decode(tag(it, 'link')) || decode(tag(it, 'guid'));
+    // Business Wire lists its pages over http; they are served over https too.
+    const link = (decode(tag(it, 'link')) || decode(tag(it, 'guid'))).replace(/^http:\/\/(?:www\.)?businesswire\.com\//, 'https://www.businesswire.com/');
     const headline = decode(tag(it, 'title'));
     const ts = Date.parse(decode(tag(it, 'pubDate')) || decode(tag(it, 'dc:date')));
     if (!/^https:\/\//.test(link) || !headline || !Number.isFinite(ts)) continue;

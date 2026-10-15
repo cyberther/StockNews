@@ -20,6 +20,7 @@ import { fmp } from './providers/fmp.js';
 import { alphavantage } from './providers/alphavantage.js';
 import { companyNews, marketNews } from './ro-news.js';
 import { euCompanyNews, euMarketNews, isEu } from './eu-news.js';
+import { usCompanyNews, usMarketNews } from './us-news.js';
 
 // Romanian company news from the press's RSS feeds (ro-news.js); no upstream key.
 const ronews = {
@@ -33,6 +34,13 @@ const eunews = {
   supports: cap => cap === 'news' || cap === 'marketNewsEU',
   load: (cap, p, ctx) => cap === 'news' ? euCompanyNews(p.symbol, p.from, p.to, ctx.log) : euMarketNews(150, ctx.log)
 };
+// US press releases and financial press from RSS (us-news.js); no upstream key. Company
+// news for one US ticker is added to Finnhub's in fetchUsNews().
+const usnews = {
+  name: 'usnews', needsKey: false, limits: {},
+  supports: cap => cap === 'marketNewsUS',
+  load: (cap, p, ctx) => usMarketNews(p.names, 150, ctx.log)
+};
 
 // Default order per capability. A provider without a key is skipped; Alpha Vantage's
 // 25 calls a day make it a last resort. Override with MARKET_ORDER_<CAPABILITY>, e.g.
@@ -45,9 +53,10 @@ const PROVIDERS = {
   chart: [yahoo, twelvedata],
   marketNewsRO: [ronews],  // /ro-news: every story naming a BVB-listed company
   marketNewsEU: [eunews],  // /eu-news: every story naming a XETRA or London listed company
+  marketNewsUS: [usnews],  // /us-news: US press releases, and press stories naming the companies given
   news: [finnhub], search: [finnhub], recommendation: [finnhub], earningsCalendar: [finnhub]
 };
-const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage, ronews, eunews].map(p => [p.name, p]));
+const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage, ronews, eunews, usnews].map(p => [p.name, p]));
 // Keys by provider, from the environment (never sent anywhere but the provider itself).
 export const keysFromEnv = env => ({ finnhub: env.FINNHUB_KEY, twelvedata: env.TWELVEDATA_KEY, fmp: env.FMP_KEY, alphavantage: env.ALPHAVANTAGE_KEY });
 // Bucharest Stock Exchange listings (.RO): Yahoo has their prices and names, the Romanian
@@ -84,15 +93,15 @@ export function orderFromEnv(env) {
 const ROUTES = {
   '/quote': 'quote', '/quotes': 'quotes', '/company-news': 'news', '/search': 'search',
   '/stock/recommendation': 'recommendation', '/stock/earnings': 'earnings',
-  '/calendar/earnings': 'earningsCalendar', '/stock/profile2': 'profile', '/chart': 'chart', '/ro-news': 'marketNewsRO', '/eu-news': 'marketNewsEU'
+  '/calendar/earnings': 'earningsCalendar', '/stock/profile2': 'profile', '/chart': 'chart', '/ro-news': 'marketNewsRO', '/eu-news': 'marketNewsEU', '/us-news': 'marketNewsUS'
 };
 // Seconds an answer is fresh. Quotes go stale fast; company names hardly change.
-const TTL = { marketNewsRO: 600, marketNewsEU: 600, quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
+const TTL = { marketNewsRO: 600, marketNewsEU: 600, marketNewsUS: 600, quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
 // How long past its TTL an answer may still be served when every provider is failing.
 const STALE_FOR = { quote: 600 };
 const STALE_DEFAULT = 86400;
 // The CDN keys cached answers on these query parameters only.
-const VARY = 'query=path|symbol|symbols|from|to|q|range|warm|limit';
+const VARY = 'query=path|symbol|symbols|from|to|q|range|warm|limit|names';
 
 const MAX_UPSTREAM_BYTES = 2 * 1024 * 1024;
 const REQUEST_TIMEOUT_MS = 8000;
@@ -127,6 +136,17 @@ const isoDate = v => /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v
 // token=, a path in symbol) reaches a provider.
 function parse(cap, q) {
   if (cap === 'marketNewsRO' || cap === 'marketNewsEU') return { params: {} };
+  // names=OKLO:Oklo Inc|JPM:JPMorgan Chase & Co (the caller's names; nothing is looked up).
+  if (cap === 'marketNewsUS') {
+    const names = {};
+    for (const pair of String(q.get('names') || '').split('|').filter(Boolean)) {
+      const i = pair.indexOf(':'), sym = pair.slice(0, i).toUpperCase(), name = pair.slice(i + 1).trim();
+      if (i < 1 || !validSymbol(sym) || !/^[\w .,&'()\-]{0,80}$/.test(name)) return { error: 'invalid names' };
+      names[sym] = name;
+    }
+    if (Object.keys(names).length > 80) return { error: 'too many names' };
+    return { params: { names } };
+  }
   if (cap === 'quotes') {
     const symbols = [...new Set(String(q.get('symbols') || '').toUpperCase().split(',').map(s => s.trim()).filter(Boolean))].sort();
     if (!symbols.length || symbols.length > MAX_BATCH || !symbols.every(validSymbol)) return { error: 'invalid symbols' };
@@ -326,6 +346,22 @@ function remember(key, cap, params, data, source) {
   return { status: 200, data, source, cache: 'miss', ttl };
 }
 
+// A US ticker's news: Finnhub's, plus the company's press releases and the CNBC and
+// MarketWatch stories that name it (us-news.js, by its name from the cached profile).
+async function fetchUsNews(params, ctx) {
+  const r = await fetchCapability('news', params, ctx);
+  let name = '';
+  try { const pr = await fetchCapability('profile', { symbol: params.symbol }, ctx); name = (pr.status === 200 && pr.data && pr.data.name) || ''; } catch {}
+  let press = [];
+  try { press = await usCompanyNews(params.symbol, name, params.from, params.to, ctx.log); } catch {}
+  if (!press.length) return r;
+  const rows = r.status === 200 && Array.isArray(r.data) ? r.data : [];
+  if (r.status !== 200 && !rows.length && r.status !== 502 && r.status !== 429) return r;
+  const seen = new Set(rows.map(x => String(x.url || '').replace(/[?#].*$/, '')));
+  const merged = rows.concat(press.filter(x => !seen.has(x.url.replace(/[?#].*$/, '')))).sort((a, b) => b.datetime - a.datetime);
+  return { ...r, status: 200, data: merged, source: [r.source, 'usnews'].filter(Boolean).join(','), ttl: r.ttl || 300 };
+}
+
 // Finnhub's free earnings calendar lists only upcoming reports. When it has no past report
 // with a result, FMP's earnings history (cached 12 hours) adds the recent ones.
 async function fetchEarningsCalendar(params, ctx) {
@@ -396,7 +432,7 @@ const AUTH_TTL_MS = 5 * 60 * 1000;
 const users = new Map(); // token -> { ok, until }
 export function publicRequest(cap, params, extraSymbols) {
   const open = new Set(PUBLIC_SYMBOLS.concat(String(extraSymbols || '').toUpperCase().split(',').map(x => x.trim()).filter(Boolean)));
-  if (cap === 'marketNewsRO' || cap === 'marketNewsEU') return true;
+  if (cap === 'marketNewsRO' || cap === 'marketNewsEU' || cap === 'marketNewsUS') return true;
   // Press stories (Romanian, German, British) cost no quota.
   if (cap === 'news') return /\.(RO|DE|L)$/.test(params.symbol);
   if (cap === 'quotes') return params.symbols.length <= 8 && params.symbols.every(t => open.has(t));
@@ -443,6 +479,7 @@ export async function handleMarketRequest(request, options = {}) {
   const ctx = { keys: { finnhub: options.apiKey, ...(options.keys || {}) }, log: options.log || defaultLog, usage: options.usage || null, order: options.order || null };
   const r = cap === 'quotes' ? await fetchQuotes(parsed.params.symbols, ctx)
     : cap === 'earningsCalendar' ? await fetchEarningsCalendar(parsed.params, ctx)
+    : cap === 'news' && !isLocal(parsed.params.symbol) ? await fetchUsNews(parsed.params, ctx)
     : await fetchCapability(cap, parsed.params, ctx);
   const flush = maybeFlush(ctx);
   if (flush && options.waitUntil) options.waitUntil(flush);
