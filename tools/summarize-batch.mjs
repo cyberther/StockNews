@@ -16,6 +16,7 @@
 //   LMSTUDIO_THREADS  auto (default: 4, or 3 during a remote desktop session) | a number | 0 = LM Studio's choice
 //   SUMMARY_LANG    default ro,en,de (comma-separated, in order of preference)
 //   BATCH_LIMIT     default 10 summaries a run
+//   DIGEST_LIMIT    default 3 digests of the previous day per run and language (0 = none)
 //   MAX_AGE_HOURS   default 24
 //   READ_ARTICLES   default 1: summarize the whole article; 0 = headline and snippet only
 //
@@ -51,6 +52,7 @@ const cfg = {
   threads: env.LMSTUDIO_THREADS,
   langs: [...new Set(String(env.SUMMARY_LANG || 'ro,en,de').toLowerCase().split(/[\s,]+/).filter(l => ['ro', 'en', 'de'].includes(l)))],
   limit: Math.max(1, Math.min(Number(env.BATCH_LIMIT) || 10, 100)),
+  digests: Math.max(0, Math.min(env.DIGEST_LIMIT === undefined ? 3 : Number(env.DIGEST_LIMIT) || 0, 20)),
   readArticles: env.READ_ARTICLES !== '0',
   hours: Math.max(1, Math.min(Number(env.MAX_AGE_HOURS) || 24, 168))
 };
@@ -340,9 +342,17 @@ const RO_TERMS = [
   ...['pierdere', 'marjă', 'lună', 'creștere', 'scădere', 'majorare', 'reducere', 'rețea', 'companie', 'piață',
     'investiție', 'cotă', 'prognoză', 'estimare', 'livrare', 'vânzare', 'ofertă', 'achiziție', 'fuziune', 'tranzacție',
     'decizie', 'strategie', 'platformă', 'fabrică', 'uzină', 'acțiune', 'evaluare', 'recomandare', 'dobândă',
-    'datorie', 'producție', 'cerere', 'întârziere', 'anchetă', 'amendă', 'licență', 'parte', 'serie']
+    'datorie', 'producție', 'cerere', 'întârziere', 'anchetă', 'amendă', 'licență', 'parte', 'serie', 'țintă']
     .map(n => ['un ' + n, 'o ' + n]),
   ['superând', 'depășind'],
+  ['un nou minim 52-week', 'un nou minim al ultimelor 52 de săptămâni'],
+  ['niveluri de 52-week', 'minimele ultimelor 52 de săptămâni'],
+  ['minim 52-week', 'minim al ultimelor 52 de săptămâni'],
+  ['maxim 52-week', 'maxim al ultimelor 52 de săptămâni'],
+  ['52-week lows', 'minimele ultimelor 52 de săptămâni'],
+  ['52-week low', 'minimul ultimelor 52 de săptămâni'],
+  ['52-week highs', 'maximele ultimelor 52 de săptămâni'],
+  ['52-week high', 'maximul ultimelor 52 de săptămâni'],
   // "Downgrade" made Romanian by sound.
   ['a demovat', 'a retrogradat', true],
   ['au demovat', 'au retrogradat'],
@@ -484,6 +494,91 @@ export function looksWrong(text, story, lang) {
   return '';
 }
 
+// ------------------------------------------------------------------ the day's digest
+// Every story about one ticker from the previous business day, as bullet points: each
+// distinct fact once, the most important first. Same rules on facts as the summaries.
+export const DIGEST_SYSTEM = [
+  'You are a financial news editor. You get every news story published about one company on one trading day ' +
+    '(time, source, headline and a short summary) and write the day\'s digest for investors.',
+  '',
+  'Rules:',
+  '- Use ONLY information in the stories. Do not add figures, causes, opinions or advice.',
+  '- 1 to 8 bullet points (as many as there are distinct facts; one story may need only one), one per distinct fact or event, the most important first (results, guidance, deals, ' +
+    'contracts, regulators, analyst rating changes, big price moves). Several stories about the same event make ONE ' +
+    'bullet. Leave out stories that say nothing new.',
+  '- Stories marked "opinion" in their brackets come from sites that mostly publish commentary. The facts they ' +
+    'report (rating changes, price moves, company announcements, filings) are facts: put them in the bullets like any ' +
+    'other. Only their own views, forecasts and recommendations are opinions: at most two bullets, after the facts, ' +
+    'saying whose view it is ("Potrivit Motley Fool...", "24/7 Wall St. consideră că..."). Never present a view as a fact.',
+  '- Each bullet is one or two short sentences with the key figures, and ends with its source(s) in brackets, e.g. ' +
+    '"(CNBC, Reuters)". Never two bullets about the same event or the same price move.',
+  '- The digest is read the next day: never write "today", "astăzi" or "heute"; the day is shown above it.',
+  '- If stories disagree, say so in the bullet. Analyst rating changes name both ratings and the target.',
+  '- Name the company in a bullet when another company also appears in it; never move another company\'s figures to it.',
+  '- Start every bullet with "• ". Reply with the bullets only: no title, no introduction, no conclusion.',
+  '',
+  'Romanian (ro): correct diacritics (ă, â, î, ș, ț), Romanian words rather than English ones (rezultate financiare, ' +
+    'prognoză, preț-țintă, val de vânzări), Romanian number style (1,5 miliarde de dolari; 8%).',
+  'German (de): correct German financial terms.',
+  'English (en): plain, concise financial English.'
+].join('\n');
+const DIGEST_LANG = { ro: 'Scrie rezumatul zilei în limba română.', en: 'Write the digest in English.', de: 'Schreibe die Tageszusammenfassung auf Deutsch.' };
+
+// The model's reply as clean bullets ("• ..." one per line), at most 8.
+export function cleanDigest(text, lang = 'ro') {
+  const raw = String(text || '').replace(/<think>[\s\S]*?<\/think>/g, '').replace(/\*\*/g, '');
+  return raw.split(/\r?\n/).map(l => l.trim()).filter(l => /^([•\-*–]|\d+[.)])\s+/.test(l))
+    .map(l => l.replace(/^([•\-*–]|\d+[.)])\s+/, '').replace(/[\u2010\u2011]/g, '-').replace(/ş/g, 'ș').replace(/Ş/g, 'Ș').replace(/ţ/g, 'ț').replace(/Ţ/g, 'Ț').replace(/\s+/g, ' ').trim())
+    .map(l => lang === 'ro' ? dropLacking(fixRomanian(l)) : lang === 'de' ? dropLacking(l) : l)
+    .filter(l => l.length >= 15 && !NO_CONTENT.test(l))
+    .slice(0, 8).map(l => '• ' + trimSentences(l, 360)).join('\n');
+}
+export function digestLooksWrong(d, lang, stories = 2) {
+  const bullets = d ? d.split('\n') : [];
+  if (bullets.length < Math.min(2, stories)) return 'too few bullets';
+  if (d.length > 3000) return 'too long';
+  if (lang !== 'en' && (d.match(EN_WORDS) || []).length >= 4 + bullets.length * 2) return 'English words';
+  return '';
+}
+const hhmm = at => new Date(at).toLocaleTimeString('ro-RO', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Bucharest' });
+async function writeDigest(row, lang) {
+  const list = (row.stories || []).slice(0, 40).map((x, i) =>
+    `${i + 1}. [${hhmm(x.at)}, ${x.source || '?'}${x.opinion ? ', opinion' : ''}] ${x.headline}${x.summary ? ' — ' + String(x.summary).slice(0, 500) : ''}`).join('\n');
+  const input = `Ticker: ${row.ticker}\nDay: ${row.day}\nStories (${row.stories.length}):\n${list}\n\n---\n${DIGEST_LANG[lang] || DIGEST_LANG.en}`;
+  let text = '', why = '';
+  for (const temperature of [0.2, 0.5]) {
+    const res = await postJson(`${cfg.lmUrl}/chat/completions`, { model: cfg.model, temperature, max_tokens: 1800,
+      messages: [{ role: 'system', content: DIGEST_SYSTEM }, { role: 'user', content: input }] }, 900_000);
+    if (res.status !== 200) throw new Error(`model: ${res.status} ${res.body.slice(0, 200)}`);
+    const d = JSON.parse(res.body);
+    text = cleanDigest(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content, lang);
+    why = digestLooksWrong(text, lang, row.stories.length);
+    if (!why) return { text, why: '' };
+    log('retry digest', row.ticker, lang, '-', why);
+  }
+  return { text, why };
+}
+// Up to DIGEST_LIMIT digests per language this run (or the one ticker asked for).
+async function runDigests(onlyTicker) {
+  const n = onlyTicker ? 1 : cfg.digests;
+  if (!n) return;
+  for (const lang of cfg.langs) {
+    let rows = [];
+    try { rows = await rpc('digests_pending', { p_secret: cfg.secret, p_lang: lang, p_limit: n, p_ticker: onlyTicker || null }) || []; }
+    catch (e) { log('digests:', String(e.message || e)); return; }
+    for (const row of rows) {
+      const t0 = Date.now();
+      try {
+        const { text, why } = await writeDigest(row, lang);
+        if (why) { log('skipped digest', row.ticker, row.day, lang, '-', why); continue; }
+        await rpc('digests_save', { p_secret: cfg.secret, p_ticker: row.ticker, p_day: row.day, p_lang: lang, p_digest: text,
+          p_stories: row.stories.length, p_model: cfg.model });
+        log('saved digest', row.ticker, row.day, lang, `${row.stories.length} stories`, `${Math.round((Date.now() - t0) / 1000)}s`);
+      } catch (e) { log('digest failed', row.ticker, lang, String(e.message || e)); }
+    }
+  }
+}
+
 export async function summarizeForTest(story, article, lang = 'ro') { return (await summarize(story, article, lang)).text; }
 // One try, and a second (a little less conservative) when the first looks wrong; the
 // second reuses the cached prompt, so it costs only the writing.
@@ -543,6 +638,9 @@ async function main() {
   log(await ensureModel({ model: cfg.model, threads: pickThreads(cfg.threads), wsUrl: cfg.lmUrl.replace(/^http/, 'ws').replace(/\/v1$/, '') }));
 
   if (!cfg.langs.length) { log('SUMMARY_LANG has no supported language (ro, en, de)'); process.exitCode = 2; return; }
+  // node tools/summarize-batch.mjs --digest ASTS: that ticker's digest of the previous day, nothing else.
+  const di = process.argv.indexOf('--digest');
+  if (di > 0) return runDigests(String(process.argv[di + 1] || '').toUpperCase());
   // What each language still needs, in the server's priority order; then one queue in which
   // a story's languages sit together, in the order of its best position in any list.
   const rank = new Map(), byId = new Map(), rejected = loadRejected();
@@ -559,7 +657,7 @@ async function main() {
   const queue = dedupeQueue([...rank.entries()].sort((a, b) => a[1].at - b[1].at)
     .flatMap(([id, e]) => cfg.langs.filter(l => e.langs.includes(l)).map(lang => ({ story: byId.get(id), lang }))))
     .slice(0, cfg.limit);
-  if (!queue.length) { log('no stories waiting'); return; }
+  if (!queue.length) { log('no stories waiting'); return runDigests(); }
   log(`${queue.length} summaries to write (${cfg.langs.join(', ')}) with ${cfg.model}`);
 
   let saved = 0;
@@ -588,6 +686,7 @@ async function main() {
     }
   }
   log(`done: ${saved} of ${queue.length} saved`);
+  await runDigests();
 }
 
 // The LM Studio SDK keeps a socket open, so the job exits explicitly when it is done.

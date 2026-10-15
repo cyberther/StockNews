@@ -15,7 +15,7 @@
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
 <div class="app-head" style="display:flex;align-items:center;gap:20px;padding:8px 20px;height:56px;border-bottom:1px solid var(--s-rule);flex:none">
-<div style="flex:none;display:flex;align-items:center;gap:10px"><img src="./assets/aa-logo.png" alt="" style="width:34px;height:auto;mix-blend-mode:lighten"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.02em">{{ brand }}</span></div>
+<div style="flex:none;display:flex;align-items:center;gap:10px"><img src="./assets/aa-logo.png" alt="" style="width:34px;height:auto"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.02em">{{ brand }}</span></div>
 <div class="app-term" style="flex:none;white-space:nowrap;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.terminal }}</div>
 <div data-m="marquee" style="flex:1 1 auto;min-width:0;display:flex;background:transparent;margin-left:12px;overflow:hidden">
 <div>
@@ -224,15 +224,30 @@
 <div style="padding:18px var(--gx);border-top:1px solid var(--s-rule)">
 <div style="display:flex;align-items:baseline;gap:10px">
 <span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.whyTitle }}</span>
-<span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-left:auto">{{ whyConf }}</span>
+<span title="{{ ui.whyConfHelp }}" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-left:auto;cursor:help;text-decoration:underline dotted;text-underline-offset:3px">{{ whyConf }}</span>
 </div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:20px;line-height:1.2;letter-spacing:-0.02em;margin-top:6px;color:{{ whyTone }}">{{ whyLabel }}</div>
-<div style="font-size:14px;line-height:1.45;margin-top:6px;max-width:56ch;text-wrap:pretty">{{ whyDetail }}</div>
+<div style="font-size:16px;line-height:1.5;margin-top:6px;text-wrap:pretty">{{ whyDetail }}</div>
+<sc-if value="{{ whyConf }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);margin-top:6px;text-wrap:pretty">{{ ui.whyConfHelp }}</div></sc-if>
 <sc-if value="{{ whyHasLink }}" hint-placeholder-val="{{ false }}">
 <button onClick="{{ openWhy }}" style-hover="color:var(--s-ink)" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:6px 0;min-height:32px;background:transparent;border:0;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.04em;cursor:pointer">{{ whyLinkLabel }}<span aria-hidden="true">↗</span></button>
 </sc-if>
 <div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ whyNote }}</div>
 </div>
+</sc-if>
+<sc-if value="{{ hasDigest }}" hint-placeholder-val="{{ false }}">
+<section aria-label="{{ ui.digestTitle }}" style="padding:18px var(--gx);border-top:1px solid var(--s-rule)">
+<div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px">
+<span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent)">{{ ui.digestTitle }}</span>
+<span style="font-size:11px;letter-spacing:0.08em;color:var(--s-mute);margin-left:auto">{{ digestMeta }}</span>
+</div>
+<ul style="list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ digestRows }}" as="b" hint-placeholder-count="4">
+<li style="display:grid;grid-template-columns:14px minmax(0,1fr);gap:8px;font-size:16px;line-height:1.5;text-wrap:pretty"><span aria-hidden="true" style="width:6px;height:6px;margin-top:10px;background:var(--color-accent)"></span><span>{{ b.text }}</span></li>
+</sc-for>
+</ul>
+<div style="font-size:12px;color:var(--s-mute);margin-top:12px;text-wrap:pretty">{{ ui.digestNote }}</div>
+</section>
 </sc-if>
 <sc-if value="{{ hasClash }}" hint-placeholder-val="{{ false }}">
 <div style="padding:18px var(--gx);border-top:1px solid var(--s-rule)">
@@ -250,13 +265,13 @@
 <sc-if value="{{ hasCall }}" hint-placeholder-val="{{ true }}">
 <div style="padding:18px var(--gx);border-top:1px solid var(--s-rule)">
 <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);margin-bottom:6px">{{ ui.theCall }}</div>
-<div style="font-size:17px;font-weight:600;line-height:1.5;text-wrap:pretty;max-width:64ch">{{ stock.call }}</div>
+<div style="font-size:17px;font-weight:600;line-height:1.5;text-wrap:pretty">{{ stock.call }}</div>
 <div style="font-size:12px;color:var(--s-mute);margin-top:12px"><sc-if value="{{ isFreeTier }}" hint-placeholder-val="{{ true }}"><span style="color:var(--color-accent)">{{ freqNote }}</span></sc-if><sc-if value="{{ isProTier }}" hint-placeholder-val="{{ false }}"><span>{{ freqNote }}</span></sc-if></div>
 </div>
 </sc-if>
 </sc-if>
 <sc-if value="{{ tabNews }}" hint-placeholder-val="{{ false }}">
-<div style="padding:14px var(--gx) 6px;border-top:1px solid var(--s-rule);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tape }} · {{ stock.tickerLabel }}</div>
+<div style="padding:14px var(--gx) 6px;border-top:1px solid var(--s-rule);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tape }} · {{ stock.tickerLabel }} · {{ stockNewsCount }}</div>
 <sc-for list="{{ stockNews }}" as="n" hint-placeholder-count="3">
 <article role="button" tabIndex="0" onClick="{{ n.open }}" onKeyDown="{{ n.keyOpen }}" style-hover="background:var(--s-panel)" style="display:grid;grid-template-columns:96px 1fr;gap:16px;padding:14px var(--gx);border-top:1px solid var(--s-rule);align-items:baseline;cursor:pointer">
 <span style="font-size:12px;letter-spacing:0.06em;color:var(--s-mute)">{{ n.stamp }}</span>
@@ -674,6 +689,14 @@
 </div>
 </div>
 <div style="margin-top:26px;max-width:420px">
+<label style="display:block"><span style="display:block;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:8px">{{ ui.phoneTitle }}</span>
+<span style="display:flex;gap:8px">
+<input type="tel" name="tel" autocomplete="tel" inputmode="tel" maxlength="24" placeholder="+40 712 345 678" value="{{ phoneDraft }}" onChange="{{ onPhone }}" onKeyDown="{{ phoneKey }}" aria-invalid="{{ phoneBad }}" aria-describedby="phone-note" style="flex:1;min-width:0;min-height:44px;padding:0 14px;background:var(--s-panel);border:1px solid {{ phoneEdge }};color:var(--s-ink);font-family:var(--font-body);font-size:15px">
+<button type="button" onClick="{{ savePhone }}" disabled="{{ phoneSame }}" style="flex:none;min-height:44px;padding:0 16px;background:{{ phoneBtnBg }};border:1px solid {{ phoneBtnEdge }};color:{{ phoneBtnInk }};font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ phoneSaveLabel }}</button>
+</span></label>
+<div id="phone-note" role="status" style="font-size:12px;color:{{ phoneNoteInk }};margin-top:8px;text-wrap:pretty">{{ phoneNote }}</div>
+</div>
+<div style="margin-top:26px;max-width:420px">
 <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:8px">{{ ui.opinionTitle }}</div>
 <div style="display:flex;gap:3px;padding:3px;border:1px solid var(--s-rule)">
 <sc-for list="{{ opinionOpts }}" as="op" hint-placeholder-count="2">
@@ -758,7 +781,7 @@
 <div data-m="smooth" data-screen-label="Landing" class="lp" style="position:fixed;inset:0;z-index:40;background:#0B0B0C;color:var(--s-ink);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column">
 <header class="lp-head" style="flex:none;display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:20px clamp(20px,4vw,64px);background:#0E0E10;border-bottom:1px solid var(--s-rule)">
 <div style="display:flex;align-items:center;gap:16px;min-width:0">
-<img src="./assets/aa-logo.png" alt="" class="lp-logo" style="width:64px;height:auto;mix-blend-mode:lighten;flex:none">
+<img src="./assets/aa-logo.png" alt="" class="lp-logo" style="width:64px;height:auto;flex:none">
 <div style="min-width:0">
 <div style="font-family:var(--font-heading);font-weight:700;font-size:clamp(22px,2.4vw,32px);letter-spacing:-0.02em;line-height:1">{{ brand }}</div>
 <div class="lp-tag" style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--s-mute);margin-top:8px">{{ ui.lpTag }}</div>
@@ -819,7 +842,7 @@
 <div data-m="fade" onClick="{{ closeAuth }}" style="position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.6);display:flex;justify-content:flex-end">
 <div data-m="slide" onClick="{{ stopProp }}" role="dialog" aria-modal="true" aria-label="{{ ui.authKicker }}" class="auth-panel" style="width:min(100%,460px);height:100%;overflow-y:auto;box-sizing:border-box;background:var(--s-bg);border-left:1px solid var(--s-rule);padding:36px">
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
-<img src="./assets/aa-logo.png" alt="" style="width:44px;height:auto;mix-blend-mode:lighten">
+<img src="./assets/aa-logo.png" alt="" style="width:44px;height:auto">
 <span style="font-family:var(--font-heading);font-weight:700;font-size:18px">{{ brand }}</span>
 <button onClick="{{ closeAuth }}" style="margin-left:auto;min-height:44px;padding:0 4px;background:transparent;border:0;color:var(--s-mute);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer" style-hover="color:var(--color-accent)">{{ ui.lpClose }}</button>
 </div>
@@ -1253,7 +1276,7 @@ class Component extends DCLogic {
     // Signing in (rather than a token refresh) lands on the portfolio.
     const landing = !this.state.session ? { screen:'portfolio' } : {};
     this.setState(Object.assign(landing, {
-      session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
+      session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId, phone:sess.phone || '' },
       accountId: sess.userId, authOpen:false, authPw:'', authPw2:'', authSent:'', authErr:''
     }, this.langsFrom(sess), fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, events:[], selected:'', screen:'portfolio' } : {}));
     this.loadPlan();
@@ -1790,15 +1813,30 @@ class Component extends DCLogic {
     return Math.floor(d.getTime() / 1000);
   }
   // The open feed tab's stories of that window from public.stories (stored by the scan every
-  // 10 minutes): the live sources only list the newest ones. Refreshed with the rest.
+  // 10 minutes), or the open ticker page's: the live sources only list the newest ones.
+  // Refreshed with the rest.
   syncHistory(force) {
     const P = window.HIFPush, s = this.state;
-    if (!P || !P.loadStories || !s.authLive || !s.session || s.screen !== 'feed') return;
+    if (!P || !P.loadStories || !s.authLive || !s.session) return;
+    if (s.screen === 'detail' && s.selected) { this.syncDigest(s.selected, force); return this.loadHistory('tk:' + s.selected, 'ticker=eq.' + encodeURIComponent(s.selected), force); }
+    if (s.screen !== 'feed') return;
     const tab = s.feedTab || 'following';
     const list = tab === 'market' ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows;
     if ((tab === 'following' || tab === 'market') && !list.length) return;
     const filter = tab === 'bvb' ? 'ticker=like.*.RO' : tab === 'eu' ? 'or=(ticker.like.*.DE,ticker.like.*.L)'
       : 'ticker=in.(' + list.map(t => '"' + t + '"').join(',') + ')';
+    this.loadHistory(tab, filter, force);
+  }
+  // The ticker's previous-day digest (supabase/digests.sql) in the content language.
+  syncDigest(ticker, force) {
+    const P = window.HIFPush, lang = String(this.lang || 'EN').toLowerCase(), key = ticker + '|' + lang;
+    if (!P || !P.loadDigest || (!force && this._digSig === key)) return;
+    this._digSig = key;
+    P.loadDigest(ticker, lang).then(d => this.setState(st => ({ digests: Object.assign({}, st.digests, { [key]: d }) })))
+      .catch(() => { this._digSig = ''; });
+  }
+  loadHistory(tab, filter, force) {
+    const P = window.HIFPush;
     const since = new Date(this.feedSince() * 1000).toISOString(), sig = tab + '|' + filter + '|' + since;
     if (!force && this._histSig === sig) return;
     this._histSig = sig;
@@ -2436,8 +2474,12 @@ class Component extends DCLogic {
     const sector = SEC[stock.ticker] || '';
     const peerList = ((H.SECTORS || {})[sector] || []).filter(t => t !== stock.ticker);
     const peers = peerList.map(t => ({ ticker:t, move:(rec(t) || {}).move })).filter(p => p.move);
+    // Candidate causes of today's move: news from the last 24 hours, not opinion pieces.
+    const isOpN = (window.HIF && window.HIF.isOpinion) || (() => false);
     const dayNews = ((live && LN[stock.ticker]) ? LN[stock.ticker] : NEWS.filter(n => n.ticker === stock.ticker))
-      .slice(0, 3).map(n => ({ headline: (live && n.id && this.aiText(stock.ticker + ':' + n.id)) || (typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN), source:n.source, url:n.url || '' }));
+      .filter(n => !isOpN(n.source, n.url)).slice(0, 3)
+      .map(n => ({ headline: (live && n.id && this.aiText(stock.ticker + ':' + n.id)) || (typeof n.headline === 'string' ? n.headline : (n.headline || {})[L] || (n.headline || {}).EN), source:n.source, url:n.url || '',
+        sameDay: live && n.ts ? Date.now() / 1000 - n.ts < 86400 : true }));
     const why = IN ? IN.attribute({ t:u, ticker:stock.ticker, movePct:stock.move, news:dayNews, signals:SIGNALS[stock.ticker] || [], peers, sector }) : null;
     // The newest story's AI summary (the source's English snippet is not a conclusion).
     const callText = (stock.call && stock.call[L]) || (live && LN[stock.ticker] && LN[stock.ticker][0] && LN[stock.ticker][0].id ? this.aiText(stock.ticker + ':' + LN[stock.ticker][0].id) : '') || '';
@@ -2479,6 +2521,24 @@ class Component extends DCLogic {
       this.navItem('watchlist', u.watchlist, isFree ? s.follows.length + '/3' : String(s.follows.length)),
       this.navItem('ledger', u.ledger, String((s.dismissed || []).length))
     ];
+    // The ticker page's Feed: every story about it in the feed's window (5 business days),
+    // newest first: live news, the press tabs and what the scan stored (syncHistory).
+    const tickerNews = (() => {
+      const t = stock.ticker, since = this.feedSince(), have = new Set(), out = [];
+      const add = n => {
+        const id = n.id ? t + ':' + n.id : '';
+        if (!n.ts || n.ts < since || (id && have.has(id))) return;
+        if (id) have.add(id);
+        out.push({ ticker:t, storyId:id, headline:n.headline, source:n.source || '', ts:n.ts, stamp:this.storyTime(n.ts, n.stamp), score:'', url:n.url || '' });
+      };
+      if (live) {
+        (LN[t] || []).forEach(add);
+        (s.roNews || []).concat(s.euNews || []).filter(n => n.related === t).forEach(add);
+        (((s.hist || {})['tk:' + t] || {}).rows || []).forEach(add);
+      } else NEWS.filter(n => n.ticker === t).forEach(n => out.push(Object.assign({}, n, { headline: n.headline[L] })));
+      const isOp = (window.HIF && window.HIF.isOpinion) || (() => false);
+      return out.filter(n => s.showOpinion || !isOp(n.source, n.url)).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    })();
     const myWeight = pos && book.value ? (pos.value / book.value * 100).toFixed(0) + '%' : '';
     const editing = s.posEdit === stock.ticker;
     const CROWD = H.CROWD || {};
@@ -2534,6 +2594,14 @@ class Component extends DCLogic {
       whyNote: why ? (why.note || '') : '', whyTone,
       whyHasLink: !!(why && why.url), whyLinkLabel: why && why.url ? (u.readAt || 'Read at %s').replace('%s', why.source || 'source') : '',
       openWhy: () => { if (why && why.url) this.openNews({ url: why.url, ticker: stock.ticker }); },
+      ...(() => {
+        const D = (s.digests || {})[stock.ticker + '|' + String(this.lang || 'EN').toLowerCase()];
+        if (!D || !D.digest) return { hasDigest:false, digestRows:[], digestMeta:'' };
+        const d = new Date(D.day + 'T12:00:00Z');
+        const day = d.toLocaleDateString(this.appLocale, { weekday:'long', day:'numeric', month:'long', timeZone:'UTC' });
+        return { hasDigest:true, digestRows: String(D.digest).split('\n').map(l => ({ text: l.replace(/^•\s*/, '') })).filter(b => b.text),
+          digestMeta: (u.digestMeta || '{d} · {n} stories').replace('{d}', day).replace('{n}', D.stories) };
+      })(),
       whyConf: why && why.confidence ? (u.whyConfFmt || '{c} confidence').replace('{c}', (u['conf_' + why.confidence] || why.confidence)).toUpperCase() : '',
       clashes, hasClash: !!clashes.length, noClash: !clashes.length,
       clashRows: clashes.map(c => ({ title:c.title, detail:c.detail, accent: c.tone === 'warn' ? 'var(--color-accent)' : 'var(--s-mute)' })),
@@ -2772,7 +2840,7 @@ class Component extends DCLogic {
       auditRows: (s.events || []).slice(0, 12).map(ev => {
         const map = { signin:u.evSignin, signout:u.evSignout, signout_all:u.evSignoutAll, twofa_on:u.evTwofaOn,
           twofa_off:u.evTwofaOff, device_revoked:u.evDeviceRevoked, locked:u.evLocked,
-          unlock_failed:u.evUnlockFailed, password_changed:u.evPasswordChanged };
+          unlock_failed:u.evUnlockFailed, password_changed:u.evPasswordChanged, phone:u.evPhone };
         const d = new Date(ev.ts);
         const warn = ev.kind === 'unlock_failed' || ev.kind === 'twofa_off' || ev.kind === 'device_revoked';
         return {
@@ -2897,17 +2965,14 @@ class Component extends DCLogic {
       }),
       dataless: dataless(stock.ticker), hasData: !dataless(stock.ticker),
       chart: dataless(stock.ticker) ? null : this.chartEl(stock),
-      stockNews: ((live && LN[stock.ticker] && LN[stock.ticker].length)
-        ? LN[stock.ticker].slice(0,5).map(n => ({ ticker:stock.ticker, storyId: n.id ? stock.ticker + ':' + n.id : '', headline:n.headline, source:n.source, stamp:this.storyTime(n.ts, n.stamp), score:'', url:n.url || '' }))
-        : NEWS.filter(n => n.ticker === stock.ticker).slice(0,5).map(n => Object.assign({}, n, { headline: n.headline[L] })))
-        .map(n => Object.assign({}, n, {
+      stockNews: tickerNews.map(n => Object.assign({}, n, {
           // The AI summary replaces the headline here as it does in the feed.
           summary: this.aiText(n.storyId), isAi: !!this.aiText(n.storyId), notAi: !this.aiText(n.storyId),
           hasUrl: /^https?:\/\//i.test(n.url || ''),
           open: () => this.openNews(n),
           keyOpen: event => this.activateFromKeyboard(() => this.openNews(n), event)
         })),
-      noStockNews: live ? !(LN[stock.ticker] && LN[stock.ticker].length) : !NEWS.some(n => n.ticker === stock.ticker),
+      noStockNews: !tickerNews.length, stockNewsCount: String(tickerNews.length),
       freqNote: isFree ? u.freqFree : u.freqPro,
       detailActionLabel: following ? (isFree ? u.enablePush : u.pushEnabled.replace('%s', this.tickerLabel(stock.ticker))) : u.addToList.replace('%s', this.tickerLabel(stock.ticker)),
       primaryDetailAction: () => {
@@ -2923,6 +2988,38 @@ class Component extends DCLogic {
       langRo: L === 'RO', langRoOff: L !== 'RO',
       langDe: L === 'DE', langDeOff: L !== 'DE',
       langNote: UI[L].langNote,
+      ...(() => {
+        // The phone number: "+40 712 345 678" is kept as +40712345678 (E.164); '' removes it.
+        const saved = (s.session && s.session.phone) || '';
+        const draft = s.phoneDraft == null ? saved : s.phoneDraft;
+        const norm = String(draft).replace(/[\s().-]/g, '');
+        const ok = norm === '' || /^\+[1-9]\d{6,14}$/.test(norm), same = norm === saved;
+        const err = s.phoneMsg === 'bad' || s.phoneMsg === 'failed';
+        const save = () => {
+          if (same || s.phoneBusy) return;
+          if (!ok) return this.setState({ phoneMsg:'bad' });
+          const done = () => {
+            this.setState(st => ({ phoneBusy:false, phoneMsg: norm ? 'saved' : 'removed', phoneDraft:null, session: Object.assign({}, st.session, { phone: norm }) }));
+            this.logEvent('phone', norm ? norm.slice(0, 4) + '…' + norm.slice(-2) : '—');
+          };
+          const A = window.HIFAuth;
+          if (!s.authLive || !A || !A.updatePrefs) return done();
+          this.setState({ phoneBusy:true, phoneMsg:'' });
+          A.updatePrefs({ phone: norm }).then(r => r && r.ok ? done() : this.setState({ phoneBusy:false, phoneMsg:'failed' }))
+            .catch(() => this.setState({ phoneBusy:false, phoneMsg:'failed' }));
+        };
+        return {
+          phoneDraft: draft, phoneBad: s.phoneMsg === 'bad', phoneSame: same || !!s.phoneBusy,
+          onPhone: e => this.setState({ phoneDraft: e.target.value, phoneMsg:'' }),
+          phoneKey: e => { if (e.key === 'Enter') { e.preventDefault(); save(); } },
+          savePhone: save, phoneSaveLabel: s.phoneBusy ? '…' : (u.phoneSave || 'Save'),
+          phoneEdge: err ? 'var(--color-accent)' : 'var(--s-rule)',
+          phoneBtnBg: same ? 'transparent' : 'var(--color-accent)', phoneBtnEdge: same ? 'var(--s-rule)' : 'var(--color-accent)',
+          phoneBtnInk: same ? 'var(--s-mute)' : 'var(--s-on-accent)',
+          phoneNote: ({ bad:u.phoneBad, failed:u.phoneFailed, saved:u.phoneSaved, removed:u.phoneRemoved })[s.phoneMsg] || u.phoneNote,
+          phoneNoteInk: err ? 'var(--color-accent)' : 'var(--s-mute)'
+        };
+      })(),
       opinionOpts: [[false, u.opinionHide || 'Hide'], [true, u.opinionShow || 'Show']].map(([v, label]) => {
         const on = !!s.showOpinion === v;
         return { label, on, bg: on ? 'var(--color-accent)' : 'transparent', ink: on ? 'var(--s-on-accent)' : 'var(--s-ink)', set: () => this.setState({ showOpinion: v }) };
