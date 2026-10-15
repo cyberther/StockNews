@@ -66,9 +66,11 @@ function attribute(input) {
   if (sig.length) {
     const s = sig[0];
     return { kind:'filing', label: s.type === 'insider' ? t.whyInsider : t.whyFiling, confidence:'low', weight:1,
-      detail: s.type === 'insider'
-        ? s.who + ' (' + s.role + ') ' + (s.act === 'buy' ? 'bought' : 'sold') + ' ' + s.shares + ' shares'
-        : 'Form ' + s.form + ' \u00b7 ' + s.item,
+      // Live rows from the company's site or the press have only a title.
+      detail: s.title ? s.title : s.type === 'insider'
+        ? s.who + (s.role ? ' (' + s.role + ')' : '') + ' ' + (s.act === 'buy' ? 'bought' : 'sold') + ' ' + s.shares + ' shares'
+        : 'Form ' + s.form + (s.item ? ' \u00b7 ' + s.item : ''),
+      url: s.url || '',
       note:t.whyTiming };
   }
   return { kind:'none', label:t.whyNone, confidence:'', weight:0,
@@ -234,15 +236,16 @@ function conflicts(input) {
   const buys = am ? +am[1] : null, holds = am ? +am[2] : null, sells = am ? +am[3] : null;
   const tot = am ? (buys + holds + sells) : 0;
   const sig = i.signals || [];
+  const whoOf = s => s.who ? s.who + (s.role ? ' (' + s.role + ')' : '') : s.title;
   const insider = sig.filter(s => s.type === 'insider');
   const sold = insider.filter(s => s.act === 'sell');
   const bought = insider.filter(s => s.act === 'buy');
 
   if (tot && buys / tot >= 0.6 && sold.length >= 2) {
-    out.push({ tone:'warn', title:t.cfBullSell, detail: fill(t.cfBullSellD, { b: buys, n: tot, k: sold.length, w: sold[0].who + ' (' + sold[0].role + ')' }) });
+    out.push({ tone:'warn', title:t.cfBullSell, detail: fill(t.cfBullSellD, { b: buys, n: tot, k: sold.length, w: whoOf(sold[0]) }) });
   }
   if (tot && sells / tot >= 0.3 && bought.length) {
-    out.push({ tone:'note', title:t.cfCautBuy, detail: fill(t.cfCautBuyD, { s: sells, n: tot, w: bought[0].who + ' (' + bought[0].role + ')', k: bought[0].shares }) });
+    out.push({ tone:'note', title:t.cfCautBuy, detail: fill(t.cfCautBuyD, { s: sells, n: tot, w: whoOf(bought[0]), k: bought[0].shares }) });
   }
   if (move != null && tot && buys / tot >= 0.6 && move <= -2) {
     out.push({ tone:'warn', title:t.cfBuyFall, detail: fill(t.cfBuyFallD, { m: Math.abs(move).toLocaleString(LOC(), { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%', p: Math.round(buys / tot * 100) + '%' }) });

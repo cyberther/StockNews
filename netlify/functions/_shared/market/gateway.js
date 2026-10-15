@@ -21,6 +21,7 @@ import { alphavantage } from './providers/alphavantage.js';
 import { companyNews, marketNews } from './ro-news.js';
 import { euCompanyNews, euMarketNews, isEu } from './eu-news.js';
 import { usCompanyNews, usMarketNews } from './us-news.js';
+import { roFilings } from './ro-filings.js';
 
 // Romanian company news from the press's RSS feeds (ro-news.js); no upstream key.
 const ronews = {
@@ -41,6 +42,13 @@ const usnews = {
   supports: cap => cap === 'marketNewsUS',
   load: (cap, p, ctx) => usMarketNews(p.names, 150, ctx.log)
 };
+// Filings and management dealings of a .RO company, from its own site and the press
+// (ro-filings.js); no upstream key.
+const rofilings = {
+  name: 'rofilings', needsKey: false, limits: {},
+  supports: cap => cap === 'filingsRO',
+  load: (cap, p, ctx) => roFilings(p.symbol, 30, ctx.log)
+};
 
 // Default order per capability. A provider without a key is skipped; Alpha Vantage's
 // 25 calls a day make it a last resort. Override with MARKET_ORDER_<CAPABILITY>, e.g.
@@ -54,9 +62,11 @@ const PROVIDERS = {
   marketNewsRO: [ronews],  // /ro-news: every story naming a BVB-listed company
   marketNewsEU: [eunews],  // /eu-news: every story naming a XETRA or London listed company
   marketNewsUS: [usnews],  // /us-news: US press releases, and press stories naming the companies given
+  filingsRO: [rofilings],  // /filings for a .RO symbol
+  insiderTx: [finnhub], secFilings: [finnhub], // /filings for a US symbol (fetchFilings)
   news: [finnhub], search: [finnhub], recommendation: [finnhub], earningsCalendar: [finnhub]
 };
-const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage, ronews, eunews, usnews].map(p => [p.name, p]));
+const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage, ronews, eunews, usnews, rofilings].map(p => [p.name, p]));
 // Keys by provider, from the environment (never sent anywhere but the provider itself).
 export const keysFromEnv = env => ({ finnhub: env.FINNHUB_KEY, twelvedata: env.TWELVEDATA_KEY, fmp: env.FMP_KEY, alphavantage: env.ALPHAVANTAGE_KEY });
 // Bucharest Stock Exchange listings (.RO): Yahoo has their prices and names, the Romanian
@@ -93,10 +103,11 @@ export function orderFromEnv(env) {
 const ROUTES = {
   '/quote': 'quote', '/quotes': 'quotes', '/company-news': 'news', '/search': 'search',
   '/stock/recommendation': 'recommendation', '/stock/earnings': 'earnings',
-  '/calendar/earnings': 'earningsCalendar', '/stock/profile2': 'profile', '/chart': 'chart', '/ro-news': 'marketNewsRO', '/eu-news': 'marketNewsEU', '/us-news': 'marketNewsUS'
+  '/calendar/earnings': 'earningsCalendar', '/stock/profile2': 'profile', '/chart': 'chart', '/ro-news': 'marketNewsRO', '/eu-news': 'marketNewsEU', '/us-news': 'marketNewsUS',
+  '/filings': 'filings'
 };
 // Seconds an answer is fresh. Quotes go stale fast; company names hardly change.
-const TTL = { marketNewsRO: 600, marketNewsEU: 600, marketNewsUS: 600, quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
+const TTL = { filings: 3600, filingsRO: 3600, insiderTx: 3600, secFilings: 3600, marketNewsRO: 600, marketNewsEU: 600, marketNewsUS: 600, quote: 30, news: 300, search: 300, recommendation: 3600, earnings: 3600, earningsCalendar: 3600, earningsHistory: 43200, profile: 86400, chart: 300 };
 // How long past its TTL an answer may still be served when every provider is failing.
 const STALE_FOR = { quote: 600 };
 const STALE_DEFAULT = 86400;
@@ -362,6 +373,52 @@ async function fetchUsNews(params, ctx) {
   return { ...r, status: 200, data: merged, source: [r.source, 'usnews'].filter(Boolean).join(','), ttl: r.ttl || 300 };
 }
 
+// The last 30 days of regulatory filings and insider dealings, as
+// { items: [{ type: 'insider'|'filing', datetime, title, url, source, official, act, who, shares, value, form }], coverage }.
+// .RO: the company's own announcements and the press (ro-filings.js). US: Finnhub's SEC
+// filings and Form 4 open-market buys and sales. Other listings: none (coverage 'none').
+const FILING_FORMS = /^(8-K|10-Q|10-K|6-K|20-F|40-F|S-1|S-3|S-4|F-1|F-3|DEF 14A|PRE 14A|SC 13D|SC 13G|SC 13D\/A|SC 13G\/A|SC TO-T|SC TO-I|424B\d)$/;
+const nameCase = s => String(s || '').toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase());
+async function fetchFilings(params, ctx) {
+  const symbol = params.symbol;
+  if (isBvb(symbol)) return fetchCapability('filingsRO', { symbol }, ctx);
+  if (isLocal(symbol)) {
+    return { status: 200, data: { items: [], coverage: 'none' }, source: null, cache: 'miss', ttl: TTL.filings };
+  }
+  const to = new Date().toISOString().slice(0, 10), from = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+  const [ins, fil] = await Promise.all([
+    fetchCapability('insiderTx', { symbol, from, to }, ctx), fetchCapability('secFilings', { symbol, from, to }, ctx)]);
+  if (ins.status !== 200 && fil.status !== 200) return ins;
+  const items = [];
+  // Several rows per Form 4 (one per lot): one line per person, day and direction.
+  const deals = new Map();
+  for (const x of (ins.status === 200 && ins.data && Array.isArray(ins.data.data) ? ins.data.data : [])) {
+    const act = x.transactionCode === 'P' ? 'buy' : x.transactionCode === 'S' ? 'sell' : '';
+    const day = x.filingDate || x.transactionDate;
+    if (!act || !day || !x.name) continue;
+    const k = x.name + '|' + day + '|' + act, d = deals.get(k) || { name: x.name, day, act, shares: 0, value: 0 };
+    const n = Math.abs(Number(x.change) || 0);
+    d.shares += n; d.value += n * (Number(x.transactionPrice) || 0);
+    deals.set(k, d);
+  }
+  for (const d of deals.values()) {
+    const at = Date.parse(d.day + 'T21:00:00Z');
+    if (!Number.isFinite(at) || !d.shares) continue;
+    items.push({ type: 'insider', datetime: Math.floor(at / 1000), who: nameCase(d.name), act: d.act, shares: d.shares, value: Math.round(d.value),
+      title: '', url: 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&type=4&CIK=' + encodeURIComponent(symbol), source: 'SEC', official: true });
+  }
+  for (const x of (fil.status === 200 && Array.isArray(fil.data) ? fil.data : [])) {
+    const at = Date.parse(String(x.acceptedDate || x.filedDate || '').replace(' ', 'T') + (/[zZ]|[+-]\d\d:?\d\d$/.test(x.acceptedDate || '') ? '' : 'Z'));
+    if (!FILING_FORMS.test(String(x.form || '')) || !Number.isFinite(at)) continue;
+    const url = String(x.reportUrl || x.filingUrl || '');
+    items.push({ type: 'filing', datetime: Math.floor(at / 1000), form: x.form, title: '', source: 'SEC', official: true,
+      url: /^https:\/\//.test(url) ? url : 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=' + encodeURIComponent(symbol) });
+  }
+  items.sort((a, b) => b.datetime - a.datetime);
+  return { status: 200, data: { items: items.slice(0, 20), coverage: 'sec' }, source: 'finnhub',
+    cache: ins.cache === 'hit' && fil.cache === 'hit' ? 'hit' : 'miss', ttl: TTL.filings };
+}
+
 // Finnhub's free earnings calendar lists only upcoming reports. When it has no past report
 // with a result, FMP's earnings history (cached 12 hours) adds the recent ones.
 async function fetchEarningsCalendar(params, ctx) {
@@ -433,8 +490,9 @@ const users = new Map(); // token -> { ok, until }
 export function publicRequest(cap, params, extraSymbols) {
   const open = new Set(PUBLIC_SYMBOLS.concat(String(extraSymbols || '').toUpperCase().split(',').map(x => x.trim()).filter(Boolean)));
   if (cap === 'marketNewsRO' || cap === 'marketNewsEU' || cap === 'marketNewsUS') return true;
-  // Press stories (Romanian, German, British) cost no quota.
+  // Press stories (Romanian, German, British) and the Romanian filings cost no quota.
   if (cap === 'news') return /\.(RO|DE|L)$/.test(params.symbol);
+  if (cap === 'filings') return isLocal(params.symbol);
   if (cap === 'quotes') return params.symbols.length <= 8 && params.symbols.every(t => open.has(t));
   if (cap === 'quote') return open.has(params.symbol);
   return false;
@@ -480,6 +538,7 @@ export async function handleMarketRequest(request, options = {}) {
   const r = cap === 'quotes' ? await fetchQuotes(parsed.params.symbols, ctx)
     : cap === 'earningsCalendar' ? await fetchEarningsCalendar(parsed.params, ctx)
     : cap === 'news' && !isLocal(parsed.params.symbol) ? await fetchUsNews(parsed.params, ctx)
+    : cap === 'filings' ? await fetchFilings(parsed.params, ctx)
     : await fetchCapability(cap, parsed.params, ctx);
   const flush = maybeFlush(ctx);
   if (flush && options.waitUntil) options.waitUntil(flush);

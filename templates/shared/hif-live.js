@@ -14,7 +14,7 @@ if (window.HIFLive) return;
 const DIRECT = 'https://finnhub.io/api/v1';
 const PROXY = '/api/finnhub';
 const cache = new Map();
-const TTL = { ronews: 600000, profile: 24 * 3600000, quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000, edates: 6 * 3600000 };
+const TTL = { ronews: 600000, profile: 24 * 3600000, quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000, edates: 6 * 3600000, filings: 1800000 };
 let proxyState = 'unknown'; // 'unknown' | 'yes' | 'no'
 let batchQuotes = true;      // false once the proxy has turned /quotes down (an older server)
 
@@ -271,6 +271,19 @@ function earningsText(ed, u){
   return out;
 }
 
+// The last 30 days of filings and insider dealings (the gateway's /filings):
+//   { items: [{ type:'insider'|'filing', datetime, title, url, source, official, act, who, shares, value, form }],
+//     coverage: 'issuer'|'press'|'sec'|'none' }
+// null when it couldn't be read (no proxy, signed out for a US ticker, an error).
+async function filings(symbol){
+  if (proxyState === 'no') return null;
+  const hit = fresh('filings', symbol); if (hit) return hit;
+  let j;
+  try { j = await callProxy('/filings', { symbol: symbol }); } catch (e) { return null; }
+  if (!j || !Array.isArray(j.items)) return null;
+  return put('filings', symbol, { items: j.items.filter(x => x && (x.type === 'insider' || x.type === 'filing') && x.datetime), coverage: j.coverage || 'none' });
+}
+
 // { buyPct, detail } from the most recent recommendation period, or null when the plan blocks it.
 async function recommendation(symbol, token){
   if (!available(token)) return null;
@@ -351,7 +364,7 @@ function translatedUrl(url, lang){
   return 'https://translate.google.com/translate?sl=auto&tl=' + tl + '&hl=' + tl + '&u=' + encodeURIComponent(url);
 }
 
-window.HIFLive = { quote, quotes, roNews, euNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
+window.HIFLive = { filings, quote, quotes, roNews, euNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();
