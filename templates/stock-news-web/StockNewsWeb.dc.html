@@ -1051,6 +1051,21 @@
 </div>
 </sc-if>
 
+<sc-if value="{{ isPending }}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-modal="true" aria-labelledby="pending-title" style="position:fixed;inset:0;z-index:50;background:var(--s-bg);display:flex;align-items:center;justify-content:center;padding:40px 16px">
+<div style="width:100%;max-width:420px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px;letter-spacing:-0.02em">{{ brand }}</div>
+<div id="pending-title" style="font-family:var(--font-heading);font-weight:800;font-size:40px;letter-spacing:-0.035em;line-height:1;margin-top:24px;text-wrap:balance">{{ ui.pendingTitle }}</div>
+<div style="height:2px;background:var(--color-accent);margin:16px 0 16px;width:56px"></div>
+<div style="font-size:14px;color:var(--s-mute);line-height:1.5;text-wrap:pretty">{{ ui.pendingNote }}</div>
+<div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:22px">{{ ui.emailLabel }}</div>
+<div style="font-size:15px;margin-top:5px;overflow-wrap:anywhere">{{ pendingEmail }}</div>
+<button onClick="{{ pendingCheck }}" disabled="{{ pendingBusy }}" style="width:100%;min-height:50px;margin-top:22px;text-align:left;padding:0 16px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.pendingCheck }}</button>
+<button onClick="{{ pendingSignOut }}" style="width:100%;min-height:44px;margin-top:9px;text-align:left;padding:0 16px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.signOut }}</button>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
 <div style="position:fixed;left:24px;bottom:24px;padding:13px 16px;background:var(--s-ink);color:var(--s-bg);animation:hfin 0.2s ease-out">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.02em">{{ toast }}</div>
@@ -1302,7 +1317,7 @@ class Component extends DCLogic {
     // Wait for the saved record (and its accountId) before deciding whether this is a new account.
     if (!this.restoreLate()) { pendingAuth = { sess }; return; }
     pendingAuth = null;
-    if (!sess) { this._wlUser = null; this._wlReady = false; this._hdReady = false; this.setState({ holdServer:false, session:null, locked:false, serverPlan:null, devicePush:'unavailable' }); return; }
+    if (!sess) { this._wlUser = null; this._wlReady = false; this._hdReady = false; this.setState({ holdServer:false, session:null, locked:false, serverPlan:null, pending:false, devicePush:'unavailable' }); return; }
     const fresh = this.state.accountId !== sess.userId;
     // Signing in (rather than a token refresh) lands on the portfolio.
     const landing = !this.state.session ? { screen:'portfolio' } : {};
@@ -1418,8 +1433,8 @@ class Component extends DCLogic {
         window.HIFAuth.signOut(false);
         return this.setState({ authOpen:true, authMode:'in', authErr:this.copy.authErrSuspended || 'This account is suspended.' });
       }
-      this.setState({ serverPlan:p.plan });
-    }).catch(() => {});
+      this.setState({ serverPlan:p.plan, pending: p.approved === false, pendingBusy:false });
+    }).catch(() => this.setState({ pendingBusy:false }));
   }
   authMessage(code) {
     const u = this.copy;
@@ -2828,7 +2843,12 @@ class Component extends DCLogic {
       isLedger: screen === 'ledger',
       isDetail: screen === 'detail', isPaywall: screen === 'paywall', isAccount: screen === 'account',
       isSecurity: screen === 'security',
-      isAuth: !signedIn, isOnboard: signedIn && !s.onboarded, isLocked: signedIn && !!s.locked,
+      isAuth: !signedIn, isOnboard: signedIn && !s.onboarded && !s.pending, isLocked: signedIn && !!s.locked,
+      // A new account the owner hasn't approved yet (supabase/approval.sql): only this screen.
+      isPending: signedIn && !!s.pending && !s.locked, pendingEmail: (s.session && s.session.email) || '',
+      pendingBusy: !!s.pendingBusy,
+      pendingCheck: () => { this.setState({ pendingBusy:true }); this.loadPlan(); },
+      pendingSignOut: () => { this.logEvent('signout'); if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, pending:false, locked:false, authPw:'' }); },
       authEmail: s.authEmail || '', authPw: s.authPw || '', authErr: s.authErr || '',
       onAuthEmail: e => this.setState({ authEmail:e.target.value, authErr:'', authBad:null }),
       onAuthName: e => this.setState({ authName:e.target.value, authErr:'', authBad:null }),
