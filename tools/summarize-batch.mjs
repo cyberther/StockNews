@@ -16,7 +16,7 @@
 //   LMSTUDIO_THREADS  auto (default: 4, or 3 during a remote desktop session) | a number | 0 = LM Studio's choice
 //   SUMMARY_LANG    default ro,en,de (comma-separated, in order of preference)
 //   BATCH_LIMIT     default 10 summaries a run
-//   DIGEST_LIMIT    default 1 digest of the previous day per run and language (0 = none)
+//   DIGEST_LIMIT    default 3 digests of the previous day per run and language (0 = none)
 //   MAX_AGE_HOURS   default 24
 //   READ_ARTICLES   default 1: summarize the whole article; 0 = headline and snippet only
 //
@@ -52,7 +52,7 @@ const cfg = {
   threads: env.LMSTUDIO_THREADS,
   langs: [...new Set(String(env.SUMMARY_LANG || 'ro,en,de').toLowerCase().split(/[\s,]+/).filter(l => ['ro', 'en', 'de'].includes(l)))],
   limit: Math.max(1, Math.min(Number(env.BATCH_LIMIT) || 10, 100)),
-  digests: Math.max(0, Math.min(env.DIGEST_LIMIT === undefined ? 1 : Number(env.DIGEST_LIMIT) || 0, 20)),
+  digests: Math.max(0, Math.min(env.DIGEST_LIMIT === undefined ? 3 : Number(env.DIGEST_LIMIT) || 0, 20)),
   readArticles: env.READ_ARTICLES !== '0',
   hours: Math.max(1, Math.min(Number(env.MAX_AGE_HOURS) || 24, 168))
 };
@@ -503,7 +503,7 @@ export const DIGEST_SYSTEM = [
   '',
   'Rules:',
   '- Use ONLY information in the stories. Do not add figures, causes, opinions or advice.',
-  '- 3 to 8 bullet points, one per distinct fact or event, the most important first (results, guidance, deals, ' +
+  '- 1 to 8 bullet points (as many as there are distinct facts; one story may need only one), one per distinct fact or event, the most important first (results, guidance, deals, ' +
     'contracts, regulators, analyst rating changes, big price moves). Several stories about the same event make ONE ' +
     'bullet. Leave out stories that say nothing new.',
   '- Stories marked "opinion" in their brackets come from sites that mostly publish commentary. The facts they ' +
@@ -533,9 +533,9 @@ export function cleanDigest(text, lang = 'ro') {
     .filter(l => l.length >= 15 && !NO_CONTENT.test(l))
     .slice(0, 8).map(l => '• ' + trimSentences(l, 360)).join('\n');
 }
-export function digestLooksWrong(d, lang) {
+export function digestLooksWrong(d, lang, stories = 2) {
   const bullets = d ? d.split('\n') : [];
-  if (bullets.length < 2) return 'too few bullets';
+  if (bullets.length < Math.min(2, stories)) return 'too few bullets';
   if (d.length > 3000) return 'too long';
   if (lang !== 'en' && (d.match(EN_WORDS) || []).length >= 4 + bullets.length * 2) return 'English words';
   return '';
@@ -552,7 +552,7 @@ async function writeDigest(row, lang) {
     if (res.status !== 200) throw new Error(`model: ${res.status} ${res.body.slice(0, 200)}`);
     const d = JSON.parse(res.body);
     text = cleanDigest(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content, lang);
-    why = digestLooksWrong(text, lang);
+    why = digestLooksWrong(text, lang, row.stories.length);
     if (!why) return { text, why: '' };
     log('retry digest', row.ticker, lang, '-', why);
   }

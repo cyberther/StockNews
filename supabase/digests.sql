@@ -42,8 +42,9 @@ end $$;
 -- Tickers still without a digest of that day in p_lang, the busiest first, each with its
 -- stories (the same headline once): headline, source, time, whether it is an opinion piece,
 -- and the story's AI summary in p_lang when there is one, else the source's snippet.
--- Which tickers: everyone's watchlists and positions, the US Market tab's ten names; for a
--- language other than Romanian, as for the summaries, only where an account reads it.
+-- Which tickers: every ticker with a story that day (followed ones, the US Market names and
+-- the press tabs' companies); for a language other than Romanian, as for the summaries, only
+-- where an account reads it.
 -- p_ticker asks for one ticker (to try it out); it is still only one the rules allow.
 create or replace function public.digests_pending(p_secret text, p_lang text default 'ro', p_limit integer default 1, p_ticker text default null)
 returns table (ticker text, day date, stories jsonb)
@@ -57,9 +58,7 @@ begin
   return query
     with wanted as (
       select distinct x.t from (
-        select w2.ticker t from public.watchlist w2
-        union select h.ticker from public.holdings h
-        union select unnest(array['NVDA','AAPL','MSFT','GOOGL','AMZN','META','AVGO','TSLA','TSM','JPM'])) x
+        select s0.ticker t from public.stories s0 where s0.published_at >= w.t0 and s0.published_at < w.t1) x
       where (p_ticker is null or x.t = upper(p_ticker))
         and (p_lang = 'ro' or exists (
           select 1 from auth.users u
@@ -83,7 +82,7 @@ begin
                      order by ds.published_at)
     from day_stories ds
     group by ds.ticker
-    having count(*) >= 2
+    having count(*) >= 1
     order by count(*) desc, ds.ticker
     limit least(greatest(coalesce(p_limit, 1), 1), 20);
 end $$;
