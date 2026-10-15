@@ -18,6 +18,8 @@
 //   BATCH_LIMIT     default 10 summaries a run
 //   DIGEST_LIMIT    default 3 digests of the previous day per run and language (0 = none)
 //   MAX_AGE_HOURS   default 24
+//   FILINGS_LIMIT   default 1 filing whose figures are read per run (0 = none); FILINGS_NIGHT_LIMIT
+//                   default 8 per run between 00:00 and 07:00 Bucharest time (tools/filings-extract.mjs)
 //   READ_ARTICLES   default 1: summarize the whole article; 0 = headline and snippet only
 //
 // The summary is written from the whole article when the publisher allows it: the job
@@ -34,6 +36,7 @@ import zlib from 'node:zlib';
 import dns from 'node:dns';
 import net from 'node:net';
 import { ensureModel, pickThreads } from './lmstudio-model.mjs';
+import { runFilings } from './filings-extract.mjs';
 
 const ENV_FILE = join(homedir(), '.config/market-pulse/summarizer.env');
 if (existsSync(ENV_FILE)) {
@@ -53,6 +56,9 @@ const cfg = {
   langs: [...new Set(String(env.SUMMARY_LANG || 'ro,en,de').toLowerCase().split(/[\s,]+/).filter(l => ['ro', 'en', 'de'].includes(l)))],
   limit: Math.max(1, Math.min(Number(env.BATCH_LIMIT) || 10, 100)),
   digests: Math.max(0, Math.min(env.DIGEST_LIMIT === undefined ? 3 : Number(env.DIGEST_LIMIT) || 0, 20)),
+  // Filings whose figures the model reads per run (tools/filings-extract.mjs).
+  filings: Math.max(0, Math.min(env.FILINGS_LIMIT === undefined ? 1 : Number(env.FILINGS_LIMIT) || 0, 20)),
+  filingsNight: Math.max(0, Math.min(Number(env.FILINGS_NIGHT_LIMIT) || 8, 50)),
   readArticles: env.READ_ARTICLES !== '0',
   hours: Math.max(1, Math.min(Number(env.MAX_AGE_HOURS) || 24, 168))
 };
@@ -142,24 +148,25 @@ function publicLookup(host, opts, cb) {
 
 // GET with redirects, decompression and a size cap. node:https rather than fetch, so large
 // response headers (Yahoo sends tens of kilobytes of cookies) don't fail the request.
-export function httpGet(url, { timeout = 15000, redirects = 5, accept = 'text/html' } = {}) {
+// binary: the body as a Buffer (PDFs); ua and maxBytes for the filings reader.
+export function httpGet(url, { timeout = 15000, redirects = 5, accept = 'text/html', ua = UA, binary = false, maxBytes = MAX_PAGE } = {}) {
   return new Promise((resolve, reject) => {
     const u = new URL(url);
     if (u.protocol !== 'http:' && u.protocol !== 'https:') return reject(new Error('not http'));
     if (u.port && u.port !== '80' && u.port !== '443') return reject(new Error('port ' + u.port));
     if (net.isIP(u.hostname.replace(/^\[|\]$/g, '')) && !isPublicAddress(u.hostname.replace(/^\[|\]$/g, ''))) return reject(new Error('blocked address'));
     const lib = u.protocol === 'http:' ? http : https;
-    const req = lib.get(u, { lookup: publicLookup, headers: { 'user-agent': UA, accept, 'accept-encoding': 'gzip, deflate, br', 'accept-language': 'en, ro;q=0.8' }, maxHeaderSize: 256 * 1024, timeout }, res => {
+    const req = lib.get(u, { lookup: publicLookup, headers: { 'user-agent': ua, accept, 'accept-encoding': 'gzip, deflate, br', 'accept-language': 'en, ro;q=0.8' }, maxHeaderSize: 256 * 1024, insecureHTTPParser: true, timeout }, res => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location && redirects > 0) {
         res.resume();
-        return resolve(httpGet(new URL(res.headers.location, u).toString(), { timeout, redirects: redirects - 1, accept }));
+        return resolve(httpGet(new URL(res.headers.location, u).toString(), { timeout, redirects: redirects - 1, accept, ua, binary, maxBytes }));
       }
       const enc = String(res.headers['content-encoding'] || '');
       const stream = enc.includes('br') ? res.pipe(zlib.createBrotliDecompress()) : enc.includes('gzip') ? res.pipe(zlib.createGunzip())
         : enc.includes('deflate') ? res.pipe(zlib.createInflate()) : res;
       const chunks = []; let size = 0;
-      stream.on('data', c => { size += c.length; if (size > MAX_PAGE) { req.destroy(); reject(new Error('page too large')); } else chunks.push(c); });
-      stream.on('end', () => resolve({ status: res.statusCode, url: u.toString(), type: String(res.headers['content-type'] || ''), body: Buffer.concat(chunks).toString('utf8') }));
+      stream.on('data', c => { size += c.length; if (size > maxBytes) { req.destroy(); reject(new Error('page too large')); } else chunks.push(c); });
+      stream.on('end', () => resolve({ status: res.statusCode, url: u.toString(), type: String(res.headers['content-type'] || ''), body: binary ? Buffer.concat(chunks) : Buffer.concat(chunks).toString('utf8') }));
       stream.on('error', reject);
     });
     req.on('timeout', () => req.destroy(new Error('timeout')));
@@ -194,14 +201,14 @@ export function robotsAllow(txt, path, agent = 'marketpulsesummarizer') {
   }
   return !best || best.allow;
 }
-async function allowedByRobots(url) {
+async function allowedByRobots(url, agent) {
   const u = new URL(url);
   if (!robotsCache.has(u.host)) {
     let txt = '';
     try { const r = await httpGet(`${u.protocol}//${u.host}/robots.txt`, { timeout: 8000, accept: 'text/plain' }); if (r.status === 200) txt = r.body; } catch {}
     robotsCache.set(u.host, txt);
   }
-  return robotsAllow(robotsCache.get(u.host), u.pathname + u.search);
+  return robotsAllow(robotsCache.get(u.host), u.pathname + u.search, agent);
 }
 
 const ENT = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', hellip: '…', ndash: '–', mdash: '—', rsquo: '’', lsquo: '‘', ldquo: '“', rdquo: '”', bdquo: '„' };
@@ -558,6 +565,12 @@ async function writeDigest(row, lang) {
   }
   return { text, why };
 }
+// Up to FILINGS_LIMIT filings' figures this run.
+const FILINGS_UA = 'Mozilla/5.0 (compatible; MarketPulseFilings/1.0; +https://github.com/cyberther/StockNews)';
+// At night (00-07 in Bucharest) there is little news to summarize: more filings per run.
+const nightHour = () => Number(new Date().toLocaleString('en-GB', { hour: '2-digit', hour12: false, timeZone: 'Europe/Bucharest' })) < 7;
+const filingsRun = () => runFilings(cfg.filings && nightHour() ? Math.max(cfg.filings, cfg.filingsNight) : cfg.filings, { cfg, rpc, postJson, httpGet, log, ua: FILINGS_UA,
+  allowed: url => allowedByRobots(url, 'marketpulsefilings') });
 // Up to DIGEST_LIMIT digests per language this run (or the one ticker asked for).
 async function runDigests(onlyTicker) {
   const n = onlyTicker ? 1 : cfg.digests;
@@ -641,6 +654,9 @@ async function main() {
   // node tools/summarize-batch.mjs --digest ASTS: that ticker's digest of the previous day, nothing else.
   const di = process.argv.indexOf('--digest');
   if (di > 0) return runDigests(String(process.argv[di + 1] || '').toUpperCase());
+  // node tools/summarize-batch.mjs --filings 3: that many filings' figures, nothing else.
+  const fi = process.argv.indexOf('--filings');
+  if (fi > 0) { cfg.filings = Math.max(1, Math.min(Number(process.argv[fi + 1]) || 1, 20)); return filingsRun(); }
   // What each language still needs, in the server's priority order; then one queue in which
   // a story's languages sit together, in the order of its best position in any list.
   const rank = new Map(), byId = new Map(), rejected = loadRejected();
@@ -657,7 +673,7 @@ async function main() {
   const queue = dedupeQueue([...rank.entries()].sort((a, b) => a[1].at - b[1].at)
     .flatMap(([id, e]) => cfg.langs.filter(l => e.langs.includes(l)).map(lang => ({ story: byId.get(id), lang }))))
     .slice(0, cfg.limit);
-  if (!queue.length) { log('no stories waiting'); return runDigests(); }
+  if (!queue.length) { log('no stories waiting'); await runDigests(); return filingsRun(); }
   log(`${queue.length} summaries to write (${cfg.langs.join(', ')}) with ${cfg.model}`);
 
   let saved = 0;
@@ -687,6 +703,7 @@ async function main() {
   }
   log(`done: ${saved} of ${queue.length} saved`);
   await runDigests();
+  await filingsRun();
 }
 
 // The LM Studio SDK keeps a socket open, so the job exits explicitly when it is done.
