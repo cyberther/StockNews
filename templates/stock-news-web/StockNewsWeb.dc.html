@@ -283,7 +283,7 @@
 </sc-if>
 </sc-if>
 <sc-if value="{{ tabResearch }}" hint-placeholder-val="{{ false }}">
-<div style="display:grid;grid-template-columns:1fr;gap:1px;background:var(--s-rule);border-top:1px solid var(--s-rule);margin-top:14px">
+<div style="display:grid;grid-template-columns:minmax(0,1fr);gap:1px;background:var(--s-rule);border-top:1px solid var(--s-rule);margin-top:14px">
 <div style="background:var(--s-bg);padding:16px 18px">
 <div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.calendarTitle }}</div>
 <sc-for list="{{ calRows }}" as="e" hint-placeholder-count="3">
