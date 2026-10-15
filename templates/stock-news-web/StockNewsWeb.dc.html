@@ -73,6 +73,7 @@
 <div onClick="{{ closeGear }}" style="position:fixed;inset:0;z-index:49"></div>
 <div role="menu" aria-label="{{ ui.settingsAria }}" style="position:fixed;left:14px;width:184px;bottom:66px;z-index:50;background:var(--s-bg);border:1px solid var(--s-rule);box-shadow:0 14px 32px rgba(0,0,0,0.3)">
 <button role="menuitem" onClick="{{ gearAccount }}" style-hover="background:var(--s-panel)" style="display:flex;width:100%;align-items:center;min-height:44px;padding:0 14px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;text-align:left;color:var(--s-ink)">{{ ui.account }}</button>
+<sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}"><button role="menuitem" onClick="{{ gearAdmin }}" style-hover="background:var(--s-panel)" style="display:flex;width:100%;align-items:center;gap:8px;min-height:44px;padding:0 14px;background:transparent;border:0;border-top:1px solid var(--s-rule);cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;text-align:left;color:var(--s-ink)"><span style="flex:1">{{ ui.adminTitle }}</span><sc-if value="{{ adminHasBadge }}" hint-placeholder-val="{{ false }}"><span style="min-width:20px;height:20px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;background:var(--color-accent);color:var(--s-on-accent);font-size:11px;letter-spacing:0">{{ adminBadge }}</span></sc-if></button></sc-if>
 <button role="menuitem" onClick="{{ gearSignOut }}" style-hover="background:var(--s-panel)" style="display:flex;width:100%;align-items:center;min-height:44px;padding:0 14px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;text-align:left;border-top:1px solid var(--s-rule);color:var(--color-accent)">{{ ui.signOut }}</button>
 </div>
 </sc-if>
@@ -91,6 +92,7 @@
 <div class="app-more" onClick="{{ closeMore }}" style="position:fixed;inset:0;z-index:39;background:rgba(0,0,0,0.5)">
 <div onClick="{{ stopProp }}" role="menu" style="position:absolute;left:0;right:0;bottom:calc(57px + env(safe-area-inset-bottom));background:var(--s-bg);border-top:1px solid var(--s-rule)">
 <button role="menuitem" onClick="{{ goAccountMore }}" style="display:flex;width:100%;align-items:center;min-height:52px;padding:0 20px;background:transparent;border:0;border-bottom:1px solid var(--s-rule);cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-ink)">{{ ui.account }}</button>
+<sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}"><button role="menuitem" onClick="{{ gearAdmin }}" style="display:flex;width:100%;align-items:center;gap:8px;min-height:52px;padding:0 20px;background:transparent;border:0;border-bottom:1px solid var(--s-rule);cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-ink)"><span style="flex:1;text-align:left">{{ ui.adminTitle }}</span><sc-if value="{{ adminHasBadge }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;background:var(--color-accent);color:var(--s-on-accent);font-size:12px;letter-spacing:0">{{ adminBadge }}</span></sc-if></button></sc-if>
 <button role="menuitem" onClick="{{ gearSignOut }}" style="display:flex;width:100%;align-items:center;min-height:52px;padding:0 20px;background:transparent;border:0;border-bottom:1px solid var(--s-rule);cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent)">{{ ui.signOut }}</button>
 <div style="padding:12px 20px 16px;display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ accountName }}</div><div style="font-size:12px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ accountEmail }}</div></div></div>
 </div>
@@ -755,6 +757,61 @@
 </div>
 </sc-if>
 
+<sc-if value="{{ isAdminScreen }}" hint-placeholder-val="{{ false }}">
+<div data-m="fade" style="max-width:820px;padding:22px var(--gx) 60px">
+<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+<div style="flex:1;min-width:0;font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.adminTitle }}</div>
+<button onClick="{{ adminRefresh }}" disabled="{{ adminBusy }}" style-hover="border-color:var(--color-accent)" style="min-height:38px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.adminRefresh }}</button>
+</div>
+<div style="font-size:13px;color:var(--s-mute);margin-top:10px;max-width:60ch;text-wrap:pretty">{{ ui.adminNote }}</div>
+<sc-if value="{{ adminErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="margin-top:12px;font-size:13px;color:var(--color-accent)">{{ adminErr }}</div></sc-if>
+
+<div style="margin-top:24px;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ adminWaitingTitle }}</div>
+<div style="margin-top:10px;border-top:1px solid var(--s-rule)">
+<sc-for list="{{ adminWaiting }}" as="a" hint-placeholder-count="2">
+<div style="padding:14px 0;border-bottom:1px solid var(--s-rule)">
+<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+<div style="flex:1;min-width:220px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:16px;overflow-wrap:anywhere">{{ a.name }}</div>
+<div style="font-size:14px;margin-top:2px;overflow-wrap:anywhere">{{ a.email }}</div>
+<div style="font-size:12px;color:var(--s-mute);margin-top:6px;line-height:1.5">{{ a.facts }}</div>
+</div>
+<sc-if value="{{ a.notConfirming }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button onClick="{{ a.approve }}" disabled="{{ adminBusy }}" style="min-height:42px;padding:0 16px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.adminApprove }}</button>
+<button onClick="{{ a.reject }}" disabled="{{ adminBusy }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="min-height:42px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.adminReject }}</button>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{ a.confirming }}" hint-placeholder-val="{{ false }}">
+<div role="alertdialog" aria-label="{{ a.rejectAsk }}" style="margin-top:12px;padding:12px 14px;border:1px solid var(--color-accent)">
+<div style="font-size:13px;font-weight:600">{{ a.rejectAsk }}</div>
+<div style="font-size:12px;color:var(--s-mute);margin-top:4px">{{ ui.adminRejectNote }}</div>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+<button onClick="{{ a.rejectYes }}" disabled="{{ adminBusy }}" style="min-height:40px;padding:0 14px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.adminRejectYes }}</button>
+<button onClick="{{ a.rejectNo }}" style="min-height:40px;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaCancel }}</button>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+<sc-if value="{{ adminNoWaiting }}" hint-placeholder-val="{{ false }}"><div style="padding:14px 0;font-size:13px;color:var(--s-mute)">{{ ui.adminNone }}</div></sc-if>
+</div>
+
+<sc-if value="{{ adminHasRecent }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:28px;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.adminRecent }}</div>
+<div style="margin-top:10px;border-top:1px solid var(--s-rule)">
+<sc-for list="{{ adminRecent }}" as="r" hint-placeholder-count="2">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:11px 0;border-bottom:1px solid var(--s-rule);align-items:baseline">
+<span style="min-width:0"><span style="font-weight:600">{{ r.name }}</span> <span style="color:var(--s-mute);font-size:13px;overflow-wrap:anywhere">{{ r.email }}</span></span>
+<span style="font-size:12px;color:var(--s-mute);white-space:nowrap">{{ r.when }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
 <sc-if value="{{ isSecurity }}" hint-placeholder-val="{{ false }}">
 <div data-m="fade" style="max-width:820px;padding:22px var(--gx) 60px">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.account }}</div>
@@ -1317,7 +1374,7 @@ class Component extends DCLogic {
     // Wait for the saved record (and its accountId) before deciding whether this is a new account.
     if (!this.restoreLate()) { pendingAuth = { sess }; return; }
     pendingAuth = null;
-    if (!sess) { this._wlUser = null; this._wlReady = false; this._hdReady = false; this.setState({ holdServer:false, session:null, locked:false, serverPlan:null, pending:false, devicePush:'unavailable' }); return; }
+    if (!sess) { this._wlUser = null; this._wlReady = false; this._hdReady = false; this.setState({ holdServer:false, session:null, locked:false, serverPlan:null, pending:false, isAdmin:false, adminRows:null, devicePush:'unavailable' }); return; }
     const fresh = this.state.accountId !== sess.userId;
     // Signing in (rather than a token refresh) lands on the portfolio.
     const landing = !this.state.session ? { screen:'portfolio' } : {};
@@ -1433,8 +1490,29 @@ class Component extends DCLogic {
         window.HIFAuth.signOut(false);
         return this.setState({ authOpen:true, authMode:'in', authErr:this.copy.authErrSuspended || 'This account is suspended.' });
       }
-      this.setState({ serverPlan:p.plan, pending: p.approved === false, pendingBusy:false });
+      this.setState({ serverPlan:p.plan, pending: p.approved === false, pendingBusy:false, isAdmin: !!p.admin });
+      if (p.admin) {
+        this.loadAdmin();
+        // A tapped "new account" alert opens …#admin.
+        if (typeof location !== 'undefined' && location.hash === '#admin') this.go('admin');
+      }
     }).catch(() => this.setState({ pendingBusy:false }));
+  }
+  // Administration (supabase/approval.sql): the requests; the server checks the caller is an admin.
+  loadAdmin() {
+    const A = window.HIFAuth;
+    if (!A || !A.rest) return;
+    this.setState({ adminBusy:true });
+    A.rest('rpc/admin_requests', { method:'POST', body:{} })
+      .then(r => this.setState({ adminRows: r.ok && Array.isArray(r.body) ? r.body : [], adminErr: r.ok ? '' : (this.copy.adminErr || 'Could not load'), adminBusy:false }))
+      .catch(() => this.setState({ adminErr: this.copy.adminErr || 'Could not load', adminBusy:false }));
+  }
+  adminAct(kind, userId) {
+    const A = window.HIFAuth;
+    this.setState({ adminBusy:true, adminConfirm:'' });
+    A.rest('rpc/' + (kind === 'approve' ? 'admin_approve' : 'admin_reject'), { method:'POST', body:{ p_user:userId } })
+      .then(r => { this.flash(r.ok && r.body ? (kind === 'approve' ? this.copy.adminApproved : this.copy.adminRejected) : (this.copy.adminErr || 'Failed')); this.loadAdmin(); })
+      .catch(() => { this.flash(this.copy.adminErr || 'Failed'); this.loadAdmin(); });
   }
   authMessage(code) {
     const u = this.copy;
@@ -2272,6 +2350,36 @@ class Component extends DCLogic {
     return v;
   }
   renderVals() { return this.withTickerLabels(this.renderValsRaw()); }
+  // The Administration screen's values: requests waiting, then the last 30 days' approvals.
+  adminVals(u) {
+    const s = this.state, rows = s.adminRows || [], loc = this.appLocale;
+    const ago = iso => {
+      const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
+      return m < 60 ? (u.adminMinAgo || '{n} min ago').replace('{n}', m) : m < 2880 ? (u.adminHAgo || '{n} h ago').replace('{n}', Math.round(m / 60))
+        : new Date(iso).toLocaleDateString(loc, { day:'numeric', month:'short', year:'numeric' });
+    };
+    const prov = p => p === 'google' ? 'Google' : p === 'apple' ? 'Apple' : (u.adminEmailSignup || 'Email');
+    const waiting = rows.filter(r => !r.approved).map(r => ({
+      name: r.name || u.adminNoName || '—', email: r.email,
+      facts: [prov(r.provider), r.email_confirmed ? u.adminConfirmed : u.adminUnconfirmed,
+        (u.adminRequested || 'requested {t}').replace('{t}', ago(r.requested_at)),
+        r.phone ? (u.phoneTitle || 'Phone') + ' ' + r.phone : '', r.content_lang ? (u.adminLang || 'Language') + ' ' + String(r.content_lang).toUpperCase() : '',
+        r.last_sign_in ? (u.adminLastIn || 'last sign-in {t}').replace('{t}', ago(r.last_sign_in)) : ''].filter(Boolean).join(' · '),
+      unconfirmed: !r.email_confirmed,
+      confirming: s.adminConfirm === r.user_id, notConfirming: s.adminConfirm !== r.user_id,
+      approve: () => this.adminAct('approve', r.user_id),
+      reject: () => this.setState({ adminConfirm: r.user_id }),
+      rejectYes: () => this.adminAct('reject', r.user_id),
+      rejectNo: () => this.setState({ adminConfirm:'' }),
+      rejectAsk: (u.adminRejectAsk || 'Delete {e}\u2019s account for good?').replace('{e}', r.email)
+    }));
+    const recent = rows.filter(r => r.approved).map(r => ({ name: r.name || u.adminNoName || '—', email: r.email, when: r.approved_at ? ago(r.approved_at) : '' }));
+    return { adminWaiting: waiting, adminHasWaiting: waiting.length > 0, adminNoWaiting: !waiting.length && !!s.adminRows,
+      adminRecent: recent, adminHasRecent: recent.length > 0, adminCount: waiting.length, adminBadge: waiting.length ? String(waiting.length) : '',
+      adminHasBadge: !!s.isAdmin && waiting.length > 0, isAdmin: !!s.isAdmin, adminBusy: !!s.adminBusy, adminErr: s.adminErr || '',
+      adminWaitingTitle: (u.adminWaiting || 'Waiting · {n}').replace('{n}', waiting.length),
+      adminRefresh: () => this.loadAdmin(), gearAdmin: () => { this.setState({ gearOpen:false, moreOpen:false }); this.go('admin'); this.loadAdmin(); } };
+  }
   renderValsRaw() {
     const H = this.data;
     if (!H || !this.sharedReady()) return {};
@@ -2279,7 +2387,7 @@ class Component extends DCLogic {
     window.HIF_LOCALE = this.appLocale;
     const NEWS = H.NEWS, FOLLOWS = H.FOLLOWS, UNIVERSE = H.UNIVERSE, UI = H.UI;
     const EVENTS = H.EVENTS || {}, SIGNALS = H.SIGNALS || {};
-    const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen === 'search' ? 'watchlist' : s.screen;
+    const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen === 'search' ? 'watchlist' : s.screen === 'admin' && !s.isAdmin ? 'portfolio' : s.screen;
     const H_ALL = !!(window.HIF || {}).ALL_ACCESS;
     const vw = s.vw || (typeof window !== 'undefined' && window.innerWidth) || 1440;
     const L = this.lang, A = this.appLang, u = UI[A];
@@ -2843,6 +2951,8 @@ class Component extends DCLogic {
       isLedger: screen === 'ledger',
       isDetail: screen === 'detail', isPaywall: screen === 'paywall', isAccount: screen === 'account',
       isSecurity: screen === 'security',
+      isAdminScreen: screen === 'admin' && !!s.isAdmin,
+      ...this.adminVals(u),
       isAuth: !signedIn, isOnboard: signedIn && !s.onboarded && !s.pending, isLocked: signedIn && !!s.locked,
       // A new account the owner hasn't approved yet (supabase/approval.sql): only this screen.
       isPending: signedIn && !!s.pending && !s.locked, pendingEmail: (s.session && s.session.email) || '',

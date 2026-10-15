@@ -310,7 +310,7 @@ Deno.serve(async (req) => {
     webpush.setVapidDetails(env('VAPID_SUBJECT'), env('VAPID_PUBLIC_KEY'), env('VAPID_PRIVATE_KEY'));
     const payload = JSON.stringify({ title: waiting.length === 1 ? 'Cont nou de aprobat' : `${waiting.length} conturi noi de aprobat`,
       body: waiting.map(w => w.email || '?').join(', ') + ' · Supabase → account_status → approved',
-      url: env('APP_URL') || '/', tag: 'market-pulse-signup' });
+      url: (env('APP_URL') || '/').replace(/#.*$/, '') + '#admin', tag: 'market-pulse-signup' });
     let sent = 0;
     await pool(adminSubs || [], 4, async sub => {
       try { await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload, { TTL: 86400, urgency: 'high' }); sent++; }

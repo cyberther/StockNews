@@ -6,7 +6,8 @@
 -- The background scan sends the admins a push alert for each new account
 -- (supabase/functions/scan/index.ts).
 --
--- To approve: Table Editor -> account_status -> the row with that email -> approved = true.
+-- To approve: the app's Administration screen (admins), or Table Editor -> account_status ->
+-- the row with that email -> approved = true.
 -- To make an account an admin (gets the alerts): is_admin = true.
 --
 -- Run once in the Supabase SQL editor, after server/schema.sql, push.sql, holdings.sql,
@@ -88,3 +89,77 @@ drop policy if exists "update own device" on public.push_subscriptions;
 create policy "update own device" on public.push_subscriptions for update to authenticated using (user_id = auth.uid() and public.is_approved()) with check (user_id = auth.uid());
 drop policy if exists "remove own device" on public.push_subscriptions;
 create policy "remove own device" on public.push_subscriptions for delete to authenticated using (user_id = auth.uid());
+
+-- ---------------------------------------------------------------------------------------
+-- The app's "Administration" screen (admins only): the requests, approve, reject. Every
+-- function checks is_admin() on the server; the screen only calls them.
+alter table public.account_status add column if not exists approved_at timestamptz;
+alter table public.account_status add column if not exists approved_by uuid;
+
+create or replace function public.is_admin() returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.account_status s where s.user_id = auth.uid() and s.is_admin and s.approved and not s.suspended);
+$$;
+revoke all on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to authenticated;
+
+-- Accounts waiting, then those approved in the last 30 days.
+create or replace function public.admin_requests()
+returns table (user_id uuid, email text, name text, provider text, email_confirmed boolean, phone text,
+               content_lang text, app_lang text, requested_at timestamptz, last_sign_in timestamptz,
+               approved boolean, approved_at timestamptz)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'not allowed' using errcode = '42501'; end if;
+  return query
+    select s.user_id, u.email::text, coalesce(u.raw_user_meta_data->>'full_name', u.raw_user_meta_data->>'name')::text,
+           coalesce(u.raw_app_meta_data->>'provider', 'email')::text, u.email_confirmed_at is not null,
+           nullif(u.raw_user_meta_data->>'phone_number', '')::text,
+           (u.raw_user_meta_data->>'content_lang')::text, (u.raw_user_meta_data->>'app_lang')::text,
+           s.requested_at, u.last_sign_in_at, s.approved, s.approved_at
+    from public.account_status s join auth.users u on u.id = s.user_id
+    where not s.approved or s.approved_at > now() - interval '30 days'
+    order by s.approved, s.requested_at desc
+    limit 100;
+end $$;
+
+create or replace function public.admin_approve(p_user uuid) returns integer
+language plpgsql security definer set search_path = public as $$
+declare n integer;
+begin
+  if not public.is_admin() then raise exception 'not allowed' using errcode = '42501'; end if;
+  update public.account_status set approved = true, approved_at = now(), approved_by = auth.uid(), updated_at = now()
+  where user_id = p_user and not approved;
+  get diagnostics n = row_count;
+  return n;
+end $$;
+
+-- Rejecting deletes the account (and with it everything it owns); only a waiting one.
+create or replace function public.admin_reject(p_user uuid) returns integer
+language plpgsql security definer set search_path = public as $$
+declare n integer;
+begin
+  if not public.is_admin() then raise exception 'not allowed' using errcode = '42501'; end if;
+  if not exists (select 1 from public.account_status where user_id = p_user and not approved and not is_admin) then return 0; end if;
+  delete from auth.users where id = p_user;
+  get diagnostics n = row_count;
+  return n;
+end $$;
+
+revoke all on function public.admin_requests() from public, anon;
+revoke all on function public.admin_approve(uuid) from public, anon;
+revoke all on function public.admin_reject(uuid) from public, anon;
+grant execute on function public.admin_requests() to authenticated;
+grant execute on function public.admin_approve(uuid) to authenticated;
+grant execute on function public.admin_reject(uuid) to authenticated;
+
+-- An approval made in the Table Editor gets its date too (it then shows under "approved").
+create or replace function public.account_approved_at() returns trigger
+language plpgsql set search_path = public as $$
+begin
+  if new.approved and not coalesce(old.approved, false) and new.approved_at is null then new.approved_at := now(); end if;
+  return new;
+end $$;
+drop trigger if exists account_status_approved_at on public.account_status;
+create trigger account_status_approved_at before update on public.account_status
+  for each row execute function public.account_approved_at();
