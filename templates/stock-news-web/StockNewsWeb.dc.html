@@ -66,9 +66,10 @@
 </button>
 </sc-for>
 </div>
-<div style="margin-top:auto;padding:12px 14px;border-top:1px solid var(--s-rule)">
-<div style="font-family:var(--font-heading);font-weight:800;font-size:13px">{{ accountName }}</div>
-<div style="font-size:11px;color:var(--s-mute)">{{ accountEmail }}</div>
+<div style="margin-top:auto;padding:12px 14px;border-top:1px solid var(--s-rule);display:flex;align-items:center;gap:10px">
+<div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ accountName }}</div>
+<div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ accountEmail }}</div></div>
+<button onClick="{{ goAccount }}" aria-label="{{ ui.settingsAria }}" title="{{ ui.settingsAria }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="flex:none;display:flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
 </div>
 </div>
 
@@ -86,7 +87,7 @@
 <sc-for list="{{ moreNav }}" as="n" hint-placeholder-count="3">
 <button role="menuitem" onClick="{{ n.go }}" style="display:flex;width:100%;align-items:center;min-height:52px;padding:0 20px;background:transparent;border:0;border-bottom:1px solid var(--s-rule);cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-ink)"><span>{{ n.label }}</span><span style="margin-left:auto;font-size:11px;color:var(--s-mute)">{{ n.count }}</span></button>
 </sc-for>
-<div style="padding:12px 20px 16px"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px">{{ accountName }}</div><div style="font-size:11px;color:var(--s-mute)">{{ accountEmail }}</div></div>
+<div style="padding:12px 20px 16px;display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ accountName }}</div><div style="font-size:11px;color:var(--s-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ accountEmail }}</div></div><button onClick="{{ goAccountMore }}" aria-label="{{ ui.settingsAria }}" title="{{ ui.settingsAria }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="flex:none;display:flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);cursor:pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button></div>
 </div>
 </div>
 </sc-if>
@@ -98,7 +99,7 @@
 <div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.feed }}</div>
 <div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ feedSub }}</div>
-<div style="font-size:11px;color:var(--s-faint);margin-top:2px">{{ feedTz }}</div>
+<div style="font-size:11px;color:var(--s-faint);margin-top:2px">{{ feedWindow }} · {{ feedTz }}</div>
 </div>
 <div style="margin-left:auto;display:flex;flex-wrap:wrap;gap:4px 20px">
 <button onClick="{{ setFeedFollowing }}" style="position:relative;padding:0 0 10px;background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute);white-space:nowrap">
@@ -156,11 +157,6 @@
 </div>
 <div class="m-feed-side" style="display:grid;grid-template-columns:1fr;gap:1px;background:var(--s-rule);align-self:start">
 <div style="background:var(--s-panel);padding:8px 10px;grid-column:1 / -1"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.source }}</div><div style="font-size:12px;font-weight:600;margin-top:1px">{{ item.source }}</div></div>
-<button onClick="{{ item.pin }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="grid-column:1 / -1;min-height:34px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;text-align:left;padding:0 10px;cursor:pointer;display:flex;align-items:center;gap:8px">
-<sc-if value="{{ item.pinned }}" hint-placeholder-val="{{ false }}"><span style="width:7px;height:7px;flex:none;background:var(--color-accent)"></span></sc-if>
-<sc-if value="{{ item.notPinned }}" hint-placeholder-val="{{ true }}"><span style="width:7px;height:7px;flex:none;border:1px solid var(--s-faint)"></span></sc-if>
-<span>{{ item.pinLabel }}</span>
-</button>
 <button onClick="{{ item.dismiss }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="grid-column:1 / -1;min-height:34px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;text-align:left;padding:0 10px;cursor:pointer">{{ ui.dismiss }}</button>
 </div>
 </article>
@@ -199,11 +195,6 @@
 <div style="font-size:14px;font-weight:600;margin-top:2px"><sc-if value="{{ stock.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ stock.move }}</span></sc-if><sc-if value="{{ stock.up }}" hint-placeholder-val="{{ true }}"><span>{{ stock.move }}</span></sc-if></div>
 </sc-if>
 </div>
-<button onClick="{{ pinDetail }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="display:flex;align-items:center;gap:8px;flex:none;min-height:46px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
-<sc-if value="{{ detailPinned }}" hint-placeholder-val="{{ false }}"><span style="width:8px;height:8px;flex:none;background:var(--color-accent)"></span></sc-if>
-<sc-if value="{{ detailNotPinned }}" hint-placeholder-val="{{ true }}"><span style="width:8px;height:8px;flex:none;border:1px solid var(--s-rule)"></span></sc-if>
-<span>{{ detailPinLabel }}</span>
-</button>
 <button onClick="{{ refreshTicker }}" aria-label="Refresh this ticker" style="flex:none;min-height:46px;min-width:46px;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:15px;cursor:pointer">{{ refreshLabel }}</button>
 <button onClick="{{ primaryDetailAction }}" style="flex:none;min-height:46px;padding:0 18px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:13px;cursor:pointer">{{ detailActionLabel }}</button>
 </div>
@@ -429,7 +420,23 @@
 <div style="display:flex;align-items:flex-end;gap:20px;padding:22px var(--gx) 18px;border-bottom:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.watchlist }}</div>
 <div style="margin-left:auto;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)"><sc-if value="{{ capWarn }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ capLabel }}</span></sc-if><sc-if value="{{ capOk }}" hint-placeholder-val="{{ true }}"><span>{{ capLabel }}</span></sc-if></div>
-<button onClick="{{ goSearch }}" style="flex:none;min-height:40px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:12px;cursor:pointer">{{ ui.addTicker }}</button>
+</div>
+<div style="padding:16px var(--gx) 14px;border-bottom:1px solid var(--s-rule)">
+<label style="display:block"><span style="display:block;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-bottom:6px">{{ ui.addTicker }}</span>
+<input type="search" data-wl-add="1" aria-label="{{ ui.addTicker }}" autocomplete="off" placeholder="{{ ui.screenerNote }}" value="{{ query }}" onChange="{{ onQuery }}" onKeyDown="{{ queryKey }}" style="width:min(100%,420px);min-height:44px;padding:0 14px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.04em"></label>
+<sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:12px;border:1px solid var(--s-rule);max-width:720px">
+<div style="display:flex;align-items:center;padding:8px 14px;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)"><span>{{ resultsLabel }}</span><button onClick="{{ clearQuery }}" style="margin-left:auto;min-height:28px;padding:0 8px;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.close }}</button></div>
+<sc-for list="{{ results }}" as="r" hint-placeholder-count="4">
+<div data-m="rise" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--s-rule)">
+<div role="button" tabIndex="0" aria-label="{{ r.openLabel }}" onClick="{{ r.open }}" onKeyDown="{{ r.keyOpen }}" style="flex:1;min-width:0;cursor:pointer" style-hover="color:var(--color-accent)"><div style="display:flex;align-items:center;gap:8px"><span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ r.tickerLabel }}</span><sc-if value="{{ r.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:2px 6px">{{ ui.liveReq }}</span></sc-if></div><div style="font-size:12px;color:var(--s-mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</div></div>
+<sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><button onClick="{{ r.add }}" style="flex:none;min-height:36px;padding:0 16px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.add }}</button></sc-if>
+<sc-if value="{{ r.following }}" hint-placeholder-val="{{ false }}"><span style="flex:none;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-mute)"><span aria-hidden="true" style="color:var(--color-accent)">✓</span>{{ ui.added }}</span><button onClick="{{ r.remove }}" aria-label="{{ r.removeLabel }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="flex:none;min-height:36px;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.remove }}</button></sc-if>
+</div>
+</sc-for>
+<sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 14px;border-top:1px solid var(--s-rule);font-size:13px;color:var(--s-mute)">{{ ui.noMatch }} · {{ ui.noMatchNote }}</div></sc-if>
+</div>
+</sc-if>
 </div>
 <div class="m-wl m-wl-head" style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(74px,116px) minmax(58px,92px) minmax(70px,110px) minmax(0,168px);gap:14px;padding:10px var(--gx);border-bottom:1px solid var(--s-rule);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">
 <div>{{ ui.ticker }}</div><div style="text-align:right">{{ ui.last }}</div><div style="text-align:right">{{ ui.chg }}</div><div style="text-align:right">1D</div><div style="text-align:right">{{ ui.watch }}</div>
@@ -442,12 +449,8 @@
 <div style="align-self:center">{{ row.spark }}<sc-if value="{{ row.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="display:block;text-align:right;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute)">{{ ui.noData }}</span></sc-if></div>
 <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
 <div style="display:flex;gap:6px;justify-content:flex-end">
-<button onClick="{{ row.pin }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="display:flex;align-items:center;gap:7px;min-height:30px;padding:0 9px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
-<sc-if value="{{ row.pinned }}" hint-placeholder-val="{{ false }}"><span style="width:7px;height:7px;flex:none;background:var(--color-accent)"></span></sc-if>
-<sc-if value="{{ row.notPinned }}" hint-placeholder-val="{{ true }}"><span style="width:7px;height:7px;flex:none;border:1px solid var(--s-faint)"></span></sc-if>
-<span>{{ row.pinLabel }}</span>
-</button>
-<button onClick="{{ row.togglePush }}" style="min-height:30px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ row.pushLabel }}</button>
+<button onClick="{{ row.togglePush }}" aria-pressed="{{ row.pushOn }}" style="min-height:30px;padding:0 10px;background:{{ row.pushBg }};border:1px solid {{ row.pushEdge }};color:{{ row.pushInk }};font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ row.pushLabel }}</button>
+<button onClick="{{ row.remove }}" aria-label="{{ row.removeLabel }}" title="{{ row.removeLabel }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="min-height:30px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.remove }}</button>
 </div>
 <div style="font-size:12px;color:var(--s-mute)">{{ row.latest }}</div>
 </div>
@@ -581,44 +584,6 @@
 </div>
 </sc-if>
 
-<sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
-<div data-m="fade">
-<div style="padding:22px var(--gx) 18px;border-bottom:1px solid var(--s-rule)">
-<div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.addTicker }}</div>
-<div style="font-size:12px;color:var(--s-mute);margin-top:6px">{{ ui.screenerNote }}</div>
-<input type="search" aria-label="Search ticker or company" autocomplete="off" placeholder="Symbol or company" value="{{ query }}" onChange="{{ onQuery }}" style="width:min(100%,380px);min-height:44px;margin-top:14px;padding:0 14px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;letter-spacing:0.06em">
-</div>
-<sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
-<div style="padding:12px var(--gx) 8px;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ resultsLabel }}</div>
-</sc-if>
-<sc-if value="{{ noQuery }}" hint-placeholder-val="{{ true }}">
-<div style="padding:22px var(--gx);font-size:13px;color:var(--s-mute);max-width:52ch">{{ ui.searchEmpty }}</div>
-</sc-if>
-<sc-for list="{{ results }}" as="r" hint-placeholder-count="6">
-<div data-m="rise" class="m-search" style="display:grid;grid-template-columns:1fr 140px 96px 120px;gap:20px;padding:14px var(--gx);border-top:1px solid var(--s-rule);align-items:center">
-<div role="button" tabIndex="0" aria-label="{{ r.openLabel }}" onClick="{{ r.open }}" onKeyDown="{{ r.keyOpen }}" style="min-width:0;cursor:pointer" style-hover="color:var(--color-accent)"><div style="display:flex;align-items:center;gap:8px"><span style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ r.tickerLabel }}</span><sc-if value="{{ r.liveOnly }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--s-mute);border:1px solid var(--s-rule);padding:2px 6px">{{ ui.liveReq }}</span></sc-if></div><div style="font-size:12px;color:var(--s-mute)">{{ r.name }}</div></div>
-<div style="text-align:right"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ r.stories }}</div><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stories24 }}</div></div>
-<button onClick="{{ r.pin }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="display:flex;align-items:center;gap:7px;min-height:40px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
-<sc-if value="{{ r.pinned }}" hint-placeholder-val="{{ false }}"><span style="width:7px;height:7px;flex:none;background:var(--color-accent)"></span></sc-if>
-<sc-if value="{{ r.notPinned }}" hint-placeholder-val="{{ true }}"><span style="width:7px;height:7px;flex:none;border:1px solid var(--s-faint)"></span></sc-if>
-<span>{{ r.pinLabel }}</span>
-</button>
-<button onClick="{{ r.toggle }}" style="position:relative;overflow:hidden;min-height:40px;padding:0 14px;text-align:left;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">
-<sc-if value="{{ r.notFollowing }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;inset:0;background:var(--color-accent)"></span><span style="position:relative;color:var(--s-on-accent)">{{ ui.add }}</span></sc-if>
-<sc-if value="{{ r.following }}" hint-placeholder-val="{{ false }}"><span style="color:var(--s-mute)">{{ ui.added }}</span></sc-if>
-</button>
-</div>
-</sc-for>
-<sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
-<div style="border-top:1px solid var(--s-rule);padding:34px var(--gx)">
-<div style="font-family:var(--font-heading);font-weight:800;font-size:20px;letter-spacing:-0.02em">{{ ui.noMatch }}</div>
-<div style="font-size:13px;color:var(--s-mute);margin-top:8px;max-width:52ch;text-wrap:pretty">{{ ui.noMatchNote }}</div>
-</div>
-</sc-if>
-<div style="height:32px"></div>
-</div>
-</sc-if>
-
 <sc-if value="{{ isPaywall }}" hint-placeholder-val="{{ false }}">
 <div data-m="fade" style="max-width:760px;padding:28px">
 <button onClick="{{ back }}" style="padding:4px 0;background:transparent;border:0;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.back }}</button>
@@ -645,6 +610,11 @@
 <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
 <div data-m="fade" style="max-width:820px;padding:22px var(--gx) 40px">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.account }}</div>
+<div role="tablist" style="display:flex;gap:0;margin-top:16px;border-bottom:1px solid var(--s-rule)">
+<sc-for list="{{ accountTabs }}" as="at" hint-placeholder-count="2">
+<button role="tab" aria-selected="{{ at.on }}" onClick="{{ at.go }}" style="position:relative;min-height:40px;padding:0 16px;background:transparent;border:0;color:{{ at.ink }};font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ at.label }}<span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:{{ at.bar }}"></span></button>
+</sc-for>
+</div>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--s-rule);border:1px solid var(--s-rule);margin-top:18px">
 <div style="background:var(--s-bg);padding:14px 16px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.plan }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:20px;margin-top:2px">{{ planLabel }}</div></div>
 <div style="background:var(--s-bg);padding:14px 16px"><div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.tickers }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:20px;margin-top:2px">{{ capLabel }}</div></div>
@@ -718,9 +688,14 @@
 </sc-if>
 
 <sc-if value="{{ isSecurity }}" hint-placeholder-val="{{ false }}">
-<div data-m="fade" style="padding:26px 30px 60px;max-width:860px">
-<div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.security }}</div>
-<div style="font-size:13px;color:var(--s-mute);margin-top:8px">{{ ui.securityNote }}</div>
+<div data-m="fade" style="max-width:820px;padding:22px var(--gx) 60px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.account }}</div>
+<div role="tablist" style="display:flex;gap:0;margin-top:16px;border-bottom:1px solid var(--s-rule)">
+<sc-for list="{{ accountTabs }}" as="at" hint-placeholder-count="2">
+<button role="tab" aria-selected="{{ at.on }}" onClick="{{ at.go }}" style="position:relative;min-height:40px;padding:0 16px;background:transparent;border:0;color:{{ at.ink }};font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ at.label }}<span style="position:absolute;left:0;right:0;bottom:-1px;height:2px;background:{{ at.bar }}"></span></button>
+</sc-for>
+</div>
+<div style="font-size:13px;color:var(--s-mute);margin-top:14px">{{ ui.securityNote }}</div>
 
 <div style="margin-top:22px;padding-top:20px;border-top:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.timeoutTitle }}</div>
@@ -762,42 +737,6 @@
 
 </div>
 
-<sc-if value="{{ stackHas }}" hint-placeholder-val="{{ false }}">
-<div style="flex:none;border-top:2px solid var(--s-rule);background:var(--s-bg)">
-<div style="display:flex;align-items:center;gap:18px;padding:10px 20px">
-<span style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.1em;text-transform:uppercase">{{ ui.stackTitle }}</span>
-<span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ stackCount }} · {{ ui.stackNorm }}</span>
-<span style="display:flex;align-items:baseline;gap:7px;margin-left:auto"><span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stackSpread }}</span><span style="font-family:var(--font-heading);font-weight:800;font-size:15px">{{ stackSpreadLabel }}</span></span>
-<span style="display:flex;align-items:baseline;gap:7px"><span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stackLead }}</span><span style="font-family:var(--font-heading);font-weight:800;font-size:15px;color:var(--color-accent)">{{ stackLeadLabel }}</span></span>
-<span style="display:flex;align-items:baseline;gap:7px"><span style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.stackLag }}</span><span style="font-family:var(--font-heading);font-weight:800;font-size:15px;color:var(--s-mute)">{{ stackLagLabel }}</span></span>
-<button onClick="{{ toggleStack }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="min-height:30px;padding:0 11px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ stackToggleLabel }}</button>
-<button onClick="{{ clearStack }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="min-height:30px;padding:0 11px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.stackClear }}</button>
-</div>
-<sc-if value="{{ stackShown }}" hint-placeholder-val="{{ true }}">
-<div style="display:flex;flex-wrap:wrap;gap:1px;background:var(--s-rule);border-top:1px solid var(--s-rule)">
-<div data-m="wipe" style="flex:1 1 340px;min-width:0;background:var(--s-bg);padding:12px 20px 14px">{{ stackChart }}</div>
-<div style="flex:0 1 440px;min-width:280px;background:var(--s-bg);padding:8px 20px 12px">
-<div style="display:grid;grid-template-columns:minmax(0,1fr) 62px 58px 64px 44px 68px;gap:10px;padding:4px 0 6px;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">
-<span>{{ ui.ticker }}</span><span style="text-align:right">{{ ui.last }}</span><span style="text-align:right">{{ ui.chg }}</span><span style="text-align:right">{{ ui.stackCrowdCol }}</span><span style="text-align:right">{{ ui.stackAccCol }}</span><span></span>
-</div>
-<sc-for list="{{ stackRows }}" as="p" hint-placeholder-count="2">
-<div style="display:grid;grid-template-columns:minmax(0,1fr) 62px 58px 64px 44px 68px;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--s-rule)">
-<button onClick="{{ p.open }}" style-hover="color:var(--color-accent)" style="display:flex;align-items:center;gap:8px;min-width:0;padding:0;background:transparent;border:0;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:14px;letter-spacing:0.02em;cursor:pointer;text-align:left">
-<span style="flex:none;width:10px;height:3px;background:{{ p.color }}"></span><span>{{ p.tickerLabel }}</span>
-</button>
-<span style="text-align:right;font-family:var(--font-heading);font-weight:800;font-size:13px">{{ p.indexLabel }}</span>
-<span style="text-align:right;font-size:12px;font-weight:600"><sc-if value="{{ p.deltaDown }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ p.deltaLabel }}</span></sc-if><sc-if value="{{ p.deltaUp }}" hint-placeholder-val="{{ true }}"><span>{{ p.deltaLabel }}</span></sc-if></span>
-<span style="text-align:right;font-size:12px;font-weight:600;color:{{ p.crowdInk }}">{{ p.crowdLabel }}</span>
-<span style="text-align:right;font-size:12px;color:var(--s-mute)">{{ p.skipLabel }}</span>
-<button onClick="{{ p.unpin }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="min-height:26px;padding:0 8px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ ui.stackUnpin }}</button>
-</div>
-</sc-for>
-<div style="font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute);margin-top:10px">{{ ui.cmdKeys }}</div>
-</div>
-</div>
-</sc-if>
-</div>
-</sc-if>
 
 <sc-if value="{{ cmdShown }}" hint-placeholder-val="{{ false }}">
 <div onClick="{{ closeCmd }}" style="position:fixed;inset:0;z-index:60;background:rgba(0,0,0,0.55);display:flex;align-items:flex-start;justify-content:center;padding:11vh 24px 24px">
@@ -1077,7 +1016,7 @@
 const STORE_KEY = 'hif.web.v2';
 // Keys that survive a reload. Live quotes and transient input (passwords, codes) never persist.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','overlays',
-  'screen','feedTab','selected','timeoutMin','locked','theme','positions','profiles','pfRange','dismissed','stack','stackOpen','events','accountId'];
+  'screen','feedTab','selected','timeoutMin','locked','theme','positions','profiles','pfRange','dismissed','events','accountId'];
 // hif-store.js can finish loading after this logic is evaluated. Until the saved
 // record has been read, nothing may be written, or a reload would overwrite the
 // stored session with these defaults; see restoreLate().
@@ -1109,9 +1048,9 @@ class Component extends DCLogic {
     authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
     pwRecovery:false, newPw:'', newPw2:'', newPwErr:'', authPw2:'',
     timeoutMin:30, lockPw:'', lockErr:'',
-    positions:{}, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, roNews:[], euNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
+    positions:{}, posEdit:null, posShares:'', posCost:'', posTicker:'', profiles:{}, summaries:{}, hist:{}, roNews:[], euNews:[], pfRange:'1mo', pfHover:null, pfCharts:{},
     dismissed:[], detailTab:'overview',
-    stack:[], stackOpen:false, cmdOpen:false, cmdQ:'', cmdIx:0, cursor:0, events:[] });
+    cmdOpen:false, cmdQ:'', cmdIx:0, cursor:0, events:[] });
   // Append-only security trail. The server mirrors this shape at POST /api/events,
   // where the table has no update or delete policy — a user can read their log
   // and add to it, never quietly rewrite it.
@@ -1323,7 +1262,7 @@ class Component extends DCLogic {
     this.setState(Object.assign(landing, {
       session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId },
       accountId: sess.userId, authOpen:false, authPw:'', authPw2:'', authSent:'', authErr:''
-    }, this.langsFrom(sess), fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, stack:[], events:[], selected:'', screen:'portfolio' } : {}));
+    }, this.langsFrom(sess), fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, events:[], selected:'', screen:'portfolio' } : {}));
     this.loadPlan();
     // A choice made in this browser before the account had one is saved to the account.
     const p = sess.prefs || {}, A = window.HIFAuth;
@@ -1449,6 +1388,7 @@ class Component extends DCLogic {
     if (this._held !== undefined && held !== this._held) this.syncPositions();
     this._held = held;
     this.syncSummaries();
+    this.syncHistory();
     // The US Market and BVB tabs load their stories the first time the feed shows them,
     // including when the app opens on one of them.
     if (this.state.screen === 'feed' && this.state.session) {
@@ -1510,6 +1450,7 @@ class Component extends DCLogic {
       this.syncLive();
       this.syncPositions();
       this.syncSummaries(true);
+      this.syncHistory(true);
       if (this.state.screen === 'portfolio') this.syncPortfolioCharts();
       if (this.state.feedTab === 'market') this.syncMarket();
       if (this.state.feedTab === 'bvb') this.syncBvb();
@@ -1636,7 +1577,20 @@ class Component extends DCLogic {
   get plan() { if ((window.HIF || {}).ALL_ACCESS) return 'pro'; return this.state.authLive ? (this.state.serverPlan || 'free') : (this.state.plan || this.props.plan || 'free'); }
   get lang() { return this.state.lang || this.props.lang || 'EN'; }
   get appLang() { return this.state.appLang || this.props.appLang || 'EN'; }
-  go(screen) { this.setState(s => ({ screen, prev: (s.screen === 'paywall') ? s.prev : s.screen })); }
+  go(screen) {
+    // Adding tickers happens on the watchlist itself; "search" is kept for old links.
+    if (screen === 'search') { screen = 'watchlist'; this.focusAdd(); }
+    this.setState(s => ({ screen, prev: (s.screen === 'paywall') ? s.prev : s.screen }));
+  }
+  focusAdd() { setTimeout(() => { const el = document.querySelector('input[data-wl-add]'); if (el) el.focus(); }, 60); }
+  // Takes a ticker off the watchlist (its push setting goes with it).
+  unfollow(ticker) {
+    this.setState(st => {
+      const next = st.follows.filter(f => f !== ticker);
+      return { follows: next, selected: st.selected === ticker ? (next[0] || '') : st.selected };
+    });
+    this.flash(this.tickerLabel(ticker) + ' · ' + String(this.copy.removed || 'Removed').toUpperCase());
+  }
   flash(toast) { this.setState({ toast }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast:'' }), 2200); }
   activateFromKeyboard(action, event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); action(); } }
   openNews(item) {
@@ -1656,31 +1610,17 @@ class Component extends DCLogic {
     this.syncLive([ticker]);
     this.syncDetail(ticker);
   }
-  // --- stack + command layer ------------------------------------------------
-  // The stack is the one piece of state that is not tied to a screen: anything
-  // pinned stays readable while you move through feed, detail, screener, ledger.
-  togglePin(ticker) {
-    if (!ticker) return;
-    const u = this.copy, on = (this.state.stack || []).indexOf(ticker) !== -1;
-    this.setState(st => {
-      const cur = st.stack || [];
-      return { stack: on ? cur.filter(x => x !== ticker) : cur.concat(ticker).slice(-5), stackOpen: on ? st.stackOpen : true };
-    });
-    this.flash(ticker + ' · ' + String(on ? (u.stackUnpin || 'Unpin') : (u.stackPin || 'Pin')).toUpperCase());
-  }
+  // --- command layer --------------------------------------------------------
   cmdResults(raw) {
     const H = this.data || {}, U = H.UNIVERSE || [], u = this.copy;
     const q = String(raw || '').trim();
     if (!q) return [];
     const out = [];
-    const pin = /^\+\s*([a-z.\-]{1,6})$/i.exec(q);
-    const body = (pin ? pin[1] : q).toLowerCase();
+    const body = q.toLowerCase();
     U.filter(x => x.ticker.toLowerCase().indexOf(body) === 0 || x.name.toLowerCase().indexOf(body) !== -1)
       .slice(0, 5)
-      .forEach(h => out.push(pin
-        ? { kind:'pin', label:(u.cmdPinHint || 'Pin') + ' · ' + h.ticker, detail:h.name, run: () => this.togglePin(h.ticker) }
-        : { kind:'open', label:(u.cmdOpenHint || 'Open') + ' · ' + h.ticker, detail:h.name, run: () => this.openTicker(h.ticker) }));
-    [['portfolio', u.pfTitle], ['feed', u.feed], ['watchlist', u.watchlist], ['search', u.addTicker], ['ledger', u.ledger], ['account', u.account], ['security', u.security]]
+      .forEach(h => out.push({ kind:'open', label:(u.cmdOpenHint || 'Open') + ' · ' + h.ticker, detail:h.name, run: () => this.openTicker(h.ticker) }));
+    [['portfolio', u.pfTitle], ['feed', u.feed], ['watchlist', u.watchlist], ['ledger', u.ledger], ['account', u.account], ['security', u.security]]
       .forEach(sc => {
         const label = String(sc[1] || '');
         if (label.toLowerCase().indexOf(body) === 0 || sc[0].indexOf(body) === 0)
@@ -1712,32 +1652,12 @@ class Component extends DCLogic {
     if (key === 'j' || key === 'ArrowDown') { event.preventDefault(); this.setState({ cursor: Math.min(max, cur + 1) }); }
     else if (key === 'k' || key === 'ArrowUp') { event.preventDefault(); this.setState({ cursor: Math.max(0, cur - 1) }); }
     else if (key === 'Enter') { event.preventDefault(); rows[cur].open(); }
-    else if (key.toLowerCase() === 'p') { event.preventDefault(); this.togglePin(rows[cur].ticker); }
     else if (key.toLowerCase() === 'x') { event.preventDefault(); rows[cur].dismiss({ stopPropagation() {} }); }
-  }
-  // One shared vertical scale for every pinned series — that is the whole point
-  // of the stack: two lines are only comparable if they are indexed alike.
-  stackChartEl(series) {
-    if (!series.length) return null;
-    const pal = this.pal;
-    const all = series.reduce((acc, x) => acc.concat(x.norm), []);
-    let lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
-    if (hi - lo < 1) { hi = lo + 1; }
-    const W = 600, H = 132, pad = 8;
-    const y = v => pad + (hi - v) / (hi - lo) * (H - pad * 2);
-    const kids = [];
-    if (100 >= lo && 100 <= hi) kids.push(React.createElement('line', { key:'base', x1:0, x2:W, y1:y(100), y2:y(100), stroke:pal.rule, strokeWidth:1, vectorEffect:'non-scaling-stroke' }));
-    series.forEach((sx, i) => {
-      const n = sx.norm.length;
-      const d = sx.norm.map((v, j) => (j ? 'L' : 'M') + (j / (n - 1 || 1) * W).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
-      kids.push(React.createElement('path', { key:'p' + i, d, fill:'none', stroke:sx.color, strokeWidth: i === 0 ? 2 : 1.5, vectorEffect:'non-scaling-stroke' }));
-      kids.push(React.createElement('circle', { key:'c' + i, cx:W - 1, cy:y(sx.norm[n - 1]), r:2.6, fill:sx.color }));
-    });
-    return React.createElement('svg', { viewBox:'0 0 ' + W + ' ' + H, preserveAspectRatio:'none', style:{ display:'block', width:'100%', height:H } }, kids);
   }
   navItem(key, label, count) {
     // A ticker page belongs to the section it was opened from.
-    const on = this.state.screen === key || (this.state.screen === 'detail' && (this.state.prev || 'feed') === key);
+    const at = this.state.screen === 'search' ? 'watchlist' : this.state.screen === 'security' ? 'account' : this.state.screen;
+    const on = at === key || (at === 'detail' && (this.state.prev || 'feed') === key);
     return { key, label, count: count || '', on, off: !on, go: () => this.go(key) };
   }
   chartPath(values, width, height, min, max) {
@@ -1893,6 +1813,33 @@ class Component extends DCLogic {
     });
     this.flash((remove ? (u.posCleared || 'Position removed') : (u.posSaved || 'Position saved')).toUpperCase());
   }
+  // Start of the feed's window: midnight of the fifth business day back, today included
+  // when it is one. Weekend stories inside that span are shown too.
+  feedSince() {
+    const d = new Date(); d.setHours(0, 0, 0, 0);
+    for (let n = 0; ; d.setDate(d.getDate() - 1)) { const wd = d.getDay(); if (wd !== 0 && wd !== 6 && ++n === 5) break; }
+    return Math.floor(d.getTime() / 1000);
+  }
+  // The open feed tab's stories of that window from public.stories (stored by the scan every
+  // 10 minutes): the live sources only list the newest ones. Refreshed with the rest.
+  syncHistory(force) {
+    const P = window.HIFPush, s = this.state;
+    if (!P || !P.loadStories || !s.authLive || !s.session || s.screen !== 'feed') return;
+    const tab = s.feedTab || 'following';
+    const list = tab === 'market' ? ((window.HIF && window.HIF.MARKET_TOP) || []) : s.follows;
+    if ((tab === 'following' || tab === 'market') && !list.length) return;
+    const filter = tab === 'bvb' ? 'ticker=like.*.RO' : tab === 'eu' ? 'or=(ticker.like.*.DE,ticker.like.*.L)'
+      : 'ticker=in.(' + list.map(t => '"' + t + '"').join(',') + ')';
+    const since = new Date(this.feedSince() * 1000).toISOString(), sig = tab + '|' + filter + '|' + since;
+    if (!force && this._histSig === sig) return;
+    this._histSig = sig;
+    P.loadStories(filter, since).then(rows => {
+      const out = (rows || []).map(r => { const i = String(r.id).indexOf(':');
+        return { id: String(r.id).slice(i + 1), related: r.ticker, headline: r.headline, source: r.source || '', url: r.url || '',
+          summary: r.summary || '', ts: Math.floor(Date.parse(r.published_at) / 1000) }; });
+      this.setState(st => ({ hist: Object.assign({}, st.hist, { [tab]: { rows: out } }) }));
+    }).catch(() => { this._histSig = ''; });
+  }
   // AI summaries (supabase/summaries.sql) for the stories loaded, in the content language.
   // Only real accounts can read them; the cache in hif-push.js re-asks for misses later.
   syncSummaries(force) {
@@ -1901,14 +1848,16 @@ class Component extends DCLogic {
     const lang = String(this.lang || 'EN').toLowerCase(), LN = s.liveNews || {}, ids = [], recent = [];
     // Stories from the batch job's window (24 h): it may be writing their summaries now. Not
     // just the newest: Finnhub sometimes lists a story hours after it was published.
-    const fresh = n => n.ts && Date.now() / 1000 - n.ts < AI_WINDOW;
-    const add = (id, n) => { ids.push(id); if (fresh(n)) recent.push(id); };
+    // Only the feed's window (5 business days): those are read in bulk, by when they were written.
+    const since = this.feedSince(), fresh = n => n.ts && Date.now() / 1000 - n.ts < AI_WINDOW;
+    const add = (id, n) => { if (!n.ts || n.ts < since) return; ids.push(id); if (fresh(n)) recent.push(id); };
     Object.keys(LN).forEach(t => (LN[t] || []).forEach(n => { if (n && n.id) add(t + ':' + n.id, n); }));
     (s.roNews || []).concat(s.euNews || []).forEach(n => { if (n && n.id && n.related) add(n.related + ':' + n.id, n); });
+    Object.keys(s.hist || {}).forEach(k => (s.hist[k].rows || []).forEach(n => add(n.related + ':' + n.id, n)));
     const sig = lang + '|' + ids.join(',');
     if (!ids.length || (!force && sig === this._sumSig)) return;
     this._sumSig = sig;
-    P.loadSummaries(ids, lang, recent).then(found => {
+    P.loadSummaries(ids, lang, recent, new Date(since * 1000).toISOString()).then(found => {
       const keys = Object.keys(found);
       if (!keys.length) return;
       this.setState(st => { const next = Object.assign({}, st.summaries); keys.forEach(id => { next[lang + '|' + id] = found[id]; }); return { summaries: next }; });
@@ -2169,7 +2118,7 @@ class Component extends DCLogic {
     window.HIF_LOCALE = this.appLocale;
     const NEWS = H.NEWS, FOLLOWS = H.FOLLOWS, UNIVERSE = H.UNIVERSE, UI = H.UI;
     const EVENTS = H.EVENTS || {}, SIGNALS = H.SIGNALS || {};
-    const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen;
+    const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen === 'search' ? 'watchlist' : s.screen;
     const H_ALL = !!(window.HIF || {}).ALL_ACCESS;
     const vw = s.vw || (typeof window !== 'undefined' && window.innerWidth) || 1440;
     const L = this.lang, A = this.appLang, u = UI[A];
@@ -2213,8 +2162,15 @@ class Component extends DCLogic {
       if (bvb) (s.roNews || []).forEach(n => rows.push(row(n.related, n)));
       else if (eu) (s.euNews || []).forEach(n => rows.push(row(n.related, n)));
       else syms.forEach(t => (LN[t] || []).forEach(n => rows.push(row(t, n))));
-      // Up to 300 stories; the feed shows 40 cards at a time once same-event stories are grouped.
-      baseFeed = rows.sort((a,b) => b.ts - a.ts).slice(0, 300);
+      // Older stories the scan has stored (public.stories), for the days the live sources
+      // no longer list. A story both have is kept once.
+      const H = ((s.hist || {})[s.feedTab || 'following'] || {}).rows || [], have = new Set(rows.map(r => r.storyId));
+      const mine = market || new Set(s.follows);
+      H.forEach(n => { const r = row(n.related, n); if ((mine === true || mine.has(n.related)) && !have.has(r.storyId)) { have.add(r.storyId); rows.push(r); } });
+      // Every story of the last 5 business days (and the weekend between them); the feed shows
+      // 40 cards at a time once same-event stories are grouped.
+      const since = this.feedSince();
+      baseFeed = rows.filter(r => r.ts >= since).sort((a,b) => b.ts - a.ts).slice(0, 5000);
     }
     baseFeed = baseFeed || [];
     const skipKeys = {};
@@ -2228,13 +2184,8 @@ class Component extends DCLogic {
     };
     baseFeed = baseFeed.filter(n => !skipped(n));
     const volNum = v => { const m = /([\d.]+)x/.exec(String(v || '')); return m ? parseFloat(m[1]) : 0; };
-    const stackList = (s.stack || []);
-    const pinned = t => stackList.indexOf(t) !== -1;
     const feed = baseFeed.map(n => Object.assign({}, n, {
       down: !n.up,
-      pinned: pinned(n.ticker), notPinned: !pinned(n.ticker),
-      pinLabel: (pinned(n.ticker) ? u.unpinCompare || u.stackUnpin : u.pinCompare || u.stackPin).replace('{t}', n.ticker),
-      pin: event => { if (event && event.stopPropagation) event.stopPropagation(); this.togglePin(n.ticker); },
       outlier: volNum(n.vol) >= 2,
       volBadge: volNum(n.vol).toFixed(1) + '× volume',
       // The card opens the ticker's page in the app; only the source link leaves it. A click
@@ -2252,8 +2203,8 @@ class Component extends DCLogic {
       r.isAi = !!ai; r.notAi = !ai;
       // A recent story on a tab the batch job covers, in a language it writes, without its
       // summary yet: say one is coming (the card switches to it when it arrives).
-      // German is written for followed and held tickers and the EU Market tab (supabase/summaries.sql).
-      const pending = !ai && AI_LANGS.includes(sumLang) && (sumLang === 'ro' ? s.feedTab !== 'market' : s.feedTab === 'following' || s.feedTab === 'eu') && r.ts && Date.now() / 1000 - r.ts < AI_WINDOW;
+      // German is written for followed and held tickers, the US and EU Market tabs (supabase/summaries.sql).
+      const pending = !ai && AI_LANGS.includes(sumLang) && (sumLang === 'ro' || s.feedTab !== 'bvb') && r.ts && Date.now() / 1000 - r.ts < AI_WINDOW;
       r.watchLabel = ai ? (u.aiSummary || 'AI summary') : pending ? (u.aiPending || 'AI summary in progress…') : (u.fromSource || u.watch);
       // The whole article, translated, for readers whose content language isn't English.
       // The publisher's own page first; Google's translated view of it as a small extra.
@@ -2347,20 +2298,13 @@ class Component extends DCLogic {
         open: () => this.openTicker(x.ticker),
         keyOpen: event => this.activateFromKeyboard(() => this.openTicker(x.ticker), event),
         openLabel: (u.cmdOpenHint || 'Open') + ' ' + x.ticker + ' · ' + x.name,
-        pinned: pinned(x.ticker), notPinned: !pinned(x.ticker),
-        pinLabel: pinned(x.ticker) ? u.stackUnpin : u.stackPin,
-        pin: event => { if (event && event.stopPropagation) event.stopPropagation(); this.togglePin(x.ticker); },
-        toggle: () => {
-          if (on) {
-            this.setState(st => {
-              const next = st.follows.filter(f => f !== x.ticker);
-              return { follows: next, selected: st.selected === x.ticker ? (next[0] || '') : st.selected };
-            });
-            return this.flash(x.ticker + ' · ' + u.removed.toUpperCase());
-          }
+        removeLabel: (u.removeTicker || 'Remove {t}').replace('{t}', this.tickerLabel(x.ticker)),
+        remove: () => this.unfollow(x.ticker),
+        add: () => {
+          if (this.state.follows.includes(x.ticker)) return;
           if (isFree && s.follows.length >= 3) { this.flash('3 / 3 — ' + u.liftCap.toUpperCase()); return this.go('paywall'); }
           this.setState(st => ({ follows: st.follows.concat(x.ticker) }));
-          this.flash(x.ticker + ' · ' + u.added.toUpperCase());
+          this.flash(this.tickerLabel(x.ticker) + ' · ' + u.added.toUpperCase());
         }
       });
     });
@@ -2377,8 +2321,13 @@ class Component extends DCLogic {
       score: live ? '#' + storyCount(r.ticker) : r.score,
       down: !r.up,
       alert: isFree ? u.pushOff : (s.push[r.ticker] !== false ? u.pushOn : u.pushOff),
-      pushLabel: isFree ? (u.pro + ' · push') : (s.push[r.ticker] !== false ? u.pushOn : u.pushOff),
+      pushLabel: !isFree && s.push[r.ticker] !== false ? u.pushOn : u.pushOff,
       pushOn: !isFree && s.push[r.ticker] !== false,
+      pushBg: !isFree && s.push[r.ticker] !== false ? 'var(--color-accent)' : 'transparent',
+      pushEdge: !isFree && s.push[r.ticker] !== false ? 'var(--color-accent)' : 'var(--s-rule)',
+      pushInk: !isFree && s.push[r.ticker] !== false ? 'var(--s-on-accent)' : 'var(--s-mute)',
+      removeLabel: (u.removeTicker || 'Remove {t}').replace('{t}', this.tickerLabel(r.ticker)),
+      remove: event => { if (event && event.stopPropagation) event.stopPropagation(); this.unfollow(r.ticker); },
       togglePush: event => {
         if (event && event.stopPropagation) event.stopPropagation();
         if (isFree) { this.flash(u.enablePush.toUpperCase()); return this.go('paywall'); }
@@ -2386,9 +2335,6 @@ class Component extends DCLogic {
       },
       spark: dataless(r.ticker) ? null : this.sparkEl(r.ticker, r.price, r.move, r.up),
       liveOnly: dataless(r.ticker),
-      pinned: pinned(r.ticker), notPinned: !pinned(r.ticker),
-      pinLabel: pinned(r.ticker) ? u.stackUnpin : u.stackPin,
-      pin: event => { if (event && event.stopPropagation) event.stopPropagation(); this.togglePin(r.ticker); },
       open: () => this.openTicker(r.ticker),
       keyOpen: event => this.activateFromKeyboard(() => this.openTicker(r.ticker), event)
     }));
@@ -2464,10 +2410,8 @@ class Component extends DCLogic {
       this.navItem('portfolio', u.pfTitle, String(Object.keys(s.positions || {}).length)),
       this.navItem('feed', u.feed, String(feed.length)),
       this.navItem('watchlist', u.watchlist, isFree ? s.follows.length + '/3' : String(s.follows.length)),
-      this.navItem('search', u.addTicker),
       this.navItem('ledger', u.ledger, String((s.dismissed || []).length)),
-      this.navItem('account', u.account, ''),
-      this.navItem('security', u.security, '')
+      this.navItem('account', u.account, '')
     ];
     const myWeight = pos && book.value ? (pos.value / book.value * 100).toFixed(0) + '%' : '';
     const editing = s.posEdit === stock.ticker;
@@ -2482,54 +2426,10 @@ class Component extends DCLogic {
     const lCount = k => k === 'all' ? led.rows.length : led.rows.filter(r => r.verdict === k).length;
     const toneInk = t => t === 'alarm' ? 'var(--color-accent)' : t === 'warn' ? 'var(--s-ink)' : t === 'edge' ? 'var(--s-faint)' : 'var(--s-mute)';
     const dTab = s.detailTab || 'overview';
-    // --- the stack: every pinned name on one indexed scale --------------------
-    const crowdLabels = { crowded:u.crowdCrowded, contrarian:u.crowdContrarian, normal:u.crowdNormal,
-      zoneEdge:u.zoneEdge, zoneNormal:u.zoneNormal, zoneCrowded:u.zoneCrowded, zoneAlarm:u.zoneAlarm };
-    const tone = [this.pal.accent, this.pal.ink, this.pal.mute, this.pal.weak, this.pal.faint];
-    const stackSeries = stackList.map((t, i) => {
-      const r = rec(t);
-      const ch = (s.charts || {})[t + ':1mo'];
-      const pts = ((ch && ch.points) || []).map(p => p.close).filter(v => typeof v === 'number' && isFinite(v) && v > 0);
-      const v0 = pts.length ? pts[0] : 0;
-      return { ticker:t, r, color:tone[i % tone.length], norm: v0 ? pts.map(v => v / v0 * 100) : [] };
-    }).filter(x => x.norm.length > 1);
-    const lastOf = x => x.norm[x.norm.length - 1];
-    const sorted = stackSeries.slice().sort((a, b) => lastOf(b) - lastOf(a));
-    const spread = sorted.length > 1 ? (lastOf(sorted[0]) - lastOf(sorted[sorted.length - 1])) : 0;
-    const stackRows = stackSeries.map(x => {
-      const cw = IN ? IN.crowding(x.ticker, CROWD, crowdLabels) : null;
-      const last = lastOf(x), delta = last - 100;
-      const skips = (s.dismissed || []).filter(d => d.ticker === x.ticker).length;
-      return {
-        ticker:x.ticker, color:x.color, move:x.r.move, up:x.r.up !== false, down:x.r.up === false, price:x.r.price,
-        indexLabel: last.toFixed(1),
-        deltaLabel: (delta >= 0 ? '+' : '−') + Math.abs(delta).toFixed(1),
-        deltaUp: delta >= 0, deltaDown: delta < 0,
-        crowdLabel: cw ? cw.pctLabel : '—', crowdInk: cw ? toneInk(cw.tone) : 'var(--s-mute)',
-        skipLabel: String(skips),
-        isLead: sorted.length > 1 && sorted[0].ticker === x.ticker,
-        isLag: sorted.length > 1 && sorted[sorted.length - 1].ticker === x.ticker,
-        open: () => this.openTicker(x.ticker),
-        unpin: event => { if (event && event.stopPropagation) event.stopPropagation(); this.togglePin(x.ticker); }
-      };
-    });
     const cmdRows = this.cmdResults(s.cmdQ).map((r, i) => ({
       label:r.label, detail:r.detail, on: i === (s.cmdIx || 0), off: i !== (s.cmdIx || 0), run: () => this.runCmd(i)
     }));
     return {
-      stackHas: !!stackRows.length, stackCount: String(stackList.length),
-      stackShown: !!(s.stackOpen && stackRows.length), stackHidden: !(s.stackOpen && stackRows.length),
-      stackEmptyShown: !stackRows.length,
-      stackRows, stackChart: this.stackChartEl(stackSeries),
-      stackSpreadLabel: sorted.length > 1 ? spread.toFixed(1) : '—',
-      stackLeadLabel: sorted.length > 1 ? sorted[0].ticker : '—',
-      stackLagLabel: sorted.length > 1 ? sorted[sorted.length - 1].ticker : '—',
-      toggleStack: () => this.setState(st => ({ stackOpen: !st.stackOpen })),
-      clearStack: () => this.setState({ stack:[] }),
-      stackToggleLabel: s.stackOpen ? u.stackHide : u.stackShow,
-      detailPinned: pinned(stock.ticker), detailNotPinned: !pinned(stock.ticker),
-      detailPinLabel: (pinned(stock.ticker) ? u.unpinCompare || u.stackUnpin : u.pinCompare || u.stackPin).replace('{t}', stock.ticker),
-      pinDetail: () => this.togglePin(stock.ticker),
       cmdShown: !!s.cmdOpen, cmdQ: s.cmdQ || '',
       onCmdQ: e => this.setState({ cmdQ:e.target.value, cmdIx:0 }),
       cmdKey: e => {
@@ -2858,7 +2758,7 @@ class Component extends DCLogic {
       isFreeTier: isFree, isProTier: !isFree,
       nav: navList,
       // Phones: the first four sections in a bottom bar, the rest under More.
-      tabNav: navList.slice(0, 4).map(n => Object.assign({}, n, { label: n.key === 'search' ? (u.tabAdd || n.label) : n.label, current: n.on ? 'page' : undefined,
+      tabNav: navList.slice(0, 4).map(n => Object.assign({}, n, { label: n.label, current: n.on ? 'page' : undefined,
         go: () => { this.setState({ moreOpen:false }); n.go(); } })).concat([(() => {
           const on = navList.slice(4).some(n => n.on) || !!s.moreOpen;
           return { key:'more', label: u.tabMore || 'More', on, off: !on, current: undefined, go: () => this.setState(st => ({ moreOpen: !st.moreOpen })) };
@@ -2876,12 +2776,19 @@ class Component extends DCLogic {
       signOut: () => { this.logEvent('signout'); if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, locked:false, authPw:'', authErr:'', twofaSetup:false }); this.go('portfolio'); this.flash(u.signOut.toUpperCase()); },
       goPaywall: () => this.go('paywall'),
       goSearch: () => this.go('search'),
+      goAccount: () => this.go('account'),
+      goAccountMore: () => { this.setState({ moreOpen:false }); this.go('account'); },
+      accountTabs: [['account', u.account], ['security', u.security]].map(([k, label]) => ({ label, on: screen === k,
+        ink: screen === k ? 'var(--s-ink)' : 'var(--s-mute)', bar: screen === k ? 'var(--color-accent)' : 'transparent', go: () => this.go(k) })),
+      clearQuery: () => this.setState({ query:'', liveHits:null }),
+      queryKey: e => { if (e.key === 'Escape') this.setState({ query:'', liveHits:null }); },
       back: () => this.go(s.prev || 'feed'),
       // "← Watchlist" when the ticker was opened from the watchlist, and so on.
       backLabel: (() => { const n = navList.filter(x => x.key === (s.prev || 'feed'))[0]; return n && n.label ? '← ' + n.label : u.backFeed; })(),
       upgrade: () => { if (s.authLive) return this.flash((u.payComing || 'Payments are coming soon').toUpperCase()); this.setState({ plan:'pro' }); this.go('feed'); this.flash('PRO · 30M'); },
       scanLabel: isFree ? u.delayLabel : u.lastScan.replace('{t}', s.lastScan ? new Date(s.lastScan).toLocaleTimeString(this.appLocale, { hour:'2-digit', minute:'2-digit' }) : '—'),
       feedSub: s.feedTab === 'following' ? (isFree ? u.freqFree : u.freqPro) : s.feedTab === 'bvb' ? u.bvbSub : s.feedTab === 'eu' ? u.euSub : u.topVolume,
+      feedWindow: u.feedWindow || 'Last 5 trading days',
       feedTz: (u.timesLocal || 'Times in your local time ({z})').replace('{z}', this.zoneName() || Intl.DateTimeFormat().resolvedOptions().timeZone || ''),
       bvbEmpty: s.feedTab === 'bvb' && !(s.roNews || []).length,
       euEmpty: s.feedTab === 'eu' && !(s.euNews || []).length,

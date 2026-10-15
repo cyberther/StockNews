@@ -158,11 +158,36 @@ async function loadHoldings() {
 // AI summaries written by the batch job (public.story_summaries, supabase/summaries.sql):
 // { 'NVDA:123': 'text' } for the ids that have one in lang. Misses are asked again after
 // 10 minutes, or after 2 for the ids in `recent` (stories the job may be writing now).
+// With `since` (the feed's window), every summary written since then is read in bulk, then
+// only the newer ones each time (at most every 90 seconds), and the ids are answered from that.
 const summaryCache = new Map(); // id|lang -> { text, at }
 const SUMMARY_ID = /^[A-Z0-9.\-]{1,12}:\d{1,20}$/;
-async function loadSummaries(ids, lang, recent) {
+const bulk = {}, bulkBusy = {}; // lang -> { since, cursor, at }; lang -> the read in flight
+function bulkSummaries(lang, since) {
+  if (!bulkBusy[lang]) bulkBusy[lang] = readBulk(lang, since).finally(() => { bulkBusy[lang] = null; });
+  return bulkBusy[lang];
+}
+async function readBulk(lang, since) {
+  const b = bulk[lang] && bulk[lang].since <= since ? bulk[lang] : { since, cursor: since, at: 0 };
+  if (Date.now() - b.at < 90000) return true;
+  let cursor = b.cursor;
+  for (let off = 0; off < 10000; off += 1000) {
+    const r = await auth().rest('story_summaries?select=story_id,summary,created_at&lang=eq.' + encodeURIComponent(lang) +
+      '&created_at=gte.' + encodeURIComponent(b.cursor) + '&order=created_at.asc&limit=1000&offset=' + off);
+    if (!r.ok || !Array.isArray(r.body)) return false;
+    r.body.forEach(row => { summaryCache.set(row.story_id + '|' + lang, { text: row.summary, at: Date.now() }); if (row.created_at > cursor) cursor = row.created_at; });
+    if (r.body.length < 1000) break;
+  }
+  bulk[lang] = { since: b.since, cursor, at: Date.now() };
+  return true;
+}
+async function loadSummaries(ids, lang, recent, since) {
   const out = {};
   if (!live() || !lang) return out;
+  if (since && await bulkSummaries(lang, since).catch(() => false)) {
+    [...new Set(ids || [])].forEach(id => { const hit = summaryCache.get(id + '|' + lang); if (hit && hit.text) out[id] = hit.text; });
+    return out;
+  }
   const now = Date.now(), want = [], soon = new Set(recent || []);
   [...new Set(ids || [])].forEach(id => {
     if (!SUMMARY_ID.test(id)) return;
@@ -182,5 +207,20 @@ async function loadSummaries(ids, lang, recent) {
   return out;
 }
 
-window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, supported };
+// Stories the scan stored (public.stories) since an ISO time, newest first; `filter` is a
+// PostgREST condition on the ticker. Up to 5000.
+async function loadStories(filter, since) {
+  if (!live()) return [];
+  const out = [];
+  for (let off = 0; off < 5000; off += 1000) {
+    const r = await auth().rest('stories?select=id,ticker,headline,source,url,summary,published_at&published_at=gte.' + encodeURIComponent(since) +
+      '&' + filter + '&order=published_at.desc&limit=1000&offset=' + off);
+    if (!r.ok || !Array.isArray(r.body)) break;
+    out.push(...r.body);
+    if (r.body.length < 1000) break;
+  }
+  return out;
+}
+
+window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, supported };
 })();
