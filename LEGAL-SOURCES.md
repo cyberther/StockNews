@@ -91,7 +91,7 @@ pe site-urile companiilor, cu robots.txt respectat, nu de pe bvb.ro. 🟢
 
 | Serviciu | Rol | Ce trebuie |
 | --- | --- | --- |
-| **Supabase** | baza de date, autentificare, cron, funcția de scanare | Acceptat DPA-ul Supabase (include clauzele contractuale standard). Verificată regiunea proiectului (Settings → General) și trecută în `OPERATOR.dbRegion` din `legal.html`. |
+| **Supabase** | baza de date, autentificare, cron, funcția de scanare | Acceptat DPA-ul Supabase (include clauzele contractuale standard). Regiunea proiectului: West EU (Ireland), eu-west-1, trecută în `legal.html`. |
 | **Netlify** | găzduire și funcții (gateway) | Acceptat DPA-ul Netlify. Jurnalele funcțiilor conțin IP-uri. |
 | **Serviciile push** ale browserelor (Apple, Google, Mozilla) | livrarea alertelor | Nimic de semnat; menționat în politică. |
 | **Google / Apple sign-in**, dacă sunt pornite | autentificare | Menționat în politică; la Google, ecranul de consimțământ OAuth cere link spre politica de confidențialitate. |
@@ -107,9 +107,10 @@ Ce s-a făcut în aplicație:
 
 ## 6. Ce rămâne de făcut
 
-1. Completat `OPERATOR` în `templates/stock-news-web/legal.html`: nume sau firmă, sediu și CUI,
-   e-mail de contact, regiunea Supabase. Până atunci pagina afișează „de completat”.
-2. Rulat `supabase/account.sql` în SQL Editor.
+1. Adresa de e-mail de contact în `OPERATOR.email` din `templates/stock-news-web/legal.html`.
+   Firma (ADALIT DATA SRL, CUI 49586191), sediul și regiunea Supabase sunt completate. Până la
+   e-mail, pagina afișează „de completat” în locul lui.
+2. ~~Rulat `supabase/account.sql` în SQL Editor~~: rulat pe 16 octombrie 2026.
 3. Acceptate DPA-urile Supabase și Netlify.
 4. Pentru monetizare: licența de date (punctul 1), acordurile cu editorii sau varianta „doar
    titlu” (punctul 2), firma (SRL/PFA) și procesatorul de plăți, apoi avocatul citește

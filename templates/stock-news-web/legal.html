@@ -135,7 +135,7 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <li><strong>Google sau Apple</strong>, numai dacă alegi să te autentifici cu ei.</li>
 </ul>
 <p>Furnizorii de date de piață și site-urile de știri primesc doar simbolurile bursiere cerute, fără date despre tine. Rezumatele automate se fac pe un calculator al operatorului, din textul public al știrilor, fără date personale.</p>
-<p>Supabase și Netlify sunt companii din SUA. Transferul datelor în afara Spațiului Economic European se face pe baza clauzelor contractuale standard ale Comisiei Europene, din acordurile lor de prelucrare a datelor.</p>
+<p>Baza de date este găzduită în Uniunea Europeană (Irlanda). Supabase și Netlify sunt însă companii din SUA. Când datele ajung în afara Spațiului Economic European, de exemplu prin serverele Netlify sau prin echipele lor de suport, transferul se face pe baza clauzelor contractuale standard ale Comisiei Europene, din acordurile lor de prelucrare a datelor.</p>
 <h3>5. Cât timp păstrăm datele</h3>
 <p>Cât timp ai cont. Când îți ștergi contul, datele tale sunt șterse imediat din baza de date; copiile de siguranță ale furnizorului se suprascriu în câteva zile. Un cont nou respins de administrator este șters împreună cu datele lui. Jurnalele tehnice ale furnizorilor se păstrează perioada stabilită de aceștia.</p>
 <h3>6. Drepturile tale</h3>
@@ -237,7 +237,7 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <li><strong>Google or Apple</strong>, only if you choose to sign in with them.</li>
 </ul>
 <p>Market data providers and news sites receive only the ticker symbols asked for, nothing about you. Automatic summaries are made on the operator’s computer from the public text of the news, with no personal data.</p>
-<p>Supabase and Netlify are US companies. Data leaves the European Economic Area under the European Commission’s standard contractual clauses in their data processing agreements.</p>
+<p>The database is hosted in the European Union (Ireland). Supabase and Netlify are US companies, though. Where data leaves the European Economic Area, for example through Netlify’s servers or their support teams, it does so under the European Commission’s standard contractual clauses in their data processing agreements.</p>
 <h3>5. How long we keep data</h3>
 <p>For as long as you have an account. When you delete your account, your data is removed from the database at once; the provider’s backups are overwritten within days. A new account an administrator rejects is deleted with its data. Providers’ technical logs are kept for the period they set.</p>
 <h3>6. Your rights</h3>
@@ -275,13 +275,15 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <footer><span id="foot">© 2026 Market Pulse</span></footer>
 
 <script>
-// Who runs the site. Fill these in before the site is public; empty ones show as "to be
-// completed" on the page.
+// Who runs the site. A value is text, or { ro, en } when it reads differently in each
+// language; an empty one shows as "to be completed" on the page.
 const OPERATOR = {
-  name: '',      // e.g. the company: "Example Software SRL", or the PFA's full name
-  address: '',   // registered office, and the company registration number (CUI)
+  name: 'ADALIT DATA SRL',
+  address: { ro: 'str. Mihail Sadoveanu nr. 9, Șelimbăr, jud. Sibiu, România, CUI 49586191',
+             en: '9 Mihail Sadoveanu St., Șelimbăr, Sibiu County, Romania, tax ID (CUI) 49586191' },
   email: '',     // a contact address that is read
-  dbRegion: ''   // the Supabase project's region, e.g. "Frankfurt (eu-central-1)"
+  // Supabase project settings -> General -> Project region.
+  dbRegion: { ro: 'Uniunea Europeană, Irlanda (eu-west-1)', en: 'European Union, Ireland (eu-west-1)' }
 };
 (function () {
   const q = new URLSearchParams(location.search), asked = (q.get('lang') || '').toLowerCase();
@@ -301,7 +303,7 @@ const OPERATOR = {
   addEventListener('hashchange', () => document.querySelectorAll('.langs a').forEach(a => { a.href = '?lang=' + a.dataset.lang + location.hash; }));
   const todo = lang === 'en' ? 'to be completed' : 'de completat';
   document.querySelectorAll('[data-op]').forEach(el => {
-    const v = String(OPERATOR[el.dataset.op] || '').trim();
+    const raw = OPERATOR[el.dataset.op], v = String((raw && typeof raw === 'object' ? raw[lang] : raw) || '').trim();
     if (!v) { el.className = 'todo'; el.textContent = '[' + todo + ']'; return; }
     if (el.dataset.op === 'email') { const a = document.createElement('a'); a.href = 'mailto:' + v; a.textContent = v; el.replaceChildren(a); }
     else el.textContent = v;
