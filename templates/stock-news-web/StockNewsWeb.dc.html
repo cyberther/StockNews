@@ -21,7 +21,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -932,6 +932,42 @@
 <div style="font-size:13px;color:var(--s-mute);margin-top:14px">{{ ui.securityNote }}</div>
 
 <div style="margin-top:22px;padding-top:20px;border-top:1px solid var(--s-rule)">
+<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+<div style="flex:1;min-width:220px"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.twofaTitle }}</div><div style="font-size:13px;color:var(--s-mute);margin-top:5px;text-wrap:pretty">{{ twofaState }}</div></div>
+<sc-if value="{{ twofaCanStart }}" hint-placeholder-val="{{ true }}"><button onClick="{{ mfaSet.start }}" disabled="{{ mfaSet.busy }}" style="min-height:46px;padding:0 18px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaSetup }}</button></sc-if>
+<sc-if value="{{ twofaCanStop }}" hint-placeholder-val="{{ false }}"><button onClick="{{ twofaStop }}" disabled="{{ mfaSet.busy }}" style="min-height:46px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaDisable }}</button></sc-if>
+</div>
+<sc-if value="{{ mfaSet.startErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size:13px;color:var(--color-accent);margin-top:8px">{{ mfaSet.startErr }}</div></sc-if>
+<sc-if value="{{ mfaSet.showing }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-top:14px">
+<img src="{{ mfaSet.qr }}" alt="{{ ui.twofaQrAlt }}" width="168" height="168" style="flex:none;width:168px;height:168px;background:#fff;padding:8px;box-sizing:border-box">
+<div style="flex:1;min-width:220px">
+<div style="font-size:13px;color:var(--s-mute);line-height:1.5;text-wrap:pretty">{{ ui.twofaScan }}</div>
+<a href="{{ mfaSet.uri }}" style="display:inline-block;margin-top:8px;font-size:13px;color:var(--color-accent)">{{ ui.twofaOpenApp }}</a>
+<div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:12px">{{ ui.twofaKey }}</div>
+<div style="font-family:ui-monospace,Menlo,monospace;font-size:14px;margin-top:4px;user-select:all;overflow-wrap:anywhere">{{ mfaSet.secret }}</div>
+</div>
+</div>
+<div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:16px">{{ ui.twofaCode }}</div>
+<input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="{{ ui.twofaCode }}" value="{{ mfaSet.code }}" onChange="{{ mfaSet.onCode }}" onKeyDown="{{ mfaSet.key }}" style="width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:18px;letter-spacing:0.3em;margin-top:6px">
+<sc-if value="{{ mfaSet.err }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size:13px;color:var(--color-accent);margin-top:8px">{{ mfaSet.err }}</div></sc-if>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+<button onClick="{{ mfaSet.verify }}" disabled="{{ mfaSet.busy }}" style="min-height:46px;padding:0 18px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ mfaSet.verifyLabel }}</button>
+<sc-if value="{{ mfaSet.canCancel }}" hint-placeholder-val="{{ true }}"><button onClick="{{ mfaSet.cancel }}" style="min-height:46px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaCancel }}</button></sc-if>
+</div>
+</sc-if>
+</div>
+
+<sc-if value="{{ bio.show }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:22px;padding-top:20px;border-top:1px solid var(--s-rule)">
+<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+<div style="flex:1;min-width:220px"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.bioTitle }}</div><div aria-live="polite" style="font-size:13px;color:var(--s-mute);margin-top:5px;text-wrap:pretty">{{ bio.note }}</div></div>
+<sc-if value="{{ bio.canAct }}" hint-placeholder-val="{{ true }}"><button onClick="{{ bio.act }}" style="min-height:46px;padding:0 18px;background:{{ bio.bg }};border:1px solid var(--color-accent);color:{{ bio.ink }};font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ bio.label }}</button></sc-if>
+</div>
+</div>
+</sc-if>
+
+<div style="margin-top:22px;padding-top:20px;border-top:1px solid var(--s-rule)">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.timeoutTitle }}</div>
 <div style="font-size:13px;color:var(--s-mute);margin-top:5px">{{ ui.timeoutNote }}</div>
 <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
@@ -1199,6 +1235,45 @@
 </div>
 </sc-if>
 
+<sc-if value="{{ isMfaGate }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;z-index:60;background:var(--s-bg);display:flex;align-items:center;justify-content:center;padding:40px 20px;overflow-y:auto">
+<div style="width:100%;max-width:460px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px;letter-spacing:-0.02em">{{ brand }}</div>
+<h1 style="margin:22px 0 0;font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1.05">{{ mfaGateTitle }}</h1>
+<div style="font-size:14px;color:var(--s-mute);margin-top:10px;line-height:1.5;text-wrap:pretty">{{ mfaGateNote }}</div>
+<div style="font-size:13px;margin-top:6px">{{ lockEmail }}</div>
+<sc-if value="{{ mfaGateCode }}" hint-placeholder-val="{{ true }}">
+<div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:20px">{{ ui.twofaCode }}</div>
+<input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="{{ ui.twofaCode }}" value="{{ mfaChallenge.code }}" onChange="{{ mfaChallenge.onCode }}" onKeyDown="{{ mfaChallenge.key }}" style="width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:18px;letter-spacing:0.3em;margin-top:6px">
+<sc-if value="{{ mfaChallenge.err }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size:13px;color:var(--color-accent);margin-top:8px">{{ mfaChallenge.err }}</div></sc-if>
+<button onClick="{{ mfaChallenge.verify }}" disabled="{{ mfaChallenge.busy }}" style="width:100%;min-height:50px;margin-top:16px;text-align:left;padding:0 16px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ mfaChallenge.label }}</button>
+</sc-if>
+<sc-if value="{{ mfaGateSetup }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ mfaSet.notShowing }}" hint-placeholder-val="{{ true }}"><button onClick="{{ mfaSet.start }}" disabled="{{ mfaSet.busy }}" style="width:100%;min-height:50px;margin-top:20px;text-align:left;padding:0 16px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.twofaSetup }}</button></sc-if>
+<sc-if value="{{ mfaSet.startErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size:13px;color:var(--color-accent);margin-top:8px">{{ mfaSet.startErr }}</div></sc-if>
+<sc-if value="{{ mfaSet.showing }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-top:14px">
+<img src="{{ mfaSet.qr }}" alt="{{ ui.twofaQrAlt }}" width="168" height="168" style="flex:none;width:168px;height:168px;background:#fff;padding:8px;box-sizing:border-box">
+<div style="flex:1;min-width:220px">
+<div style="font-size:13px;color:var(--s-mute);line-height:1.5;text-wrap:pretty">{{ ui.twofaScan }}</div>
+<a href="{{ mfaSet.uri }}" style="display:inline-block;margin-top:8px;font-size:13px;color:var(--color-accent)">{{ ui.twofaOpenApp }}</a>
+<div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:12px">{{ ui.twofaKey }}</div>
+<div style="font-family:ui-monospace,Menlo,monospace;font-size:14px;margin-top:4px;user-select:all;overflow-wrap:anywhere">{{ mfaSet.secret }}</div>
+</div>
+</div>
+<div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);margin-top:16px">{{ ui.twofaCode }}</div>
+<input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="{{ ui.twofaCode }}" value="{{ mfaSet.code }}" onChange="{{ mfaSet.onCode }}" onKeyDown="{{ mfaSet.key }}" style="width:100%;box-sizing:border-box;min-height:46px;padding:0 14px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:18px;letter-spacing:0.3em;margin-top:6px">
+<sc-if value="{{ mfaSet.err }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size:13px;color:var(--color-accent);margin-top:8px">{{ mfaSet.err }}</div></sc-if>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+<button onClick="{{ mfaSet.verify }}" disabled="{{ mfaSet.busy }}" style="min-height:46px;padding:0 18px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ mfaSet.verifyLabel }}</button>
+<sc-if value="{{ mfaSet.canCancel }}" hint-placeholder-val="{{ true }}"><button onClick="{{ mfaSet.cancel }}" style="min-height:46px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaCancel }}</button></sc-if>
+</div>
+</sc-if>
+</sc-if>
+<button onClick="{{ lockSignOut }}" style="width:100%;min-height:44px;margin-top:10px;text-align:left;padding:0 16px;font-size:13px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.signOut }}</button>
+</div>
+</div>
+</sc-if>
 <sc-if value="{{ isLocked }}" hint-placeholder-val="{{ false }}">
 <div style="position:fixed;inset:0;z-index:50;background:var(--s-bg);display:flex;align-items:center;justify-content:center;padding:40px">
 <div style="width:100%;max-width:420px">
@@ -1214,6 +1289,7 @@
 <div style="margin-top:10px;font-size:12px;color:var(--color-accent)">{{ lockErr }}</div>
 </sc-if>
 <button onClick="{{ unlock }}" style="width:100%;min-height:50px;margin-top:16px;text-align:left;padding:0 16px;font-size:14px;background:var(--color-accent);border:0;color:var(--s-bg);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.unlockBtn }}</button>
+<sc-if value="{{ bioUnlock.on }}" hint-placeholder-val="{{ false }}"><button onClick="{{ bioUnlock.go }}" style="width:100%;min-height:50px;margin-top:10px;text-align:left;padding:0 16px;font-size:14px;background:transparent;border:1px solid var(--color-accent);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.unlockBio }}</button></sc-if>
 <button onClick="{{ lockSignOut }}" style="width:100%;min-height:44px;margin-top:9px;text-align:left;padding:0 16px;font-size:12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;cursor:pointer">{{ ui.notYou }}</button>
 </div>
 </div>
@@ -1441,6 +1517,9 @@ class Component extends DCLogic {
     window.addEventListener('resize', this._onResize);
     // A tapped news alert: …#alert=<ids> on opening, or a message from the service worker
     // (hif-sw.js) when the app was already open.
+    // Face ID / Touch ID on this device (hif-unlock.js), for the lock screen.
+    const bioCheck = () => window.HIFUnlock ? window.HIFUnlock.available().then(v => this.setState({ bioAvail: v })) : setTimeout(bioCheck, 200);
+    bioCheck();
     this._onHash = () => this.openAlertFromHash();
     window.addEventListener('hashchange', this._onHash);
     this._onSwMsg = e => { const d = e && e.data; if (d && d.type === 'hif-open' && /^#alert=/.test(d.hash || '')) { location.hash = d.hash; this.openAlertFromHash(); } };
@@ -1878,6 +1957,87 @@ class Component extends DCLogic {
       }).catch(() => {});
     }).catch(() => tries < 5 ? setTimeout(() => load(tries + 1), 1500) : this.setState({ alertRows: [] }));
     load(0);
+  }
+  // Two-factor sign-in (hif-auth.js mfa*): the code asked once per device at sign-in; an
+  // administrator account must set it up before using the app. Face ID / Touch ID for the
+  // lock screen (hif-unlock.js).
+  mfaVals(u, signedIn, sessionEmail) {
+    const s = this.state, A = window.HIFAuth, live = !!(s.authLive && signedIn && A && A.mfa);
+    const M = live ? A.mfa() : { enrolled:false, verified:false, needed:false };
+    const adminSetup = live && !!s.isAdmin && !M.enrolled;
+    const gate = live && !s.locked && (M.needed || adminSetup);
+    const errOf = e => e === 'bad_code' ? (u.twofaBadCode || 'Wrong code') : e === 'rate_limited' ? (u.authErrRate || 'Too many attempts') : (u.authErrFailed || 'Something went wrong');
+    const E = s.mfaEnroll || null, code = s.mfaCode || '';
+    const verifySetup = () => {
+      if (!E || s.mfaBusy) return;
+      if (!/^\d{6}$/.test(code)) return this.setState({ mfaErr: u.twofaBadCode });
+      this.setState({ mfaBusy: true, mfaErr: '' });
+      A.mfaVerify(code, E.factorId).then(r => {
+        if (r.error) return this.setState({ mfaBusy: false, mfaErr: errOf(r.error), mfaCode: '' });
+        this.logEvent('twofa_on');
+        this.setState({ mfaBusy: false, mfaEnroll: null, mfaCode: '', mfaErr: '' });
+        this.flash((u.twofaDone || 'Two-factor authentication is on.').toUpperCase());
+        if (gate) location.reload();
+      });
+    };
+    const uid = (s.session && s.session.userId) || '', H = window.HIFUnlock, bioOn = !!(H && uid && H.enabled(uid));
+    const challengeVerify = () => {
+      const c = s.mfaChallengeCode || '';
+      if (s.mfaBusy) return;
+      if (!/^\d{6}$/.test(c)) return this.setState({ mfaChallengeErr: u.twofaBadCode });
+      this.setState({ mfaBusy: true, mfaChallengeErr: '' });
+      A.mfaVerify(c).then(r => {
+        if (r.error) { this.logEvent('unlock_failed', '2fa'); return this.setState({ mfaBusy: false, mfaChallengeErr: errOf(r.error), mfaChallengeCode: '' }); }
+        // The data asked for before the code was given came back empty: start again.
+        location.reload();
+      });
+    };
+    return {
+      isMfaGate: gate, mfaGateCode: gate && M.needed, mfaGateSetup: gate && !M.needed && adminSetup,
+      mfaGateTitle: M.needed ? (u.mfaCodeTitle || 'Enter your code') : (u.mfaRequiredTitle || 'Set up two-factor authentication'),
+      mfaGateNote: M.needed ? (u.mfaCodeNote || 'This device is new to your account. Enter the 6-digit code from your authenticator app; it is asked once per device.')
+        : (u.mfaRequiredNote || 'Administrator accounts need two-factor authentication before they can be used.'),
+      mfaChallenge: { code: s.mfaChallengeCode || '', err: s.mfaChallengeErr || '', busy: !!s.mfaBusy, label: s.mfaBusy ? '…' : (u.mfaContinue || 'Continue'),
+        onCode: e => this.setState({ mfaChallengeCode: String(e.target.value || '').replace(/\D/g, '').slice(0, 6), mfaChallengeErr: '' }),
+        key: e => { if (e.key === 'Enter') { e.preventDefault(); challengeVerify(); } }, verify: challengeVerify },
+      mfaSet: { showing: !!E, notShowing: !E, qr: E ? E.qr : '', secret: E ? E.secret : '', uri: E ? E.uri : '', code, err: s.mfaErr || '',
+        startErr: s.mfaStartErr || '', busy: !!s.mfaBusy, verifyLabel: s.mfaBusy ? '…' : u.twofaVerify, canCancel: !gate,
+        onCode: e => this.setState({ mfaCode: String(e.target.value || '').replace(/\D/g, '').slice(0, 6), mfaErr: '' }),
+        key: e => { if (e.key === 'Enter') { e.preventDefault(); verifySetup(); } },
+        start: () => {
+          if (!live || s.mfaBusy) return;
+          this.setState({ mfaBusy: true, mfaStartErr: '' });
+          A.mfaEnroll().then(r => this.setState(r.error ? { mfaBusy: false, mfaStartErr: errOf(r.error) } : { mfaBusy: false, mfaEnroll: r, mfaCode: '', mfaErr: '' }));
+        },
+        verify: verifySetup,
+        cancel: () => this.setState({ mfaEnroll: null, mfaCode: '', mfaErr: '' }) },
+      twofaState: !live ? (u.twofaNote || '') : M.enrolled ? (u.twofaOnNote || 'On. A new device asks for a code once, at sign-in.') + (s.isAdmin ? ' ' + (u.twofaAdminKeep || 'Required for administrator accounts.') : '')
+        : (u.twofaNote || ''),
+      twofaCanStart: live && !M.enrolled && !E, twofaCanStop: live && M.enrolled && M.verified && !s.isAdmin,
+      twofaStop: () => {
+        if (s.mfaBusy) return;
+        this.setState({ mfaBusy: true, mfaStartErr: '' });
+        A.mfaUnenroll().then(r => {
+          if (r.error) return this.setState({ mfaBusy: false, mfaStartErr: errOf(r.error) });
+          this.logEvent('twofa_off');
+          this.setState({ mfaBusy: false });
+          this.flash((u.twofaOffDone || 'Two-factor authentication is off.').toUpperCase());
+        });
+      },
+      bio: { show: live && !!s.bioAvail, note: s.bioMsg || (bioOn ? (u.bioOnNote || 'On for this device.') : (u.bioNote || '')),
+        canAct: true, label: bioOn ? (u.bioOff || 'Turn off') : (u.bioOn || 'Turn on'),
+        bg: bioOn ? 'transparent' : 'var(--color-accent)', ink: bioOn ? 'var(--color-accent)' : 'var(--s-on-accent)',
+        act: () => {
+          if (!H) return;
+          if (bioOn) { H.disable(uid); return this.setState({ bioMsg: '' }); }
+          H.enable(uid, sessionEmail, s.session && s.session.name).then(r => this.setState({ bioMsg: r.ok ? '' : r.error === 'cancelled' ? '' : (u.bioFailed || 'It could not be turned on.') }));
+        } },
+      bioUnlock: { on: live && !!s.locked && bioOn,
+        go: () => H.unlock(uid).then(r => {
+          if (r.ok) { this.setState({ locked: false, lockPw: '', lockErr: '' }); this.touch(); return; }
+          if (r.error !== 'cancelled') { this.logEvent('unlock_failed', 'face id'); this.setState({ lockErr: u.bioNotRecognised || 'Not recognised. Try again or use your password.' }); }
+        }) }
+    };
   }
   alertVals(u) {
     const s = this.state, rows = s.alertRows, lang = String(this.lang || 'EN').toLowerCase(), SUMS = s.summaries || {};
@@ -3501,12 +3661,14 @@ class Component extends DCLogic {
         if (!(s.lockPw || '').length) { this.logEvent('unlock_failed'); return this.setState({ lockErr: u.authErrPw }); }
         const done = () => { this.setState({ locked:false, lockPw:'', lockErr:'' }); this.touch(); };
         if (!s.authLive) return done();
-        // A real account unlocks only with its real password, checked by Supabase.
-        window.HIFAuth.signIn(sessionEmail, s.lockPw).then(r => {
+        // A real account unlocks only with its real password, checked by Supabase; the
+        // device keeps its session (and its two-factor level), so no code is asked.
+        window.HIFAuth.checkPassword(sessionEmail, s.lockPw).then(r => {
           if (r.error) { this.logEvent('unlock_failed'); return this.setState({ lockErr:this.authMessage(r.error), lockPw:'' }); }
           done();
         });
       },
+      ...this.mfaVals(u, signedIn, sessionEmail),
       lockSignOut: () => { this.logEvent('signout'); if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, locked:false, lockPw:'', lockErr:'' }); },
       isFreeTier: isFree, isProTier: !isFree,
       nav: navList,
