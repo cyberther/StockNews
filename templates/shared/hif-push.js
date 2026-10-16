@@ -239,6 +239,14 @@ async function loadFilings(ticker) {
   return r.ok && Array.isArray(r.body) ? r.body : null;
 }
 
+// A Bucharest listing's report dates, general meeting and dividend dates, from its
+// financial calendar (supabase/calendar.sql), oldest first.
+async function loadReportDates(ticker) {
+  if (!live() || !ticker) return null;
+  const r = await auth().rest('report_dates?select=kind,year,q,day,hour,label&ticker=eq.' + encodeURIComponent(ticker) + '&order=day.asc&limit=100');
+  return r.ok && Array.isArray(r.body) ? r.body : null;
+}
+
 // The user's drawings on one ticker's chart (supabase/drawings.sql), [] when none.
 async function loadDrawings(ticker) {
   if (!live() || !ticker) return [];
@@ -256,5 +264,5 @@ async function saveDrawings(ticker, list) {
   return true;
 }
 
-window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadDrawings, saveDrawings, supported };
+window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadReportDates, loadDrawings, saveDrawings, supported };
 })();
