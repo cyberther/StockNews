@@ -198,3 +198,23 @@ test('an article filed under several tickers is written once per language', () =
     .map(([id, lang]) => ({ story: { id }, lang }));
   assert.deepEqual(dedupeQueue(q).map(x => x.story.id + '|' + x.lang), ['AAPL:142903568|ro', 'AAPL:142903568|de', 'MSFT:1|ro']);
 });
+
+import { digestLooksWrong, digestKey, digestsToWrite } from '../tools/summarize-batch.mjs';
+
+test('a day of two or three stories about one event may have a one-bullet digest', () => {
+  const one = '• Commerzbank a anunțat răscumpărarea de acțiuni de 1 miliard de euro, aprobată de BCE.';
+  assert.equal(digestLooksWrong(one, 'ro', 2), '');
+  assert.equal(digestLooksWrong(one, 'ro', 3), '');
+  assert.equal(digestLooksWrong(one, 'ro', 4), 'too few bullets');
+  assert.equal(digestLooksWrong('', 'ro', 1), 'too few bullets');
+});
+
+test('a digest the model got wrong is passed over, and the ones behind it get their turn', () => {
+  const rows = ['CBK.DE', 'ITV.L', 'TEL.RO', 'SNP.RO', 'BMW.DE'].map(ticker => ({ ticker, day: '2026-10-15', stories: [{}, {}] }));
+  const rejected = { [digestKey(rows[0], 'ro')]: 1, [digestKey(rows[1], 'ro')]: 1, [digestKey(rows[2], 'ro')]: 1 };
+  assert.deepEqual(digestsToWrite(rows, 'ro', rejected, 3).map(r => r.ticker), ['SNP.RO', 'BMW.DE']);
+  // Another language, or the same day with more stories, is tried again.
+  assert.equal(digestsToWrite(rows, 'de', rejected, 3).length, 3);
+  const more = Object.assign({}, rows[0], { stories: [{}, {}, {}] });
+  assert.deepEqual(digestsToWrite([more], 'ro', rejected, 3).map(r => r.ticker), ['CBK.DE']);
+});
