@@ -2551,10 +2551,10 @@ class Component extends DCLogic {
       // Averages over the price, indicators in panes under it; remembered on this device.
       avgs: this.constructor.LC_AVERAGES.map(([id, label, c]) => { const on = !!(s.lcAvg || {})[id]; return { label, on, color: 'var(--lc-' + c + ')', swatch: on ? 1 : 0.45,
         ink: on ? 'var(--s-ink)' : 'var(--s-mute)', edge: on ? 'var(--lc-' + c + ')' : 'var(--s-rule)',
-        toggle: () => { const next = Object.assign({}, s.lcAvg, { [id]: !on }); this.setState({ lcAvg: next }); this.lcRemember('lcAvg', next); if (this._lc) this._lc.setAverages(next); } }; }),
+        toggle: () => { const next = Object.assign({}, this.state.lcAvg, { [id]: !(this.state.lcAvg || {})[id] }); this.setState({ lcAvg: next }); this.lcRemember('lcAvg', next); if (this._lc) this._lc.setAverages(next); } }; }),
       inds: [['macd', 'MACD'], ['dmi', 'DMI'], ['rsi', 'RSI']].map(([id, label]) => { const on = !!(s.lcInd || {})[id]; return { label, on, hint: u['lcInd_' + id] || '',
         bg: on ? 'var(--color-accent)' : 'transparent', ink: on ? 'var(--s-on-accent)' : 'var(--s-mute)', edge: on ? 'var(--color-accent)' : 'var(--s-rule)',
-        toggle: () => { const next = Object.assign({}, s.lcInd, { [id]: !on }); this.setState({ lcInd: next }); this.lcRemember('lcInd', next); if (this._lc) this._lc.setIndicators(next); } }; }),
+        toggle: () => { const next = Object.assign({}, this.state.lcInd, { [id]: !(this.state.lcInd || {})[id] }); this.setState({ lcInd: next }); this.lcRemember('lcInd', next); if (this._lc) this._lc.setIndicators(next); } }; }),
       pens: this.constructor.LC_PENS.map(c => { const on = (s.lcPen || 'blue') === c; return { color: 'var(--lc-' + c + ')', on, label: (u.lcColor || 'Line colour') + ': ' + (u['lcPen_' + c] || c),
         edge: on ? 'var(--s-ink)' : 'transparent', pick: () => { this.setState({ lcPen: c }); this.lcRemember('lcPen', c); if (this._lc) this._lc.setPen(c); } }; }),
       zoomIn: () => this._lc && this._lc.zoom(0.7), zoomOut: () => this._lc && this._lc.zoom(1.45), reset: () => this._lc && this._lc.reset(),
