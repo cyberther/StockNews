@@ -162,6 +162,8 @@ test('candles: bars in an old unit dropped, a late day added, weeks grouped into
   const chart = (meta, t, c) => ({ chart: { result: [{ meta, timestamp: t, indicators: { quote: [{ open: c, high: c.map(x => x * 1.01), low: c.map(x => x * 0.99), close: c, volume: c.map(() => 5) }] } }] } });
   const old = compactCandles(chart({ dataGranularity: '1mo' }, [1, 2, 3, 4], [400, 410, 1.2, 1.3]), '1mo');
   assert.deepEqual(old.c, [1.2, 1.3]);
+  const turn = compactCandles({ chart: { result: [{ meta: {}, timestamp: [1, 2], indicators: { quote: [{ open: [3729, 0.39], high: [3729, 0.4], low: [0.37, 0.38], close: [0.384, 0.39], volume: [1, 1] }] } }] } });
+  assert.deepEqual([turn.o[0], turn.h[0], turn.l[0]], [0.384, 0.384, 0.37]);
   const day = 86400, t0 = 20000 * day + 7 * 3600;
   const late = compactCandles(chart({ dataGranularity: '1d', regularMarketPrice: 1.305, regularMarketTime: t0 + day + 5 * 3600, regularMarketDayHigh: 1.31, regularMarketDayLow: 1.25, gmtoffset: 10800 },
     [t0 - day, t0], [1.24, 1.258]), '1d');

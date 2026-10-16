@@ -43,6 +43,12 @@ function cleanScale(out) {
     const r = out.c[i - 1] / out.c[i];
     if (r > 10 || r < 0.1) { keys.forEach(k => out[k].splice(0, i)); break; }
   }
+  // The bar where the unit changed can still open or peak in the old one: those prices are
+  // replaced by the close.
+  const off = (x, i) => x / out.c[i] > 10 || x / out.c[i] < 0.1;
+  out.o = out.o.map((o, i) => (off(o, i) ? out.c[i] : o));
+  out.h = out.h.map((h, i) => (off(h, i) ? Math.max(out.o[i], out.c[i]) : h));
+  out.l = out.l.map((l, i) => (off(l, i) ? Math.min(out.o[i], out.c[i]) : l));
   out.h = out.h.map((h, i) => Math.min(h, Math.max(out.o[i], out.c[i]) * 5));
   out.l = out.l.map((l, i) => Math.max(l, Math.min(out.o[i], out.c[i]) / 5));
 }
