@@ -26,6 +26,7 @@ const ASK = today => `This is a company's financial calendar (calendar financiar
 - kind "agm": a general meeting of shareholders (AGA, AGOA, AGEA, adunarea generală). year = the year of the meeting; quarter null. Only its first convening.
 - kind "ex_dividend" (ex-date / data ex-dividend), "record_date" (data de înregistrare), "payment_date" (data plății dividendelor): year = the year of the date; quarter null.
 date: YYYY-MM-DD. time: "bmo" when published before the market opens (before 10:00, "înainte de deschiderea"), "amc" after it closes (after 17:45, "după închiderea"), else null. label: the event as written, max 8 words.
+date is the day the event happens or the document is published, never the end of the period reported on ("Raportul trimestrial la 30.09.2026" is published later, on its own date).
 In a table, a row's date belongs to every event in that row (results published with their conference call share its date).
 Skip quiet periods, date ranges, conference calls, and events with no exact date.`;
 
@@ -36,9 +37,14 @@ export const tableRows = html => String(html || '').replace(/<tr[\s>][\s\S]*?<\/
   '\n' + row.replace(/<br\s*\/?>|<\/(?:p|div|li|span)>/gi, ' ').replace(/<\/t[dh]>/gi, ' | ').replace(/\n/g, ' ') + '\n');
 
 // Checks the model's events; returns the ones fit to save ({ kind, year, q, day, hour, label }).
+// .wrong counts events dropped for a date that can't be right (results dated before their
+// quarter ended: the model took the period's end for the publication day).
 export function checkEvents(d, today = new Date().toISOString().slice(0, 10)) {
-  if (!d || !Array.isArray(d.events)) return [];
-  const t = Date.parse(today + 'T00:00:00Z'), out = new Map();
+  const out = new Map();
+  let wrong = 0;
+  const done = () => Object.assign([...out.values()], { wrong });
+  if (!d || !Array.isArray(d.events)) return done();
+  const t = Date.parse(today + 'T00:00:00Z');
   for (const e of d.events) {
     if (!e || !KINDS.includes(e.kind) || !/^\d{4}-\d{2}-\d{2}$/.test(e.date || '')) continue;
     const at = Date.parse(e.date + 'T00:00:00Z');
@@ -49,8 +55,9 @@ export function checkEvents(d, today = new Date().toISOString().slice(0, 10)) {
     if (e.kind === 'results' || e.kind === 'trading_update') {
       q = Number.isInteger(e.quarter) && e.quarter >= 1 && e.quarter <= 4 ? e.quarter : 0;
       if (!q) continue;
-      // Results come out in their year or the next one.
+      // Results come out in their year or the next one, after their quarter has ended.
       if (year !== dy && year !== dy - 1) continue;
+      if (e.date <= new Date(Date.UTC(year, q * 3, 0)).toISOString().slice(0, 10)) { wrong++; continue; }
     } else if (e.kind === 'annual_report') {
       if (year !== dy - 1 && year !== dy) continue;
     } else {
@@ -60,7 +67,7 @@ export function checkEvents(d, today = new Date().toISOString().slice(0, 10)) {
     const hour = e.time === 'bmo' || e.time === 'amc' ? e.time : null;
     out.set(e.kind + '|' + year + '|' + q, { kind: e.kind, year, q, day: e.date, hour, label: String(e.label || '').trim().slice(0, 120) });
   }
-  return [...out.values()];
+  return done();
 }
 
 // deps: { cfg: { secret, lmUrl, model }, rpc, postJson, httpGet, allowed(url), log, ua, deadline (ms) }
@@ -92,6 +99,7 @@ export async function runCalendars(limit, deps) {
       if (c.content_hash === hash) { await save('same', hash); log('calendar', c.ticker, 'unchanged'); continue; }
       const today = new Date().toISOString().slice(0, 10);
       const input = `Company: ${c.ticker}\nDocument title: ${c.title || '(none)'}\nAddress: ${c.url}\n\n${ASK(today)}\n\nDocument text:\n${text}`;
+      // A second try when the first reply has no dates or a wrong one; the better reply is kept.
       let events = [];
       for (const temperature of [0, 0.3]) {
         const res = await postJson(`${cfg.lmUrl}/chat/completions`, { model: cfg.model, temperature, max_tokens: 3000,
@@ -99,8 +107,9 @@ export async function runCalendars(limit, deps) {
           messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: input }] }, 900_000);
         if (res.status !== 200) throw new Error(`model: ${res.status} ${res.body.slice(0, 200)}`);
         const d = JSON.parse(res.body);
-        events = checkEvents(parseJson(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content), today);
-        if (events.length) break;
+        const got = checkEvents(parseJson(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content), today);
+        if (!events.length || got.wrong < events.wrong || (got.wrong === events.wrong && got.length > events.length)) events = got;
+        if (events.length && !events.wrong) break;
       }
       if (!events.length) { await save('none', hash); log('calendar', c.ticker, 'no dates', c.url); continue; }
       const n = await save('ok', hash, events);

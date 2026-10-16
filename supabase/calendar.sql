@@ -57,7 +57,8 @@ declare n integer;
 begin
   if not public.summary_secret_ok(p_secret) then raise exception 'not allowed' using errcode = '42501'; end if;
   with r as (
-    select upper(x->>'ticker') ticker, x->>'url' url, left(coalesce(x->>'title', ''), 300) title, nullif(x->>'year', '')::int y
+    -- One row per address (two listings of one group can share a site).
+    select distinct on (x->>'url') upper(x->>'ticker') as ticker, x->>'url' as url, left(coalesce(x->>'title', ''), 300) as title, nullif(x->>'year', '')::int as y
     from jsonb_array_elements(coalesce(p_rows, '[]'::jsonb)) x
   ), ins as (
     insert into public.calendar_docs (ticker, url, title, year)
