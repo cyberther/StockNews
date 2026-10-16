@@ -81,15 +81,22 @@ function attribute(input) {
 // ------------------------------------------------------------------ positions
 // A watchlist is curiosity; a position is exposure. Everything downstream
 // (alerts, ranking, the daily close) reads from these numbers.
-function position(pos, priceStr, movePct, currency) {
+// London listings are priced in pence (the price and the average price a position was
+// bought at), while their amounts (value, gain) are in pounds, as UK brokers show them.
+const inPence = t => /\.L$/.test(String(t || ''));
+const unitScale = t => inPence(t) ? 0.01 : 1;
+
+// scale turns price x shares into the amount's currency: 0.01 for pence into pounds.
+function position(pos, priceStr, movePct, currency, scale) {
   if (!pos || !pos.shares) return null;
+  const k = scale || 1;
   const price = num(priceStr), shares = num(pos.shares), cost = num(pos.cost);
   if (price == null || !shares) return null;
-  const value = price * shares;
+  const value = price * shares * k;
   const move = pctNum(movePct) || 0;
   const prevPrice = price / (1 + move / 100);
-  const dayPL = (price - prevPrice) * shares;
-  const totalPL = cost == null ? null : (price - cost) * shares;
+  const dayPL = (price - prevPrice) * shares * k;
+  const totalPL = cost == null ? null : (price - cost) * shares * k;
   const plPct = (cost == null || !cost) ? null : (price / cost - 1) * 100;
   return {
     shares, cost, price, value,
@@ -102,7 +109,7 @@ function position(pos, priceStr, movePct, currency) {
 
 function portfolio(positions, priceOf, moveOf, currency) {
   const rows = Object.keys(positions || {}).map(t => {
-    const p = position(positions[t], priceOf(t), moveOf(t), currency);
+    const p = position(positions[t], priceOf(t), moveOf(t), currency, unitScale(t));
     return p ? Object.assign({ ticker:t }, p) : null;
   }).filter(Boolean);
   const value = rows.reduce((a,r) => a + r.value, 0);
@@ -130,6 +137,8 @@ const amt = (v, cur) => v == null ? NONE : (v < 0 ? '−' : '') + fmt(Math.abs(v
 const signedAmt = (v, cur) => v == null ? NONE : sgn(v) + fmt(Math.abs(v), 2) + ' ' + cur;
 const pctL = v => v == null ? NONE : sgn(v) + fmt(Math.abs(v), 2) + '%';
 const priceL = v => v == null ? NONE : fmt(v, v < 10 ? 4 : 2);
+// A London price: "99.40p" (pence get 2 decimals unless under a penny).
+const penceL = v => v == null ? NONE : fmt(v, v < 1 ? 4 : 2) + 'p';
 const qtyL = v => v.toLocaleString(LOC() || 'en-US', { maximumFractionDigits:4 });
 
 function holdings(positions, quoteOf) {
@@ -137,14 +146,16 @@ function holdings(positions, quoteOf) {
   Object.keys(positions || {}).forEach(t => {
     const p = positions[t] || {}, shares = num(p.shares), avg = num(p.cost);
     if (!shares || shares <= 0) return;
-    const q = quoteOf(t) || {}, cur = q.currency || 'USD';
+    const q = quoteOf(t) || {}, pence = inPence(t), k = pence ? 0.01 : 1;
+    // A London position's amounts are in pounds; its prices stay in pence.
+    const cur = pence ? 'GBP' : q.currency || 'USD';
     const price = num(q.price), move = pctNum(q.move);
-    const value = price == null ? null : price * shares;
-    const cost = avg == null ? null : avg * shares;
+    const value = price == null ? null : price * shares * k;
+    const cost = avg == null ? null : avg * shares * k;
     const pl = value != null && cost != null ? value - cost : null;
     const plPct = pl != null && cost ? pl / cost * 100 : null;
     const dayPL = value != null && move != null ? value - value / (1 + move / 100) : null;
-    rows.push({ ticker:t, name:q.name || '', currency:cur, shares, avg, price, move, value, cost, pl, plPct, dayPL });
+    rows.push({ ticker:t, name:q.name || '', currency:cur, pence, shares, avg, price, move, value, cost, pl, plPct, dayPL });
   });
   const groups = {};
   rows.forEach(r => {
@@ -160,8 +171,8 @@ function holdings(positions, quoteOf) {
     Object.assign(r, {
       weight,
       qtyLabel: qtyL(r.shares),
-      avgLabel: priceL(r.avg),
-      priceLabel: r.price == null ? NONE : priceL(r.price) + ' ' + r.currency,
+      avgLabel: r.pence ? penceL(r.avg) : priceL(r.avg),
+      priceLabel: r.price == null ? NONE : r.pence ? penceL(r.price) : priceL(r.price) + ' ' + r.currency,
       valueLabel: amt(r.value, r.currency),
       costLabel: amt(r.cost, r.currency),
       plLabel: signedAmt(r.pl, r.currency),
@@ -192,7 +203,7 @@ function holdings(positions, quoteOf) {
 // (that ticker is then left out and `partial` is set).
 function portfolioSeries(positions, chartOf, currencyOf, currency) {
   const held = Object.keys(positions || {}).filter(t => num((positions[t] || {}).shares) > 0 && (currencyOf(t) || 'USD') === currency);
-  const lines = held.map(t => ({ t, shares: num(positions[t].shares), avg: num(positions[t].cost), pts: chartOf(t) }));
+  const lines = held.map(t => ({ t, shares: num(positions[t].shares) * unitScale(t), avg: num(positions[t].cost), pts: chartOf(t) }));
   const ready = lines.filter(l => Array.isArray(l.pts) && l.pts.length);
   const loading = lines.some(l => l.pts === undefined);
   if (!ready.length || loading) return { points: [], loading, currency, cost: 0 };
@@ -392,5 +403,5 @@ function sameEvent(rows, namesOf) {
   return [...groups.values()];
 }
 
-window.HIFInsight = { sameEvent, attribute, position, portfolio, holdings, portfolioSeries, portfolioLabels, amt, signedAmt, pctL, conflicts, crowding, bookCrowding, ledger, money, signed, num };
+window.HIFInsight = { sameEvent, attribute, position, unitScale, portfolio, holdings, portfolioSeries, portfolioLabels, amt, signedAmt, pctL, conflicts, crowding, bookCrowding, ledger, money, signed, num };
 })();

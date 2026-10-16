@@ -61,8 +61,20 @@ async function callDirect(path, params, token){
   if (!res.ok) throw new Error('finnhub ' + res.status);
   return res.json();
 }
-// Proxy first (unless known missing), then direct with the page token.
-async function get(path, params, token){
+// Proxy first (unless known missing), then direct with the page token. The same request
+// asked for again while it is still on its way (the watchlist, the feed and a ticker's page
+// often want one symbol at once) shares the first one's answer instead of going out twice.
+const inflight = new Map();
+function get(path, params, token){
+  const key = path + '?' + qs(params || {});
+  if (inflight.has(key)) return inflight.get(key);
+  const p = fetchOnce(path, params, token);
+  inflight.set(key, p);
+  const done = () => { if (inflight.get(key) === p) inflight.delete(key); };
+  p.then(done, done);
+  return p;
+}
+async function fetchOnce(path, params, token){
   if (proxyState !== 'no') {
     try { const j = await callProxy(path, params); if (j) return j; }
     catch (e) { if (proxyState === 'unknown') proxyState = 'no'; else throw e; }
@@ -71,7 +83,10 @@ async function get(path, params, token){
 }
 function available(token){ return proxyState !== 'no' || !!token; }
 
-function fmtPrice(v){ return v == null ? null : Number(v).toFixed(2); }
+// Small prices keep their digits (0.9940, 4.125), so a quote under 10 isn't rounded away.
+function fmtPrice(v){ if (v == null) return null; const n = Number(v), a = Math.abs(n); return n.toFixed(a < 1 ? 4 : a < 10 ? 3 : 2); }
+// London listings are quoted in pence, as on the exchange: "99.40p".
+const isPence = symbol => /\.L$/.test(String(symbol || ''));
 function fmtPct(v){ if (v == null) return null; const n = Number(v); return (n < 0 ? '−' : '+') + Math.abs(n).toFixed(1) + '%'; }
 // When a story was published, in the reader's locale: "12 Oct · 10:24", with the year
 // added for anything outside the current year.
@@ -87,12 +102,13 @@ async function quote(symbol, token){
   if (!available(token)) return null;
   const hit = fresh('quote', symbol); if (hit) return hit;
   const j = await get('/quote', { symbol: symbol }, token);
-  return put('quote', symbol, shapeQuote(j));
+  return put('quote', symbol, shapeQuote(j, symbol));
 }
 // last/dp keep full precision for position maths; price/move are the display strings.
-function shapeQuote(j){
+function shapeQuote(j, symbol){
   if (!j || j.c == null || j.c === 0) return null;
-  return { price: fmtPrice(j.c), move: fmtPct(j.dp), up: Number(j.dp) >= 0, changeAbs: fmtPrice(j.d),
+  const unit = isPence(symbol) ? 'p' : '', f = v => { const t = fmtPrice(v); return t == null ? null : t + unit; };
+  return { price: f(j.c), move: fmtPct(j.dp), up: Number(j.dp) >= 0, changeAbs: f(j.d),
     last: Number(j.c), dp: j.dp == null ? null : Number(j.dp) };
 }
 
@@ -110,7 +126,7 @@ async function quotes(symbols, token){
     try {
       const j = await callProxy('/quotes', { symbols: need.join(',') });
       if (j && j.quotes) {
-        need.forEach(s => { const q = put('quote', s, shapeQuote(j.quotes[s])); if (q) out[s] = q; });
+        need.forEach(s => { const q = put('quote', s, shapeQuote(j.quotes[s], s)); if (q) out[s] = q; });
         return out;
       }
     } catch (e) { if (/proxy 400/.test(e.message)) batchQuotes = false; }
@@ -301,8 +317,9 @@ async function recommendation(symbol, token){
   if (!available(token)) return null;
   const hit = fresh('recs', symbol); if (hit) return hit;
   let j;
+  // A failed call (busy, rate limited) isn't remembered as "no analysts": asked again later.
   try { j = await get('/stock/recommendation', { symbol: symbol }, token); }
-  catch (e) { return put('recs', symbol, null); }
+  catch (e) { return null; }
   const r = Array.isArray(j) && j.length ? j[0] : null;
   if (!r) return put('recs', symbol, null);
   const buy = (r.strongBuy || 0) + (r.buy || 0), hold = r.hold || 0, sell = (r.sell || 0) + (r.strongSell || 0);
@@ -328,16 +345,19 @@ async function search(q, token){
     try { const p = await profile(sym, token); if (p && p.name) local.unshift({ ticker: sym, name: p.name, exchange: /\.L$/.test(sym) ? 'LSE' : /\.RO$/.test(sym) ? 'BVB' : 'XETRA' }); } catch (e) {}
   }
   const hit = fresh('search', q);
-  let rows = hit;
+  let rows = hit, failed = null;
   if (!rows) {
+    // A failed US search (busy, rate limited) isn't remembered, and doesn't stop the
+    // London, Frankfurt and Bucharest tries below, which come from other market data.
     let j = null;
-    try { j = await get('/search', { q: q }, token); } catch (e) { if (!local.length) throw e; }
-    rows = put('search', q, ((j && j.result) || [])
+    try { j = await get('/search', { q: q }, token); } catch (e) { failed = e; }
+    const found = ((j && j.result) || [])
       // US listings: plain symbols and share classes (BRK.B, BF.A); other exchanges' listings
       // ("BMW.DE") come from the catalogs above.
       .filter(r => r.symbol && (r.symbol.indexOf('.') < 0 || /^[A-Z]{1,5}\.[A-C]$/.test(r.symbol)) && r.type !== 'Crypto')
       .slice(0, 12)
-      .map(r => ({ ticker: r.symbol, name: r.description || r.displaySymbol || r.symbol })));
+      .map(r => ({ ticker: r.symbol, name: r.description || r.displaySymbol || r.symbol }));
+    rows = failed ? found : put('search', q, found);
   }
   const all = local.concat(rows.filter(r => !local.some(x => x.ticker === r.ticker)));
   // A bare symbol ("pzc") that matches nothing exactly: the same symbol in London,
@@ -348,6 +368,7 @@ async function search(q, token){
       profile(bare + suf, token).then(p => p && p.name ? { ticker: bare + suf, name: p.name, exchange: ex } : null).catch(() => null));
     (await Promise.all(tries)).filter(Boolean).forEach(r => all.unshift(r));
   }
+  if (!all.length && failed) throw failed;
   return all;
 }
 

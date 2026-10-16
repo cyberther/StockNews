@@ -51,18 +51,21 @@ test('.DE and .L news comes from the press, without sign-in and without Finnhub'
   assert.ok(!seen.some(u => u.includes('finnhub')));
 });
 
-test('London prices in pence become pounds, in quotes and charts', async () => {
+test('London prices stay in pence, in quotes, charts and names', async () => {
   const data = { chart: { result: [{ meta: { currency: 'GBp', regularMarketPrice: 7250, chartPreviousClose: 7100, longName: 'Vodafone Group' },
     timestamp: [1, 2], indicators: { quote: [{ close: [7100, 7250], volume: [10, 20] }] } }] } };
   const q = await yahoo.transform('quote', data, { symbol: 'VOD.L' });
-  assert.equal(q.c, 72.5);
-  assert.equal(q.pc, 71);
+  assert.equal(q.c, 7250);
+  assert.equal(q.pc, 7100);
   const c = await yahoo.transform('chart', data, { symbol: 'VOD.L' });
-  assert.equal(c.chart.result[0].meta.currency, 'GBP');
-  assert.deepEqual(c.chart.result[0].indicators.quote[0].close, [71, 72.5]);
-  assert.deepEqual(c.chart.result[0].indicators.quote[0].volume, [10, 20]);
+  assert.equal(c.chart.result[0].meta.currency, 'GBp');
+  assert.deepEqual(c.chart.result[0].indicators.quote[0].close, [7100, 7250]);
   const p = await yahoo.transform('profile', data, { symbol: 'VOD.L' });
-  assert.equal(p.currency, 'GBP');
+  assert.equal(p.currency, 'GBp');
+  // GBX is the same unit under another name.
+  const gbx = { chart: { result: [{ meta: { currency: 'GBX', regularMarketPrice: 99.4, chartPreviousClose: 97.8, longName: 'PZ Cussons plc' } }] } };
+  assert.equal((await yahoo.transform('profile', gbx, { symbol: 'PZC.L' })).currency, 'GBp');
+  assert.equal((await yahoo.transform('quote', gbx, { symbol: 'PZC.L' })).c, 99.4);
   // Euros are left alone.
   const eur = { chart: { result: [{ meta: { currency: 'EUR', regularMarketPrice: 197.3, chartPreviousClose: 194.5 } }] } };
   assert.equal((await yahoo.transform('quote', eur, { symbol: 'SAP.DE' })).c, 197.3);
