@@ -825,6 +825,7 @@
 <div style="padding:20px 0 18px"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.alertTypes }}</div><div style="font-size:13px;color:var(--s-mute);margin-top:5px;max-width:64ch;text-wrap:pretty">{{ ui.alertsWhat }}</div></div>
 <sc-if value="{{ pushRow.show }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ ui.pushDevice }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px;text-wrap:pretty">{{ pushRow.note }}</div></div><sc-if value="{{ pushRow.canAct }}" hint-placeholder-val="{{ true }}"><button onClick="{{ pushRow.act }}" style="flex:none;min-height:36px;padding:0 14px;background:{{ pushRow.bg }};border:1px solid var(--color-accent);color:{{ pushRow.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ pushRow.actionLabel }}</button></sc-if></div>
+<div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ ui.pushTest }}</div><div aria-live="polite" style="font-size:12px;color:var(--s-mute);margin-top:3px;text-wrap:pretty">{{ pushRow.testNote }}</div></div><button onClick="{{ pushRow.test }}" disabled="{{ pushRow.testBusy }}" style-hover="border-color:var(--color-accent)" style="flex:none;min-height:36px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ pushRow.testLabel }}</button></div>
 </sc-if>
 </div>
 <div style="display:flex;gap:10px;margin-top:20px">
@@ -3686,7 +3687,18 @@ class Component extends DCLogic {
           note: ({ on:u.pushDeviceOn, off:u.pushDeviceOff, denied:u.pushDeviceDenied, 'ios-install':u.pushDeviceIos, unsupported:u.pushDeviceNo })[dp] || '',
           canAct: dp === 'on' || dp === 'off', actionLabel: s.pushBusy ? '…' : (dp === 'on' ? u.pushTurnOff : u.pushTurnOn),
           act: () => this.togglePushDevice(),
-          bg: dp === 'on' ? 'transparent' : 'var(--color-accent)', ink: dp === 'on' ? 'var(--color-accent)' : 'var(--s-on-accent)' };
+          bg: dp === 'on' ? 'transparent' : 'var(--color-accent)', ink: dp === 'on' ? 'var(--color-accent)' : 'var(--s-on-accent)',
+          // A test alert to every device of the account (also checks a phone from the computer).
+          testBusy: !!s.pushTestBusy, testLabel: s.pushTestBusy ? '…' : (u.pushTestSend || 'Send a test'),
+          testNote: s.pushTestMsg || u.pushTestNote || 'Sends an alert with your latest stories to every device where alerts are on.',
+          test: () => {
+            const P = window.HIFPush;
+            if (!P || !P.testAlert || s.pushTestBusy) return;
+            this.setState({ pushTestBusy: true, pushTestMsg: '' });
+            P.testAlert().then(r => this.setState({ pushTestBusy: false, pushTestMsg: r.error === 'wait' ? (u.pushTestWait || 'Wait half a minute between tests.')
+              : r.error ? (u.pushTestErr || 'The test could not be sent.') : !r.devices ? (u.pushTestNone || 'No device has alerts on yet: turn them on first.')
+              : (u.pushTestSent || 'Sent to {n} of {d} devices.').replace('{n}', r.sent).replace('{d}', r.devices) }));
+          } };
       })(),
       toast: s.toast
     };
