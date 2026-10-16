@@ -320,6 +320,13 @@ async function search(q, token){
   const local = (window.HIFBVB ? window.HIFBVB.search(q, 6) : []).concat(window.HIFEU ? window.HIFEU.search(q, 6) : [])
     .map(r => ({ ticker: r.ticker, name: r.name, exchange: r.exchange }));
   if (!available(token)) return local.length ? local : null;
+  // An exact London or Frankfurt symbol outside the catalog (PZC.L): offered when the
+  // market data knows it, under its own name.
+  const exact = /^[A-Za-z0-9][A-Za-z0-9-]{0,9}\.(l|de)$/i.exec(q);
+  if (exact && !local.some(r => r.ticker.toUpperCase() === q.toUpperCase())) {
+    const sym = q.toUpperCase();
+    try { const p = await profile(sym, token); if (p && p.name) local.unshift({ ticker: sym, name: p.name, exchange: /\.L$/.test(sym) ? 'LSE' : 'XETRA' }); } catch (e) {}
+  }
   const hit = fresh('search', q);
   let rows = hit;
   if (!rows) {
