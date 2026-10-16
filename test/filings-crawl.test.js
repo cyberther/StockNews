@@ -86,8 +86,10 @@ test('financial calendar events: checked, keyed by event and year', async () => 
     { kind: 'agm', year: 2026, quarter: null, date: '2026-04-28', time: null, label: 'AGOA' },
     { kind: 'ex_dividend', year: 2025, quarter: null, date: '2026-05-14', time: null, label: 'Ex-date' },
     { kind: 'results', year: 2026, quarter: 1, date: '2026-02-30', time: null, label: 'no such day' },
-    { kind: 'results', year: 2019, quarter: 1, date: '2026-05-15', time: null, label: 'wrong year' }
+    { kind: 'results', year: 2019, quarter: 1, date: '2026-05-15', time: null, label: 'wrong year' },
+    { kind: 'results', year: 2026, quarter: 2, date: '2026-06-30', time: null, label: 'the period end, not the publication' }
   ] }, '2026-10-16');
+  assert.equal(ev.wrong, 1);
   assert.deepEqual(ev.map(e => [e.kind, e.year, e.q, e.day, e.hour]), [
     ['results', 2026, 3, '2026-11-13', null], ['results', 2026, 4, '2027-02-26', null],
     ['agm', 2026, 4, '2026-04-28', null], ['ex_dividend', 2026, 0, '2026-05-14', null]]);

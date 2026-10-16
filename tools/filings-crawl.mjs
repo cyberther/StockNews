@@ -268,7 +268,7 @@ async function main() {
   for (let i = 0; i < Math.max(rows.length, 1); i += 300) {
     saved += await rpc('filings_upsert', { p_secret: cfg.secret, p_rows: rows.slice(i, i + 300), p_sites: i === 0 ? sitesInfo : [] }) || 0;
   }
-  const cals = results.flatMap(r => r.calendars);
+  const cals = [...new Map(results.flatMap(r => r.calendars).map(c => [c.url, c])).values()];
   let calSaved = 0;
   for (let i = 0; i < cals.length; i += 200) {
     try { calSaved += await rpc('calendar_docs_upsert', { p_secret: cfg.secret, p_rows: cals.slice(i, i + 200) }) || 0; }
