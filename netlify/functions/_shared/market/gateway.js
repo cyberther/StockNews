@@ -506,7 +506,8 @@ export function publicRequest(cap, params, extraSymbols) {
   return false;
 }
 // true for a valid session of an account the owner has approved (supabase/approval.sql),
-// 'pending' for one still waiting, false otherwise. A refusal is remembered for a minute
+// 'pending' for one still waiting, 'mfa' for an approved account whose session hasn't given
+// its two-factor code (supabase/mfa.sql: is_approved() says no), false otherwise. A refusal is remembered for a minute
 // only, so an approval takes effect quickly.
 const PENDING_TTL_MS = 60 * 1000;
 async function signedIn(request, auth, fetchImpl) {
@@ -527,6 +528,13 @@ async function signedIn(request, auth, fetchImpl) {
       const rows = st.ok ? await st.json() : null;
       if (!st.ok) return false; // can't tell: refuse, but don't remember it
       ok = Array.isArray(rows) && !!rows[0] && rows[0].approved === true && !rows[0].suspended ? true : 'pending';
+      // The database's own answer, which includes the two-factor rule.
+      if (ok === true) {
+        const ia = await f(base + '/rest/v1/rpc/is_approved', { method: 'POST', headers: { ...headers, 'content-type': 'application/json', accept: 'application/json' },
+          body: '{}', signal: AbortSignal.timeout(5000) });
+        if (!ia.ok) return false;
+        if ((await ia.json()) !== true) ok = 'mfa';
+      }
     }
   } catch { return false; } // Supabase unreachable: refuse, but don't remember it.
   if (users.size > 5000) for (const [k, v] of users) if (v.until <= now) users.delete(k);
@@ -553,6 +561,7 @@ export async function handleMarketRequest(request, options = {}) {
   if (auth && auth.supabaseUrl && auth.anonKey && !publicRequest(cap, parsed.params, auth.publicSymbols)) {
     const who = await signedIn(request, auth, auth.fetch);
     if (who === 'pending') return json({ error: 'account awaiting approval' }, 403, { 'cache-control': 'no-store' });
+    if (who === 'mfa') return json({ error: 'two-factor code required' }, 403, { 'cache-control': 'no-store' });
     if (who !== true) return json({ error: 'sign in required' }, 401, { 'cache-control': 'no-store' });
   }
 

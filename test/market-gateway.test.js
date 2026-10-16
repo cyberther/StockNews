@@ -172,9 +172,11 @@ test('cache misses that spend quota need a signed-in user; RSS news and landing 
     const tok = init.headers.authorization.replace('Bearer ', '');
     if (String(url).includes('/auth/v1/user')) {
       seen.push(init.headers.authorization);
-      return tok === 'good' || tok === 'waiting' ? Response.json({ id: tok + '-id' }) : new Response('{}', { status: 401 });
+      return tok === 'good' || tok === 'waiting' || tok === 'nocode' ? Response.json({ id: tok + '-id' }) : new Response('{}', { status: 401 });
     }
-    return Response.json([{ approved: tok === 'good', suspended: false }]);
+    // is_approved(): false for an account with two-factor on whose session gave no code.
+    if (String(url).includes('/rpc/is_approved')) return Response.json(tok === 'good');
+    return Response.json([{ approved: tok === 'good' || tok === 'nocode', suspended: false }]);
   };
   const auth = { supabaseUrl: 'https://x.supabase.co', anonKey: 'anon', fetch: authFetch };
   const q = (s, hdr) => new Request('http://localhost:8080/api/finnhub?' + s, { headers: hdr || {} });
@@ -188,6 +190,10 @@ test('cache misses that spend quota need a signed-in user; RSS news and landing 
   const waiting = await h(q('path=/stock/recommendation&symbol=NVDA', { 'x-hif-auth': 'waiting' }), opts);
   assert.equal(waiting.status, 403);
   assert.equal((await waiting.json()).error, 'account awaiting approval');
+  // Two-factor on, password only: nothing either.
+  const nocode = await h(q('path=/stock/recommendation&symbol=NVDA', { 'x-hif-auth': 'nocode' }), opts);
+  assert.equal(nocode.status, 403);
+  assert.equal((await nocode.json()).error, 'two-factor code required');
   assert.equal(publicRequest('marketNewsRO', {}), true);
   assert.equal(publicRequest('news', { symbol: 'SNP.RO' }), true);
   assert.equal(publicRequest('news', { symbol: 'NVDA' }), false);
