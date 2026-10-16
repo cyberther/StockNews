@@ -33,3 +33,13 @@ test('the same words on different tickers, or days apart, stay separate', () => 
   ];
   assert.equal(sameEvent(rows, () => '').length, 3);
 });
+
+test('two Bucharest stories sharing only market words stay apart (BVB: cyber attack vs new government)', () => {
+  const rows = [
+    row('BVB.RO', 'Ultima oră. Atac informatic la Bursă. Aplicația Depozitarului Central, unde sunt inclusiv datele „cuponarilor” blocată. Ce trebuie să facă investitorii', 'Bursa de Valori București anunță un atac informatic asupra aplicației Depozitarului Central; pri...'),
+    row('BVB.RO', 'Bursa de la Bucureşti respiră după semnalele privind formarea unui nou guvern: investitorii aşteaptă acum măsuri', 'Bursa de Valori Bucureşti a încheiat şedinţa de joi în avans după anunţul privind formarea guvernului; pri...', 0.3),
+    row('BVB.RO', 'Un guvern funcţional, primul semnal aşteptat de investitorii de la BVB după luni de incertitudine', 'Indicele BET a încheiat şedinţa în avans, una dintre cele mai mari creşteri din acest an, după anunţul privind guvernul.', 9)
+  ];
+  const groups = JSON.parse(JSON.stringify(sameEvent(rows, () => 'Bursa de Valori București')));
+  assert.deepEqual(groups, [[0], [1, 2]]);
+});
