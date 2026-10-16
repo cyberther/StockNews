@@ -56,6 +56,17 @@ table { border-collapse:collapse; width:100%; font-size:14px; margin:12px 0; }
 th, td { text-align:left; vertical-align:top; padding:8px 10px 8px 0; border-bottom:1px solid var(--rule); }
 th { font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--mute); font-weight:700; }
 .wrap { overflow-x:auto; }
+form.contact { display:grid; gap:14px; max-width:560px; margin-top:12px; }
+form.contact label span { display:block; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--mute); margin-bottom:6px; }
+form.contact input, form.contact select, form.contact textarea { width:100%; min-height:46px; padding:10px 12px; background:var(--panel); border:1px solid var(--rule); color:var(--ink); font:inherit; font-size:16px; border-radius:0; }
+form.contact textarea { resize:vertical; min-height:140px; }
+form.contact input:focus, form.contact select:focus, form.contact textarea:focus { outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+form.contact button { justify-self:start; min-height:48px; padding:0 26px; background:var(--accent); color:var(--bg); border:0; font:inherit; font-weight:800; cursor:pointer; }
+form.contact button[disabled] { opacity:0.6; cursor:default; }
+form.contact .small { font-size:13px; color:var(--mute); margin:0; }
+form.contact .status { margin:0; font-size:14px; min-height:1.4em; }
+form.contact .status.err { color:var(--accent); }
+.hp { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
 footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px solid var(--rule); color:var(--mute); font-size:13px; }
 @media (max-width:560px) { .brand span { display:none; } th, td { padding-right:8px; } }
 </style>
@@ -73,13 +84,13 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <h1>Informații legale</h1>
 <p class="meta">Ultima actualizare: 16 octombrie 2026. Versiunea în limba română prevalează.</p>
 <nav class="toc" aria-label="Cuprins">
-<a href="#terms">Termeni de utilizare</a><a href="#privacy">Politica de confidențialitate</a><a href="#disclaimer">Nu e consultanță de investiții</a><a href="#sources">Surse și drepturi</a>
+<a href="#terms">Termeni de utilizare</a><a href="#privacy">Politica de confidențialitate</a><a href="#disclaimer">Nu e consultanță de investiții</a><a href="#sources">Surse și drepturi</a><a href="#contact">Contact</a>
 </nav>
 
 <section id="terms">
 <h2>Termeni de utilizare</h2>
 <h3>1. Cine suntem</h3>
-<p>Market Pulse („serviciul”) este operat de <span data-op="name"></span>, <span data-op="address"></span> („operatorul”, „noi”). Contact: <span data-op="email"></span>.</p>
+<p>Market Pulse („serviciul”) este operat de <span data-op="name"></span>, <span data-op="address"></span> („operatorul”, „noi”). Ne poți scrie prin <a href="#contact">formularul de contact</a>.</p>
 <h3>2. Ce face serviciul</h3>
 <p>Market Pulse adună știri publice despre companiile listate în SUA, la Bursa de Valori București, Frankfurt și Londra, le rezumă automat cu un model de inteligență artificială, afișează prețuri și grafice primite de la furnizori de date și trimite alerte despre companiile pe care le urmărești. Serviciul are și unelte de analiză grafică (indicatori, desene, suport și rezistență calculate automat) și un portofoliu în care îți notezi singur pozițiile.</p>
 <p>Serviciul este momentan gratuit. Conturile noi sunt aprobate manual; putem refuza, suspenda sau închide un cont, mai ales când acești termeni nu sunt respectați.</p>
@@ -104,13 +115,13 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <h3>8. Modificări</h3>
 <p>Putem actualiza acești termeni. Schimbările importante le anunțăm în aplicație înainte să intre în vigoare. Dacă vor exista planuri plătite, prețul și condițiile lor vor fi afișate și acceptate separat, înainte de plată.</p>
 <h3>9. Legea aplicabilă</h3>
-<p>Se aplică legea română. Dacă ești consumator, păstrezi protecția oferită de legea țării în care locuiești. Pentru reclamații ne poți scrie la adresa de mai sus sau te poți adresa Autorității Naționale pentru Protecția Consumatorilor (<a href="https://anpc.ro" rel="noopener">anpc.ro</a>).</p>
+<p>Se aplică legea română. Dacă ești consumator, păstrezi protecția oferită de legea țării în care locuiești. Pentru reclamații ne poți scrie prin <a href="#contact">formularul de contact</a> sau te poți adresa Autorității Naționale pentru Protecția Consumatorilor (<a href="https://anpc.ro" rel="noopener">anpc.ro</a>).</p>
 </section>
 
 <section id="privacy">
 <h2>Politica de confidențialitate</h2>
 <h3>1. Operatorul datelor</h3>
-<p><span data-op="name"></span>, <span data-op="address"></span>. Pentru orice întrebare despre datele tale: <span data-op="email"></span>.</p>
+<p><span data-op="name"></span>, <span data-op="address"></span>. Pentru orice întrebare despre datele tale, folosește <a href="#contact">formularul de contact</a>.</p>
 <h3>2. Ce date prelucrăm</h3>
 <div class="wrap"><table>
 <thead><tr><th>Date</th><th>De ce</th><th>Temei (GDPR art. 6)</th></tr></thead>
@@ -121,6 +132,7 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <tr><td>Factorii de autentificare în doi pași (aplicațiile tale de coduri)</td><td>securitatea contului</td><td>contract și interes legitim</td></tr>
 <tr><td>Watchlist, pozițiile din portofoliu (simbol, cantitate, preț), desenele de pe grafice</td><td>funcțiile pe care le folosești</td><td>contract</td></tr>
 <tr><td>Abonamentele la alerte ale dispozitivelor (adresa serviciului de notificări al browserului, cheile de criptare, tipul browserului)</td><td>trimiterea alertelor pe care le-ai cerut</td><td>contract</td></tr>
+<tr><td>Mesajele trimise prin formularul de contact: numele, dacă îl dai, e-mailul și mesajul</td><td>ca să-ți răspundem</td><td>interes legitim, lit. f, sau contract</td></tr>
 <tr><td>Date tehnice: adresa IP, ora cererilor</td><td>limitarea numărului de cereri și securitate; furnizorii de găzduire și autentificare păstrează jurnale tehnice</td><td>interes legitim</td></tr>
 </tbody>
 </table></div>
@@ -130,16 +142,16 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <h3>4. Cine mai primește date</h3>
 <ul>
 <li><strong>Supabase</strong>: baza de date și autentificarea; regiunea serverelor: <span data-op="dbRegion"></span>.</li>
-<li><strong>Netlify</strong>: găzduirea site-ului și a funcțiilor serverului.</li>
+<li><strong>Netlify</strong>: găzduirea site-ului și a funcțiilor serverului, și primirea mesajelor din formularul de contact (cu filtrul lor antispam).</li>
 <li><strong>Serviciul de notificări al browserului tău</strong> (Apple, Google sau Mozilla): primește alertele, criptate, pentru a le livra dispozitivului tău.</li>
 <li><strong>Google sau Apple</strong>, numai dacă alegi să te autentifici cu ei.</li>
 </ul>
 <p>Furnizorii de date de piață și site-urile de știri primesc doar simbolurile bursiere cerute, fără date despre tine. Rezumatele automate se fac pe un calculator al operatorului, din textul public al știrilor, fără date personale.</p>
 <p>Baza de date este găzduită în Uniunea Europeană (Irlanda). Supabase și Netlify sunt însă companii din SUA. Când datele ajung în afara Spațiului Economic European, de exemplu prin serverele Netlify sau prin echipele lor de suport, transferul se face pe baza clauzelor contractuale standard ale Comisiei Europene, din acordurile lor de prelucrare a datelor.</p>
 <h3>5. Cât timp păstrăm datele</h3>
-<p>Cât timp ai cont. Când îți ștergi contul, datele tale sunt șterse imediat din baza de date; copiile de siguranță ale furnizorului se suprascriu în câteva zile. Un cont nou respins de administrator este șters împreună cu datele lui. Jurnalele tehnice ale furnizorilor se păstrează perioada stabilită de aceștia.</p>
+<p>Cât timp ai cont. Când îți ștergi contul, datele tale sunt șterse imediat din baza de date; copiile de siguranță ale furnizorului se suprascriu în câteva zile. Un cont nou respins de administrator este șters împreună cu datele lui. Mesajele din formularul de contact le ștergem după ce cererea e rezolvată, cel târziu după 12 luni. Jurnalele tehnice ale furnizorilor se păstrează perioada stabilită de aceștia.</p>
 <h3>6. Drepturile tale</h3>
-<p>Ai dreptul de acces, rectificare, ștergere, restricționare, portabilitate și opoziție. Poți corecta numele, telefonul și limba în aplicație și îți poți șterge singur contul (Cont → Șterge contul). Pentru celelalte drepturi scrie-ne; răspundem în cel mult o lună. Ai și dreptul să depui o plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (<a href="https://www.dataprotection.ro" rel="noopener">dataprotection.ro</a>).</p>
+<p>Ai dreptul de acces, rectificare, ștergere, restricționare, portabilitate și opoziție. Poți corecta numele, telefonul și limba în aplicație și îți poți șterge singur contul (Cont → Șterge contul). Pentru celelalte drepturi scrie-ne prin <a href="#contact">formularul de contact</a>; răspundem în cel mult o lună. Ai și dreptul să depui o plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (<a href="https://www.dataprotection.ro" rel="noopener">dataprotection.ro</a>).</p>
 <h3>7. Securitate</h3>
 <p>Conexiunile sunt criptate (HTTPS). Fiecare cont vede doar propriile date, iar regula este impusă chiar de baza de date. Autentificarea în doi pași este disponibilă pentru toate conturile și obligatorie pentru administratori.</p>
 <h3>8. Modificări</h3>
@@ -166,7 +178,23 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <li><strong>Documentele emitenților de la BVB</strong> (rapoarte, calendare financiare): de pe site-urile companiilor.</li>
 <li><strong>Prețuri, grafice și date despre companii</strong>: Finnhub, Yahoo Finance, Twelve Data, Financial Modeling Prep și Alpha Vantage; documentele SEC pentru companiile americane.</li>
 </ul>
-<p>Mărcile și numele companiilor aparțin proprietarilor lor și apar doar pentru a identifica sursa sau compania. Dacă ești titularul unui conținut și vrei să nu mai apară aici, scrie-ne la <span data-op="email"></span> și îl scoatem.</p>
+<p>Mărcile și numele companiilor aparțin proprietarilor lor și apar doar pentru a identifica sursa sau compania. Dacă ești titularul unui conținut și vrei să nu mai apară aici, scrie-ne prin <a href="#contact">formularul de contact</a> și îl scoatem.</p>
+</section>
+<section id="contact">
+<h2>Contact</h2>
+<p>Scrie-ne aici: întrebări, cereri despre datele tale sau cereri de scoatere a unui conținut. Răspundem pe e-mail, de obicei în câteva zile lucrătoare.</p>
+<form class="contact" name="contact" method="POST" action="./legal.html?lang=ro&amp;sent=1#contact" data-netlify="true" netlify-honeypot="bot-field">
+<input type="hidden" name="form-name" value="contact">
+<input type="hidden" name="lang" value="ro">
+<p class="hp" aria-hidden="true"><label>Nu completa acest câmp <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+<label><span>Nume (opțional)</span><input type="text" name="name" autocomplete="name" maxlength="80"></label>
+<label><span>E-mailul tău, ca să-ți răspundem</span><input type="email" name="email" autocomplete="email" inputmode="email" maxlength="254" required></label>
+<label><span>Despre ce e vorba</span><select name="topic"><option value="question">O întrebare</option><option value="privacy">Datele mele personale (GDPR)</option><option value="removal">Scoaterea unui conținut</option><option value="other">Altceva</option></select></label>
+<label><span>Mesajul</span><textarea name="message" rows="6" maxlength="4000" required></textarea></label>
+<p class="small">Folosim aceste date doar ca să-ți răspundem. Detalii în <a href="#privacy">Politica de confidențialitate</a>.</p>
+<button type="submit">Trimite</button>
+<p class="status" role="status" aria-live="polite"></p>
+</form>
 </section>
 </main>
 
@@ -175,13 +203,13 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <p class="meta">Last updated: 16 October 2026. If the versions differ, the Romanian version prevails.</p>
 <p class="note" data-de hidden>Die deutsche Fassung folgt. Bis dahin gilt die englische Übersetzung; maßgeblich ist die rumänische Fassung.</p>
 <nav class="toc" aria-label="Contents">
-<a href="#terms">Terms of use</a><a href="#privacy">Privacy policy</a><a href="#disclaimer">Not investment advice</a><a href="#sources">Sources and rights</a>
+<a href="#terms">Terms of use</a><a href="#privacy">Privacy policy</a><a href="#disclaimer">Not investment advice</a><a href="#sources">Sources and rights</a><a href="#contact">Contact</a>
 </nav>
 
 <section id="terms">
 <h2>Terms of use</h2>
 <h3>1. Who we are</h3>
-<p>Market Pulse (“the service”) is run by <span data-op="name"></span>, <span data-op="address"></span> (“the operator”, “we”). Contact: <span data-op="email"></span>.</p>
+<p>Market Pulse (“the service”) is run by <span data-op="name"></span>, <span data-op="address"></span> (“the operator”, “we”). You can reach us through the <a href="#contact">contact form</a>.</p>
 <h3>2. What the service does</h3>
 <p>Market Pulse collects public news about companies listed in the US, on the Bucharest Stock Exchange, in Frankfurt and in London, summarises it automatically with an AI model, shows prices and charts from data providers, and sends alerts about the companies you follow. It also has chart tools (indicators, drawings, automatic support and resistance) and a portfolio where you record your own positions.</p>
 <p>The service is currently free. New accounts are approved by hand; we may refuse, suspend or close an account, in particular when these terms aren’t followed.</p>
@@ -206,13 +234,13 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <h3>8. Changes</h3>
 <p>We may update these terms. We announce important changes in the app before they take effect. If paid plans are introduced, their price and conditions will be shown and accepted separately, before any payment.</p>
 <h3>9. Governing law</h3>
-<p>Romanian law applies. If you are a consumer, you keep the protection of the law of the country where you live. For complaints, write to us at the address above, or contact Romania’s consumer protection authority, ANPC (<a href="https://anpc.ro" rel="noopener">anpc.ro</a>).</p>
+<p>Romanian law applies. If you are a consumer, you keep the protection of the law of the country where you live. For complaints, write to us through the <a href="#contact">contact form</a>, or contact Romania’s consumer protection authority, ANPC (<a href="https://anpc.ro" rel="noopener">anpc.ro</a>).</p>
 </section>
 
 <section id="privacy">
 <h2>Privacy policy</h2>
 <h3>1. Data controller</h3>
-<p><span data-op="name"></span>, <span data-op="address"></span>. For any question about your data: <span data-op="email"></span>.</p>
+<p><span data-op="name"></span>, <span data-op="address"></span>. For any question about your data, use the <a href="#contact">contact form</a>.</p>
 <h3>2. What we process</h3>
 <div class="wrap"><table>
 <thead><tr><th>Data</th><th>Why</th><th>Basis (GDPR art. 6)</th></tr></thead>
@@ -223,6 +251,7 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <tr><td>Two-factor sign-in factors (your authenticator apps)</td><td>account security</td><td>contract and legitimate interest</td></tr>
 <tr><td>Watchlist, portfolio positions (symbol, quantity, price), chart drawings</td><td>the features you use</td><td>contract</td></tr>
 <tr><td>Devices’ alert subscriptions (the browser’s push service address, encryption keys, browser type)</td><td>sending the alerts you asked for</td><td>contract</td></tr>
+<tr><td>Messages sent through the contact form: your name if you give it, email and message</td><td>to answer you</td><td>legitimate interest, (1)(f), or contract</td></tr>
 <tr><td>Technical data: IP address, time of requests</td><td>rate limiting and security; the hosting and sign-in providers keep technical logs</td><td>legitimate interest</td></tr>
 </tbody>
 </table></div>
@@ -232,16 +261,16 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <h3>4. Who else receives data</h3>
 <ul>
 <li><strong>Supabase</strong>: database and sign-in; server region: <span data-op="dbRegion"></span>.</li>
-<li><strong>Netlify</strong>: hosting of the site and its server functions.</li>
+<li><strong>Netlify</strong>: hosting of the site and its server functions, and receiving contact form messages (with their spam filter).</li>
 <li><strong>Your browser’s push service</strong> (Apple, Google or Mozilla): receives the alerts, encrypted, to deliver them to your device.</li>
 <li><strong>Google or Apple</strong>, only if you choose to sign in with them.</li>
 </ul>
 <p>Market data providers and news sites receive only the ticker symbols asked for, nothing about you. Automatic summaries are made on the operator’s computer from the public text of the news, with no personal data.</p>
 <p>The database is hosted in the European Union (Ireland). Supabase and Netlify are US companies, though. Where data leaves the European Economic Area, for example through Netlify’s servers or their support teams, it does so under the European Commission’s standard contractual clauses in their data processing agreements.</p>
 <h3>5. How long we keep data</h3>
-<p>For as long as you have an account. When you delete your account, your data is removed from the database at once; the provider’s backups are overwritten within days. A new account an administrator rejects is deleted with its data. Providers’ technical logs are kept for the period they set.</p>
+<p>For as long as you have an account. When you delete your account, your data is removed from the database at once; the provider’s backups are overwritten within days. A new account an administrator rejects is deleted with its data. Contact form messages are deleted once the request is dealt with, at the latest after 12 months. Providers’ technical logs are kept for the period they set.</p>
 <h3>6. Your rights</h3>
-<p>You have the right of access, rectification, erasure, restriction, portability and objection. You can correct your name, phone and language in the app and delete your account yourself (Account → Delete account). For the other rights, write to us; we answer within one month. You can also complain to Romania’s data protection authority, ANSPDCP (<a href="https://www.dataprotection.ro" rel="noopener">dataprotection.ro</a>), or to the authority where you live.</p>
+<p>You have the right of access, rectification, erasure, restriction, portability and objection. You can correct your name, phone and language in the app and delete your account yourself (Account → Delete account). For the other rights, write to us through the <a href="#contact">contact form</a>; we answer within one month. You can also complain to Romania’s data protection authority, ANSPDCP (<a href="https://www.dataprotection.ro" rel="noopener">dataprotection.ro</a>), or to the authority where you live.</p>
 <h3>7. Security</h3>
 <p>Connections are encrypted (HTTPS). Each account sees only its own data, a rule enforced by the database itself. Two-factor sign-in is available to every account and required for administrators.</p>
 <h3>8. Changes</h3>
@@ -268,7 +297,23 @@ footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px 
 <li><strong>Bucharest issuers’ documents</strong> (reports, financial calendars): from the companies’ websites.</li>
 <li><strong>Prices, charts and company data</strong>: Finnhub, Yahoo Finance, Twelve Data, Financial Modeling Prep and Alpha Vantage; SEC filings for US companies.</li>
 </ul>
-<p>Trademarks and company names belong to their owners and appear only to identify the source or the company. If you hold the rights to content and want it removed from here, write to <span data-op="email"></span> and we will take it down.</p>
+<p>Trademarks and company names belong to their owners and appear only to identify the source or the company. If you hold the rights to content and want it removed from here, write to us through the <a href="#contact">contact form</a> and we will take it down.</p>
+</section>
+<section id="contact">
+<h2>Contact</h2>
+<p>Write to us here: questions, requests about your data, or requests to remove content. We answer by email, usually within a few working days.</p>
+<form class="contact" name="contact" method="POST" action="./legal.html?lang=en&amp;sent=1#contact" data-netlify="true" netlify-honeypot="bot-field">
+<input type="hidden" name="form-name" value="contact">
+<input type="hidden" name="lang" value="en">
+<p class="hp" aria-hidden="true"><label>Leave this field empty <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+<label><span>Name (optional)</span><input type="text" name="name" autocomplete="name" maxlength="80"></label>
+<label><span>Your email, so we can answer</span><input type="email" name="email" autocomplete="email" inputmode="email" maxlength="254" required></label>
+<label><span>What it is about</span><select name="topic"><option value="question">A question</option><option value="privacy">My personal data (GDPR)</option><option value="removal">Removing content</option><option value="other">Something else</option></select></label>
+<label><span>Message</span><textarea name="message" rows="6" maxlength="4000" required></textarea></label>
+<p class="small">We use these details only to answer you. See the <a href="#privacy">Privacy policy</a>.</p>
+<button type="submit">Send</button>
+<p class="status" role="status" aria-live="polite"></p>
+</form>
 </section>
 </template>
 
@@ -281,7 +326,8 @@ const OPERATOR = {
   name: 'ADALIT DATA SRL',
   address: { ro: 'str. Mihail Sadoveanu nr. 9, Șelimbăr, jud. Sibiu, România, CUI 49586191',
              en: '9 Mihail Sadoveanu St., Șelimbăr, Sibiu County, Romania, tax ID (CUI) 49586191' },
-  email: '',     // a contact address that is read
+  // No email address on the page: people write through the contact form (Netlify Forms),
+  // whose submissions Netlify emails to the operator (Project configuration -> Notifications).
   // Supabase project settings -> General -> Project region.
   dbRegion: { ro: 'Uniunea Europeană, Irlanda (eu-west-1)', en: 'European Union, Ireland (eu-west-1)' }
 };
@@ -308,6 +354,29 @@ const OPERATOR = {
     if (el.dataset.op === 'email') { const a = document.createElement('a'); a.href = 'mailto:' + v; a.textContent = v; el.replaceChildren(a); }
     else el.textContent = v;
   });
+  // The contact form: sent in the background, so the reader stays on the page. Netlify
+  // takes any POST with form-name=contact (the form is found when the site is built).
+  const said = {
+    ro: { sending: 'Se trimite…', sent: 'Mulțumim, mesajul a fost trimis. Îți răspundem pe e-mail.', failed: 'Mesajul nu a putut fi trimis. Încearcă din nou puțin mai târziu.' },
+    en: { sending: 'Sending…', sent: 'Thank you, your message has been sent. We will answer by email.', failed: 'The message could not be sent. Please try again a little later.' }
+  }[lang];
+  const form = document.querySelector('form.contact');
+  if (form) {
+    const status = form.querySelector('.status'), button = form.querySelector('button');
+    if (q.get('sent') === '1') status.textContent = said.sent;
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      button.disabled = true; status.className = 'status'; status.textContent = said.sending;
+      try {
+        const r = await fetch(location.pathname, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(new FormData(form)).toString() });
+        if (!r.ok) throw new Error(String(r.status));
+        form.reset(); status.textContent = said.sent;
+      } catch (err) { status.className = 'status err'; status.textContent = said.failed; }
+      button.disabled = false;
+    });
+  }
   // The content moved in after the browser looked for the #section: go there now.
   // (after load: the browser's own scroll happens then and would undo an earlier one).
   const jump = () => { const el = location.hash && document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView({ behavior: 'instant' }); };
