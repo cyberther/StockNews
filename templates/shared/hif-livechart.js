@@ -6,12 +6,17 @@
 //   c.setBars([{ t, o, h, l, c, v }, ...])   all bars (a new symbol or bar size)
 //   c.mergeBars([...])                       the latest bars (a refresh): updates the last, adds new ones
 //   c.zoom(0.7) / c.zoom(1.4) / c.reset()    narrower / wider / the last ~150 bars
-//   c.setAverages({ 20: true, 50: false })  c.setTheme()   c.destroy()
+//   c.setAverages({ sma20: true, sma200: true, ema9: false })  (AVERAGES)
+//   c.setIndicators({ macd: true, dmi: false, rsi: true })    each in its own pane under the
+//                                                             chart, in this order
+//   c.setTheme()   c.destroy()
 // Drawing (support and resistance, trends): c.setTool('hline' | 'trend' | 'zone' | 'fib' |
 // 'measure' | null), c.setDrawings(list), c.removeDrawing(id), c.clearDrawings(),
-// c.setAutoLevels(true); onDraw(list) is called when the user adds one. A drawing keeps
-// real times and prices ({ id, type, a: { t, p }, b: { t, p } }), so it stays in place
-// when the bar size changes.
+// c.setAutoLevels(true), c.setPen('blue'); onDraw(list) is called when the user adds one.
+// A drawing keeps real times and prices and its colour ({ id, type, c, a: { t, p },
+// b: { t, p } }), so it stays in place when the bar size changes.
+// Colours come from the page's --lc-<name> variables (one set for dark, one for light), so
+// lines stay clear on either theme.
 // Times are shown in the exchange's time zone (tz), as trading platforms do.
 (function () {
   let lib = null;
@@ -49,11 +54,64 @@
     const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
     return m ? `rgba(${parseInt(m[1], 16)},${parseInt(m[2], 16)},${parseInt(m[3], 16)},${a})` : hex;
   };
-  function sma(bars, n) {
-    const out = []; let sum = 0;
-    bars.forEach((b, i) => { sum += b.close; if (i >= n) sum -= bars[i - n].close; if (i >= n - 1) out.push({ time: b.time, value: sum / n }); });
+  // ---- indicators: arrays of numbers in, arrays (null where not yet defined) out ----------
+  function smaOf(v, n) {
+    const out = new Array(v.length).fill(null); let sum = 0;
+    v.forEach((x, i) => { sum += x; if (i >= n) sum -= v[i - n]; if (i >= n - 1) out[i] = sum / n; });
     return out;
   }
+  // Exponential, started from the simple average of the first n values (nulls skipped).
+  function emaOf(v, n) {
+    const out = new Array(v.length).fill(null), a = 2 / (n + 1);
+    let prev = null, seed = [], i0 = v.findIndex(x => x != null);
+    if (i0 < 0) return out;
+    for (let i = i0; i < v.length; i++) {
+      if (prev == null) { seed.push(v[i]); if (seed.length === n) { prev = seed.reduce((x, y) => x + y, 0) / n; out[i] = prev; } continue; }
+      prev = v[i] * a + prev * (1 - a); out[i] = prev;
+    }
+    return out;
+  }
+  // Wilder's smoothing (RSI, DMI): the first value is the average of n, then (prev*(n-1)+x)/n.
+  function wilder(v, n, from) {
+    const out = new Array(v.length).fill(null);
+    if (v.length < from + n) return out;
+    let prev = 0;
+    for (let i = from; i < from + n; i++) prev += v[i];
+    prev /= n; out[from + n - 1] = prev;
+    for (let i = from + n; i < v.length; i++) { prev = (prev * (n - 1) + v[i]) / n; out[i] = prev; }
+    return out;
+  }
+  function rsiOf(c, n) {
+    const up = c.map((x, i) => i ? Math.max(0, x - c[i - 1]) : 0), dn = c.map((x, i) => i ? Math.max(0, c[i - 1] - x) : 0);
+    const au = wilder(up, n, 1), ad = wilder(dn, n, 1);
+    return au.map((u, i) => u == null ? null : ad[i] === 0 ? 100 : 100 - 100 / (1 + u / ad[i]));
+  }
+  function macdOf(c, f, sl, sig) {
+    const a = emaOf(c, f), b = emaOf(c, sl), line = a.map((x, i) => x == null || b[i] == null ? null : x - b[i]);
+    const signal = emaOf(line, sig);
+    return { line, signal, hist: line.map((x, i) => x == null || signal[i] == null ? null : x - signal[i]) };
+  }
+  function dmiOf(bars, n) {
+    const tr = [0], pdm = [0], mdm = [0];
+    for (let i = 1; i < bars.length; i++) {
+      const b = bars[i], p = bars[i - 1], up = b.high - p.high, dn = p.low - b.low;
+      tr.push(Math.max(b.high - b.low, Math.abs(b.high - p.close), Math.abs(b.low - p.close)));
+      pdm.push(up > dn && up > 0 ? up : 0); mdm.push(dn > up && dn > 0 ? dn : 0);
+    }
+    const str = wilder(tr, n, 1), sp = wilder(pdm, n, 1), sm = wilder(mdm, n, 1);
+    const plus = str.map((t, i) => t == null || !t ? null : 100 * sp[i] / t), minus = str.map((t, i) => t == null || !t ? null : 100 * sm[i] / t);
+    const dx = plus.map((p, i) => p == null ? null : (p + minus[i]) ? 100 * Math.abs(p - minus[i]) / (p + minus[i]) : 0);
+    const from = dx.findIndex(x => x != null);
+    const adx = from < 0 ? dx.map(() => null) : wilder(dx.map(x => x || 0), n, from);
+    return { plus, minus, adx };
+  }
+  const AVERAGES = [['sma20', 'SMA 20', 'blue'], ['sma50', 'SMA 50', 'orange'], ['sma100', 'SMA 100', 'purple'], ['sma200', 'SMA 200', 'pink'],
+    ['ema9', 'EMA 9', 'teal'], ['ema21', 'EMA 21', 'yellow']];
+  const INDICATORS = [['macd', 'MACD'], ['dmi', 'DMI'], ['rsi', 'RSI']];
+  const PENS = ['blue', 'orange', 'green', 'red', 'purple', 'yellow'];
+  // A drawing saved before it had a colour.
+  const PEN_OF = { hline: 'blue', trend: 'orange', zone: 'teal', fib: 'purple' };
+  const DARK = { blue: '#5AA9FF', orange: '#FF9F43', green: '#3DDC84', red: '#FF5C6C', purple: '#C08CFF', teal: '#2ED1C1', pink: '#FF7AB6', yellow: '#FFD54A' };
 
   // Support and resistance from the bars: swing highs and lows (a bar higher or lower than
   // the 5 on each side), grouped when within half an average bar range, ranked by how many
@@ -90,8 +148,10 @@
   async function create(el, opts) {
     const LWC = await loadLib();
     const o = Object.assign({ tz: '', locale: undefined, intraday: true, seconds: false, onHover: null, onDraw: null, step: 60 }, opts || {});
-    const colors = () => ({ bg: css(el, '--s-bg', '#121212'), ink: css(el, '--s-ink', '#F5F5F7'), mute: css(el, '--s-mute', '#A0A0A0'),
-      rule: css(el, '--s-rule', '#333333'), accent: css(el, '--color-accent', '#D4AF37') });
+    const colors = () => Object.assign({ bg: css(el, '--s-bg', '#121212'), ink: css(el, '--s-ink', '#F5F5F7'), mute: css(el, '--s-mute', '#A0A0A0'),
+      rule: css(el, '--s-rule', '#333333'), accent: css(el, '--color-accent', '#D4AF37') },
+      Object.fromEntries(Object.keys(DARK).map(n => [n, css(el, '--lc-' + n, DARK[n])])));
+    const penOf = d => k[d.c] || k[PEN_OF[d.type]] || k.blue;
     let k = colors();
     const chart = LWC.createChart(el, {
       autoSize: true,
@@ -107,8 +167,8 @@
     const volume = chart.addSeries(LWC.HistogramSeries, { priceScaleId: 'vol', priceFormat: { type: 'volume' }, lastValueVisible: false, priceLineVisible: false });
     chart.priceScale('vol').applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });
     candles.priceScale().applyOptions({ scaleMargins: { top: 0.08, bottom: 0.24 } });
-    const avgSeries = { 20: null, 50: null };
-    let avgOn = { 20: false, 50: false }, bars = [];
+    const avgSeries = {};
+    let avgOn = {}, indOn = {}, indSeries = [], bars = [], pen = 'blue';
 
     // ---- drawings ----------------------------------------------------------------------
     let drawings = [], tool = null, first = null, hover = null, autoOn = false, autoLines = [];
@@ -153,34 +213,37 @@
         const A = xy(d.a), B = xy(d.b);
         if (!A || !B) continue;
         ctx.globalAlpha = d.temp ? 0.7 : 1;
+        const col = penOf(d.temp ? { c: pen, type: d.type } : d);
         if (d.type === 'trend') {
-          ctx.strokeStyle = k.accent; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(A.x, A.y);
+          ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(A.x, A.y);
           // A trend line runs on to the right edge, as a ray.
           const dx = B.x - A.x, dy = B.y - A.y, far = dx > 0 ? (size.width - A.x) / dx : 1;
           ctx.lineTo(dx > 0 && !d.temp ? A.x + dx * far : B.x, dx > 0 && !d.temp ? A.y + dy * far : B.y); ctx.stroke();
-          [A, B].forEach(P => { ctx.fillStyle = k.accent; ctx.beginPath(); ctx.arc(P.x, P.y, 3, 0, 7); ctx.fill(); });
+          [A, B].forEach(P => { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(P.x, P.y, 3.5, 0, 7); ctx.fill(); });
         } else if (d.type === 'zone') {
           const x = Math.min(A.x, B.x), y = Math.min(A.y, B.y), w = Math.max(size.width - x, Math.abs(B.x - A.x)), h = Math.abs(B.y - A.y);
-          ctx.fillStyle = fade(k.accent, 0.14); ctx.fillRect(x, y, d.temp ? Math.abs(B.x - A.x) : w, h);
-          ctx.strokeStyle = fade(k.accent, 0.7); ctx.lineWidth = 1; ctx.strokeRect(x, y, d.temp ? Math.abs(B.x - A.x) : w, h);
+          ctx.fillStyle = fade(col, 0.18); ctx.fillRect(x, y, d.temp ? Math.abs(B.x - A.x) : w, h);
+          ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.strokeRect(x, y, d.temp ? Math.abs(B.x - A.x) : w, h);
         } else if (d.type === 'fib') {
           const x0 = Math.min(A.x, B.x);
           FIB.forEach(f => {
             const p = d.b.p + (d.a.p - d.b.p) * f, y = candles.priceToCoordinate(p);
             if (y == null) return;
-            ctx.strokeStyle = f === 0.618 || f === 0.5 ? k.accent : fade(k.mute, 0.9); ctx.lineWidth = 1; ctx.setLineDash(f === 0 || f === 1 ? [] : [4, 3]);
+            const key = f === 0.618 || f === 0.5 || f === 0 || f === 1;
+            ctx.strokeStyle = key ? col : fade(col, 0.75); ctx.lineWidth = key ? 1.75 : 1.25; ctx.setLineDash(f === 0 || f === 1 ? [] : [5, 3]);
             ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(size.width, y); ctx.stroke();
-            ctx.setLineDash([]); ctx.fillStyle = k.mute; ctx.fillText((f * 100).toFixed(1) + '%  ' + fmtP(p), x0 + 4, y - 3);
+            ctx.setLineDash([]); ctx.fillStyle = col; ctx.fillText((f * 100).toFixed(1) + '%  ' + fmtP(p), x0 + 4, y - 3);
           });
         } else if (d.type === 'measure') {
           const dp = d.b.p - d.a.p, pct = d.a.p ? dp / d.a.p * 100 : 0;
           const nb = Math.round(Math.abs((logicalOf(d.b.t) || 0) - (logicalOf(d.a.t) || 0)));
-          ctx.fillStyle = fade(dp >= 0 ? k.ink : k.accent, 0.12);
+          const mc = dp >= 0 ? k.green : k.red;
+          ctx.fillStyle = fade(mc, 0.16);
           ctx.fillRect(Math.min(A.x, B.x), Math.min(A.y, B.y), Math.abs(B.x - A.x), Math.abs(B.y - A.y));
           const txt = (dp >= 0 ? '+' : '\u2212') + fmtP(Math.abs(dp)) + '  (' + (pct >= 0 ? '+' : '\u2212') + Math.abs(pct).toFixed(2) + '%)  \u00b7  ' + nb + ' bars';
           const tw = ctx.measureText(txt).width + 12, tx = Math.min(Math.max(B.x - tw / 2, 4), size.width - tw - 4), ty = B.y + (dp >= 0 ? -26 : 8);
           ctx.fillStyle = k.bg; ctx.fillRect(tx, ty, tw, 18); ctx.strokeStyle = k.rule; ctx.strokeRect(tx, ty, tw, 18);
-          ctx.fillStyle = dp >= 0 ? k.ink : k.accent; ctx.fillText(txt, tx + 6, ty + 13);
+          ctx.fillStyle = mc; ctx.fillText(txt, tx + 6, ty + 13);
         }
       }
       ctx.restore();
@@ -188,13 +251,13 @@
     function syncHLines() {
       for (const [id, line] of hLines) if (!drawings.some(d => d.id === id)) { candles.removePriceLine(line); hLines.delete(id); }
       drawings.filter(d => d.type === 'hline' && !hLines.has(d.id)).forEach(d => hLines.set(d.id,
-        candles.createPriceLine({ price: d.a.p, color: k.accent, lineWidth: 1, lineStyle: LWC.LineStyle.Solid, axisLabelVisible: true, title: '' })));
+        candles.createPriceLine({ price: d.a.p, color: penOf(d), lineWidth: 2, lineStyle: LWC.LineStyle.Solid, axisLabelVisible: true, title: '' })));
     }
     function syncAuto() {
       autoLines.forEach(l => candles.removePriceLine(l)); autoLines = [];
       if (!autoOn) return;
-      autoLevels(bars).forEach(x => autoLines.push(candles.createPriceLine({ price: x.p, color: x.label[0] === 'R' ? k.accent : k.ink,
-        lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: true, title: x.label + ' \u00d7' + x.touches })));
+      autoLevels(bars).forEach(x => autoLines.push(candles.createPriceLine({ price: x.p, color: x.label[0] === 'R' ? k.red : k.green,
+        lineWidth: 2, lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: true, title: x.label + ' \u00d7' + x.touches })));
     }
     const redraw = () => { if (layer._req) layer._req(); };
     const pointAt = param => {
@@ -209,9 +272,9 @@
 
       const pt = pointAt(param);
       if (!pt) return;
-      if (tool === 'hline') { drawings.push({ id: newId(), type: 'hline', a: pt, b: pt }); syncHLines(); if (o.onDraw) o.onDraw(drawings.slice()); return; }
+      if (tool === 'hline') { drawings.push({ id: newId(), type: 'hline', c: pen, a: pt, b: pt }); syncHLines(); if (o.onDraw) o.onDraw(drawings.slice()); return; }
       if (!first) { first = pt; hover = pt; redraw(); return; }
-      const d = { id: newId(), type: tool, a: first, b: pt };
+      const d = { id: newId(), type: tool, c: pen, a: first, b: pt };
       first = null; hover = null;
       // A measurement is shown until the next click, not kept.
       if (tool === 'measure') { measure = d; drawings = drawings.filter(x => x.type !== 'measure').concat([d]); redraw(); return; }
@@ -227,8 +290,8 @@
       const p = local(ev), d = down;
       down = null;
       if (!tool || !d || Math.hypot(p.x - d.x, p.y - d.y) > 6) return;
-      // Only on the plot itself, not on the price or time axis.
-      if (p.x < 0 || p.x > chart.timeScale().width() || p.y < 0 || p.y > el.clientHeight - chart.timeScale().height()) return;
+      // Only on the price chart itself: not an axis, not an indicator's pane.
+      if (p.x < 0 || p.x > chart.timeScale().width() || p.y < 0 || p.y > chart.panes()[0].getHeight()) return;
       onClick({ point: p });
     };
     el.addEventListener('pointerdown', onDown);
@@ -239,11 +302,58 @@
 
     const toBar = b => ({ time: b.t + offsetAt(o.tz, b.t), open: b.o, high: b.h, low: b.l, close: b.c, value: b.v, raw: b });
     const volOf = b => ({ time: b.time, value: b.value || 0, color: fade(b.close >= b.open ? k.ink : k.accent, 0.35) });
+    const points = vals => vals.map((v, i) => v == null ? null : { time: bars[i].time, value: v }).filter(Boolean);
     function drawAverages() {
-      [20, 50].forEach(n => {
-        if (avgOn[n] && !avgSeries[n]) avgSeries[n] = chart.addSeries(LWC.LineSeries, { color: n === 20 ? k.accent : k.mute, lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
-        if (!avgOn[n] && avgSeries[n]) { chart.removeSeries(avgSeries[n]); avgSeries[n] = null; }
-        if (avgSeries[n]) avgSeries[n].setData(sma(bars, n));
+      const close = bars.map(b => b.close);
+      AVERAGES.forEach(([id, , c]) => {
+        if (avgOn[id] && !avgSeries[id]) avgSeries[id] = chart.addSeries(LWC.LineSeries, { color: k[c], lineWidth: id === 'sma200' || id === 'sma100' ? 2 : 1.5,
+          priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
+        if (!avgOn[id] && avgSeries[id]) { chart.removeSeries(avgSeries[id]); avgSeries[id] = null; }
+        if (avgSeries[id]) { const n = +id.replace(/\D/g, ''); avgSeries[id].setData(points(id[0] === 's' ? smaOf(close, n) : emaOf(close, n))); }
+      });
+    }
+    // Indicator panes: rebuilt when the set changes; their data is recomputed on each refresh.
+    let indKey = '';
+    function drawIndicators() {
+      const on = INDICATORS.map(x => x[0]).filter(id => indOn[id]), key = on.join(',');
+      if (key !== indKey) {
+        indSeries.forEach(x => chart.removeSeries(x.s)); indSeries = [];
+        for (let i = chart.panes().length - 1; i > 0; i--) chart.removePane(i);
+        on.forEach((id, i) => {
+          const pane = i + 1, line = (color, title, extra) => chart.addSeries(LWC.LineSeries, Object.assign({ color, lineWidth: 1.5, title,
+            priceLineVisible: false, lastValueVisible: true, crosshairMarkerVisible: false }, extra || {}), pane);
+          if (id === 'macd') {
+            indSeries.push({ id, part: 'hist', s: chart.addSeries(LWC.HistogramSeries, { priceLineVisible: false, lastValueVisible: false }, pane) });
+            indSeries.push({ id, part: 'line', s: line(k.blue, 'MACD 12 26') });
+            indSeries.push({ id, part: 'signal', s: line(k.orange, '9') });
+          } else if (id === 'rsi') {
+            const s = line(k.purple, 'RSI 14', { autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }) });
+            [70, 30].forEach(v => s.createPriceLine({ price: v, color: fade(k.mute, 0.8), lineWidth: 1, lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: false }));
+            s.createPriceLine({ price: 50, color: fade(k.rule, 0.9), lineWidth: 1, lineStyle: LWC.LineStyle.Dotted, axisLabelVisible: false });
+            indSeries.push({ id, part: 'rsi', s });
+          } else if (id === 'dmi') {
+            indSeries.push({ id, part: 'plus', s: line(k.green, '+DI') });
+            indSeries.push({ id, part: 'minus', s: line(k.red, '\u2212DI') });
+            indSeries.push({ id, part: 'adx', s: line(k.ink, 'ADX 14', { lineWidth: 2 }) });
+          }
+        });
+        indKey = key;
+        // The price chart keeps most of the height; each indicator gets an equal strip.
+        const panes = chart.panes();
+        panes.forEach((p, i) => p.setStretchFactor(i ? 1 : 3.4));
+      }
+      if (!indSeries.length || !bars.length) return;
+      const close = bars.map(b => b.close);
+      const m = indOn.macd ? macdOf(close, 12, 26, 9) : null, r = indOn.rsi ? rsiOf(close, 14) : null, d = indOn.dmi ? dmiOf(bars, 14) : null;
+      indSeries.forEach(x => {
+        if (x.part === 'hist') x.s.setData(m.hist.map((v, i) => v == null ? null : { time: bars[i].time, value: v,
+          color: fade(v >= 0 ? k.green : k.red, (i && m.hist[i - 1] != null && Math.abs(v) < Math.abs(m.hist[i - 1])) ? 0.4 : 0.8) }).filter(Boolean));
+        else if (x.part === 'line') x.s.setData(points(m.line));
+        else if (x.part === 'signal') x.s.setData(points(m.signal));
+        else if (x.part === 'rsi') x.s.setData(points(r));
+        else if (x.part === 'plus') x.s.setData(points(d.plus));
+        else if (x.part === 'minus') x.s.setData(points(d.minus));
+        else if (x.part === 'adx') x.s.setData(points(d.adx));
       });
     }
     chart.subscribeCrosshairMove(p => {
@@ -256,7 +366,7 @@
     const api = {
       setBars(list) {
         bars = (list || []).map(toBar);
-        candles.setData(bars); volume.setData(bars.map(volOf)); drawAverages(); syncAuto();
+        candles.setData(bars); volume.setData(bars.map(volOf)); drawAverages(); drawIndicators(); syncAuto();
         api.reset();
       },
       mergeBars(list) {
@@ -266,7 +376,7 @@
           if (b.time === bars[bars.length - 1].time) bars[bars.length - 1] = b; else bars.push(b);
           candles.update(b); volume.update(volOf(b));
         });
-        drawAverages(); redraw();
+        drawAverages(); drawIndicators(); redraw();
       },
       zoom(f) {
         const ts = chart.timeScale(), r = ts.getVisibleLogicalRange();
@@ -279,11 +389,15 @@
         if (!n) return;
         chart.timeScale().setVisibleLogicalRange({ from: Math.max(-1, n - 150), to: n + 5 });
       },
-      setAverages(on) { avgOn = Object.assign({ 20: false, 50: false }, on || {}); drawAverages(); },
+      setAverages(on) { avgOn = Object.assign({}, on || {}); drawAverages(); },
+      setIndicators(on) { indOn = Object.assign({}, on || {}); drawIndicators(); },
+      setPen(name) { if (k[name]) pen = name; redraw(); },
       setTool(name) { tool = name || null; first = null; hover = null; drawings = drawings.filter(x => x.type !== 'measure'); redraw();
         chart.applyOptions({ handleScroll: !tool, handleScale: !tool }); },
       cancel() { first = null; hover = null; redraw(); },
       setDrawings(list) { drawings = (list || []).filter(d => d && d.a && d.b && ['hline', 'trend', 'zone', 'fib'].includes(d.type)); syncHLines(); redraw(); },
+      recolor(id, c) { const d = drawings.find(x => x.id === id); if (!d || !k[c]) return; d.c = c;
+        if (hLines.has(id)) hLines.get(id).applyOptions({ color: penOf(d) }); redraw(); if (o.onDraw) o.onDraw(drawings.filter(x => x.type !== 'measure')); },
       removeDrawing(id) { drawings = drawings.filter(d => d.id !== id); syncHLines(); redraw(); if (o.onDraw) o.onDraw(drawings.filter(x => x.type !== 'measure')); },
       clearDrawings() { drawings = []; syncHLines(); redraw(); if (o.onDraw) o.onDraw([]); },
       setAutoLevels(on) { autoOn = !!on; syncAuto(); },
@@ -294,9 +408,9 @@
           rightPriceScale: { borderColor: k.rule }, timeScale: { borderColor: k.rule } });
         candles.applyOptions({ upColor: k.ink, downColor: k.accent, borderUpColor: k.ink, borderDownColor: k.accent, wickUpColor: k.ink, wickDownColor: k.accent });
         volume.setData(bars.map(volOf));
-        if (avgSeries[20]) avgSeries[20].applyOptions({ color: k.accent });
-        if (avgSeries[50]) avgSeries[50].applyOptions({ color: k.mute });
-        for (const l of hLines.values()) l.applyOptions({ color: k.accent });
+        AVERAGES.forEach(([id, , c]) => avgSeries[id] && avgSeries[id].applyOptions({ color: k[c] }));
+        for (const [id, l] of hLines) { const d = drawings.find(x => x.id === id); if (d) l.applyOptions({ color: penOf(d) }); }
+        indKey = ''; drawIndicators();
         syncAuto(); redraw();
       },
       get element() { return el; },
@@ -305,5 +419,5 @@
     return api;
   }
 
-  window.HIFLiveChart = { create, loadLib, autoLevels };
+  window.HIFLiveChart = { create, loadLib, autoLevels, AVERAGES, INDICATORS, PENS, PEN_OF, smaOf, emaOf, rsiOf, macdOf, dmiOf };
 })();

@@ -10,7 +10,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -298,17 +298,27 @@
 <button onClick="{{ lc.zoomOut }}" aria-label="{{ ui.lcZoomOut }}" title="{{ ui.lcZoomOut }}" style-hover="border-color:var(--color-accent)" style="min-height:32px;min-width:36px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:15px;cursor:pointer">&minus;</button>
 <button onClick="{{ lc.reset }}" style-hover="border-color:var(--color-accent)" style="min-height:32px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer">{{ ui.lcReset }}</button>
 </div>
-<div style="display:flex;gap:4px">
-<sc-for list="{{ lc.avgs }}" as="a" hint-placeholder-count="2">
-<button aria-pressed="{{ a.on }}" onClick="{{ a.toggle }}" style-hover="border-color:var(--color-accent)" style="min-height:32px;padding:0 10px;background:transparent;border:1px solid {{ a.edge }};color:{{ a.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.04em;cursor:pointer">{{ a.label }}</button>
-</sc-for>
-</div>
 <div style="margin-left:auto;font-size:12px;color:var(--s-mute);display:flex;align-items:center;gap:6px"><span aria-hidden="true" style="width:7px;height:7px;border-radius:50%;background:{{ lc.dot }}"></span><span>{{ lc.status }}</span></div>
+</div>
+<div role="toolbar" aria-label="{{ ui.lcIndicators }}" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+<sc-for list="{{ lc.avgs }}" as="a" hint-placeholder-count="6">
+<button aria-pressed="{{ a.on }}" onClick="{{ a.toggle }}" style-hover="border-color:{{ a.color }}" style="min-height:32px;padding:0 10px;display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid {{ a.edge }};color:{{ a.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.04em;cursor:pointer"><span aria-hidden="true" style="width:14px;height:3px;background:{{ a.color }};opacity:{{ a.swatch }}"></span>{{ a.label }}</button>
+</sc-for>
+<span aria-hidden="true" style="width:1px;height:20px;background:var(--s-rule);margin:0 4px"></span>
+<sc-for list="{{ lc.inds }}" as="x" hint-placeholder-count="3">
+<button aria-pressed="{{ x.on }}" onClick="{{ x.toggle }}" title="{{ x.hint }}" style-hover="border-color:var(--color-accent)" style="min-height:32px;padding:0 12px;background:{{ x.bg }};border:1px solid {{ x.edge }};color:{{ x.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.06em;cursor:pointer">{{ x.label }}</button>
+</sc-for>
 </div>
 <div role="toolbar" aria-label="{{ ui.lcTools }}" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
 <sc-for list="{{ lc.tools }}" as="t" hint-placeholder-count="6">
 <button aria-pressed="{{ t.on }}" onClick="{{ t.pick }}" title="{{ t.hint }}" style-hover="border-color:var(--color-accent)" style="min-height:32px;padding:0 10px;background:{{ t.bg }};border:1px solid {{ t.edge }};color:{{ t.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.04em;cursor:pointer">{{ t.label }}</button>
 </sc-for>
+<span aria-hidden="true" style="width:1px;height:20px;background:var(--s-rule);margin:0 4px"></span>
+<div role="radiogroup" aria-label="{{ ui.lcColor }}" style="display:flex;gap:2px">
+<sc-for list="{{ lc.pens }}" as="c" hint-placeholder-count="6">
+<button role="radio" aria-checked="{{ c.on }}" aria-label="{{ c.label }}" title="{{ c.label }}" onClick="{{ c.pick }}" style="width:32px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid {{ c.edge }};cursor:pointer"><span aria-hidden="true" style="width:16px;height:16px;border-radius:50%;background:{{ c.color }}"></span></button>
+</sc-for>
+</div>
 <span aria-hidden="true" style="width:1px;height:20px;background:var(--s-rule);margin:0 4px"></span>
 <button aria-pressed="{{ lc.autoOn }}" onClick="{{ lc.autoToggle }}" style-hover="border-color:var(--color-accent)" style="min-height:32px;padding:0 10px;background:transparent;border:1px solid {{ lc.autoEdge }};color:{{ lc.autoInk }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.04em;cursor:pointer">{{ ui.lcAuto }}</button>
 <sc-if value="{{ lc.hasDrawings }}" hint-placeholder-val="{{ false }}"><button onClick="{{ lc.clearAll }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="min-height:32px;padding:0 10px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.04em;cursor:pointer">{{ ui.lcClear }}</button></sc-if>
@@ -335,6 +345,7 @@
 <div style="margin-top:4px">
 <sc-for list="{{ lc.drawings }}" as="d" hint-placeholder-count="2">
 <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--s-rule);font-size:13px">
+<button onClick="{{ d.recolor }}" aria-label="{{ d.recolorLabel }}" title="{{ d.recolorLabel }}" style="flex:none;width:32px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:1px solid var(--s-rule);cursor:pointer"><span aria-hidden="true" style="width:14px;height:14px;border-radius:50%;background:{{ d.color }}"></span></button>
 <span style="flex:1;min-width:0;overflow-wrap:anywhere">{{ d.label }}</span>
 <button onClick="{{ d.remove }}" aria-label="{{ d.removeLabel }}" title="{{ d.removeLabel }}" style-hover="color:var(--color-accent);border-color:var(--color-accent)" style="flex:none;min-width:32px;min-height:32px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-size:14px;cursor:pointer">&times;</button>
 </div>
@@ -1384,6 +1395,7 @@ class Component extends DCLogic {
   sharedReady() { return !!(window.HIF && window.HIFChart && window.HIFStore); }
   componentDidMount() {
     this.plotRef = this.plotRef || React.createRef();
+    this.setState(this.lcRecall());
     this._ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => this.measureChart()) : null;
     this.startIdleWatch();
     this._onResize = () => { this.setState({ vw: window.innerWidth }); this.measureChart(); };
@@ -2414,6 +2426,10 @@ class Component extends DCLogic {
   renderVals() { return this.withTickerLabels(this.renderValsRaw()); }
   // ---- live chart page (hif-livechart.js, loaded on first use) ----------------------------
   // Bar sizes, and how often the page asks for the latest bars while it is open.
+  // Must match AVERAGES, PENS and PEN_OF in hif-livechart.js (the chart may not be loaded yet).
+  static get LC_AVERAGES() { return [['sma20', 'SMA 20', 'blue'], ['sma50', 'SMA 50', 'orange'], ['sma100', 'SMA 100', 'purple'], ['sma200', 'SMA 200', 'pink'], ['ema9', 'EMA 9', 'teal'], ['ema21', 'EMA 21', 'yellow']]; }
+  static get LC_PENS() { return ['blue', 'orange', 'green', 'red', 'purple', 'yellow']; }
+  static get LC_PEN_OF() { return { hline: 'blue', trend: 'orange', zone: 'teal', fib: 'purple' }; }
   static get LC_INTERVALS() { return [['1m', 5000], ['5m', 10000], ['15m', 20000], ['30m', 20000], ['60m', 60000], ['1d', 60000], ['1wk', 300000], ['1mo', 300000]]; }
   loadScriptOnce(path) {
     this._scripts = this._scripts || {};
@@ -2455,6 +2471,8 @@ class Component extends DCLogic {
           onDraw: list => { this.setState(st => ({ lcDrawings: Object.assign({}, st.lcDrawings, { [sym]: list }) })); this.saveDrawings(sym, list); } });
         this._lc.setBars(bars);
         this._lc.setAverages(this.state.lcAvg || {});
+        this._lc.setIndicators(this.state.lcInd || {});
+        this._lc.setPen(this.state.lcPen || 'blue');
         this._lc.setDrawings((this.state.lcDrawings || {})[sym] || []);
         this._lc.setAutoLevels(!!this.state.lcAuto);
         this._lc.setTool(this.state.lcTool || null);
@@ -2503,6 +2521,13 @@ class Component extends DCLogic {
     if (this._lc) { this._lc.destroy(); this._lc = null; }
     this._lcKey = ''; this._lcLoading = false;
   }
+  // The chart's averages, indicators and pen colour, kept on this device only.
+  lcRemember(key, val) { try { localStorage.setItem('mp.' + key, JSON.stringify(val)); } catch (e) {} }
+  lcRecall() {
+    const out = {};
+    ['lcAvg', 'lcInd', 'lcPen'].forEach(key => { try { const v = JSON.parse(localStorage.getItem('mp.' + key) || 'null'); if (v != null) out[key] = v; } catch (e) {} });
+    return out;
+  }
   liveChartVals(u) {
     const s = this.state, sym = s.selected || '', m = s.lcMeta || {}, loc = this.appLocale;
     const H = this.data || {}, U = H.UNIVERSE || [];
@@ -2523,8 +2548,15 @@ class Component extends DCLogic {
       intervals: this.constructor.LC_INTERVALS.map(([k]) => ({ label: ivLabel(k), on: (s.lcIv || '5m') === k,
         bg: (s.lcIv || '5m') === k ? 'var(--color-accent)' : 'transparent', ink: (s.lcIv || '5m') === k ? 'var(--s-on-accent)' : 'var(--s-mute)', edge: (s.lcIv || '5m') === k ? 'var(--color-accent)' : 'var(--s-rule)',
         pick: () => this.setState({ lcIv: k, lcHover: null }) })),
-      avgs: [20, 50].map(n => { const on = !!(s.lcAvg || {})[n]; return { label: 'SMA ' + n, on, ink: on ? 'var(--s-ink)' : 'var(--s-mute)', edge: on ? 'var(--color-accent)' : 'var(--s-rule)',
-        toggle: () => { const next = Object.assign({}, s.lcAvg, { [n]: !on }); this.setState({ lcAvg: next }); if (this._lc) this._lc.setAverages(next); } }; }),
+      // Averages over the price, indicators in panes under it; remembered on this device.
+      avgs: this.constructor.LC_AVERAGES.map(([id, label, c]) => { const on = !!(s.lcAvg || {})[id]; return { label, on, color: 'var(--lc-' + c + ')', swatch: on ? 1 : 0.45,
+        ink: on ? 'var(--s-ink)' : 'var(--s-mute)', edge: on ? 'var(--lc-' + c + ')' : 'var(--s-rule)',
+        toggle: () => { const next = Object.assign({}, this.state.lcAvg, { [id]: !(this.state.lcAvg || {})[id] }); this.setState({ lcAvg: next }); this.lcRemember('lcAvg', next); if (this._lc) this._lc.setAverages(next); } }; }),
+      inds: [['macd', 'MACD'], ['dmi', 'DMI'], ['rsi', 'RSI']].map(([id, label]) => { const on = !!(s.lcInd || {})[id]; return { label, on, hint: u['lcInd_' + id] || '',
+        bg: on ? 'var(--color-accent)' : 'transparent', ink: on ? 'var(--s-on-accent)' : 'var(--s-mute)', edge: on ? 'var(--color-accent)' : 'var(--s-rule)',
+        toggle: () => { const next = Object.assign({}, this.state.lcInd, { [id]: !(this.state.lcInd || {})[id] }); this.setState({ lcInd: next }); this.lcRemember('lcInd', next); if (this._lc) this._lc.setIndicators(next); } }; }),
+      pens: this.constructor.LC_PENS.map(c => { const on = (s.lcPen || 'blue') === c; return { color: 'var(--lc-' + c + ')', on, label: (u.lcColor || 'Line colour') + ': ' + (u['lcPen_' + c] || c),
+        edge: on ? 'var(--s-ink)' : 'transparent', pick: () => { this.setState({ lcPen: c }); this.lcRemember('lcPen', c); if (this._lc) this._lc.setPen(c); } }; }),
       zoomIn: () => this._lc && this._lc.zoom(0.7), zoomOut: () => this._lc && this._lc.zoom(1.45), reset: () => this._lc && this._lc.reset(),
       legend: h ? ['O ' + dec(h.o), 'H ' + dec(h.h), 'L ' + dec(h.l), 'C ' + dec(h.c), 'V ' + Number(h.v || 0).toLocaleString(loc, { notation: 'compact' })].join('   ') : '',
       busy: !!s.lcBusy, err: s.lcErr || '',
@@ -2539,19 +2571,22 @@ class Component extends DCLogic {
       autoOn: !!s.lcAuto, autoInk: s.lcAuto ? 'var(--s-ink)' : 'var(--s-mute)', autoEdge: s.lcAuto ? 'var(--color-accent)' : 'var(--s-rule)',
       autoToggle: () => { const on = !s.lcAuto; this.setState({ lcAuto: on }); if (this._lc) this._lc.setAutoLevels(on); },
       hasLevels: !!s.lcAuto && !!this._lc && this._lc.autoLevels().length > 0,
-      levels: s.lcAuto && this._lc ? this._lc.autoLevels().map(x => ({ label: x.label, price: dec(x.p), ink: x.label[0] === 'R' ? 'var(--color-accent)' : 'var(--s-ink)',
+      levels: s.lcAuto && this._lc ? this._lc.autoLevels().map(x => ({ label: x.label, price: dec(x.p), ink: x.label[0] === 'R' ? 'var(--lc-red)' : 'var(--lc-green)',
         touches: x.touches === 1 ? (u.lcTouch1 || '1 touch') : (u.lcTouches || '{n} touches').replace('{n}', x.touches) })) : [],
       drawings: ((s.lcDrawings || {})[sym] || []).map(d => {
         const day = t => new Date(t * 1000).toLocaleDateString(loc, { day: 'numeric', month: 'short' });
         const what = { hline: u.lcToolH, trend: u.lcToolTrend, zone: u.lcToolZone, fib: u.lcToolFib }[d.type] || d.type;
         const detail = d.type === 'hline' ? dec(d.a.p) : d.type === 'zone' ? dec(Math.min(d.a.p, d.b.p)) + ' \u2013 ' + dec(Math.max(d.a.p, d.b.p))
           : dec(d.a.p) + ' (' + day(d.a.t) + ') \u2192 ' + dec(d.b.p) + ' (' + day(d.b.t) + ')';
-        return { label: what + ' \u00b7 ' + detail, removeLabel: (u.lcRemove || 'Remove') + ' ' + what,
+        return { label: what + ' \u00b7 ' + detail, color: 'var(--lc-' + (d.c || this.constructor.LC_PEN_OF[d.type] || 'blue') + ')', removeLabel: (u.lcRemove || 'Remove') + ' ' + what,
+          recolorLabel: (u.lcRecolor || 'Give it the selected colour') + ' (' + (u['lcPen_' + (s.lcPen || 'blue')] || s.lcPen || 'blue') + ')',
+          recolor: () => { const c = s.lcPen || 'blue'; if (this._lc) this._lc.recolor(d.id, c); else { const list = ((this.state.lcDrawings || {})[sym] || []).map(x => x.id === d.id ? Object.assign({}, x, { c }) : x); this.setState(st => ({ lcDrawings: Object.assign({}, st.lcDrawings, { [sym]: list }) })); this.saveDrawings(sym, list); } },
           remove: () => { if (this._lc) this._lc.removeDrawing(d.id); else { const list = ((this.state.lcDrawings || {})[sym] || []).filter(x => x.id !== d.id); this.setState(st => ({ lcDrawings: Object.assign({}, st.lcDrawings, { [sym]: list }) })); this.saveDrawings(sym, list); } } };
       }),
       hasDrawings: ((s.lcDrawings || {})[sym] || []).length > 0,
       clearAll: () => { if (this._lc) this._lc.clearDrawings(); },
-      height: (s.vw || 1440) < 760 ? '420px' : '540px',
+      // Each indicator adds a strip under the price chart.
+      height: ((s.vw || 1440) < 760 ? 420 : 540) + Object.values(s.lcInd || {}).filter(Boolean).length * ((s.vw || 1440) < 760 ? 120 : 150) + 'px',
       dot: s.lcErr ? 'var(--color-accent)' : 'var(--s-ink)',
       status: (u.lcEvery || 'Updates every {n}').replace('{n}', everyMs < 60000 ? Math.round(everyMs / 1000) + ' s' : Math.round(everyMs / 60000) + ' min') + (when ? ' \u00b7 ' + (u.lcLastTrade || 'last price {t}').replace('{t}', when) : ''),
       note: local ? (u.lcNoteLocal || 'Bucharest, XETRA and London prices come from Yahoo and may be delayed up to 15 minutes.') : (u.lcNoteUs || 'Minute bars from Yahoo. Second bars come in the next version.')
