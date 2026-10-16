@@ -71,7 +71,10 @@ async function get(path, params, token){
 }
 function available(token){ return proxyState !== 'no' || !!token; }
 
-function fmtPrice(v){ return v == null ? null : Number(v).toFixed(2); }
+// Small prices keep their digits (0.9940, 4.125), so a quote under 10 isn't rounded away.
+function fmtPrice(v){ if (v == null) return null; const n = Number(v), a = Math.abs(n); return n.toFixed(a < 1 ? 4 : a < 10 ? 3 : 2); }
+// London listings are quoted in pence, as on the exchange: "99.40p".
+const isPence = symbol => /\.L$/.test(String(symbol || ''));
 function fmtPct(v){ if (v == null) return null; const n = Number(v); return (n < 0 ? '−' : '+') + Math.abs(n).toFixed(1) + '%'; }
 // When a story was published, in the reader's locale: "12 Oct · 10:24", with the year
 // added for anything outside the current year.
@@ -87,12 +90,13 @@ async function quote(symbol, token){
   if (!available(token)) return null;
   const hit = fresh('quote', symbol); if (hit) return hit;
   const j = await get('/quote', { symbol: symbol }, token);
-  return put('quote', symbol, shapeQuote(j));
+  return put('quote', symbol, shapeQuote(j, symbol));
 }
 // last/dp keep full precision for position maths; price/move are the display strings.
-function shapeQuote(j){
+function shapeQuote(j, symbol){
   if (!j || j.c == null || j.c === 0) return null;
-  return { price: fmtPrice(j.c), move: fmtPct(j.dp), up: Number(j.dp) >= 0, changeAbs: fmtPrice(j.d),
+  const unit = isPence(symbol) ? 'p' : '', f = v => { const t = fmtPrice(v); return t == null ? null : t + unit; };
+  return { price: f(j.c), move: fmtPct(j.dp), up: Number(j.dp) >= 0, changeAbs: f(j.d),
     last: Number(j.c), dp: j.dp == null ? null : Number(j.dp) };
 }
 
@@ -110,7 +114,7 @@ async function quotes(symbols, token){
     try {
       const j = await callProxy('/quotes', { symbols: need.join(',') });
       if (j && j.quotes) {
-        need.forEach(s => { const q = put('quote', s, shapeQuote(j.quotes[s])); if (q) out[s] = q; });
+        need.forEach(s => { const q = put('quote', s, shapeQuote(j.quotes[s], s)); if (q) out[s] = q; });
         return out;
       }
     } catch (e) { if (/proxy 400/.test(e.message)) batchQuotes = false; }

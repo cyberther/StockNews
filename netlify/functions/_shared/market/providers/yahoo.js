@@ -78,20 +78,13 @@ function addToday(out, m) {
 }
 
 const num = v => (v == null || !Number.isFinite(Number(v)) ? null : Number(v));
-// London prices come in pence ("GBp"); the apps show pounds, like every other currency.
-const PENCE = new Set(['GBp', 'GBX']);
-function toPounds(data) {
+// London prices come in pence, as the London Stock Exchange and every UK broker quote them,
+// and stay so: the apps show "99.40p" and work out position values in pounds
+// (templates/shared/hif-insight.js). Yahoo writes the unit GBp or GBX; one name for both.
+function pence(data) {
   const r = data && data.chart && data.chart.result && data.chart.result[0];
-  if (!r || !r.meta || !PENCE.has(r.meta.currency)) return data;
-  const p = v => (typeof v === 'number' ? +(v / 100).toFixed(6) : v);
-  const meta = Object.assign({}, r.meta, { currency: 'GBP' });
-  ['regularMarketPrice', 'chartPreviousClose', 'previousClose', 'regularMarketDayHigh', 'regularMarketDayLow',
-    'fiftyTwoWeekHigh', 'fiftyTwoWeekLow'].forEach(k => { if (k in meta) meta[k] = p(meta[k]); });
-  const quote = ((r.indicators && r.indicators.quote) || []).map(q => Object.fromEntries(Object.entries(q)
-    .map(([k, arr]) => [k, k === 'volume' || !Array.isArray(arr) ? arr : arr.map(p)])));
-  const adj = ((r.indicators && r.indicators.adjclose) || []).map(a => ({ adjclose: (a.adjclose || []).map(p) }));
-  const indicators = Object.assign({}, r.indicators, { quote }, adj.length ? { adjclose: adj } : {});
-  return { chart: Object.assign({}, data.chart, { result: [Object.assign({}, r, { meta, indicators })].concat(data.chart.result.slice(1)) }) };
+  if (!r || !r.meta || r.meta.currency !== 'GBX') return data;
+  return { chart: Object.assign({}, data.chart, { result: [Object.assign({}, r, { meta: Object.assign({}, r.meta, { currency: 'GBp' }) })].concat(data.chart.result.slice(1)) }) };
 }
 const metaOf = d => (d && d.chart && d.chart.result && d.chart.result[0] && d.chart.result[0].meta) || null;
 
@@ -121,7 +114,7 @@ export const yahoo = {
   },
   headers: { 'user-agent': 'Mozilla/5.0' },
   async transform(cap, raw, p) {
-    const data = toPounds(raw);
+    const data = pence(raw);
     if (cap === 'chart') return data;
     if (cap === 'candles') return compactCandles(data, p && p.interval);
     const m = metaOf(data) || {};
