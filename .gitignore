@@ -13,3 +13,6 @@ admin.env
 
 # Dependencies
 node_modules
+
+# Browser test output (screenshots, logs)
+.playwright-mcp/
