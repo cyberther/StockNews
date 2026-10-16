@@ -188,13 +188,18 @@ async function pressMarketNews(path: string, label: string, errors: string[], ke
   }
 }
 
-// One alert per user per run: the newest story leads, the rest are counted.
+// One alert per user per run: the newest story leads, the rest are counted. A tap opens
+// the article itself when there is one story (article), else the app on those stories
+// (url …#alert=<ids>, the app's "From this alert" screen).
 function message(stories: Story[], appUrl: string) {
   const s = [...stories].sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
   const tickers = [...new Set(s.map(x => x.ticker))];
   const title = s.length === 1 ? `${s[0].ticker} · new story` : `${s.length} new stories · ${tickers.slice(0, 4).join(', ')}${tickers.length > 4 ? '…' : ''}`;
   const body = s[0].headline + (s.length > 1 ? `  (+${s.length - 1} more)` : '');
-  return JSON.stringify({ title, body, url: appUrl, tag: 'market-pulse-scan' });
+  const base = appUrl.replace(/#.*$/, '');
+  const url = base + '#alert=' + s.slice(0, 20).map(x => encodeURIComponent(x.id)).join(',');
+  const article = s.length === 1 && s[0].url && /^https:\/\//.test(s[0].url) ? s[0].url : null;
+  return JSON.stringify({ title, body, url, article, tag: 'market-pulse-scan' });
 }
 
 Deno.serve(async (req) => {

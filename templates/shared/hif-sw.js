@@ -1,5 +1,7 @@
 // Service worker for Market Pulse push alerts (registered by hif-push.js).
-// The scan sends { title, body, url, tag }; a tap focuses an open app tab or opens url.
+// The scan sends { title, body, url, article, tag }. A tap opens the article when the alert
+// is about one story; otherwise the app on the alert's stories (url …#alert=<ids>): an open
+// app tab is sent there and focused, else url opens in a new one.
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
 
@@ -12,15 +14,20 @@ self.addEventListener('push', event => {
     renotify: true,
     icon: '/templates/stock-news-web/assets/aa-logo.png',
     badge: '/templates/stock-news-web/assets/aa-logo.png',
-    data: { url: d.url || '/' }
+    data: { url: d.url || '/', article: d.article || '' }
   }));
 });
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const target = new URL((event.notification.data && event.notification.data.url) || '/', self.location.origin);
+  const data = event.notification.data || {};
+  if (/^https:\/\//.test(data.article || '')) { event.waitUntil(self.clients.openWindow(data.article)); return; }
+  const target = new URL(data.url || '/', self.location.origin);
   event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
     const open = list.find(c => new URL(c.url).origin === target.origin && c.url.indexOf('/templates/stock-news') >= 0);
-    return open ? open.focus() : self.clients.openWindow(target.href);
+    if (!open) return self.clients.openWindow(target.href);
+    // The open app shows the alert's stories (it listens for this; see StockNewsWeb).
+    if (target.hash) open.postMessage({ type: 'hif-open', hash: target.hash });
+    return open.focus();
   }));
 });

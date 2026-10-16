@@ -239,6 +239,15 @@ async function loadFilings(ticker) {
   return r.ok && Array.isArray(r.body) ? r.body : null;
 }
 
+// The stories an alert was about (ids "TICKER:id", the scan's public.stories).
+async function loadStoriesById(ids) {
+  const list = [...new Set(ids || [])].filter(id => /^[A-Z0-9.\-]+:[^,()"]{1,200}$/.test(id)).slice(0, 20);
+  if (!live() || !list.length) return [];
+  const r = await auth().rest('stories?select=id,ticker,headline,source,url,summary,published_at&id=in.(' +
+    list.map(id => encodeURIComponent('"' + id + '"')).join(',') + ')&order=published_at.desc');
+  return r.ok && Array.isArray(r.body) ? r.body : [];
+}
+
 // A Bucharest listing's report dates, general meeting and dividend dates, from its
 // financial calendar (supabase/calendar.sql), oldest first.
 async function loadReportDates(ticker) {
@@ -264,5 +273,5 @@ async function saveDrawings(ticker, list) {
   return true;
 }
 
-window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadReportDates, loadDrawings, saveDrawings, supported };
+window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadReportDates, loadStoriesById, loadDrawings, saveDrawings, supported };
 })();
