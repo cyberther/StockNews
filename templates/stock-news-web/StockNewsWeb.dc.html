@@ -836,7 +836,7 @@
 <button onClick="{{ alertAll }}" style-hover="border-color:var(--color-accent)" style="min-height:38px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.alertAll }}</button>
 </div>
 <div style="font-size:13px;color:var(--s-mute);margin-top:10px">{{ alertSub }}</div>
-<sc-if value="{{ alertLoading }}" hint-placeholder-val="{{ false }}"><div style="margin-top:20px;font-size:13px;color:var(--s-mute)">{{ ui.lcLoading }}</div></sc-if>
+<sc-if value="{{ alertLoading }}" hint-placeholder-val="{{ false }}"><div style="margin-top:20px;font-size:13px;color:var(--s-mute)">{{ ui.alertLoadingText }}</div></sc-if>
 <sc-if value="{{ alertNone }}" hint-placeholder-val="{{ false }}"><div style="margin-top:20px;font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.alertNone }}</div></sc-if>
 <div style="margin-top:16px;border-top:1px solid var(--s-rule)">
 <sc-for list="{{ alertCards }}" as="c" hint-placeholder-count="3">
@@ -1848,14 +1848,18 @@ class Component extends DCLogic {
     this.setState(s => ({ screen:'alert', prev: s.screen === 'alert' ? s.prev : s.screen, alertIds: ids, alertRows: null }));
     const P = window.HIFPush;
     if (!P || !P.loadStoriesById) return this.setState({ alertRows: [] });
-    P.loadStoriesById(ids).then(rows => {
+    // Right after the page opens the session may not be restored yet: a few tries.
+    const load = tries => P.loadStoriesById(ids).then(rows => {
+      if ((!rows || !rows.length) && tries < 5) { setTimeout(() => load(tries + 1), 1500); return; }
+      if (String((this.state.alertIds || []).join()) !== ids.join()) return;
       this.setState({ alertRows: rows || [] });
       const lang = String(this.lang || 'EN').toLowerCase();
       if (P.loadSummaries && rows && rows.length) P.loadSummaries(rows.map(r => r.id), lang).then(map => {
         const add = {}; Object.keys(map || {}).forEach(id => { add[lang + '|' + id] = map[id]; });
         if (Object.keys(add).length) this.setState(st => ({ summaries: Object.assign({}, st.summaries, add) }));
       }).catch(() => {});
-    }).catch(() => this.setState({ alertRows: [] }));
+    }).catch(() => tries < 5 ? setTimeout(() => load(tries + 1), 1500) : this.setState({ alertRows: [] }));
+    load(0);
   }
   alertVals(u) {
     const s = this.state, rows = s.alertRows, lang = String(this.lang || 'EN').toLowerCase(), SUMS = s.summaries || {};
