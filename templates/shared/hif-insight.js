@@ -359,11 +359,18 @@ function ledger(entries, priceOf, labels) {
 const EVENT_STOP = new Set(('der die das den dem des ein eine einer einen einem und oder aber fur mit von vom zum zur auf aus bei nach uber unter vor gegen ist sind wird werden hat haben nicht noch auch nur wie was wer als bis durch ohne um an am im in zu es sie er wir ihr sich so ' +
   'the a an and or of to in on at for with from by is are was were be has have had will its it this that as after over new says said more than ' +
   'de la si sau cu din pe in la pentru ca care este sunt mai un o al ale lui ce dupa prin ' +
-  'chef boss ceo konzern aktie aktien shares stock director directorul actiunile').split(' '));
+  'chef boss ceo konzern aktie aktien shares stock director directorul actiunile ' +
+  // Words any market story has: sharing them says nothing about the event.
+  'investitor investitori investitorii investitorilor investor investors anleger bursa burse bursei borse boerse market markets markt ' +
+  'piata pietei pietele actiuni actiunilor actionari actionarii actionarilor indice indicele indicelui indicii index sedinta sedintei ' +
+  'tranzactionare tranzactii crestere cresteri scadere scaderi pret pretul preturi preturile milioane miliarde companie compania companiei ' +
+  'companii firma firme anunt anuntul ultima azi astazi luni marti miercuri joi vineri sambata duminica').split(' '));
 const eventWords = s => [...new Set(String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
   .split(/[^a-z0-9ß]+/).filter(w => w.length >= 3 && !EVENT_STOP.has(w) && !/^\d+$/.test(w)))];
 function sameEvent(rows, namesOf) {
-  const docs = rows.map(r => eventWords(r.headline + ' ' + (r.snippet || '')));
+  // A snippet cut off mid-word ("...privind pri...") ends in a fragment: dropped.
+  const whole = t => String(t || '').replace(/\s*\S*(?:\.\.\.|…)\s*$/, '');
+  const docs = rows.map(r => eventWords(r.headline + ' ' + whole(r.snippet)));
   const heads = rows.map(r => eventWords(r.headline));
   const df = {}; docs.forEach(d => d.forEach(w => { df[w] = (df[w] || 0) + 1; }));
   // Uncommon: in at most 3 stories, or 15% of a long list.
