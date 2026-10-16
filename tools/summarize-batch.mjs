@@ -548,7 +548,8 @@ export function cleanDigest(text, lang = 'ro') {
 }
 export function digestLooksWrong(d, lang, stories = 2) {
   const bullets = d ? d.split('\n') : [];
-  if (bullets.length < Math.min(2, stories)) return 'too few bullets';
+  // Two or three stories are often one event told by several outlets: one bullet is right.
+  if (bullets.length < (stories >= 4 ? 2 : 1)) return 'too few bullets';
   if (d.length > 3000) return 'too long';
   if (lang !== 'en' && (d.match(EN_WORDS) || []).length >= 4 + bullets.length * 2) return 'English words';
   return '';
@@ -584,19 +585,32 @@ const filingsRun = () => runFilings(cfg.filings && nightHour() ? Math.max(cfg.fi
 const calendarRun = () => runCalendars(cfg.calendars && nightHour() ? Math.max(cfg.calendars, 6) : cfg.calendars, { cfg, rpc, postJson, httpGet, log, ua: FILINGS_UA,
   deadline: Date.now() + cfg.filingsMinutes * 60_000,
   allowed: url => allowedByRobots(url, 'marketpulsefilings') });
-// Up to DIGEST_LIMIT digests per language this run (or the one ticker asked for).
+// Up to DIGEST_LIMIT digests per language this run (or the one ticker asked for). A digest
+// the model got wrong twice isn't tried again for a day (unless its day gets more stories):
+// it used to come back first in every run, cost two model replies each time, and kept the
+// digests behind it from ever being written.
+export const digestKey = (row, lang) => `digest|${row.ticker}|${row.day}|${lang}|${(row.stories || []).length}`;
+export function digestsToWrite(rows, lang, rejected, n) {
+  return (rows || []).filter(r => !rejected[digestKey(r, lang)]).slice(0, n);
+}
 async function runDigests(onlyTicker) {
   const n = onlyTicker ? 1 : cfg.digests;
   if (!n) return;
+  const rejected = onlyTicker ? {} : loadRejected();
   for (const lang of cfg.langs) {
     let rows = [];
-    try { rows = await rpc('digests_pending', { p_secret: cfg.secret, p_lang: lang, p_limit: n, p_ticker: onlyTicker || null }) || []; }
+    const held = Object.keys(rejected).filter(k => k.startsWith('digest|') && k.includes('|' + lang + '|')).length;
+    try { rows = await rpc('digests_pending', { p_secret: cfg.secret, p_lang: lang, p_limit: Math.min(20, n + held), p_ticker: onlyTicker || null }) || []; }
     catch (e) { log('digests:', String(e.message || e)); return; }
-    for (const row of rows) {
+    for (const row of digestsToWrite(rows, lang, rejected, n)) {
       const t0 = Date.now();
       try {
         const { text, why } = await writeDigest(row, lang);
-        if (why) { log('skipped digest', row.ticker, row.day, lang, '-', why); continue; }
+        if (why) {
+          log('skipped digest', row.ticker, row.day, lang, '-', why, '(not tried again today)');
+          if (!onlyTicker) { rejected[digestKey(row, lang)] = Date.now(); saveRejected(rejected); }
+          continue;
+        }
         await rpc('digests_save', { p_secret: cfg.secret, p_ticker: row.ticker, p_day: row.day, p_lang: lang, p_digest: text,
           p_stories: row.stories.length, p_model: cfg.model });
         log('saved digest', row.ticker, row.day, lang, `${row.stories.length} stories`, `${Math.round((Date.now() - t0) / 1000)}s`);
