@@ -113,34 +113,63 @@
   const PEN_OF = { hline: 'blue', trend: 'orange', zone: 'teal', fib: 'purple' };
   const DARK = { blue: '#5AA9FF', orange: '#FF9F43', green: '#3DDC84', red: '#FF5C6C', purple: '#C08CFF', teal: '#2ED1C1', pink: '#FF7AB6', yellow: '#FFD54A' };
 
-  // Support and resistance from the bars: swing highs and lows (a bar higher or lower than
-  // the 5 on each side), grouped when within half an average bar range, ranked by how many
-  // times price turned there; the closest 3 above and 3 below the last close.
-  function autoLevels(bars) {
-    const n = bars.length, w = 5;
-    if (n < 2 * w + 5) return [];
-    const range = bars.slice(-200).reduce((a, b) => a + (b.high - b.low), 0) / Math.min(n, 200) || 0;
-    const tol = Math.max(range * 0.5, bars[n - 1].close * 0.002);
+  // Support and resistance from the bars (the last 400): swing highs and lows (a bar higher or
+  // lower than the 5 before and the 3 after it; 3 and 2 for weekly and monthly bars, so a
+  // recent pullback counts), grouped into bands
+  // of +/- tol around the busiest price first, so a band never creeps along the chart. tol is
+  // 0.6 of the average true range (at least 0.15% of the price). Each band's level is the
+  // median of its swings; touches is how many swings it has. Above the last close are
+  // resistances, below supports: the 3 closest each within 8 average ranges of the price,
+  // preferring bands touched twice or more and keeping them at least 1.5 tol apart.
+  // A swing must be strictly beyond the bars after it, so a run of equal prices (a quiet
+  // Bucharest share trading at one tick) counts once, not once per bar.
+  function autoLevels(all, long) {
+    const bars = all.slice(-400), n = bars.length, w = long ? 3 : 5, wr = long ? 2 : 3;
+    if (n < w + wr + 10) return [];
+    const last = bars[n - 1].close;
+    let atr = 0, m = 0;
+    for (let i = Math.max(1, n - 100); i < n; i++, m++) {
+      const b = bars[i], pc = bars[i - 1].close;
+      atr += Math.max(b.high - b.low, Math.abs(b.high - pc), Math.abs(b.low - pc));
+    }
+    atr = m ? atr / m : 0;
+    const tol = Math.max(atr * 0.6, last * 0.0015);
     const pts = [];
-    for (let i = w; i < n - w; i++) {
+    for (let i = w; i < n - wr; i++) {
       let hi = true, lo = true;
-      for (let j = i - w; j <= i + w; j++) {
+      for (let j = i - w; j <= i + wr; j++) {
         if (j === i) continue;
-        if (bars[j].high > bars[i].high) hi = false;
-        if (bars[j].low < bars[i].low) lo = false;
+        if (j < i ? bars[j].high > bars[i].high : bars[j].high >= bars[i].high) hi = false;
+        if (j < i ? bars[j].low < bars[i].low : bars[j].low <= bars[i].low) lo = false;
       }
       if (hi) pts.push(bars[i].high);
       if (lo) pts.push(bars[i].low);
     }
-    const groups = [];
-    pts.sort((a, b) => a - b).forEach(p => {
-      const g = groups[groups.length - 1];
-      if (g && p - g.max <= tol) { g.sum += p; g.n++; g.max = p; } else groups.push({ sum: p, n: 1, max: p });
-    });
-    const last = bars[n - 1].close;
-    const lv = groups.map(g => ({ p: g.sum / g.n, touches: g.n }));
-    const above = lv.filter(x => x.p > last).sort((a, b) => a.p - b.p).slice(0, 3).map((x, i) => Object.assign(x, { label: 'R' + (i + 1) }));
-    const below = lv.filter(x => x.p <= last).sort((a, b) => b.p - a.p).slice(0, 3).map((x, i) => Object.assign(x, { label: 'S' + (i + 1) }));
+    pts.sort((a, b) => a - b);
+    const bands = [];
+    let left = pts.slice();
+    while (left.length) {
+      // The point with the most others within tol of it.
+      let best = 0, bestN = 0;
+      for (let a = 0, b = 0, c = 0; c < left.length; c++) {
+        while (left[c] - left[a] > tol) a++;
+        while (b < left.length && left[b] - left[c] <= tol) b++;
+        if (b - a > bestN) { bestN = b - a; best = c; }
+      }
+      const lo = left[best] - tol, hi = left[best] + tol;
+      const inBand = left.filter(p => p >= lo && p <= hi);
+      bands.push({ p: inBand[Math.floor(inBand.length / 2)], touches: inBand.length });
+      left = left.filter(p => p < lo || p > hi);
+    }
+    const pick = side => {
+      const near = side.filter(x => Math.abs(x.p - last) <= Math.max(atr * 8, tol * 3)).sort((a, b) => Math.abs(a.p - last) - Math.abs(b.p - last)), out = [];
+      const add = x => { if (out.length < 3 && out.every(y => Math.abs(y.p - x.p) >= tol * 1.5)) out.push(x); };
+      near.filter(x => x.touches >= 2).forEach(add);
+      near.filter(x => x.touches < 2).forEach(add);
+      return out.sort((a, b) => Math.abs(a.p - last) - Math.abs(b.p - last));
+    };
+    const above = pick(bands.filter(x => x.p > last)).map((x, i) => Object.assign(x, { label: 'R' + (i + 1) }));
+    const below = pick(bands.filter(x => x.p <= last)).map((x, i) => Object.assign(x, { label: 'S' + (i + 1) }));
     return above.concat(below);
   }
   const FIB = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
@@ -256,7 +285,7 @@
     function syncAuto() {
       autoLines.forEach(l => candles.removePriceLine(l)); autoLines = [];
       if (!autoOn) return;
-      autoLevels(bars).forEach(x => autoLines.push(candles.createPriceLine({ price: x.p, color: x.label[0] === 'R' ? k.red : k.green,
+      autoLevels(bars, o.step >= 604800).forEach(x => autoLines.push(candles.createPriceLine({ price: x.p, color: x.label[0] === 'R' ? k.red : k.green,
         lineWidth: 2, lineStyle: LWC.LineStyle.Dashed, axisLabelVisible: true, title: x.label + ' \u00d7' + x.touches })));
     }
     const redraw = () => { if (layer._req) layer._req(); };
@@ -371,11 +400,13 @@
       },
       mergeBars(list) {
         if (!bars.length) return api.setBars(list);
-        const last = bars[bars.length - 1].time;
+        const last = bars[bars.length - 1].time, n0 = bars.length;
         (list || []).map(toBar).filter(b => b.time >= last).forEach(b => {
           if (b.time === bars[bars.length - 1].time) bars[bars.length - 1] = b; else bars.push(b);
           candles.update(b); volume.update(volOf(b));
         });
+        // A new bar can make a new swing: the automatic levels are found again.
+        if (bars.length !== n0) syncAuto();
         drawAverages(); drawIndicators(); redraw();
       },
       zoom(f) {
@@ -401,7 +432,7 @@
       removeDrawing(id) { drawings = drawings.filter(d => d.id !== id); syncHLines(); redraw(); if (o.onDraw) o.onDraw(drawings.filter(x => x.type !== 'measure')); },
       clearDrawings() { drawings = []; syncHLines(); redraw(); if (o.onDraw) o.onDraw([]); },
       setAutoLevels(on) { autoOn = !!on; syncAuto(); },
-      autoLevels() { return autoLevels(bars); },
+      autoLevels() { return autoLevels(bars, o.step >= 604800); },
       setTheme() {
         k = colors();
         chart.applyOptions({ layout: { textColor: k.mute }, grid: { vertLines: { color: fade(k.rule, 0.35) }, horzLines: { color: fade(k.rule, 0.35) } },
