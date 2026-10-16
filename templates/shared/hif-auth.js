@@ -22,6 +22,8 @@
 //   HIFAuth.mfaEnroll()      -> { factorId, qr, secret, uri } | { error }  (a new TOTP factor)
 //   HIFAuth.mfaVerify(code, factorId?) -> { ok } | { error }  (the session becomes aal2)
 //   HIFAuth.mfaUnenroll()    -> { ok } | { error }
+//   HIFAuth.mfaFactors()     -> [{ id, name, created }] the account's authenticators
+//   HIFAuth.mfaRemove(factorId, code) -> { ok } | { error }  (a current code first, from any of them)
 //   HIFAuth.checkPassword(email, password) -> { ok } | { error }, the session unchanged
 // Two-factor sign-in: a device asks for the code once, at sign-in; the session it gets is
 // at level aal2 and stays so through refreshes, so the lock screen never asks again. The
@@ -186,14 +188,20 @@ async function reloadUser() {
   const r = await call('/auth/v1/user', { headers: { authorization: 'Bearer ' + t } });
   if (r.ok && r.body && r.body.id && current) { current.user = r.body; save(current); emit(); }
 }
-async function mfaEnroll() {
+function mfaFactors() {
+  return ((current && current.user && current.user.factors) || []).filter(x => x.factor_type === 'totp' && x.status === 'verified')
+    .map(x => ({ id: x.id, name: x.friendly_name || 'Authenticator', created: x.created_at || '' }))
+    .sort((a, b) => String(a.created).localeCompare(String(b.created)));
+}
+async function mfaEnroll(name) {
   const t = await token(); if (!t) return { error: 'failed' };
   // A setup that was started and never confirmed is dropped first.
   for (const f of ((current.user && current.user.factors) || []).filter(x => x.status !== 'verified')) {
     try { await call('/auth/v1/factors/' + encodeURIComponent(f.id), { method: 'DELETE', headers: { authorization: 'Bearer ' + t } }); } catch (e) {}
   }
   const r = await call('/auth/v1/factors', { method: 'POST', headers: { authorization: 'Bearer ' + t },
-    body: { factor_type: 'totp', friendly_name: 'Market Pulse ' + new Date().toISOString().slice(0, 16).replace('T', ' ') } });
+    // Names must differ between an account's authenticators.
+    body: { factor_type: 'totp', friendly_name: (String(name || '').trim().slice(0, 40) || 'Authenticator') + ' · ' + new Date().toISOString().slice(0, 16).replace('T', ' ') } });
   if (!r.ok || !r.body || !r.body.totp) return { error: errorCode(r) };
   await reloadUser();
   // The QR code comes as SVG markup (older servers: already a data: address).
@@ -222,6 +230,28 @@ async function mfaUnenroll() {
   await refresh(); await reloadUser();
   return { ok: true };
 }
+// Removing an authenticator takes a current code first (from any of them), so an unlocked
+// device left alone can't take two-factor off. The code makes a fresh aal2 session.
+async function mfaRemove(factorId, code) {
+  const list = mfaFactors(), target = list.find(f => f.id === factorId);
+  if (!target) return { error: 'failed' };
+  if (!/^\d{6}$/.test(String(code || ''))) return { error: 'bad_code' };
+  // The code may come from any authenticator: the ones that stay first, so the fresh
+  // session rests on one of them, then the one being removed.
+  let ok = null;
+  for (const f of list.filter(f => f.id !== factorId).concat([target])) {
+    const r = await mfaVerify(code, f.id);
+    if (r.ok) { ok = r; break; }
+    if (r.error === 'rate_limited') return r;
+  }
+  if (!ok) return { error: 'bad_code' };
+  const t = await token();
+  const r = await call('/auth/v1/factors/' + encodeURIComponent(factorId), { method: 'DELETE', headers: { authorization: 'Bearer ' + t } });
+  if (!r.ok) return { error: errorCode(r) };
+  await refresh(); await reloadUser();
+  return { ok: true };
+}
+
 // The lock screen: the password is checked by signing in once more, and that extra session
 // is ended at once; the device keeps its own (aal2) session, so no code is asked again.
 async function checkPassword(email, password) {
@@ -325,7 +355,7 @@ async function rest(path, opts) {
 function onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; }
 
 window.HIFAuth = { ready, session, signUp, signIn, resend, recover, updatePassword, updatePrefs, oauth, signOut, plan, token, onChange, rest,
-  mfa, mfaEnroll, mfaVerify, mfaUnenroll, checkPassword,
+  mfa, mfaEnroll, mfaVerify, mfaUnenroll, mfaFactors, mfaRemove, checkPassword,
   enabled: () => !!(info && info.enabled), info: () => info,
   publicConfig: () => cfg ? { supabaseUrl: cfg.supabaseUrl, vapidPublicKey: cfg.vapidPublicKey || null } : null };
 })();

@@ -932,11 +932,38 @@
 <div style="font-size:13px;color:var(--s-mute);margin-top:14px">{{ ui.securityNote }}</div>
 
 <div style="margin-top:22px;padding-top:20px;border-top:1px solid var(--s-rule)">
-<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
-<div style="flex:1;min-width:220px"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.twofaTitle }}</div><div style="font-size:13px;color:var(--s-mute);margin-top:5px;text-wrap:pretty">{{ twofaState }}</div></div>
-<sc-if value="{{ twofaCanStart }}" hint-placeholder-val="{{ true }}"><button onClick="{{ mfaSet.start }}" disabled="{{ mfaSet.busy }}" style="min-height:46px;padding:0 18px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaSetup }}</button></sc-if>
-<sc-if value="{{ twofaCanStop }}" hint-placeholder-val="{{ false }}"><button onClick="{{ twofaStop }}" disabled="{{ mfaSet.busy }}" style="min-height:46px;padding:0 16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaDisable }}</button></sc-if>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.twofaTitle }}</div>
+<div style="font-size:13px;color:var(--s-mute);margin-top:5px;max-width:64ch;text-wrap:pretty">{{ twofaState }}</div>
+<sc-if value="{{ twofaHasList }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:12px;border-top:1px solid var(--s-rule)">
+<sc-for list="{{ twofaList }}" as="f" hint-placeholder-count="2">
+<div style="padding:12px 0;border-bottom:1px solid var(--s-rule)">
+<div style="display:flex;gap:12px;align-items:center">
+<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;overflow-wrap:anywhere">{{ f.name }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:2px">{{ f.added }}</div></div>
+<sc-if value="{{ f.canRemove }}" hint-placeholder-val="{{ true }}"><button onClick="{{ f.ask }}" aria-label="{{ f.removeLabel }}" style-hover="border-color:var(--color-accent);color:var(--color-accent)" style="flex:none;min-height:36px;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaRemove }}</button></sc-if>
 </div>
+<sc-if value="{{ f.confirming }}" hint-placeholder-val="{{ false }}">
+<div role="alertdialog" aria-label="{{ f.askText }}" style="margin-top:10px;padding:12px 14px;border:1px solid var(--color-accent)">
+<div style="font-size:13px;font-weight:600;text-wrap:pretty">{{ f.askText }}</div>
+<input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="{{ ui.twofaCode }}" placeholder="123456" value="{{ f.code }}" onChange="{{ f.onCode }}" onKeyDown="{{ f.key }}" style="width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;margin-top:8px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:18px;letter-spacing:0.3em">
+<sc-if value="{{ f.err }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size:13px;color:var(--color-accent);margin-top:6px">{{ f.err }}</div></sc-if>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+<button onClick="{{ f.confirm }}" disabled="{{ f.busy }}" style="min-height:42px;padding:0 16px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ f.confirmLabel }}</button>
+<button onClick="{{ f.cancel }}" style="flex:none;min-height:36px;padding:0 12px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.twofaCancel }}</button>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ twofaAdminLast }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);margin-top:8px;max-width:64ch;text-wrap:pretty">{{ ui.twofaAdminLast }}</div></sc-if>
+</sc-if>
+<sc-if value="{{ twofaCanAdd }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px">
+<input type="text" maxlength="40" aria-label="{{ ui.twofaNameLabel }}" placeholder="{{ ui.twofaNamePh }}" value="{{ twofaName }}" onChange="{{ onTwofaName }}" style="min-height:42px;padding:0 12px;background:var(--s-panel);border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-body);font-size:14px">
+<button onClick="{{ mfaSet.start }}" disabled="{{ mfaSet.busy }}" style="min-height:42px;padding:0 16px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ twofaAddLabel }}</button>
+</div>
+</sc-if>
 <sc-if value="{{ mfaSet.startErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size:13px;color:var(--color-accent);margin-top:8px">{{ mfaSet.startErr }}</div></sc-if>
 <sc-if value="{{ mfaSet.showing }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;margin-top:14px">
@@ -1974,9 +2001,9 @@ class Component extends DCLogic {
       this.setState({ mfaBusy: true, mfaErr: '' });
       A.mfaVerify(code, E.factorId).then(r => {
         if (r.error) return this.setState({ mfaBusy: false, mfaErr: errOf(r.error), mfaCode: '' });
-        this.logEvent('twofa_on');
-        this.setState({ mfaBusy: false, mfaEnroll: null, mfaCode: '', mfaErr: '' });
-        this.flash((u.twofaDone || 'Two-factor authentication is on.').toUpperCase());
+        this.logEvent(M.enrolled ? 'twofa_add' : 'twofa_on', E.name || '');
+        this.setState({ mfaBusy: false, mfaEnroll: null, mfaCode: '', mfaErr: '', mfaNewName: '' });
+        this.flash((M.enrolled ? (u.twofaAdded || 'Authenticator added') : (u.twofaDone || 'Two-factor authentication is on.')).toUpperCase());
         if (gate) location.reload();
       });
     };
@@ -2007,23 +2034,48 @@ class Component extends DCLogic {
         start: () => {
           if (!live || s.mfaBusy) return;
           this.setState({ mfaBusy: true, mfaStartErr: '' });
-          A.mfaEnroll().then(r => this.setState(r.error ? { mfaBusy: false, mfaStartErr: errOf(r.error) } : { mfaBusy: false, mfaEnroll: r, mfaCode: '', mfaErr: '' }));
+          const name = String(s.mfaNewName || '').trim();
+          A.mfaEnroll(name).then(r => this.setState(r.error ? { mfaBusy: false, mfaStartErr: errOf(r.error) } : { mfaBusy: false, mfaEnroll: Object.assign(r, { name }), mfaCode: '', mfaErr: '' }));
         },
         verify: verifySetup,
         cancel: () => this.setState({ mfaEnroll: null, mfaCode: '', mfaErr: '' }) },
-      twofaState: !live ? (u.twofaNote || '') : M.enrolled ? (u.twofaOnNote || 'On. A new device asks for a code once, at sign-in.') + (s.isAdmin ? ' ' + (u.twofaAdminKeep || 'Required for administrator accounts.') : '')
-        : (u.twofaNote || ''),
-      twofaCanStart: live && !M.enrolled && !E, twofaCanStop: live && M.enrolled && M.verified && !s.isAdmin,
-      twofaStop: () => {
-        if (s.mfaBusy) return;
-        this.setState({ mfaBusy: true, mfaStartErr: '' });
-        A.mfaUnenroll().then(r => {
-          if (r.error) return this.setState({ mfaBusy: false, mfaStartErr: errOf(r.error) });
-          this.logEvent('twofa_off');
-          this.setState({ mfaBusy: false });
-          this.flash((u.twofaOffDone || 'Two-factor authentication is off.').toUpperCase());
-        });
-      },
+      // The account's authenticators: add another (a backup: tablet, 1Password), remove one
+      // with a current code. An administrator always keeps at least one.
+      ...(() => {
+        const list = live && A.mfaFactors ? A.mfaFactors() : [], last = list.length <= 1, adminLast = !!s.isAdmin && last;
+        const day = v => { const d = Date.parse(v); return Number.isFinite(d) ? (u.twofaAddedOn || 'Added {d}').replace('{d}', new Date(d).toLocaleDateString(this.appLocale, { day: 'numeric', month: 'short', year: 'numeric' })) : ''; };
+        const rm = s.mfaRm || null;
+        return {
+          twofaState: !live ? (u.twofaNote || '') : list.length ? (u.twofaOnNote || '') + (s.isAdmin ? ' ' + (u.twofaAdminKeep || '') : '') : (u.twofaNote || ''),
+          twofaHasList: list.length > 0, twofaAdminLast: adminLast,
+          twofaCanAdd: live && !E && (!list.length || M.verified),
+          twofaAddLabel: list.length ? (u.twofaAdd || 'Add another authenticator') : u.twofaSetup,
+          twofaName: s.mfaNewName || '', onTwofaName: e => this.setState({ mfaNewName: String(e.target.value || '').slice(0, 40) }),
+          twofaList: list.map(f => {
+            const confirming = !!rm && rm.id === f.id;
+            const doRemove = () => {
+              const code = (s.mfaRm && s.mfaRm.code) || '';
+              if (!/^\d{6}$/.test(code)) return this.setState({ mfaRm: Object.assign({}, rm, { err: u.twofaBadCode }) });
+              this.setState({ mfaRm: Object.assign({}, rm, { busy: true, err: '' }) });
+              A.mfaRemove(f.id, code).then(r => {
+                if (r.error) return this.setState({ mfaRm: Object.assign({}, rm, { busy: false, err: errOf(r.error), code: '' }) });
+                this.logEvent(last ? 'twofa_off' : 'twofa_remove', f.name);
+                this.setState({ mfaRm: null });
+                this.flash((last ? (u.twofaOffDone || 'Two-factor authentication is off') : (u.twofaRemoved || 'Authenticator removed')).toUpperCase());
+              });
+            };
+            return { name: f.name, added: day(f.created), canRemove: !adminLast && !confirming && M.verified,
+              removeLabel: (u.twofaRemove || 'Remove') + ' ' + f.name,
+              confirming, code: confirming ? rm.code || '' : '', err: confirming ? rm.err || '' : '', busy: confirming && !!rm.busy,
+              askText: (last ? (u.twofaAskOff || 'Turn two-factor off: enter a current code to remove {n}.') : (u.twofaAsk || 'Enter a current code from any of your authenticators to remove {n}.')).replace('{n}', f.name),
+              confirmLabel: confirming && rm.busy ? '…' : (last ? (u.twofaOffBtn || 'Turn off') : (u.twofaRemove || 'Remove')),
+              onCode: e => this.setState({ mfaRm: Object.assign({}, s.mfaRm, { code: String(e.target.value || '').replace(/\D/g, '').slice(0, 6), err: '' }) }),
+              key: e => { if (e.key === 'Enter') { e.preventDefault(); doRemove(); } },
+              ask: () => this.setState({ mfaRm: { id: f.id, code: '', err: '', busy: false } }),
+              cancel: () => this.setState({ mfaRm: null }), confirm: doRemove };
+          })
+        };
+      })(),
       bio: { show: live && !!s.bioAvail, note: s.bioMsg || (bioOn ? (u.bioOnNote || 'On for this device.') : (u.bioNote || '')),
         canAct: true, label: bioOn ? (u.bioOff || 'Turn off') : (u.bioOn || 'Turn on'),
         bg: bioOn ? 'transparent' : 'var(--color-accent)', ink: bioOn ? 'var(--color-accent)' : 'var(--s-on-accent)',
@@ -3634,9 +3686,10 @@ class Component extends DCLogic {
       auditRows: (s.events || []).slice(0, 12).map(ev => {
         const map = { signin:u.evSignin, signout:u.evSignout, signout_all:u.evSignoutAll, twofa_on:u.evTwofaOn,
           twofa_off:u.evTwofaOff, device_revoked:u.evDeviceRevoked, locked:u.evLocked,
-          unlock_failed:u.evUnlockFailed, password_changed:u.evPasswordChanged, phone:u.evPhone };
+          unlock_failed:u.evUnlockFailed, password_changed:u.evPasswordChanged, phone:u.evPhone,
+          twofa_add:u.evTwofaAdd || 'Authenticator added', twofa_remove:u.evTwofaRemove || 'Authenticator removed' };
         const d = new Date(ev.ts);
-        const warn = ev.kind === 'unlock_failed' || ev.kind === 'twofa_off' || ev.kind === 'device_revoked';
+        const warn = ev.kind === 'unlock_failed' || ev.kind === 'twofa_off' || ev.kind === 'twofa_remove' || ev.kind === 'device_revoked';
         return {
           label: map[ev.kind] || ev.kind, detail: ev.detail || '',
           when: d.toLocaleDateString(this.appLocale, { month:'short', day:'numeric' }) + ' · ' + d.toLocaleTimeString(this.appLocale, { hour:'2-digit', minute:'2-digit' }),
