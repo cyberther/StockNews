@@ -840,6 +840,30 @@
 </div>
 </sc-if>
 
+<sc-if value="{{ isAlertScreen }}" hint-placeholder-val="{{ false }}">
+<div data-m="fade" style="max-width:820px;padding:22px var(--gx) 60px">
+<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+<h1 style="flex:1;min-width:0;margin:0;font-family:var(--font-heading);font-weight:800;font-size:30px;letter-spacing:-0.03em;line-height:1">{{ ui.alertTitle }}</h1>
+<button onClick="{{ alertAll }}" style-hover="border-color:var(--color-accent)" style="min-height:38px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.alertAll }}</button>
+</div>
+<div style="font-size:13px;color:var(--s-mute);margin-top:10px">{{ alertSub }}</div>
+<sc-if value="{{ alertLoading }}" hint-placeholder-val="{{ false }}"><div style="margin-top:20px;font-size:13px;color:var(--s-mute)">{{ ui.alertLoadingText }}</div></sc-if>
+<sc-if value="{{ alertNone }}" hint-placeholder-val="{{ false }}"><div style="margin-top:20px;font-size:13px;color:var(--s-mute);max-width:60ch">{{ ui.alertNone }}</div></sc-if>
+<div style="margin-top:16px;border-top:1px solid var(--s-rule)">
+<sc-for list="{{ alertCards }}" as="c" hint-placeholder-count="3">
+<article style="padding:16px 0;border-bottom:1px solid var(--s-rule)">
+<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:12px;color:var(--s-mute)"><span style="font-family:var(--font-heading);font-weight:800;color:var(--s-ink);letter-spacing:0.04em">{{ c.ticker }}</span><span>{{ c.stamp }}</span><span>{{ c.source }}</span></div>
+<h2 style="margin:6px 0 0;font-family:var(--font-heading);font-weight:800;font-size:18px;line-height:1.3;letter-spacing:-0.01em;text-wrap:pretty">{{ c.headline }}</h2>
+<sc-if value="{{ c.summary }}" hint-placeholder-val="{{ true }}"><div style="margin-top:8px;font-size:14px;line-height:1.55;color:var(--s-ink);max-width:68ch;text-wrap:pretty"><sc-if value="{{ c.isAi }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-accent);margin-right:8px">{{ c.aiLabel }}</span></sc-if>{{ c.summary }}</div></sc-if>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+<sc-if value="{{ c.hasUrl }}" hint-placeholder-val="{{ true }}"><a href="{{ c.url }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;min-height:42px;padding:0 16px;background:var(--color-accent);color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none">{{ c.readLabel }}</a></sc-if>
+<button onClick="{{ c.openTicker }}" style-hover="border-color:var(--color-accent)" style="min-height:42px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ c.tickerLabel }}</button>
+</div>
+</article>
+</sc-for>
+</div>
+</div>
+</sc-if>
 <sc-if value="{{ isAdminScreen }}" hint-placeholder-val="{{ false }}">
 <div data-m="fade" style="max-width:820px;padding:22px var(--gx) 60px">
 <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
@@ -1411,6 +1435,12 @@ class Component extends DCLogic {
     this.startIdleWatch();
     this._onResize = () => { this.setState({ vw: window.innerWidth }); this.measureChart(); };
     window.addEventListener('resize', this._onResize);
+    // A tapped news alert: …#alert=<ids> on opening, or a message from the service worker
+    // (hif-sw.js) when the app was already open.
+    this._onHash = () => this.openAlertFromHash();
+    window.addEventListener('hashchange', this._onHash);
+    this._onSwMsg = e => { const d = e && e.data; if (d && d.type === 'hif-open' && /^#alert=/.test(d.hash || '')) { location.hash = d.hash; this.openAlertFromHash(); } };
+    if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', this._onSwMsg);
     this._onKey = e => this.onKey(e);
     window.addEventListener('keydown', this._onKey);
     this._onContent = () => this.forceUpdate();
@@ -1429,6 +1459,7 @@ class Component extends DCLogic {
       this.startAutoRefresh();
       this.syncDetail(this.state.selected);
       this.state.follows.forEach(t => this.syncSpark(t));
+      this.openAlertFromHash();
     };
     const ready = () => this.sharedReady() && !!window.HIFLive;
     const go = () => { this.whenRestored(start); this.forceUpdate(); };
@@ -1636,7 +1667,7 @@ class Component extends DCLogic {
     this.measureChart();
     this.persist();
   }
-  componentWillUnmount() { this.stopAutoRefresh(); clearInterval(this._authPoll); if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); window.removeEventListener('keydown', this._onKey); window.removeEventListener('hif:content', this._onContent); clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); this.stopIdleWatch(); }
+  componentWillUnmount() { window.removeEventListener('hashchange', this._onHash); if (navigator.serviceWorker) navigator.serviceWorker.removeEventListener('message', this._onSwMsg); this.stopAutoRefresh(); clearInterval(this._authPoll); if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); window.removeEventListener('keydown', this._onKey); window.removeEventListener('hif:content', this._onContent); clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); this.stopIdleWatch(); }
   get token() { return (this.props.finnhubToken || '').trim(); }
   // Manual / on-open only: the adapter caches (quotes 60s, news 5m, analysts 15m),
   // so an extra call on screen open is usually free.
@@ -1817,6 +1848,47 @@ class Component extends DCLogic {
   get plan() { if ((window.HIF || {}).ALL_ACCESS) return 'pro'; return this.state.authLive ? (this.state.serverPlan || 'free') : (this.state.plan || this.props.plan || 'free'); }
   get lang() { return this.state.lang || this.props.lang || 'EN'; }
   get appLang() { return this.state.appLang || this.props.appLang || 'EN'; }
+  // The "From this alert" screen: the stories a tapped push alert was about, read from the
+  // scan's stories table with their AI summaries. The hash is cleared so a reload doesn't
+  // open it again.
+  openAlertFromHash() {
+    if (typeof location === 'undefined' || !/^#alert=/.test(location.hash)) return;
+    const ids = location.hash.slice(7).split(',').map(x => { try { return decodeURIComponent(x); } catch (e) { return ''; } }).filter(Boolean).slice(0, 20);
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    if (!ids.length) return;
+    this.setState(s => ({ screen:'alert', prev: s.screen === 'alert' ? s.prev : s.screen, alertIds: ids, alertRows: null }));
+    const P = window.HIFPush;
+    if (!P || !P.loadStoriesById) return this.setState({ alertRows: [] });
+    // Right after the page opens the session may not be restored yet: a few tries.
+    const load = tries => P.loadStoriesById(ids).then(rows => {
+      if ((!rows || !rows.length) && tries < 5) { setTimeout(() => load(tries + 1), 1500); return; }
+      if (String((this.state.alertIds || []).join()) !== ids.join()) return;
+      this.setState({ alertRows: rows || [] });
+      const lang = String(this.lang || 'EN').toLowerCase();
+      if (P.loadSummaries && rows && rows.length) P.loadSummaries(rows.map(r => r.id), lang).then(map => {
+        const add = {}; Object.keys(map || {}).forEach(id => { add[lang + '|' + id] = map[id]; });
+        if (Object.keys(add).length) this.setState(st => ({ summaries: Object.assign({}, st.summaries, add) }));
+      }).catch(() => {});
+    }).catch(() => tries < 5 ? setTimeout(() => load(tries + 1), 1500) : this.setState({ alertRows: [] }));
+    load(0);
+  }
+  alertVals(u) {
+    const s = this.state, rows = s.alertRows, lang = String(this.lang || 'EN').toLowerCase(), SUMS = s.summaries || {};
+    const tickers = [...new Set((rows || []).map(r => r.ticker))];
+    return {
+      alertLoading: rows == null, alertNone: Array.isArray(rows) && !rows.length,
+      alertSub: Array.isArray(rows) && rows.length ? (rows.length === 1 ? (u.alertOne || '1 story') : (u.alertMany || '{n} stories').replace('{n}', rows.length)) + ' \u00b7 ' + tickers.map(t => this.tickerLabel(t)).join(', ') : '',
+      alertCards: (rows || []).map(r => {
+        const ai = SUMS[lang + '|' + r.id];
+        let host = ''; try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch (e) {}
+        return { ticker: this.tickerLabel(r.ticker), stamp: this.storyTime(Math.floor(Date.parse(r.published_at) / 1000)), source: r.source || host,
+          headline: r.headline, summary: ai || r.summary || '', isAi: !!ai, aiLabel: u.aiSummary || 'AI summary',
+          url: r.url || '', hasUrl: /^https?:\/\//.test(r.url || ''), readLabel: u.alertRead || 'Read the article',
+          tickerLabel: (u.alertTicker || 'Open {t}').replace('{t}', this.tickerLabel(r.ticker)), openTicker: () => this.openTicker(r.ticker) };
+      }),
+      alertAll: () => this.setState({ screen:'feed', feedTab:'following' })
+    };
+  }
   go(screen) {
     // Adding tickers happens on the watchlist itself; "search" is kept for old links.
     if (screen === 'search') { screen = 'watchlist'; this.focusAdd(); }
@@ -2641,7 +2713,7 @@ class Component extends DCLogic {
     window.HIF_LOCALE = this.appLocale;
     const NEWS = H.NEWS, FOLLOWS = H.FOLLOWS, UNIVERSE = H.UNIVERSE, UI = H.UI;
     const EVENTS = H.EVENTS || {}, SIGNALS = H.SIGNALS || {};
-    const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen === 'search' ? 'watchlist' : (s.screen === 'admin' && !s.isAdmin) || s.screen === 'chart' ? 'portfolio' : s.screen;
+    const s = this.state, plan = this.plan, isFree = plan === 'free', screen = s.screen === 'search' ? 'watchlist' : (s.screen === 'admin' && !s.isAdmin) || s.screen === 'chart' ? 'portfolio' : s.screen === 'alert' && !(s.alertIds || []).length ? 'feed' : s.screen;
     const H_ALL = !!(window.HIF || {}).ALL_ACCESS;
     const vw = s.vw || (typeof window !== 'undefined' && window.innerWidth) || 1440;
     const L = this.lang, A = this.appLang, u = UI[A];
@@ -3224,6 +3296,8 @@ class Component extends DCLogic {
       isDetail: screen === 'detail', isPaywall: screen === 'paywall', isAccount: screen === 'account',
       isSecurity: screen === 'security',
       isAdminScreen: screen === 'admin' && !!s.isAdmin,
+      isAlertScreen: screen === 'alert',
+      ...this.alertVals(u),
       lc: this.liveChartVals(u),
       ...this.adminVals(u),
       isAuth: !signedIn, isOnboard: signedIn && !s.onboarded && !s.pending, isLocked: signedIn && !!s.locked,
