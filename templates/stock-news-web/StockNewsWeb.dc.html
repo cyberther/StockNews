@@ -2993,14 +2993,17 @@ class Component extends DCLogic {
       shares: x.shares ? nfmt(x.shares) : '', value: x.value ? money(x.value) : '', form:x.form || '', item:'', title:x.title || '',
       url:x.url || '', source:x.source || '', official: x.official !== false })) : null;
     const tickerSignals = liveSig || SIGNALS[stock.ticker] || [];
+    // Links from outside sources: only web addresses (never javascript: or data:), also
+    // checked by the gateway and the database; this is the last line.
+    const webUrl = v => /^https?:\/\//i.test(String(v || '')) ? String(v) : '';
     const fromWhere = x => x.source + (x.official ? '' : ' \u00b7 ' + (u.sigPress || 'press'));
     const stampTxt = st => String(st || '').replace(/^(\d+)d$/, '$1' + (u.agoD || 'd'));
     const sigRows = tickerSignals.map(x => x.type === 'insider'
-      ? { stamp:stampTxt(x.stamp), tag:x.role || u.sigInsider || 'Insider', url:x.url || '', hasUrl:!!x.url, noUrl:!x.url,
+      ? { stamp:stampTxt(x.stamp), tag:x.role || u.sigInsider || 'Insider', url:webUrl(x.url), hasUrl:!!webUrl(x.url), noUrl:!webUrl(x.url),
           title: x.who ? x.who + ' ' + (x.act === 'buy' ? u.sigBuy : u.sigSell) + ' ' + x.shares + ' ' + u.sigShares : x.title,
           detail: x.who ? [x.value, x.source].filter(Boolean).join(' \u00b7 ') : fromWhere(x),
           accent: x.act === 'buy' ? 'var(--s-ink)' : 'var(--color-accent)' }
-      : { stamp:stampTxt(x.stamp), tag:u.sigFiling, url:x.url || '', hasUrl:!!x.url, noUrl:!x.url,
+      : { stamp:stampTxt(x.stamp), tag:u.sigFiling, url:webUrl(x.url), hasUrl:!!webUrl(x.url), noUrl:!webUrl(x.url),
           title: x.title || 'Form ' + x.form,
           detail: x.form ? [((u.formNames || {})[x.form] || ''), x.item].filter(Boolean).join(' \u00b7 ') || x.source || '' : fromWhere(x),
           accent:'var(--s-mute)' });
@@ -3016,7 +3019,7 @@ class Component extends DCLogic {
       const pct = (a, b) => a == null || b == null || !b ? '' : ((a - b) / Math.abs(b) * 100);
       const pctTxt = v => v === '' ? '—' : (v > 0 ? '+' : '\u2212') + Math.abs(v).toLocaleString(loc, { maximumFractionDigits:1 }) + '%';
       const cell = (text, o) => { const c = Object.assign({ text: text == null || text === '' ? '—' : String(text), url:'', hasUrl:false, noUrl:true, right:false, accent:'var(--s-ink)', weight:'400' }, o || {}); c.align = c.right ? 'right' : 'left'; return c; };
-      const link = (text, url) => cell(text, { url, hasUrl: !!url, noUrl: !url, accent:'var(--s-ink)' });
+      const link = (text, url) => cell(text, { url: webUrl(url), hasUrl: !!webUrl(url), noUrl: !webUrl(url), accent:'var(--s-ink)' });
       const docCell = r => link(u.fDocOpen || 'PDF', r.url);
       const kindName = k => (u['fk_' + k] || k);
       const all = RF.slice();
