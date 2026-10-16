@@ -1233,7 +1233,7 @@ function hydrate(defaults) {
 }
 class Component extends DCLogic {
   state = hydrate({ screen:'portfolio', plan:null, lang:null, appLang:null, follows:[], selected:'', feedTab:'following', query:'', toast:'', prev:'feed',
-    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, liveEarnDates:{}, liveFilings:{}, roFilings:{}, filingsView:'all', filingsMore:0, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
+    quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, liveEarnDates:{}, liveFilings:{}, roFilings:{}, roDates:{}, filingsView:'all', filingsMore:0, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
     liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false, detailLoading:false,
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
     authLive:false, authInfo:null, authBusy:false, authSent:'', authSentKind:'', serverPlan:null, accountId:null,
@@ -1745,6 +1745,7 @@ class Component extends DCLogic {
     if (/\.RO$/.test(symbol) && P && P.loadFilings) {
       P.loadFilings(symbol).then(rows => this.setState(st => ({ roFilings: Object.assign({}, st.roFilings, { [symbol]: rows || false }) })))
         .catch(() => this.setState(st => ({ roFilings: Object.assign({}, st.roFilings, { [symbol]: false }) })));
+      if (P.loadReportDates) P.loadReportDates(symbol).then(rows => this.setState(st => ({ roDates: Object.assign({}, st.roDates, { [symbol]: rows || [] }) }))).catch(() => {});
     }
     const L = window.HIFLive;
     if (!L || !L.filings) return;
@@ -2860,14 +2861,32 @@ class Component extends DCLogic {
       .filter(e => e.surprisePercent != null && Date.parse(e.date) <= Date.now())
       .sort((a,b) => Date.parse(b.date) - Date.parse(a.date));
     // Report dates from the earnings calendar win over the demo dates and quarter ends.
-    const ED = (s.liveEarnDates || {})[stock.ticker];
+    // Bucharest listings: the dates from the company's financial calendar.
+    const RD = (s.roDates || {})[stock.ticker] || [], todayIso = new Date().toISOString().slice(0, 10);
+    const rdResults = RD.filter(x => x.kind === 'results');
+    const rdNext = rdResults.find(x => x.day >= todayIso), rdLast = rdResults.filter(x => x.day < todayIso).pop();
+    const ED = (s.liveEarnDates || {})[stock.ticker] || (rdNext || rdLast ? { next: rdNext ? { date: rdNext.day, hour: rdNext.hour } : null, last: rdLast ? { date: rdLast.day } : null } : null);
     const edText = ED && (ED.next || ED.last) && window.HIFLive && window.HIFLive.earningsText ? window.HIFLive.earningsText(ED, u) : null;
     const lastEarn = edText && edText.last ? edText.last : earnRows.length
       ? (Number(earnRows[0].surprisePercent) >= 0 ? u.beatBy || 'Beat by {p} · {d}' : u.missedBy || 'Missed by {p} · {d}')
           .replace('{p}', Math.abs(Number(earnRows[0].surprisePercent)).toLocaleString(this.appLocale, { minimumFractionDigits:1, maximumFractionDigits:1 }) + '%').replace('{d}', earnRows[0].date)
       : (stock.lastEarn || '—');
     // The calendar: the next report date from the earnings calendar, when one is announced.
-    const calRows = ED && ED.next && ED.next.date ? [(() => {
+    const rdLabel = x => {
+      const per = (u.calQ || 'Q{q} {y}').replace('{q}', x.q).replace('{y}', x.year);
+      return x.kind === 'results' ? (x.q === 4 ? (u.calPrelim || 'Preliminary results {y}').replace('{y}', x.year) : (u.evEarnings || 'Earnings') + ' ' + per)
+        : x.kind === 'trading_update' ? (u.calTrading || 'Trading update') + ' ' + per
+        : x.kind === 'annual_report' ? (u.calAnnual || 'Annual report {y}').replace('{y}', x.year)
+        : x.kind === 'agm' ? (u.calAgm || 'General meeting')
+        : x.kind === 'ex_dividend' ? (u.evExDiv || 'Ex-dividend') : x.kind === 'record_date' ? (u.calRecord || 'Dividend record date') : (u.evPay || 'Dividend paid');
+    };
+    const calRows = RD.length && !(s.liveEarnDates || {})[stock.ticker] ? RD.filter(x => x.day >= todayIso).slice(0, 6).map(x => {
+      const d = new Date(x.day + 'T12:00:00Z');
+      return { date: d.toLocaleDateString(this.appLocale, { month:'short', day:'2-digit', timeZone:'UTC' }),
+        dow: d.toLocaleDateString('en-US', { weekday:'short', timeZone:'UTC' }).toUpperCase(),
+        detail: [({ bmo:u.edBmo, amc:u.edAmc })[x.hour] || '', u.calFrom || 'company’s financial calendar'].filter(Boolean).join(' · '),
+        label: rdLabel(x), accent: x.kind === 'results' ? 'var(--color-accent)' : /dividend|payment|record/.test(x.kind) ? 'var(--s-ink)' : 'var(--s-mute)' };
+    }) : ED && ED.next && ED.next.date ? [(() => {
       const d = new Date(ED.next.date + 'T12:00:00Z');
       const when = ({ bmo:u.edBmo, amc:u.edAmc, dmh:u.edDmh })[ED.next.hour] || '';
       const est = ED.next.epsEstimate != null ? 'EPS est. ' + Number(ED.next.epsEstimate).toFixed(2) : '';

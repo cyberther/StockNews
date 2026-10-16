@@ -21,6 +21,8 @@
 //   FILINGS_LIMIT   default 3 filings whose figures are read per run (0 = none); FILINGS_NIGHT_LIMIT
 //                   default 8 per run between 00:00 and 07:00 Bucharest time (tools/filings-extract.mjs).
 //                   Only in runs with no summary to write, and none started after FILINGS_MINUTES (7)
+//   CALENDAR_LIMIT  default 2 financial calendars whose dates are read per run (6 at night; 0 = none),
+//                   in the same runs, before the filings (tools/calendar-extract.mjs)
 //   READ_ARTICLES   default 1: summarize the whole article; 0 = headline and snippet only
 //
 // The summary is written from the whole article when the publisher allows it: the job
@@ -38,6 +40,7 @@ import dns from 'node:dns';
 import net from 'node:net';
 import { ensureModel, pickThreads } from './lmstudio-model.mjs';
 import { runFilings } from './filings-extract.mjs';
+import { runCalendars } from './calendar-extract.mjs';
 
 const ENV_FILE = join(homedir(), '.config/market-pulse/summarizer.env');
 if (existsSync(ENV_FILE)) {
@@ -61,6 +64,7 @@ const cfg = {
   filings: Math.max(0, Math.min(env.FILINGS_LIMIT === undefined ? 3 : Number(env.FILINGS_LIMIT) || 0, 20)),
   filingsNight: Math.max(0, Math.min(Number(env.FILINGS_NIGHT_LIMIT) || 8, 50)),
   filingsMinutes: Math.max(1, Math.min(Number(env.FILINGS_MINUTES) || 7, 120)),
+  calendars: Math.max(0, Math.min(env.CALENDAR_LIMIT === undefined ? 2 : Number(env.CALENDAR_LIMIT) || 0, 20)),
   readArticles: env.READ_ARTICLES !== '0',
   hours: Math.max(1, Math.min(Number(env.MAX_AGE_HOURS) || 24, 168))
 };
@@ -575,6 +579,11 @@ const nightHour = () => Number(new Date().toLocaleString('en-GB', { hour: '2-dig
 const filingsRun = () => runFilings(cfg.filings && nightHour() ? Math.max(cfg.filings, cfg.filingsNight) : cfg.filings, { cfg, rpc, postJson, httpGet, log, ua: FILINGS_UA,
   deadline: Date.now() + cfg.filingsMinutes * 60_000,
   allowed: url => allowedByRobots(url, 'marketpulsefilings') });
+// Up to CALENDAR_LIMIT financial calendars' dates this run (more at night), within the same
+// FILINGS_MINUTES budget.
+const calendarRun = () => runCalendars(cfg.calendars && nightHour() ? Math.max(cfg.calendars, 6) : cfg.calendars, { cfg, rpc, postJson, httpGet, log, ua: FILINGS_UA,
+  deadline: Date.now() + cfg.filingsMinutes * 60_000,
+  allowed: url => allowedByRobots(url, 'marketpulsefilings') });
 // Up to DIGEST_LIMIT digests per language this run (or the one ticker asked for).
 async function runDigests(onlyTicker) {
   const n = onlyTicker ? 1 : cfg.digests;
@@ -661,6 +670,9 @@ async function main() {
   // node tools/summarize-batch.mjs --filings 3: that many filings' figures, nothing else.
   const fi = process.argv.indexOf('--filings');
   if (fi > 0) { cfg.filings = Math.max(1, Math.min(Number(process.argv[fi + 1]) || 1, 20)); return filingsRun(); }
+  // node tools/summarize-batch.mjs --calendars 3: that many financial calendars, nothing else.
+  const ci = process.argv.indexOf('--calendars');
+  if (ci > 0) { cfg.calendars = Math.max(1, Math.min(Number(process.argv[ci + 1]) || 1, 20)); cfg.filingsMinutes = 120; return calendarRun(); }
   // What each language still needs, in the server's priority order; then one queue in which
   // a story's languages sit together, in the order of its best position in any list.
   const rank = new Map(), byId = new Map(), rejected = loadRejected();
@@ -678,7 +690,7 @@ async function main() {
     .flatMap(([id, e]) => cfg.langs.filter(l => e.langs.includes(l)).map(lang => ({ story: byId.get(id), lang }))))
     .slice(0, cfg.limit);
   // Filings only in a run that had no summaries to write, so they never hold up the news.
-  if (!queue.length) { log('no stories waiting'); await runDigests(); return filingsRun(); }
+  if (!queue.length) { log('no stories waiting'); await runDigests(); await calendarRun(); return filingsRun(); }
   log(`${queue.length} summaries to write (${cfg.langs.join(', ')}) with ${cfg.model}`);
 
   let saved = 0;
