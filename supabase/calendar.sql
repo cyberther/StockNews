@@ -25,7 +25,9 @@ create table if not exists public.calendar_docs (
 );
 create index if not exists calendar_docs_todo on public.calendar_docs (read_at nulls first);
 alter table public.calendar_docs enable row level security;
--- Only the RPCs below touch it.
+-- Only the RPCs below touch it: no table rights for the API roles (Supabase grants them on
+-- every new table; row-level security would block them anyway).
+revoke all on public.calendar_docs from anon, authenticated;
 
 -- One row per event: results for a quarter (q 1-4; q 4 = the preliminary yearly results),
 -- the annual report, a trading update, a general meeting, the dividend's ex, record and
@@ -48,6 +50,7 @@ create index if not exists report_dates_next on public.report_dates (ticker, day
 alter table public.report_dates enable row level security;
 drop policy if exists "read report dates" on public.report_dates;
 create policy "read report dates" on public.report_dates for select to authenticated using (public.is_approved());
+revoke all on public.report_dates from anon, authenticated;
 grant select on public.report_dates to authenticated;
 
 -- The crawler: [{ ticker, url, title, year }].
