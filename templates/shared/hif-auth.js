@@ -196,7 +196,10 @@ async function mfaEnroll() {
     body: { factor_type: 'totp', friendly_name: 'Market Pulse ' + new Date().toISOString().slice(0, 16).replace('T', ' ') } });
   if (!r.ok || !r.body || !r.body.totp) return { error: errorCode(r) };
   await reloadUser();
-  return { factorId: r.body.id, qr: r.body.totp.qr_code, secret: r.body.totp.secret, uri: r.body.totp.uri };
+  // The QR code comes as SVG markup (older servers: already a data: address).
+  const q = String(r.body.totp.qr_code || '');
+  const qr = /^data:/.test(q) ? q : q ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(q) : '';
+  return { factorId: r.body.id, qr, secret: r.body.totp.secret, uri: r.body.totp.uri };
 }
 async function mfaVerify(code, factorId) {
   const t = await token(); if (!t) return { error: 'failed' };
