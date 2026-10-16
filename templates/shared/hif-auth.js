@@ -18,6 +18,14 @@
 //   HIFAuth.plan()           -> Promise<{ plan, suspended }>
 //   HIFAuth.onChange(fn)     -> called with session() whenever it changes
 //   HIFAuth.rest(path, opts) -> PostgREST call as the signed-in user ({ ok, status, body })
+//   HIFAuth.mfa()            -> { enrolled, verified, needed, factorId } for the session
+//   HIFAuth.mfaEnroll()      -> { factorId, qr, secret, uri } | { error }  (a new TOTP factor)
+//   HIFAuth.mfaVerify(code, factorId?) -> { ok } | { error }  (the session becomes aal2)
+//   HIFAuth.mfaUnenroll()    -> { ok } | { error }
+//   HIFAuth.checkPassword(email, password) -> { ok } | { error }, the session unchanged
+// Two-factor sign-in: a device asks for the code once, at sign-in; the session it gets is
+// at level aal2 and stays so through refreshes, so the lock screen never asks again. The
+// database refuses data to an enrolled account's aal1 session (supabase/mfa.sql).
 (function(){
 // The page runtime can evaluate this file more than once. A second copy would have its
 // own session and listener list, so the app would listen to one copy while the buttons
@@ -160,6 +168,69 @@ async function signUp(email, password, name) {
   return { ok: true, confirm: true };
 }
 
+// The access token's claims (aal: 'aal1' | 'aal2').
+function claims() {
+  try {
+    const p = current.access_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(decodeURIComponent(escape(atob(p + '='.repeat((4 - p.length % 4) % 4)))));
+  } catch (e) { return {}; }
+}
+function mfa() {
+  const f = ((current && current.user && current.user.factors) || []).filter(x => x.factor_type === 'totp' && x.status === 'verified');
+  const verified = !!current && claims().aal === 'aal2';
+  return { enrolled: f.length > 0, verified, needed: f.length > 0 && !verified, factorId: f[0] ? f[0].id : null };
+}
+// The user object (with its factors) after a change.
+async function reloadUser() {
+  const t = await token(); if (!t) return;
+  const r = await call('/auth/v1/user', { headers: { authorization: 'Bearer ' + t } });
+  if (r.ok && r.body && r.body.id && current) { current.user = r.body; save(current); emit(); }
+}
+async function mfaEnroll() {
+  const t = await token(); if (!t) return { error: 'failed' };
+  // A setup that was started and never confirmed is dropped first.
+  for (const f of ((current.user && current.user.factors) || []).filter(x => x.status !== 'verified')) {
+    try { await call('/auth/v1/factors/' + encodeURIComponent(f.id), { method: 'DELETE', headers: { authorization: 'Bearer ' + t } }); } catch (e) {}
+  }
+  const r = await call('/auth/v1/factors', { method: 'POST', headers: { authorization: 'Bearer ' + t },
+    body: { factor_type: 'totp', friendly_name: 'Market Pulse ' + new Date().toISOString().slice(0, 16).replace('T', ' ') } });
+  if (!r.ok || !r.body || !r.body.totp) return { error: errorCode(r) };
+  await reloadUser();
+  return { factorId: r.body.id, qr: r.body.totp.qr_code, secret: r.body.totp.secret, uri: r.body.totp.uri };
+}
+async function mfaVerify(code, factorId) {
+  const t = await token(); if (!t) return { error: 'failed' };
+  const id = factorId || mfa().factorId;
+  if (!id || !/^\d{6}$/.test(String(code || ''))) return { error: 'bad_code' };
+  const h = { authorization: 'Bearer ' + t };
+  const c = await call('/auth/v1/factors/' + encodeURIComponent(id) + '/challenge', { method: 'POST', headers: h, body: {} });
+  if (!c.ok || !c.body || !c.body.id) return { error: c.status === 429 ? 'rate_limited' : 'failed' };
+  const v = await call('/auth/v1/factors/' + encodeURIComponent(id) + '/verify', { method: 'POST', headers: h, body: { challenge_id: c.body.id, code: String(code) } });
+  if (!v.ok) return { error: v.status === 429 ? 'rate_limited' : 'bad_code' };
+  const s = fromTokens(v.body);
+  if (s) { if (!s.user || !s.user.id) s.user = current.user; setSession(s); }
+  await reloadUser();
+  return { ok: true };
+}
+async function mfaUnenroll() {
+  const t = await token(), id = mfa().factorId; if (!t || !id) return { error: 'failed' };
+  const r = await call('/auth/v1/factors/' + encodeURIComponent(id), { method: 'DELETE', headers: { authorization: 'Bearer ' + t } });
+  if (!r.ok) return { error: errorCode(r) };
+  await refresh(); await reloadUser();
+  return { ok: true };
+}
+// The lock screen: the password is checked by signing in once more, and that extra session
+// is ended at once; the device keeps its own (aal2) session, so no code is asked again.
+async function checkPassword(email, password) {
+  await ready; if (!cfg) return { error: 'unavailable' };
+  const r = await call('/auth/v1/token?grant_type=password', { method: 'POST', body: { email, password } });
+  if (!r.ok) return { error: errorCode(r) };
+  if (r.body && r.body.access_token) {
+    try { await call('/auth/v1/logout?scope=local', { method: 'POST', headers: { authorization: 'Bearer ' + r.body.access_token } }); } catch (e) {}
+  }
+  return { ok: true };
+}
+
 async function signIn(email, password) {
   await ready; if (!cfg) return { error: 'unavailable' };
   const r = await call('/auth/v1/token?grant_type=password', { method: 'POST', body: { email, password } });
@@ -251,6 +322,7 @@ async function rest(path, opts) {
 function onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; }
 
 window.HIFAuth = { ready, session, signUp, signIn, resend, recover, updatePassword, updatePrefs, oauth, signOut, plan, token, onChange, rest,
+  mfa, mfaEnroll, mfaVerify, mfaUnenroll, checkPassword,
   enabled: () => !!(info && info.enabled), info: () => info,
   publicConfig: () => cfg ? { supabaseUrl: cfg.supabaseUrl, vapidPublicKey: cfg.vapidPublicKey || null } : null };
 })();

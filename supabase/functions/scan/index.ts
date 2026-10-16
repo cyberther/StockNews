@@ -225,8 +225,10 @@ async function testAlert(req: Request): Promise<Response> {
   const { data: who, error: whoErr } = await db.auth.getUser(token);
   const uid = who && who.user && who.user.id;
   if (whoErr || !uid) return reply({ error: 'sign in required' }, 401);
-  const { data: st } = await db.from('account_status').select('approved,suspended').eq('user_id', uid).maybeSingle();
-  if (!st || !st.approved || st.suspended) return reply({ error: 'account not approved' }, 403);
+  // The database's own rule (approved, not suspended, two-factor code given when set up).
+  const asUser = createClient(env('SUPABASE_URL'), env('SUPABASE_ANON_KEY'), { auth: { persistSession: false }, global: { headers: { Authorization: 'Bearer ' + token } } });
+  const { data: ok } = await asUser.rpc('is_approved');
+  if (ok !== true) return reply({ error: 'account not approved' }, 403);
   const now = Date.now();
   if (now - (lastTest.get(uid) || 0) < 30_000) return reply({ error: 'wait' }, 429);
   lastTest.set(uid, now);
