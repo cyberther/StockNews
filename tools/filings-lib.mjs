@@ -151,3 +151,16 @@ export const sameSite = (a, b) => { try { return baseDomain(new URL(a).hostname)
 // Never read: the exchange's own site (see the project's rules), and social networks.
 export const OFF_LIMITS = /(?:^|\.)(?:bvb\.ro|facebook\.com|linkedin\.com|twitter\.com|x\.com|instagram\.com|youtube\.com|tiktok\.com|google\.[a-z.]+)$/i;
 export const offLimits = url => { try { return OFF_LIMITS.test(new URL(url).hostname); } catch { return true; } };
+
+// ------------------------------------------------------------------ financial calendars
+// "Calendar financiar 2026", "Calendarul de comunicare financiară", "Financial calendar",
+// "Calendarul evenimentelor corporative": the yearly list of report dates every issuer
+// publishes. Their dates are read by tools/calendar-extract.mjs.
+const CALENDAR = /calendar(?:ul)?[\s_-]*(?:financiar|de[\s_-]+comunicare|(?:al[\s_-]+)?(?:evenimentelor|evenimente)[\s_-]+(?:corporative|financiare)|(?:de[\s_-]+)?raportar)|financial[\s_-]*calendar|corporate[\s_-]*calendar|finanzkalender/;
+export const isCalendar = (text, url = '') => CALENDAR.test(fold(text + ' ' + decode(String(url).replace(/^https?:\/\/[^/]+/, ''))));
+// The newest year named in the title or address; null when none. A calendar for a year
+// before the current one is of no use (null: a standing page, read anyway).
+export function calendarYear(text, url = '') {
+  const ys = (fold(text + ' ' + decode(url)).match(/(?<!\d)(?:19|20)\d\d(?!\d)/g) || []).map(Number).filter(y => y >= 1995);
+  return ys.length ? Math.max(...ys) : null;
+}
