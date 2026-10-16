@@ -239,6 +239,20 @@ async function loadFilings(ticker) {
   return r.ok && Array.isArray(r.body) ? r.body : null;
 }
 
+// A test alert to every device of the signed-in account (the scan function's test path):
+// { sent, devices } | { error: 'wait' | 'failed' | ... }.
+async function testAlert() {
+  if (!live()) return { error: 'unavailable' };
+  const t = await auth().token(), c = auth().publicConfig && auth().publicConfig();
+  if (!t || !c || !c.supabaseUrl) return { error: 'failed' };
+  try {
+    const res = await fetch(c.supabaseUrl.replace(/\/$/, '') + '/functions/v1/scan', { method: 'POST', headers: { authorization: 'Bearer ' + t, 'x-hif-test': '1' } });
+    const j = await res.json().catch(() => ({}));
+    if (res.status === 429) return { error: 'wait' };
+    return res.ok ? { sent: j.sent || 0, devices: j.devices || 0 } : { error: j.error || 'failed' };
+  } catch (e) { return { error: 'failed' }; }
+}
+
 // The stories an alert was about (ids "TICKER:id", the scan's public.stories).
 async function loadStoriesById(ids) {
   const list = [...new Set(ids || [])].filter(id => /^[A-Z0-9.\-]+:[^,()"]{1,200}$/.test(id)).slice(0, 20);
@@ -273,5 +287,5 @@ async function saveDrawings(ticker, list) {
   return true;
 }
 
-window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadReportDates, loadStoriesById, loadDrawings, saveDrawings, supported };
+window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadReportDates, loadStoriesById, testAlert, loadDrawings, saveDrawings, supported };
 })();
