@@ -19,6 +19,9 @@ import { fileURLToPath } from 'node:url';
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SOURCE = 'https://www.bvb.ro/FinancialInstruments/Markets/SharesListForDownload.ashx';
 
+// Exchange-traded funds: not in BVB's share export, so listed here by hand (checked against
+// the market data) and added to the catalog.
+const ETFS = [['PTENGETF.RO', 'ETF Energie Patria-Tradeville', 'BVB', 'ETF'], ['TVBETETF.RO', 'ETF BET Tradeville', 'BVB', 'ETF']];
 // Readable names where the registered one is an acronym soup ("S.N.G.N. ROMGAZ S.A.").
 const DISPLAY = {
   TLV: 'Banca Transilvania', SNP: 'OMV Petrom', H2O: 'Hidroelectrica', SNG: 'Romgaz',
@@ -77,6 +80,7 @@ const list = lines.slice(1).map(l => l.split(';'))
     const sym = r[iSym], seg = r[iSect] === 'ATS' ? 'AeRO' : 'BVB';
     return [sym + '.RO', DISPLAY[sym] || cleanName(r[iName]), seg, r[iCat]];
   })
+  .concat(ETFS)
   .sort((a, b) => a[0].localeCompare(b[0]));
 if (list.length < 100) throw new Error('only ' + list.length + ' shares: the export format may have changed');
 
