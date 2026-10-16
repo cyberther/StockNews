@@ -42,6 +42,9 @@ writeFileSync(join(output, '_headers'), [
   '  Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=()',
   '  Cross-Origin-Opener-Policy: same-origin',
   '  X-Permitted-Cross-Domain-Policies: none',
+  // The home-screen manifest: with nosniff, browsers only read it under its own type.
+  '/templates/stock-news-web/manifest.webmanifest',
+  '  Content-Type: application/manifest+json',
   ''
 ].join('\n'));
 
