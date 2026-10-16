@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Pulse · Informații legale</title>
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#121212">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png">
+<!--
+  Market Pulse: terms of use, privacy policy, investment disclaimer and sources, in Romanian
+  (the version that prevails) and English. The app links here with ?lang=ro|en|de#section;
+  German readers get the English text for now.
+
+  Before the site is public, fill in OPERATOR below (who runs the site and how to reach
+  them) and have a lawyer read both texts. Until then the page shows each missing detail as
+  "to be completed". The facts about data come from the code: supabase/*.sql, the gateway
+  (netlify/functions/_shared/market/), the push alerts and the summary job (tools/).
+-->
+<style>
+:root {
+  --bg:#121212; --panel:#1A1A1A; --rule:#333333; --ink:#F5F5F7; --mute:#A0A0A0; --accent:#D4AF37; --todo-bg:rgba(212,175,55,0.14);
+  --font: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root { --bg:#F7F6F4; --panel:#EDEBE7; --rule:#C9C5BE; --ink:#1A1A1A; --mute:#5F5A54; --accent:#8A6A12; --todo-bg:rgba(138,106,18,0.12); color-scheme: light; }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); font-size:16px; line-height:1.6; -webkit-text-size-adjust:100%; }
+a { color:var(--ink); text-decoration:underline; text-decoration-color:var(--rule); text-underline-offset:3px; }
+a:hover { color:var(--accent); text-decoration-color:currentColor; }
+a:focus-visible, button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.top { position:sticky; top:0; z-index:2; background:var(--bg); border-bottom:1px solid var(--rule); }
+.top-in { max-width:880px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; gap:12px; }
+.brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:17px; letter-spacing:-0.02em; text-decoration:none; color:var(--ink); }
+.brand img { width:30px; height:auto; }
+.langs { margin-left:auto; display:flex; border:1px solid var(--rule); }
+.langs a { min-width:44px; min-height:36px; display:flex; align-items:center; justify-content:center; padding:0 10px; font-size:12px; font-weight:800; letter-spacing:0.08em; text-decoration:none; color:var(--mute); }
+.langs a[aria-current="true"] { background:var(--accent); color:var(--bg); }
+main { max-width:880px; margin:0 auto; padding:28px 16px 64px; }
+h1 { font-size:clamp(28px,5vw,40px); line-height:1.1; letter-spacing:-0.03em; margin:0; }
+.meta { color:var(--mute); font-size:13px; margin-top:10px; }
+.toc { display:flex; flex-wrap:wrap; gap:6px 18px; margin:20px 0 8px; padding:12px 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); }
+.toc a { display:inline-flex; align-items:center; min-height:36px; font-size:14px; font-weight:700; }
+section { padding-top:28px; }
+h2 { font-size:24px; letter-spacing:-0.02em; line-height:1.2; margin:12px 0 4px; }
+h3 { font-size:16px; margin:22px 0 4px; }
+p, li { max-width:70ch; text-wrap:pretty; }
+ul { padding-left:20px; }
+li { margin:4px 0; }
+.note { background:var(--panel); border-left:3px solid var(--accent); padding:12px 14px; margin:16px 0; max-width:70ch; }
+.todo { background:var(--todo-bg); color:var(--accent); padding:0 4px; font-style:normal; font-weight:700; }
+table { border-collapse:collapse; width:100%; font-size:14px; margin:12px 0; }
+th, td { text-align:left; vertical-align:top; padding:8px 10px 8px 0; border-bottom:1px solid var(--rule); }
+th { font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--mute); font-weight:700; }
+.wrap { overflow-x:auto; }
+form.contact { display:grid; gap:14px; max-width:560px; margin-top:12px; }
+form.contact label span { display:block; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--mute); margin-bottom:6px; }
+form.contact input, form.contact select, form.contact textarea { width:100%; min-height:46px; padding:10px 12px; background:var(--panel); border:1px solid var(--rule); color:var(--ink); font:inherit; font-size:16px; border-radius:0; }
+form.contact textarea { resize:vertical; min-height:140px; }
+form.contact input:focus, form.contact select:focus, form.contact textarea:focus { outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+form.contact button { justify-self:start; min-height:48px; padding:0 26px; background:var(--accent); color:var(--bg); border:0; font:inherit; font-weight:800; cursor:pointer; }
+form.contact button[disabled] { opacity:0.6; cursor:default; }
+form.contact .small { font-size:13px; color:var(--mute); margin:0; }
+form.contact .status { margin:0; font-size:14px; min-height:1.4em; }
+form.contact .status.err { color:var(--accent); }
+.hp { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
+footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px solid var(--rule); color:var(--mute); font-size:13px; }
+@media (max-width:560px) { .brand span { display:none; } th, td { padding-right:8px; } }
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+<a class="brand" href="./StockNewsWeb.dc.html"><img src="./assets/aa-logo.png" alt=""><span>Market Pulse</span></a>
+<nav class="langs" aria-label="Limba / Language">
+<a href="?lang=ro" data-lang="ro" hreflang="ro">RO</a><a href="?lang=en" data-lang="en" hreflang="en">EN</a>
+</nav>
+</div></header>
+
+<main id="doc">
+<!-- Romanian: shown without JavaScript too. -->
+<h1>Informații legale</h1>
+<p class="meta">Ultima actualizare: 16 octombrie 2026. Versiunea în limba română prevalează.</p>
+<nav class="toc" aria-label="Cuprins">
+<a href="#terms">Termeni de utilizare</a><a href="#privacy">Politica de confidențialitate</a><a href="#disclaimer">Nu e consultanță de investiții</a><a href="#sources">Surse și drepturi</a><a href="#contact">Contact</a>
+</nav>
+
+<section id="terms">
+<h2>Termeni de utilizare</h2>
+<h3>1. Cine suntem</h3>
+<p>Market Pulse („serviciul”) este operat de <span data-op="name"></span>, <span data-op="address"></span> („operatorul”, „noi”). Ne poți scrie prin <a href="#contact">formularul de contact</a>.</p>
+<h3>2. Ce face serviciul</h3>
+<p>Market Pulse adună știri publice despre companiile listate în SUA, la Bursa de Valori București, Frankfurt și Londra, le rezumă automat cu un model de inteligență artificială, afișează prețuri și grafice primite de la furnizori de date și trimite alerte despre companiile pe care le urmărești. Serviciul are și unelte de analiză grafică (indicatori, desene, suport și rezistență calculate automat) și un portofoliu în care îți notezi singur pozițiile.</p>
+<p>Serviciul este momentan gratuit. Conturile noi sunt aprobate manual; putem refuza, suspenda sau închide un cont, mai ales când acești termeni nu sunt respectați.</p>
+<h3>3. Contul tău</h3>
+<ul>
+<li>Trebuie să ai cel puțin 18 ani și să folosești date corecte.</li>
+<li>Contul e personal: nu îl împarți cu altcineva și păstrezi parola și codurile de autentificare în doi pași în siguranță.</li>
+<li>Poți șterge contul oricând, din aplicație: Cont → Șterge contul.</li>
+</ul>
+<h3>4. Ce nu ai voie să faci</h3>
+<ul>
+<li>să folosești serviciul în scop comercial sau să redistribui datele, știrile sau rezumatele lui;</li>
+<li>să extragi automat date (scraping, roboți) sau să ocolești limitele de acces;</li>
+<li>să încerci să accesezi conturile altora, să ataci sau să perturbi serviciul.</li>
+</ul>
+<h3>5. Conținutul altora</h3>
+<p>Știrile aparțin editorilor lor. Afișăm titlul, un fragment scurt și un link către articolul original; pentru textul complet, citește sursa. Rezumatele sunt generate automat și pot conține erori sau omisiuni. Prețurile, graficele și datele companiilor vin de la furnizori terți și pot fi întârziate, incomplete sau greșite. Detalii la <a href="#sources">Surse și drepturi</a>.</p>
+<h3>6. Nu e consultanță de investiții</h3>
+<p>Nimic din serviciu nu este o recomandare de a cumpăra sau vinde. Citește <a href="#disclaimer">secțiunea dedicată</a>.</p>
+<h3>7. Disponibilitate și răspundere</h3>
+<p>Serviciul este oferit „ca atare”, fără garanția că funcționează neîntrerupt sau fără erori. Îl putem modifica sau opri oricând. În limita permisă de lege, nu răspundem pentru pierderile rezultate din deciziile tale de investiții sau din date întârziate, incomplete sau greșite. Aceasta nu limitează răspunderea pentru prejudiciile cauzate cu intenție sau din culpă gravă, nici drepturile pe care le ai ca consumator.</p>
+<h3>8. Modificări</h3>
+<p>Putem actualiza acești termeni. Schimbările importante le anunțăm în aplicație înainte să intre în vigoare. Dacă vor exista planuri plătite, prețul și condițiile lor vor fi afișate și acceptate separat, înainte de plată.</p>
+<h3>9. Legea aplicabilă</h3>
+<p>Se aplică legea română. Dacă ești consumator, păstrezi protecția oferită de legea țării în care locuiești. Pentru reclamații ne poți scrie prin <a href="#contact">formularul de contact</a> sau te poți adresa Autorității Naționale pentru Protecția Consumatorilor (<a href="https://anpc.ro" rel="noopener">anpc.ro</a>).</p>
+</section>
+
+<section id="privacy">
+<h2>Politica de confidențialitate</h2>
+<h3>1. Operatorul datelor</h3>
+<p><span data-op="name"></span>, <span data-op="address"></span>. Pentru orice întrebare despre datele tale, folosește <a href="#contact">formularul de contact</a>.</p>
+<h3>2. Ce date prelucrăm</h3>
+<div class="wrap"><table>
+<thead><tr><th>Date</th><th>De ce</th><th>Temei (GDPR art. 6)</th></tr></thead>
+<tbody>
+<tr><td>Adresa de e-mail, parola (păstrată doar ca hash de serviciul de autentificare), numele, dacă îl dai</td><td>crearea contului și autentificarea</td><td>contract, alin. (1) lit. b</td></tr>
+<tr><td>Numărul de telefon, doar dacă îl adaugi; limba aplicației și a conținutului</td><td>setările contului tău</td><td>contract</td></tr>
+<tr><td>Starea contului: data cererii, aprobat sau nu, rolul de administrator</td><td>aprobarea manuală a conturilor noi; administratorii văd numele și e-mailul celor care cer acces</td><td>interes legitim, lit. f (prevenirea abuzului)</td></tr>
+<tr><td>Factorii de autentificare în doi pași (aplicațiile tale de coduri)</td><td>securitatea contului</td><td>contract și interes legitim</td></tr>
+<tr><td>Watchlist, pozițiile din portofoliu (simbol, cantitate, preț), desenele de pe grafice</td><td>funcțiile pe care le folosești</td><td>contract</td></tr>
+<tr><td>Abonamentele la alerte ale dispozitivelor (adresa serviciului de notificări al browserului, cheile de criptare, tipul browserului)</td><td>trimiterea alertelor pe care le-ai cerut</td><td>contract</td></tr>
+<tr><td>Mesajele trimise prin formularul de contact: numele, dacă îl dai, e-mailul și mesajul</td><td>ca să-ți răspundem</td><td>interes legitim, lit. f, sau contract</td></tr>
+<tr><td>Date tehnice: adresa IP, ora cererilor</td><td>limitarea numărului de cereri și securitate; furnizorii de găzduire și autentificare păstrează jurnale tehnice</td><td>interes legitim</td></tr>
+</tbody>
+</table></div>
+<p>Nu folosim datele pentru reclame, nu creăm profiluri de marketing și nu vindem date. Nu folosim cookies de urmărire sau de analiză.</p>
+<h3>3. Stocarea pe dispozitivul tău</h3>
+<p>Aplicația păstrează în browser (localStorage) sesiunea de autentificare, preferințele și o copie a datelor afișate, ca să pornească repede. Dacă activezi deblocarea cu Face ID sau Touch ID, cheia rămâne pe dispozitiv, în sistemul de operare; noi nu primim date biometrice. Aceste stocări sunt strict necesare pentru serviciul cerut, de aceea nu cerem consimțământ pentru ele.</p>
+<h3>4. Cine mai primește date</h3>
+<ul>
+<li><strong>Supabase</strong>: baza de date și autentificarea; regiunea serverelor: <span data-op="dbRegion"></span>.</li>
+<li><strong>Netlify</strong>: găzduirea site-ului și a funcțiilor serverului, și primirea mesajelor din formularul de contact (cu filtrul lor antispam).</li>
+<li><strong>Serviciul de notificări al browserului tău</strong> (Apple, Google sau Mozilla): primește alertele, criptate, pentru a le livra dispozitivului tău.</li>
+<li><strong>Google sau Apple</strong>, numai dacă alegi să te autentifici cu ei.</li>
+</ul>
+<p>Furnizorii de date de piață și site-urile de știri primesc doar simbolurile bursiere cerute, fără date despre tine. Rezumatele automate se fac pe un calculator al operatorului, din textul public al știrilor, fără date personale.</p>
+<p>Baza de date este găzduită în Uniunea Europeană (Irlanda). Supabase și Netlify sunt însă companii din SUA. Când datele ajung în afara Spațiului Economic European, de exemplu prin serverele Netlify sau prin echipele lor de suport, transferul se face pe baza clauzelor contractuale standard ale Comisiei Europene, din acordurile lor de prelucrare a datelor.</p>
+<h3>5. Cât timp păstrăm datele</h3>
+<p>Cât timp ai cont. Când îți ștergi contul, datele tale sunt șterse imediat din baza de date; copiile de siguranță ale furnizorului se suprascriu în câteva zile. Un cont nou respins de administrator este șters împreună cu datele lui. Mesajele din formularul de contact le ștergem după ce cererea e rezolvată, cel târziu după 12 luni. Jurnalele tehnice ale furnizorilor se păstrează perioada stabilită de aceștia.</p>
+<h3>6. Drepturile tale</h3>
+<p>Ai dreptul de acces, rectificare, ștergere, restricționare, portabilitate și opoziție. Poți corecta numele, telefonul și limba în aplicație și îți poți șterge singur contul (Cont → Șterge contul). Pentru celelalte drepturi scrie-ne prin <a href="#contact">formularul de contact</a>; răspundem în cel mult o lună. Ai și dreptul să depui o plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (<a href="https://www.dataprotection.ro" rel="noopener">dataprotection.ro</a>).</p>
+<h3>7. Securitate</h3>
+<p>Conexiunile sunt criptate (HTTPS). Fiecare cont vede doar propriile date, iar regula este impusă chiar de baza de date. Autentificarea în doi pași este disponibilă pentru toate conturile și obligatorie pentru administratori.</p>
+<h3>8. Modificări</h3>
+<p>Dacă schimbăm această politică, actualizăm data de mai sus, iar schimbările importante le anunțăm în aplicație.</p>
+</section>
+
+<section id="disclaimer">
+<h2>Nu e consultanță de investiții</h2>
+<div class="note"><p style="margin:0">Market Pulse oferă informații, nu consultanță de investiții. Nu suntem o firmă de investiții autorizată de ASF și nu facem recomandări personalizate.</p></div>
+<ul>
+<li>Știrile, rezumatele automate, indicatorii, nivelurile de suport și rezistență, calendarul financiar și opiniile analiștilor afișate sunt doar informative. Nu sunt un îndemn să cumperi, să vinzi sau să păstrezi un instrument financiar.</li>
+<li>Rezumatele sunt generate de un model de inteligență artificială și pot greși. Înainte să te bazezi pe o informație, citește sursa originală.</li>
+<li>Prețurile pot fi întârziate sau greșite și nu sunt potrivite pentru tranzacționare în timp real.</li>
+<li>Investițiile implică riscuri, inclusiv pierderea capitalului. Performanța trecută nu garantează rezultate viitoare.</li>
+<li>Deciziile de investiții îți aparțin. Dacă ai nevoie de un sfat potrivit situației tale, adresează-te unui consultant autorizat.</li>
+</ul>
+</section>
+
+<section id="sources">
+<h2>Surse și drepturi</h2>
+<ul>
+<li><strong>Știri</strong>: din fluxurile RSS publice ale editorilor, de exemplu Ziarul Financiar, Profit.ro, Economica.net, Handelsblatt, FAZ, BBC, The Guardian, CNBC și MarketWatch, plus comunicatele PR Newswire și Business Wire. Fiecare știre are numele sursei și un link către original.</li>
+<li><strong>Rezumate</strong>: un model AI citește articolul doar unde site-ul editorului permite acest lucru (robots.txt) și nu are paywall. Textul articolului nu este păstrat; păstrăm doar rezumatul scurt.</li>
+<li><strong>Documentele emitenților de la BVB</strong> (rapoarte, calendare financiare): de pe site-urile companiilor.</li>
+<li><strong>Prețuri, grafice și date despre companii</strong>: Finnhub, Yahoo Finance, Twelve Data, Financial Modeling Prep și Alpha Vantage; documentele SEC pentru companiile americane.</li>
+</ul>
+<p>Mărcile și numele companiilor aparțin proprietarilor lor și apar doar pentru a identifica sursa sau compania. Dacă ești titularul unui conținut și vrei să nu mai apară aici, scrie-ne prin <a href="#contact">formularul de contact</a> și îl scoatem.</p>
+</section>
+<section id="contact">
+<h2>Contact</h2>
+<p>Scrie-ne aici: întrebări, cereri despre datele tale sau cereri de scoatere a unui conținut. Răspundem pe e-mail, de obicei în câteva zile lucrătoare.</p>
+<form class="contact" name="contact" method="POST" action="./legal.html?lang=ro&amp;sent=1#contact" data-netlify="true" netlify-honeypot="bot-field">
+<input type="hidden" name="form-name" value="contact">
+<input type="hidden" name="lang" value="ro">
+<p class="hp" aria-hidden="true"><label>Nu completa acest câmp <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+<label><span>Nume (opțional)</span><input type="text" name="name" autocomplete="name" maxlength="80"></label>
+<label><span>E-mailul tău, ca să-ți răspundem</span><input type="email" name="email" autocomplete="email" inputmode="email" maxlength="254" required></label>
+<label><span>Despre ce e vorba</span><select name="topic"><option value="question">O întrebare</option><option value="privacy">Datele mele personale (GDPR)</option><option value="removal">Scoaterea unui conținut</option><option value="other">Altceva</option></select></label>
+<label><span>Mesajul</span><textarea name="message" rows="6" maxlength="4000" required></textarea></label>
+<p class="small">Folosim aceste date doar ca să-ți răspundem. Detalii în <a href="#privacy">Politica de confidențialitate</a>.</p>
+<button type="submit">Trimite</button>
+<p class="status" role="status" aria-live="polite"></p>
+</form>
+</section>
+</main>
+
+<template id="doc-en">
+<h1>Legal</h1>
+<p class="meta">Last updated: 16 October 2026. If the versions differ, the Romanian version prevails.</p>
+<p class="note" data-de hidden>Die deutsche Fassung folgt. Bis dahin gilt die englische Übersetzung; maßgeblich ist die rumänische Fassung.</p>
+<nav class="toc" aria-label="Contents">
+<a href="#terms">Terms of use</a><a href="#privacy">Privacy policy</a><a href="#disclaimer">Not investment advice</a><a href="#sources">Sources and rights</a><a href="#contact">Contact</a>
+</nav>
+
+<section id="terms">
+<h2>Terms of use</h2>
+<h3>1. Who we are</h3>
+<p>Market Pulse (“the service”) is run by <span data-op="name"></span>, <span data-op="address"></span> (“the operator”, “we”). You can reach us through the <a href="#contact">contact form</a>.</p>
+<h3>2. What the service does</h3>
+<p>Market Pulse collects public news about companies listed in the US, on the Bucharest Stock Exchange, in Frankfurt and in London, summarises it automatically with an AI model, shows prices and charts from data providers, and sends alerts about the companies you follow. It also has chart tools (indicators, drawings, automatic support and resistance) and a portfolio where you record your own positions.</p>
+<p>The service is currently free. New accounts are approved by hand; we may refuse, suspend or close an account, in particular when these terms aren’t followed.</p>
+<h3>3. Your account</h3>
+<ul>
+<li>You must be at least 18 and give accurate details.</li>
+<li>The account is personal: don’t share it, and keep your password and two-factor codes safe.</li>
+<li>You can delete the account at any time in the app: Account → Delete account.</li>
+</ul>
+<h3>4. What you may not do</h3>
+<ul>
+<li>use the service commercially, or redistribute its data, news or summaries;</li>
+<li>collect data automatically (scraping, bots) or get around access limits;</li>
+<li>try to get into other people’s accounts, or attack or disrupt the service.</li>
+</ul>
+<h3>5. Other people’s content</h3>
+<p>News belongs to its publishers. We show the headline, a short excerpt and a link to the original; read the source for the full text. Summaries are generated automatically and can contain errors or omissions. Prices, charts and company data come from third-party providers and can be delayed, incomplete or wrong. See <a href="#sources">Sources and rights</a>.</p>
+<h3>6. Not investment advice</h3>
+<p>Nothing in the service is a recommendation to buy or sell. See <a href="#disclaimer">the section on this</a>.</p>
+<h3>7. Availability and liability</h3>
+<p>The service is provided “as is”, without a promise that it runs without interruption or errors. We may change or stop it at any time. As far as the law allows, we are not liable for losses from your investment decisions or from delayed, incomplete or wrong data. This doesn’t limit liability for harm caused intentionally or by gross negligence, or your rights as a consumer.</p>
+<h3>8. Changes</h3>
+<p>We may update these terms. We announce important changes in the app before they take effect. If paid plans are introduced, their price and conditions will be shown and accepted separately, before any payment.</p>
+<h3>9. Governing law</h3>
+<p>Romanian law applies. If you are a consumer, you keep the protection of the law of the country where you live. For complaints, write to us through the <a href="#contact">contact form</a>, or contact Romania’s consumer protection authority, ANPC (<a href="https://anpc.ro" rel="noopener">anpc.ro</a>).</p>
+</section>
+
+<section id="privacy">
+<h2>Privacy policy</h2>
+<h3>1. Data controller</h3>
+<p><span data-op="name"></span>, <span data-op="address"></span>. For any question about your data, use the <a href="#contact">contact form</a>.</p>
+<h3>2. What we process</h3>
+<div class="wrap"><table>
+<thead><tr><th>Data</th><th>Why</th><th>Basis (GDPR art. 6)</th></tr></thead>
+<tbody>
+<tr><td>Email address, password (kept only as a hash by the sign-in service), your name if you give it</td><td>creating the account and signing in</td><td>contract, (1)(b)</td></tr>
+<tr><td>Phone number, only if you add it; app and content language</td><td>your account settings</td><td>contract</td></tr>
+<tr><td>Account status: request date, approved or not, administrator role</td><td>approving new accounts by hand; administrators see the name and email of people asking for access</td><td>legitimate interest, (1)(f) (preventing abuse)</td></tr>
+<tr><td>Two-factor sign-in factors (your authenticator apps)</td><td>account security</td><td>contract and legitimate interest</td></tr>
+<tr><td>Watchlist, portfolio positions (symbol, quantity, price), chart drawings</td><td>the features you use</td><td>contract</td></tr>
+<tr><td>Devices’ alert subscriptions (the browser’s push service address, encryption keys, browser type)</td><td>sending the alerts you asked for</td><td>contract</td></tr>
+<tr><td>Messages sent through the contact form: your name if you give it, email and message</td><td>to answer you</td><td>legitimate interest, (1)(f), or contract</td></tr>
+<tr><td>Technical data: IP address, time of requests</td><td>rate limiting and security; the hosting and sign-in providers keep technical logs</td><td>legitimate interest</td></tr>
+</tbody>
+</table></div>
+<p>We don’t use your data for advertising, build marketing profiles or sell data. We use no tracking or analytics cookies.</p>
+<h3>3. Storage on your device</h3>
+<p>The app keeps your sign-in session, preferences and a copy of the data it shows in the browser (localStorage), so it starts quickly. If you turn on Face ID or Touch ID unlock, the key stays on your device, in its operating system; we receive no biometric data. This storage is strictly necessary for the service you asked for, so we don’t ask for consent to it.</p>
+<h3>4. Who else receives data</h3>
+<ul>
+<li><strong>Supabase</strong>: database and sign-in; server region: <span data-op="dbRegion"></span>.</li>
+<li><strong>Netlify</strong>: hosting of the site and its server functions, and receiving contact form messages (with their spam filter).</li>
+<li><strong>Your browser’s push service</strong> (Apple, Google or Mozilla): receives the alerts, encrypted, to deliver them to your device.</li>
+<li><strong>Google or Apple</strong>, only if you choose to sign in with them.</li>
+</ul>
+<p>Market data providers and news sites receive only the ticker symbols asked for, nothing about you. Automatic summaries are made on the operator’s computer from the public text of the news, with no personal data.</p>
+<p>The database is hosted in the European Union (Ireland). Supabase and Netlify are US companies, though. Where data leaves the European Economic Area, for example through Netlify’s servers or their support teams, it does so under the European Commission’s standard contractual clauses in their data processing agreements.</p>
+<h3>5. How long we keep data</h3>
+<p>For as long as you have an account. When you delete your account, your data is removed from the database at once; the provider’s backups are overwritten within days. A new account an administrator rejects is deleted with its data. Contact form messages are deleted once the request is dealt with, at the latest after 12 months. Providers’ technical logs are kept for the period they set.</p>
+<h3>6. Your rights</h3>
+<p>You have the right of access, rectification, erasure, restriction, portability and objection. You can correct your name, phone and language in the app and delete your account yourself (Account → Delete account). For the other rights, write to us through the <a href="#contact">contact form</a>; we answer within one month. You can also complain to Romania’s data protection authority, ANSPDCP (<a href="https://www.dataprotection.ro" rel="noopener">dataprotection.ro</a>), or to the authority where you live.</p>
+<h3>7. Security</h3>
+<p>Connections are encrypted (HTTPS). Each account sees only its own data, a rule enforced by the database itself. Two-factor sign-in is available to every account and required for administrators.</p>
+<h3>8. Changes</h3>
+<p>If we change this policy, we update the date above and announce important changes in the app.</p>
+</section>
+
+<section id="disclaimer">
+<h2>Not investment advice</h2>
+<div class="note"><p style="margin:0">Market Pulse provides information, not investment advice. We are not an investment firm authorised by the Romanian Financial Supervisory Authority (ASF), and we make no personal recommendations.</p></div>
+<ul>
+<li>The news, automatic summaries, indicators, support and resistance levels, financial calendar and analyst opinions shown are for information only. They are not a prompt to buy, sell or hold any financial instrument.</li>
+<li>Summaries are written by an AI model and can be wrong. Read the original source before relying on anything.</li>
+<li>Prices can be delayed or wrong and aren’t suitable for real-time trading.</li>
+<li>Investing carries risk, including the loss of capital. Past performance doesn’t guarantee future results.</li>
+<li>Your investment decisions are your own. For advice that fits your situation, see an authorised adviser.</li>
+</ul>
+</section>
+
+<section id="sources">
+<h2>Sources and rights</h2>
+<ul>
+<li><strong>News</strong>: publishers’ public RSS feeds, for example Ziarul Financiar, Profit.ro, Economica.net, Handelsblatt, FAZ, BBC, The Guardian, CNBC and MarketWatch, plus PR Newswire and Business Wire press releases. Every story carries its source’s name and a link to the original.</li>
+<li><strong>Summaries</strong>: an AI model reads the article only where the publisher’s site allows it (robots.txt) and there is no paywall. The article text isn’t kept; only the short summary is.</li>
+<li><strong>Bucharest issuers’ documents</strong> (reports, financial calendars): from the companies’ websites.</li>
+<li><strong>Prices, charts and company data</strong>: Finnhub, Yahoo Finance, Twelve Data, Financial Modeling Prep and Alpha Vantage; SEC filings for US companies.</li>
+</ul>
+<p>Trademarks and company names belong to their owners and appear only to identify the source or the company. If you hold the rights to content and want it removed from here, write to us through the <a href="#contact">contact form</a> and we will take it down.</p>
+</section>
+<section id="contact">
+<h2>Contact</h2>
+<p>Write to us here: questions, requests about your data, or requests to remove content. We answer by email, usually within a few working days.</p>
+<form class="contact" name="contact" method="POST" action="./legal.html?lang=en&amp;sent=1#contact" data-netlify="true" netlify-honeypot="bot-field">
+<input type="hidden" name="form-name" value="contact">
+<input type="hidden" name="lang" value="en">
+<p class="hp" aria-hidden="true"><label>Leave this field empty <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+<label><span>Name (optional)</span><input type="text" name="name" autocomplete="name" maxlength="80"></label>
+<label><span>Your email, so we can answer</span><input type="email" name="email" autocomplete="email" inputmode="email" maxlength="254" required></label>
+<label><span>What it is about</span><select name="topic"><option value="question">A question</option><option value="privacy">My personal data (GDPR)</option><option value="removal">Removing content</option><option value="other">Something else</option></select></label>
+<label><span>Message</span><textarea name="message" rows="6" maxlength="4000" required></textarea></label>
+<p class="small">We use these details only to answer you. See the <a href="#privacy">Privacy policy</a>.</p>
+<button type="submit">Send</button>
+<p class="status" role="status" aria-live="polite"></p>
+</form>
+</section>
+</template>
+
+<footer><span id="foot">© 2026 Market Pulse</span></footer>
+
+<script>
+// Who runs the site. A value is text, or { ro, en } when it reads differently in each
+// language; an empty one shows as "to be completed" on the page.
+const OPERATOR = {
+  name: 'ADALIT DATA SRL',
+  address: { ro: 'str. Mihail Sadoveanu nr. 9, Șelimbăr, jud. Sibiu, România, CUI 49586191',
+             en: '9 Mihail Sadoveanu St., Șelimbăr, Sibiu County, Romania, tax ID (CUI) 49586191' },
+  // No email address on the page: people write through the contact form (Netlify Forms),
+  // whose submissions Netlify emails to the operator (Project configuration -> Notifications).
+  // Supabase project settings -> General -> Project region.
+  dbRegion: { ro: 'Uniunea Europeană, Irlanda (eu-west-1)', en: 'European Union, Ireland (eu-west-1)' }
+};
+(function () {
+  const q = new URLSearchParams(location.search), asked = (q.get('lang') || '').toLowerCase();
+  const lang = asked === 'en' || asked === 'de' ? 'en' : 'ro';
+  if (lang === 'en') {
+    const doc = document.getElementById('doc'), t = document.getElementById('doc-en');
+    doc.replaceChildren(t.content.cloneNode(true));
+    document.documentElement.lang = asked === 'de' ? 'de' : 'en';
+    document.title = 'Market Pulse · Legal';
+    const de = doc.querySelector('[data-de]'); if (de && asked === 'de') de.hidden = false;
+    document.querySelector('.langs').setAttribute('aria-label', 'Language');
+  }
+  document.querySelectorAll('.langs a').forEach(a => {
+    a.setAttribute('aria-current', String(a.dataset.lang === lang));
+    a.href = '?lang=' + a.dataset.lang + location.hash;
+  });
+  addEventListener('hashchange', () => document.querySelectorAll('.langs a').forEach(a => { a.href = '?lang=' + a.dataset.lang + location.hash; }));
+  const todo = lang === 'en' ? 'to be completed' : 'de completat';
+  document.querySelectorAll('[data-op]').forEach(el => {
+    const raw = OPERATOR[el.dataset.op], v = String((raw && typeof raw === 'object' ? raw[lang] : raw) || '').trim();
+    if (!v) { el.className = 'todo'; el.textContent = '[' + todo + ']'; return; }
+    if (el.dataset.op === 'email') { const a = document.createElement('a'); a.href = 'mailto:' + v; a.textContent = v; el.replaceChildren(a); }
+    else el.textContent = v;
+  });
+  // The contact form: sent in the background, so the reader stays on the page. Netlify
+  // takes any POST with form-name=contact (the form is found when the site is built).
+  const said = {
+    ro: { sending: 'Se trimite…', sent: 'Mulțumim, mesajul a fost trimis. Îți răspundem pe e-mail.', failed: 'Mesajul nu a putut fi trimis. Încearcă din nou puțin mai târziu.' },
+    en: { sending: 'Sending…', sent: 'Thank you, your message has been sent. We will answer by email.', failed: 'The message could not be sent. Please try again a little later.' }
+  }[lang];
+  const form = document.querySelector('form.contact');
+  if (form) {
+    const status = form.querySelector('.status'), button = form.querySelector('button');
+    if (q.get('sent') === '1') status.textContent = said.sent;
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!form.reportValidity()) return;
+      button.disabled = true; status.className = 'status'; status.textContent = said.sending;
+      try {
+        const r = await fetch(location.pathname, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(new FormData(form)).toString() });
+        if (!r.ok) throw new Error(String(r.status));
+        form.reset(); status.textContent = said.sent;
+      } catch (err) { status.className = 'status err'; status.textContent = said.failed; }
+      button.disabled = false;
+    });
+  }
+  // The content moved in after the browser looked for the #section: go there now.
+  // (after load: the browser's own scroll happens then and would undo an earlier one).
+  const jump = () => { const el = location.hash && document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView({ behavior: 'instant' }); };
+  if (lang === 'en') { if (document.readyState === 'complete') jump(); else addEventListener('load', () => setTimeout(jump, 0)); }
+})();
+</script>
+</body>
+</html>

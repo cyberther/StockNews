@@ -25,6 +25,7 @@
 //   HIFAuth.mfaFactors()     -> [{ id, name, created }] the account's authenticators
 //   HIFAuth.mfaRemove(factorId, code) -> { ok } | { error }  (a current code first, from any of them)
 //   HIFAuth.checkPassword(email, password) -> { ok } | { error }, the session unchanged
+//   HIFAuth.deleteAccount()  -> { ok } | { error: 'mfa' | 'admin' | 'failed' }; signed out after
 // Two-factor sign-in: a device asks for the code once, at sign-in; the session it gets is
 // at level aal2 and stays so through refreshes, so the lock screen never asks again. The
 // database refuses data to an enrolled account's aal1 session (supabase/mfa.sql).
@@ -343,6 +344,26 @@ async function plan() {
     admin: !!(row && row.is_admin) };
 }
 
+// Deletes the signed-in account and everything saved with it (supabase/account.sql), then
+// forgets the session on this device. The caller checks the password first.
+async function deleteAccount() {
+  await ready;
+  const t = await token();
+  if (!cfg || !t) return { error: 'failed' };
+  const r = await call('/rest/v1/rpc/delete_my_account', { method: 'POST', body: {}, headers: { authorization: 'Bearer ' + t } });
+  if (!r.ok) {
+    const msg = String((r.body && (r.body.message || r.body.msg)) || '');
+    return { error: /two-factor/.test(msg) ? 'mfa' : /administrator/.test(msg) ? 'admin' : 'failed' };
+  }
+  // The server row went with the account; the browser still holds this device's alert
+  // subscription until it is dropped here.
+  if (window.HIFPush && window.HIFPush.forget) {
+    try { await Promise.race([window.HIFPush.forget(), new Promise(r => setTimeout(r, 3000))]); } catch (e) {}
+  }
+  setSession(null);
+  return { ok: true };
+}
+
 // PostgREST call as the signed-in user; row-level security limits it to their own rows.
 async function rest(path, opts) {
   await ready;
@@ -355,7 +376,7 @@ async function rest(path, opts) {
 function onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; }
 
 window.HIFAuth = { ready, session, signUp, signIn, resend, recover, updatePassword, updatePrefs, oauth, signOut, plan, token, onChange, rest,
-  mfa, mfaEnroll, mfaVerify, mfaUnenroll, mfaFactors, mfaRemove, checkPassword,
+  mfa, mfaEnroll, mfaVerify, mfaUnenroll, mfaFactors, mfaRemove, checkPassword, deleteAccount,
   enabled: () => !!(info && info.enabled), info: () => info,
   publicConfig: () => cfg ? { supabaseUrl: cfg.supabaseUrl, vapidPublicKey: cfg.vapidPublicKey || null } : null };
 })();
