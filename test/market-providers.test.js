@@ -175,3 +175,10 @@ test('candles: bars in an old unit dropped, a late day added, weeks grouped into
   assert.deepEqual(m.c, [11, 13]);
   assert.equal(m.v[0], 15);
 });
+
+test('a US share class goes to Yahoo with a dash (BRK.B -> BRK-B); London and Frankfurt symbols unchanged', async () => {
+  const { yahoo } = await import('../netlify/functions/_shared/market/providers/yahoo.js');
+  assert.match(String(yahoo.url('quote', { symbol: 'BRK.B' })), /\/chart\/BRK-B\?/);
+  assert.match(String(yahoo.url('quote', { symbol: 'PZC.L' })), /\/chart\/PZC\.L\?/);
+  assert.match(String(yahoo.url('quote', { symbol: 'BMW.DE' })), /\/chart\/BMW\.DE\?/);
+});

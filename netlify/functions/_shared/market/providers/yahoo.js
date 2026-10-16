@@ -101,7 +101,9 @@ export const yahoo = {
   limits: {},
   supports: cap => cap === 'chart' || cap === 'candles' || cap === 'quote' || cap === 'profile',
   url(cap, p) {
-    const u = new URL(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(p.symbol)}`);
+    // A US share class is BRK.B elsewhere and BRK-B at Yahoo.
+    const sym = /^[A-Z]{1,5}\.[A-C]$/.test(p.symbol) ? p.symbol.replace('.', '-') : p.symbol;
+    const u = new URL(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}`);
     if (cap === 'chart') {
       u.searchParams.set('range', p.warm ? WARM[p.range] : p.range);
       u.searchParams.set('interval', RANGES[p.range]);
