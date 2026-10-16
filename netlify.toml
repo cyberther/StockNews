@@ -13,6 +13,12 @@
   to = "/templates/stock-news-web/StockNewsWeb.dc.html"
   status = 302
 
+# Terms, privacy policy, disclaimer and sources (templates/stock-news-web/legal.html).
+[[redirects]]
+  from = "/legal"
+  to = "/templates/stock-news-web/legal.html"
+  status = 301
+
 # The mobile app is no longer published (scripts/build-netlify.mjs); old links land on the
 # web app, which has its own phone layout.
 [[redirects]]
