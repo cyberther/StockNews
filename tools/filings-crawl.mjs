@@ -8,6 +8,8 @@
 //   - each link becomes a row: title, day, link and kind (insider, holding, dividend, agm,
 //     results, report), from the last 6 months only. Pages already seen are not read again
 //     (~/.cache/market-pulse).
+//   - its financial calendar (this year's and next, whatever its date) is listed apart, for
+//     tools/calendar-extract.mjs to read the report dates (supabase/calendar.sql).
 // The figures in the documents are read later by tools/summarize-batch.mjs.
 //
 //   node tools/filings-crawl.mjs                 every company, saved
@@ -20,7 +22,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { httpGet, robotsAllow } from './summarize-batch.mjs';
 import { classifyKind, classifyPress, looksLikeFiling, stripSiteName, publishedDay, linksIn, linkTitle, isDocument, isEnglishCopy, isIrLink,
-  sameSite, offLimits, decodeText, fold } from './filings-lib.mjs';
+  sameSite, offLimits, decodeText, fold, isCalendar, calendarYear } from './filings-lib.mjs';
 import { BVB_SHARES } from '../netlify/functions/_shared/market/bvb-symbols.js';
 import { ISSUERS } from '../netlify/functions/_shared/market/ro-filings.js';
 import { parseRss, marketNews } from '../netlify/functions/_shared/market/ro-news.js';
@@ -95,9 +97,21 @@ const pageTitle = html => decodeText((/<meta[^>]+property=["']og:title["'][^>]+c
 const pageDate = html => ((/<meta[^>]+property=["']article:published_time["'][^>]+content=["'](\d{4}-\d{2}-\d{2})/i.exec(html) || /"datePublished"\s*:\s*"(\d{4}-\d{2}-\d{2})/.exec(html) || [])[1]) || null;
 
 export async function crawlCompany(ticker, site, source) {
-  const found = new Map(), dupes = new Set();
+  const found = new Map(), dupes = new Set(), calendars = new Map();
   let reads = 0;
+  const thisYear = new Date().getFullYear();
+  const addCalendar = (url, title) => {
+    // A query string is the same page again (romgaz.ro/calendar-financiar?%2Fcalendar-financiar=).
+    if (!isDocument(url)) url = url.split('?')[0];
+    if (!/^https:\/\//.test(url) || offLimits(url) || calendars.has(url) || !isCalendar(title, url)) return;
+    // A link to the home page whose text runs on into a menu item isn't a calendar.
+    if (!/[^/]/.test(new URL(url).pathname.replace(/^\/(?:ro|en|de)(?=\/|$)/i, ''))) return;
+    const year = calendarYear(title, url);
+    if (year != null && (year < thisYear || year > thisYear + 1)) return;
+    calendars.set(url, { ticker, url, title: String(title || '').replace(/\s+/g, ' ').trim().slice(0, 300), year });
+  };
   const add = (url, title, day, viaPath) => {
+    addCalendar(url, title);
     if (!/^https:\/\//.test(url) || offLimits(url) || found.has(url) || isEnglishCopy(url, title)) return;
     const t = String(title || '').replace(/\s+/g, ' ').trim();
     // Only the last 6 months are kept (supabase/filings.sql); an undated link isn't stored.
@@ -112,8 +126,8 @@ export async function crawlCompany(ticker, site, source) {
   };
   const hint = ISSUERS[ticker] || {};
   let home = site ? site.replace(/\/$/, '') : '';
-  if (!home && !hint.feed && !hint.sitemap) return { rows: [], status: 'none' };
-  if (home && !(await allowed(home + '/'))) return { rows: [], status: 'robots' };
+  if (!home && !hint.feed && !hint.sitemap) return { rows: [], calendars: [], status: 'none' };
+  if (home && !(await allowed(home + '/'))) return { rows: [], calendars: [], status: 'robots' };
   if (home) {
     // A site that turns programs away (403, a bot wall) is left alone. One that moved
     // (a renamed company: sif1.ro -> lion-capital.ro, by redirect or meta refresh) is read
@@ -121,13 +135,13 @@ export async function crawlCompany(ticker, site, source) {
     let r = null;
     try { r = await httpGet(home + '/', { timeout: 15000, ua: UA }); } catch {}
     const st = r ? r.status : 0;
-    if (st === 401 || st === 403 || st === 429 || st === 0) return { rows: [], status: st ? 'blocked' : 'unreachable' };
+    if (st === 401 || st === 403 || st === 429 || st === 0) return { rows: [], calendars: [], status: st ? 'blocked' : 'unreachable' };
     const refresh = /<meta[^>]+http-equiv=["']?refresh["']?[^>]+content=["'][^"']*url=([^"'>\s]+)/i.exec(r.body || '');
     let moved = r.url;
     if (refresh) { try { moved = new URL(refresh[1], r.url).toString(); } catch {} }
     const origin = new URL(moved).origin;
     if (origin !== new URL(home).origin) {
-      if (!(await allowed(origin + '/'))) return { rows: [], status: 'robots' };
+      if (!(await allowed(origin + '/'))) return { rows: [], calendars: [], status: 'robots' };
       home = origin;
     }
   }
@@ -148,6 +162,7 @@ export async function crawlCompany(ticker, site, source) {
   }
   let urls = [];
   for (const m of maps) { urls = urls.concat(await sitemapUrls(m)); if (urls.length && !hint.sitemap) break; }
+  urls.forEach(x => addCalendar(x.url, ''));
   const pathOk = u => hint.path ? hint.path.test(u) : (looksLikeFiling(u) || isIrLink({ text: '', url: u }));
   const cand = urls.filter(x => x.url.startsWith('https://') && pathOk(x.url) && !isEnglishCopy(x.url) && (!x.at || x.at >= KEEP_FROM))
     .sort((a, b) => String(b.at || '').localeCompare(String(a.at || '')));
@@ -178,16 +193,22 @@ export async function crawlCompany(ticker, site, source) {
     for (const l of linksIn(r.body, r.url)) {
       if (offLimits(l.url)) continue;
       const title = linkTitle(l);
+      addCalendar(l.url.split('#')[0], l.text || title);
       if (isDocument(l.url)) { add(l.url, title, publishedDay(l.block + ' ' + l.text, l.url), depth > 0); continue; }
       if (!sameSite(l.url, home || url)) continue;
       const clean = l.url.split('#')[0];
       // A page is an announcement when its link is dated; an undated one is a section to open.
       const day = publishedDay(l.block, clean);
       if (depth > 0 && day && classifyKind(l.text) && l.text.length >= 12) add(clean, title, day);
-      if (depth < 2 && !visited.has(clean) && (isIrLink(l) || (depth > 0 && classifyKind(l.text)))) queue.push([clean, depth + 1]);
+      if (depth < 2 && !visited.has(clean) && (isIrLink(l) || (depth > 0 && (classifyKind(l.text) || isCalendar(l.text, clean))))) queue.push([clean, depth + 1]);
     }
   }
-  return { rows: [...found.values()], status: 'ok' };
+  // This year's and next year's first; at most 6.
+  // English copies only when there is no Romanian one.
+  let calList = [...calendars.values()];
+  if (calList.some(c => !isEnglishCopy(c.url, c.title))) calList = calList.filter(c => !isEnglishCopy(c.url, c.title));
+  const cal = calList.sort((a, b) => (b.year || thisYear) - (a.year || thisYear)).slice(0, 6);
+  return { rows: [...found.values()], calendars: cal, status: 'ok' };
 }
 const linkTitleFromUrl = url => linkTitle({ text: '', block: '', url });
 
@@ -227,8 +248,8 @@ async function main() {
       try {
         const r = await crawlCompany(t, site, source);
         results.push({ ticker: t, site, ...r });
-        log(t, r.status, r.rows.length, site);
-      } catch (e) { results.push({ ticker: t, site, rows: [], status: 'unreachable' }); log(t, 'error', String(e.message || e)); }
+        log(t, r.status, r.rows.length, r.calendars.length ? r.calendars.length + ' calendar(s)' : '', site);
+      } catch (e) { results.push({ ticker: t, site, rows: [], calendars: [], status: 'unreachable' }); log(t, 'error', String(e.message || e)); }
     }
   }));
   let press = [];
@@ -238,6 +259,7 @@ async function main() {
   if (dry) {
     rows.sort((a, b) => String(b.published_at).localeCompare(String(a.published_at)))
       .forEach(r => console.log((r.published_at || '----------').slice(0, 10), r.ticker.padEnd(8), r.kind.padEnd(8), r.official ? ' ' : 'P', r.title.slice(0, 90), '|', r.url.slice(0, 90)));
+    results.flatMap(r => r.calendars).forEach(c => console.log('calendar', c.ticker.padEnd(8), String(c.year || '----'), c.title.slice(0, 70), '|', c.url.slice(0, 100)));
     log(`${rows.length} rows (dry run), ${Math.round((Date.now() - t0) / 1000)}s`);
     return;
   }
@@ -246,6 +268,13 @@ async function main() {
   for (let i = 0; i < Math.max(rows.length, 1); i += 300) {
     saved += await rpc('filings_upsert', { p_secret: cfg.secret, p_rows: rows.slice(i, i + 300), p_sites: i === 0 ? sitesInfo : [] }) || 0;
   }
+  const cals = results.flatMap(r => r.calendars);
+  let calSaved = 0;
+  for (let i = 0; i < cals.length; i += 200) {
+    try { calSaved += await rpc('calendar_docs_upsert', { p_secret: cfg.secret, p_rows: cals.slice(i, i + 200) }) || 0; }
+    catch (e) { log('calendars:', e.message); break; }
+  }
+  log(`calendars: ${cals.length} found for ${results.filter(r => r.calendars.length).length} companies, ${calSaved} saved`);
   log(`done: ${rows.length} found, ${saved} saved or updated, ${results.filter(r => r.rows.length).length} of ${results.length} companies, ${Math.round((Date.now() - t0) / 1000)}s`);
 }
 

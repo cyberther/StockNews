@@ -13,20 +13,20 @@ import { offLimits } from './filings-lib.mjs';
 
 const MAX_DOC = 15 * 1024 * 1024;
 const MAX_CHARS = 7000;   // a filing's key figures are on its first pages; at CPU speed
-const pdfText = buf => new Promise(resolve => {
+export const pdfText = (buf, pages = 8) => new Promise(resolve => {
   const dir = mkdtempSync(join(tmpdir(), 'mp-filing-')), f = join(dir, 'doc.pdf');
   writeFileSync(f, buf);
-  execFile('pdftotext', ['-layout', '-f', '1', '-l', '8', '-enc', 'UTF-8', f, '-'], { timeout: 60000, maxBuffer: 8 * 1024 * 1024 }, (err, out) => {
+  execFile('pdftotext', ['-layout', '-f', '1', '-l', String(pages), '-enc', 'UTF-8', f, '-'], { timeout: 60000, maxBuffer: 8 * 1024 * 1024 }, (err, out) => {
     try { unlinkSync(f); } catch {}
     resolve(err ? '' : String(out || ''));
   });
 });
-const htmlText = h => String(h || '').replace(/<(script|style|noscript|nav|header|footer|form)[\s\S]*?<\/\1>/gi, ' ')
+export const htmlText = h => String(h || '').replace(/<(script|style|noscript|nav|header|footer|form)[\s\S]*?<\/\1>/gi, ' ')
   .replace(/<br\s*\/?>|<\/(p|div|li|tr|h[1-6])>/gi, '\n').replace(/<[^>]+>/g, ' ')
-  .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(+n))
+  .replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(+n))
   .replace(/[ \t]+/g, ' ').replace(/\s*\n\s*/g, '\n').trim();
 // Long tables come out of pdftotext as runs of spaces; the model needs the words and numbers.
-const squeeze = t => t.replace(/[ \t]{3,}/g, '  ').replace(/\n{3,}/g, '\n\n').trim();
+export const squeeze = t => t.replace(/[ \t]{3,}/g, '  ').replace(/\n{3,}/g, '\n\n').trim();
 
 // ------------------------------------------------------------------ shapes
 const num = { type: ['number', 'null'] }, str = { type: ['string', 'null'] };
