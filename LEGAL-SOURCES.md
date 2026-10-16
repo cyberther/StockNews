@@ -92,7 +92,7 @@ pe site-urile companiilor, cu robots.txt respectat, nu de pe bvb.ro. 🟢
 | Serviciu | Rol | Ce trebuie |
 | --- | --- | --- |
 | **Supabase** | baza de date, autentificare, cron, funcția de scanare | Acceptat DPA-ul Supabase (include clauzele contractuale standard). Regiunea proiectului: West EU (Ireland), eu-west-1, trecută în `legal.html`. |
-| **Netlify** | găzduire și funcții (gateway) | Acceptat DPA-ul Netlify. Jurnalele funcțiilor conțin IP-uri. |
+| **Netlify** | găzduire, funcții (gateway), formularul de contact (Netlify Forms, cu filtru antispam) | Acceptat DPA-ul Netlify. Jurnalele funcțiilor conțin IP-uri. Mesajele din formular se șterg după rezolvare, cel târziu după 12 luni. |
 | **Serviciile push** ale browserelor (Apple, Google, Mozilla) | livrarea alertelor | Nimic de semnat; menționat în politică. |
 | **Google / Apple sign-in**, dacă sunt pornite | autentificare | Menționat în politică; la Google, ecranul de consimțământ OAuth cere link spre politica de confidențialitate. |
 | **LM Studio** (local, pe PC) | rezumate | Nu prelucrează date personale. |
@@ -107,9 +107,10 @@ Ce s-a făcut în aplicație:
 
 ## 6. Ce rămâne de făcut
 
-1. Adresa de e-mail de contact în `OPERATOR.email` din `templates/stock-news-web/legal.html`.
-   Firma (ADALIT DATA SRL, CUI 49586191), sediul și regiunea Supabase sunt completate. Până la
-   e-mail, pagina afișează „de completat” în locul lui.
+1. ~~Datele operatorului~~: completate (ADALIT DATA SRL, CUI 49586191, sediul, regiunea
+   Supabase). Pe site nu apare nicio adresă de e-mail: contactul se face prin formularul de pe
+   `/legal#contact` (Netlify Forms). Netlify trimite mesajele pe e-mailul operatorului, setat doar
+   în Netlify → Project configuration → Notifications, nu în cod (repo-ul e public).
 2. ~~Rulat `supabase/account.sql` în SQL Editor~~: rulat pe 16 octombrie 2026.
 3. Acceptate DPA-urile Supabase și Netlify.
 4. Pentru monetizare: licența de date (punctul 1), acordurile cu editorii sau varianta „doar

@@ -841,7 +841,7 @@
 <div style="margin-top:32px;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.legalTitle }}</div>
 <div style="border-top:1px solid var(--s-rule);margin-top:8px;padding-top:6px">
 <nav aria-label="{{ ui.legalTitle }}" style="display:flex;flex-wrap:wrap;gap:4px 20px">
-<sc-for list="{{ legalLinks }}" as="lk" hint-placeholder-count="4"><a href="{{ lk.href }}" target="_blank" rel="noopener" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:40px;font-size:13px;color:var(--s-mute);text-decoration:underline;text-decoration-color:var(--s-rule);text-underline-offset:3px">{{ lk.label }}</a></sc-for>
+<sc-for list="{{ legalLinks }}" as="lk" hint-placeholder-count="5"><a href="{{ lk.href }}" target="_blank" rel="noopener" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:40px;font-size:13px;color:var(--s-mute);text-decoration:underline;text-decoration-color:var(--s-rule);text-underline-offset:3px">{{ lk.label }}</a></sc-for>
 </nav>
 <div style="font-size:12px;color:var(--s-mute);margin-top:6px;max-width:64ch;text-wrap:pretty">{{ ui.legalNoAdvice }}</div>
 </div>
@@ -1129,7 +1129,7 @@
 <footer style="flex:none;margin-top:auto;display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 22px;padding:22px clamp(20px,4vw,64px) 30px;border-top:1px solid var(--s-rule);font-size:12px;line-height:1.5;color:var(--s-mute)">
 <span style="flex:1 1 320px;max-width:72ch;text-wrap:pretty">{{ ui.legalNoAdvice }}</span>
 <nav aria-label="{{ ui.legalTitle }}" style="display:flex;flex-wrap:wrap;gap:6px 18px">
-<sc-for list="{{ legalLinks }}" as="lk" hint-placeholder-count="4"><a href="{{ lk.href }}" target="_blank" rel="noopener" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;color:var(--s-mute);text-decoration:underline;text-decoration-color:var(--s-rule);text-underline-offset:3px">{{ lk.label }}</a></sc-for>
+<sc-for list="{{ legalLinks }}" as="lk" hint-placeholder-count="5"><a href="{{ lk.href }}" target="_blank" rel="noopener" style-hover="color:var(--color-accent)" style="display:inline-flex;align-items:center;min-height:32px;color:var(--s-mute);text-decoration:underline;text-decoration-color:var(--s-rule);text-underline-offset:3px">{{ lk.label }}</a></sc-for>
 </nav>
 </footer>
 <sc-if value="{{ authOpen }}" hint-placeholder-val="{{ false }}">
@@ -3946,8 +3946,8 @@ class Component extends DCLogic {
       ...(() => {
         // The legal page, in the app's language (German readers get the English text).
         const q = './legal.html?lang=' + (A === 'RO' ? 'ro' : A === 'DE' ? 'de' : 'en') + '#';
-        const legalHref = { terms: q + 'terms', privacy: q + 'privacy', disclaimer: q + 'disclaimer', sources: q + 'sources' };
-        const legalLinks = [['terms', u.legalTerms], ['privacy', u.legalPrivacy], ['disclaimer', u.legalDisclaimer], ['sources', u.legalSources]]
+        const legalHref = { terms: q + 'terms', privacy: q + 'privacy', disclaimer: q + 'disclaimer', sources: q + 'sources', contact: q + 'contact' };
+        const legalLinks = [['terms', u.legalTerms], ['privacy', u.legalPrivacy], ['disclaimer', u.legalDisclaimer], ['sources', u.legalSources], ['contact', u.legalContact]]
           .map(([k, label]) => ({ label, href: legalHref[k] }));
         // Delete account: the password again (a Google or Apple account types a word instead).
         const sess = s.session || {}, viaProvider = !!sess.provider && sess.provider !== 'Email';
