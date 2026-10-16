@@ -1028,7 +1028,7 @@
 <button onClick="{{ openAuth }}" style="display:flex;align-items:center;gap:10px;padding:20px 24px;background:transparent;border:0;color:var(--s-ink);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;text-align:left;cursor:pointer" style-hover="color:var(--color-accent)">{{ ui.lpAll }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
 </div>
 </sc-if>
-<div style="flex:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));padding:28px clamp(20px,4vw,64px) 40px;gap:8px 0">
+<div style="flex:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));padding:28px clamp(20px,4vw,64px) 40px;gap:8px 0">
 <sc-for list="{{ lpFeatures }}" as="f" hint-placeholder-count="6">
 <div data-m="rise" style="display:flex;align-items:flex-start;gap:18px;padding:14px 24px 14px 0">
 <div style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid #3A3A3A;background:#141414;color:var(--color-accent)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="{{ f.path }}"></path></svg></div>
