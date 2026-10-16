@@ -1774,7 +1774,9 @@ class Component extends DCLogic {
     const synced = this._synced || [];
     const added = (this.state.follows || []).filter(t => synced.indexOf(t) < 0);
     this._synced = (this.state.follows || []).slice();
-    if (added.length) this.syncLive(added);
+    // A share just added gets its quotes and news, and its name (one outside the catalogs,
+    // like PZC.L, has it only from its profile).
+    if (added.length) { this.syncLive(added); this.syncPositions(); }
     const el = this.plotRef && this.plotRef.current;
     if (el && this._ro && this._roEl !== el) { if (this._roEl) this._ro.unobserve(this._roEl); this._ro.observe(el); this._roEl = el; }
     this.measureChart();

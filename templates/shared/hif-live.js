@@ -320,12 +320,12 @@ async function search(q, token){
   const local = (window.HIFBVB ? window.HIFBVB.search(q, 6) : []).concat(window.HIFEU ? window.HIFEU.search(q, 6) : [])
     .map(r => ({ ticker: r.ticker, name: r.name, exchange: r.exchange }));
   if (!available(token)) return local.length ? local : null;
-  // An exact London or Frankfurt symbol outside the catalog (PZC.L): offered when the
-  // market data knows it, under its own name.
-  const exact = /^[A-Za-z0-9][A-Za-z0-9-]{0,9}\.(l|de)$/i.exec(q);
+  // An exact Bucharest, London or Frankfurt symbol outside the catalog (PZC.L): offered when
+  // the market data knows it, under its own name.
+  const exact = /^[A-Za-z0-9][A-Za-z0-9-]{0,9}\.(l|de|ro)$/i.exec(q);
   if (exact && !local.some(r => r.ticker.toUpperCase() === q.toUpperCase())) {
     const sym = q.toUpperCase();
-    try { const p = await profile(sym, token); if (p && p.name) local.unshift({ ticker: sym, name: p.name, exchange: /\.L$/.test(sym) ? 'LSE' : 'XETRA' }); } catch (e) {}
+    try { const p = await profile(sym, token); if (p && p.name) local.unshift({ ticker: sym, name: p.name, exchange: /\.L$/.test(sym) ? 'LSE' : /\.RO$/.test(sym) ? 'BVB' : 'XETRA' }); } catch (e) {}
   }
   const hit = fresh('search', q);
   let rows = hit;
@@ -333,11 +333,22 @@ async function search(q, token){
     let j = null;
     try { j = await get('/search', { q: q }, token); } catch (e) { if (!local.length) throw e; }
     rows = put('search', q, ((j && j.result) || [])
-      .filter(r => r.symbol && r.symbol.indexOf('.') < 0 && r.type !== 'Crypto')
+      // US listings: plain symbols and share classes (BRK.B, BF.A); other exchanges' listings
+      // ("BMW.DE") come from the catalogs above.
+      .filter(r => r.symbol && (r.symbol.indexOf('.') < 0 || /^[A-Z]{1,5}\.[A-C]$/.test(r.symbol)) && r.type !== 'Crypto')
       .slice(0, 12)
       .map(r => ({ ticker: r.symbol, name: r.description || r.displaySymbol || r.symbol })));
   }
-  return local.concat(rows.filter(r => !local.some(x => x.ticker === r.ticker)));
+  const all = local.concat(rows.filter(r => !local.some(x => x.ticker === r.ticker)));
+  // A bare symbol ("pzc") that matches nothing exactly: the same symbol in London,
+  // Frankfurt and Bucharest, where the market data knows it (PZC -> PZC.L).
+  const bare = /^[A-Za-z0-9]{2,6}$/.test(q) ? q.toUpperCase() : '';
+  if (bare && !all.some(r => r.ticker.toUpperCase() === bare || r.ticker.toUpperCase().split('.')[0] === bare)) {
+    const tries = [['.L', 'LSE'], ['.DE', 'XETRA'], ['.RO', 'BVB']].map(([suf, ex]) =>
+      profile(bare + suf, token).then(p => p && p.name ? { ticker: bare + suf, name: p.name, exchange: ex } : null).catch(() => null));
+    (await Promise.all(tries)).filter(Boolean).forEach(r => all.unshift(r));
+  }
+  return all;
 }
 
 // Batched. { quotes, news, recs, errors, mode }
