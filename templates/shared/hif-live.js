@@ -43,7 +43,9 @@ async function authHeader(){
 }
 async function callProxy(path, params){
   const res = await fetch(PROXY + '?' + qs(Object.assign({ path: path }, params)), { headers: await authHeader() });
-  if (res.status === 404 || res.status === 405) { proxyState = 'no'; return null; }
+  // Only a missing function means no proxy: the gateway's own 404 (a symbol Yahoo doesn't
+  // know) is JSON, and mustn't switch the proxy off for the rest of the visit.
+  if ((res.status === 404 || res.status === 405) && !/json/.test(res.headers.get('content-type') || '')) { proxyState = 'no'; return null; }
   // Signed out (or the session not restored yet): the proxy exists, this call just isn't
   // allowed. An error, not an empty answer, so nothing empty is cached for after sign-in.
   if (res.status === 401) { proxyState = 'yes'; throw new Error('sign in required'); }

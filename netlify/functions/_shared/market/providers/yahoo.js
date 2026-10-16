@@ -14,7 +14,7 @@ export const CANDLE_RANGE = { '1m': '5d', '2m': '1mo', '5m': '1mo', '15m': '1mo'
 export const CANDLE_INTERVALS = Object.keys(CANDLE_RANGE);
 // Yahoo's chart -> { t, o, h, l, c, v } arrays (bars without a price dropped), plus what the
 // page labels: currency, the exchange's time zone and how many minutes the data is delayed.
-export function compactCandles(data) {
+export function compactCandles(data, interval) {
   const r = data && data.chart && data.chart.result && data.chart.result[0];
   if (!r) return { t: [], o: [], h: [], l: [], c: [], v: [] };
   const q = (r.indicators && r.indicators.quote && r.indicators.quote[0]) || {}, ts = r.timestamp || [];
@@ -25,9 +25,56 @@ export function compactCandles(data) {
     out.t.push(t); out.o.push(o); out.h.push(h); out.l.push(l); out.c.push(c); out.v.push(num((q.volume || [])[i]) || 0);
   });
   const m = r.meta || {};
+  cleanScale(out);
+  if (m.dataGranularity === '1d') addToday(out, m);
+  // A share listed recently gets weekly bars when months are asked for: grouped into months.
+  if (interval === '1mo' && m.dataGranularity && m.dataGranularity !== '1mo') toMonths(out, num(m.gmtoffset) || 0);
   return Object.assign(out, { currency: m.currency || '', tz: m.exchangeTimezoneName || '', delay: num(m.exchangeDataDelayedBy) || 0,
     price: num(m.regularMarketPrice), prevClose: num(m.chartPreviousClose != null ? m.chartPreviousClose : m.previousClose),
     exchange: m.fullExchangeName || m.exchangeName || '', marketTime: num(m.regularMarketTime) });
+}
+
+// Yahoo's oldest bars are sometimes in another unit (Petrom's monthly bars before 2005 are in
+// the hundreds, the price is about 1): everything before a tenfold jump between two closes is
+// dropped. A wick more than five times the body's edge is a bad print, cut to the body.
+function cleanScale(out) {
+  const keys = ['t', 'o', 'h', 'l', 'c', 'v'];
+  for (let i = out.c.length - 1; i > 0; i--) {
+    const r = out.c[i - 1] / out.c[i];
+    if (r > 10 || r < 0.1) { keys.forEach(k => out[k].splice(0, i)); break; }
+  }
+  // The bar where the unit changed can still open or peak in the old one: those prices are
+  // replaced by the close.
+  const off = (x, i) => x / out.c[i] > 10 || x / out.c[i] < 0.1;
+  out.o = out.o.map((o, i) => (off(o, i) ? out.c[i] : o));
+  out.h = out.h.map((h, i) => (off(h, i) ? Math.max(out.o[i], out.c[i]) : h));
+  out.l = out.l.map((l, i) => (off(l, i) ? Math.min(out.o[i], out.c[i]) : l));
+  out.h = out.h.map((h, i) => Math.min(h, Math.max(out.o[i], out.c[i]) * 5));
+  out.l = out.l.map((l, i) => Math.max(l, Math.min(out.o[i], out.c[i]) / 5));
+}
+function toMonths(out, off) {
+  const keys = ['t', 'o', 'h', 'l', 'c', 'v'], res = Object.fromEntries(keys.map(k => [k, []]));
+  let cur = '';
+  out.t.forEach((t, i) => {
+    const d = new Date((t + off) * 1000), key = d.getUTCFullYear() + '-' + d.getUTCMonth(), n = res.t.length;
+    if (key !== cur) { cur = key; keys.forEach(k => res[k].push(out[k][i])); return; }
+    res.h[n - 1] = Math.max(res.h[n - 1], out.h[i]); res.l[n - 1] = Math.min(res.l[n - 1], out.l[i]);
+    res.c[n - 1] = out.c[i]; res.v[n - 1] += out.v[i];
+  });
+  keys.forEach(k => { out[k] = res[k]; });
+}
+// Daily bars for Bucharest come a day late: when the last trade is on a later day than the
+// last bar, that day is added from the quote (it opens at the previous close; Yahoo's chart
+// doesn't give the day's open).
+function addToday(out, m) {
+  const n = out.t.length, price = num(m.regularMarketPrice), at = num(m.regularMarketTime), off = num(m.gmtoffset) || 0;
+  if (!n || price == null || at == null) return;
+  const day = s => Math.floor((s + off) / 86400), gap = day(at) - day(out.t[n - 1]);
+  if (gap <= 0) return;
+  const o = out.c[n - 1], hi = num(m.regularMarketDayHigh), lo = num(m.regularMarketDayLow);
+  out.t.push(out.t[n - 1] + gap * 86400); out.o.push(o); out.c.push(price);
+  out.h.push(Math.max(o, price, hi != null ? hi : price)); out.l.push(Math.min(o, price, lo != null ? lo : price));
+  out.v.push(num(m.regularMarketVolume) || 0);
 }
 
 const num = v => (v == null || !Number.isFinite(Number(v)) ? null : Number(v));
@@ -74,7 +121,7 @@ export const yahoo = {
   async transform(cap, raw, p) {
     const data = toPounds(raw);
     if (cap === 'chart') return data;
-    if (cap === 'candles') return compactCandles(data);
+    if (cap === 'candles') return compactCandles(data, p && p.interval);
     const m = metaOf(data) || {};
     if (cap === 'quote') {
       const c = num(m.regularMarketPrice), pc = num(m.chartPreviousClose != null ? m.chartPreviousClose : m.previousClose);
