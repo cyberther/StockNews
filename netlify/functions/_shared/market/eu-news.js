@@ -35,10 +35,15 @@ const ARTICLE = `(?<!\\b(?:${ARTICLES.concat(ARTICLES.map(w => w[0].toUpperCase(
 const L = 'A-Za-zÄÖÜäöüß0-9';
 const ALL_NAMES = [...new Set(Object.values(EU_ALIASES).flat().map(n => n.replace(/^~/, '')))];
 const matchers = new Map();
-function matcherFor(symbol) {
+// A listed company's name as the press writes it: "PZ Cussons Plc" -> "PZ Cussons".
+export const pressName = n => String(n || '').replace(/[,.]/g, ' ').replace(/\s+(plc|p\.?l\.?c|ag|se|kgaa|& co|co|n\.?v|s\.?a|ltd|limited|holdings?|group|gmbh)\b.*$/i, '').replace(/\s+/g, ' ').trim();
+// Catalog names first; a share outside the catalog (added by its exact symbol) by its own
+// name, when it is at least two words or five letters (so "Next" or "BP" alone never match).
+function matcherFor(symbol, name) {
   if (matchers.has(symbol)) return matchers.get(symbol);
-  const names = EU_ALIASES[symbol];
-  if (!names || !names.length) { matchers.set(symbol, null); return null; }
+  const own = pressName(name), names = EU_ALIASES[symbol] || (own && (own.includes(' ') || own.length >= 5) ? [own] : null);
+  // Not remembered when the name is simply missing (the lookup can fail once).
+  if (!names || !names.length) { if (EU_ALIASES[symbol] || own) matchers.set(symbol, null); return null; }
   // "Siemens" is not "Siemens Energy": a name doesn't match where another company's longer
   // name starting with it stands. Compounds still match ("Siemens-Aktie", "Allianz-Chef").
   const part = n => {
@@ -63,8 +68,8 @@ const shape = (x, symbol) => ({ category: 'company', datetime: x.datetime, headl
   image: '', related: symbol, source: x.source, summary: x.summary, url: x.url });
 
 // Stories about one .DE or .L company between two ISO dates, newest first.
-export async function euCompanyNews(symbol, from, to, log) {
-  const m = matcherFor(symbol);
+export async function euCompanyNews(symbol, from, to, log, name) {
+  const m = matcherFor(symbol, name);
   if (!m) return [];
   const lo = from ? Date.parse(from + 'T00:00:00Z') / 1000 : 0, hi = to ? Date.parse(to + 'T23:59:59Z') / 1000 : Infinity;
   return (await allEuItems(log)).filter(x => x.datetime >= lo && x.datetime <= hi && !isRoundup(x) && m(x.headline + ' \n ' + x.summary) >= 0)

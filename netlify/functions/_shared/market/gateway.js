@@ -20,6 +20,7 @@ import { fmp } from './providers/fmp.js';
 import { alphavantage } from './providers/alphavantage.js';
 import { companyNews, marketNews } from './ro-news.js';
 import { euCompanyNews, euMarketNews, isEu } from './eu-news.js';
+import { EU_ALIASES } from './eu-symbols.js';
 import { usCompanyNews, usMarketNews } from './us-news.js';
 import { roFilings } from './ro-filings.js';
 
@@ -33,7 +34,13 @@ const ronews = {
 const eunews = {
   name: 'eunews', needsKey: false, limits: {},
   supports: cap => cap === 'news' || cap === 'marketNewsEU',
-  load: (cap, p, ctx) => cap === 'news' ? euCompanyNews(p.symbol, p.from, p.to, ctx.log) : euMarketNews(150, ctx.log)
+  load: async (cap, p, ctx) => {
+    if (cap !== 'news') return euMarketNews(150, ctx.log);
+    // A share outside the catalog: its stories are found by its name (Yahoo's, cached a day).
+    let name = '';
+    if (!EU_ALIASES[p.symbol]) { try { const pr = await fetchCapability('profile', { symbol: p.symbol }, ctx); name = (pr.status === 200 && pr.data && pr.data.name) || ''; } catch {} }
+    return euCompanyNews(p.symbol, p.from, p.to, ctx.log, name);
+  }
 };
 // US press releases and financial press from RSS (us-news.js); no upstream key. Company
 // news for one US ticker is added to Finnhub's in fetchUsNews().

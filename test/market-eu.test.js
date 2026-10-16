@@ -84,3 +84,19 @@ test('the EU Market feed files each story under the company named first, and is 
   assert.equal(r.status, 200);
   assert.equal(JSON.parse(await r.text()).length, 2);
 });
+
+test('a share outside the catalog (PZC.L) gets its stories by its own name, through the gateway', async () => {
+  const { pressName } = await import('../netlify/functions/_shared/market/eu-news.js');
+  assert.equal(pressName('PZ Cussons Plc'), 'PZ Cussons');
+  assert.equal(pressName('Games Workshop Group PLC'), 'Games Workshop');
+  const yahooMeta = { chart: { result: [{ meta: { currency: 'GBp', longName: 'PZ Cussons Plc', regularMarketPrice: 78.5, chartPreviousClose: 77 }, timestamp: [now], indicators: { quote: [{ close: [78.5] }] } }] } };
+  feeds([
+    { title: 'PZ Cussons sells its St Tropez brand', link: 'https://a.co.uk/pz' },
+    { title: 'Unilever raises prices again', link: 'https://a.co.uk/ul' }
+  ], u => (u.hostname === 'query1.finance.yahoo.com' ? Response.json(yahooMeta) : new Response('{}', { status: 404 })));
+  assert.deepEqual(await euCompanyNews('PZC.L'), [], 'no name, no stories');
+  const day = d => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
+  const r = await handleMarketRequest(req(`path=/company-news&symbol=PZC.L&from=${day(-20)}&to=${day(1)}`), { log: () => {} });
+  assert.equal(r.status, 200);
+  assert.deepEqual((await r.json()).map(x => x.url), ['https://a.co.uk/pz']);
+});
