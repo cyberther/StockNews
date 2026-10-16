@@ -307,7 +307,9 @@ const OPERATOR = {
     else el.textContent = v;
   });
   // The content moved in after the browser looked for the #section: go there now.
-  if (location.hash) { const el = document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView(); }
+  // (after load: the browser's own scroll happens then and would undo an earlier one).
+  const jump = () => { const el = location.hash && document.getElementById(location.hash.slice(1)); if (el) el.scrollIntoView({ behavior: 'instant' }); };
+  if (lang === 'en') { if (document.readyState === 'complete') jump(); else addEventListener('load', () => setTimeout(jump, 0)); }
 })();
 </script>
 </body>
