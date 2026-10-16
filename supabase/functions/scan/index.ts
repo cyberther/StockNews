@@ -17,6 +17,9 @@
 //   APP_URL            where a tapped alert opens, e.g. https://aa-market-pulse.netlify.app/
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
 //
+// A signed-in user can also send themselves a test alert (the app's Account screen):
+// header x-hif-test: 1 with their own access token; it goes to their own devices only, at
+// most once every 30 seconds, and opens their latest stories like a real alert.
 // Deploy with JWT verification off (the bearer token is SCAN_SECRET, not a user JWT):
 //   supabase functions deploy scan --no-verify-jwt
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -202,7 +205,65 @@ function message(stories: Story[], appUrl: string) {
   return JSON.stringify({ title, body, url, article, tag: 'market-pulse-scan' });
 }
 
+// ---- the test alert ---------------------------------------------------------------------
+// The app's own sites (production, its branch deploys such as staging--) may call it.
+function corsFor(req: Request): Record<string, string> {
+  const origin = req.headers.get('origin') || '';
+  let app = '';
+  try { app = new URL(env('APP_URL')).origin; } catch { /* unset */ }
+  const ok = origin && (origin === app || /^https:\/\/(?:[a-z0-9-]+--)?aa-market-pulse\.netlify\.app$/.test(origin));
+  return ok ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'POST, OPTIONS',
+    'access-control-allow-headers': 'authorization, x-hif-test, content-type, apikey', 'access-control-max-age': '600', vary: 'origin' } : { vary: 'origin' };
+}
+const lastTest = new Map<string, number>();
+async function testAlert(req: Request): Promise<Response> {
+  const cors = corsFor(req);
+  const reply = (body: unknown, status = 200) => Response.json(body, { status, headers: cors });
+  const token = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!token) return reply({ error: 'sign in required' }, 401);
+  const db = createClient(env('SUPABASE_URL'), env('SUPABASE_SERVICE_ROLE_KEY'), { auth: { persistSession: false } });
+  const { data: who, error: whoErr } = await db.auth.getUser(token);
+  const uid = who && who.user && who.user.id;
+  if (whoErr || !uid) return reply({ error: 'sign in required' }, 401);
+  const { data: st } = await db.from('account_status').select('approved,suspended').eq('user_id', uid).maybeSingle();
+  if (!st || !st.approved || st.suspended) return reply({ error: 'account not approved' }, 403);
+  const now = Date.now();
+  if (now - (lastTest.get(uid) || 0) < 30_000) return reply({ error: 'wait' }, 429);
+  lastTest.set(uid, now);
+  if (!(env('VAPID_PUBLIC_KEY') && env('VAPID_PRIVATE_KEY') && env('VAPID_SUBJECT'))) return reply({ error: 'push not configured' }, 503);
+  const { data: subs } = await db.from('push_subscriptions').select('endpoint,p256dh,auth').eq('user_id', uid);
+  if (!subs || !subs.length) return reply({ sent: 0, devices: 0 });
+  // The user's three latest stories, so the tap does what a real alert does.
+  const { data: wl } = await db.from('watchlist').select('ticker').eq('user_id', uid);
+  const tickers = [...new Set((wl || []).map(r => r.ticker))].slice(0, 100);
+  let stories: Story[] = [];
+  if (tickers.length) {
+    const { data } = await db.from('stories').select('id,ticker,headline,source,url,summary,published_at').in('ticker', tickers)
+      .order('published_at', { ascending: false }).limit(3);
+    stories = (data || []) as Story[];
+  }
+  const appUrl = env('APP_URL') || '/';
+  const payload = stories.length
+    ? (() => { const m = JSON.parse(message(stories, appUrl)); return JSON.stringify(Object.assign(m, { title: 'Test · ' + m.title, tag: 'market-pulse-test' })); })()
+    : JSON.stringify({ title: 'Market Pulse · test', body: 'Notifications work on this device.', url: appUrl.replace(/#.*$/, ''), tag: 'market-pulse-test' });
+  webpush.setVapidDetails(env('VAPID_SUBJECT'), env('VAPID_PUBLIC_KEY'), env('VAPID_PRIVATE_KEY'));
+  let sent = 0;
+  await pool(subs, 6, async sub => {
+    try {
+      await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload, { TTL: 600, urgency: 'high' });
+      sent++;
+      await db.from('push_subscriptions').update({ last_ok: new Date().toISOString() }).eq('endpoint', sub.endpoint);
+    } catch (e) {
+      const code = (e as { statusCode?: number }).statusCode;
+      if (code === 404 || code === 410) await db.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+    }
+  });
+  return reply({ sent, devices: subs.length });
+}
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsFor(req) });
+  if (req.headers.get('x-hif-test') === '1') return testAlert(req);
   const secret = env('SCAN_SECRET');
   const given = (req.headers.get('authorization') || '').replace(/^Bearer\s+/i, '');
   if (!sameSecret(given, secret)) return new Response('forbidden', { status: 403 });
