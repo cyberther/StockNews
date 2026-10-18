@@ -46,3 +46,12 @@ test('the test alert answers the app on Cloudflare Pages (production and branch 
   for (const o of ['https://evil.pages.dev', 'https://aa-market-pulse.pages.dev.evil.com', 'http://aa-market-pulse.pages.dev', 'https://x.y.aa-market-pulse.pages.dev'])
     assert.ok(!re.test(o), o);
 });
+
+test('scan_runs gets only its own columns (the mode stays in the response)', () => {
+  const ins = src.match(/from\('scan_runs'\)\.insert\(([^)]*)\)/);
+  assert.ok(ins, 'scan_runs insert');
+  const cols = /\{([^}]*)\}/.exec(ins[1]);
+  assert.ok(cols, 'inserts an explicit column list');
+  const names = cols[1].split(',').map(s => s.trim().split(':')[0]).filter(Boolean).sort();
+  assert.deepEqual(names, ['errors', 'new_stories', 'pushes', 'started_at', 'tickers']);
+});
