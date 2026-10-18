@@ -297,7 +297,7 @@ async function fetchJson(target, headers) {
     const declared = Number(res.headers.get('content-length') || 0);
     if (declared > MAX_UPSTREAM_BYTES) throw new Error('response too large');
     const body = await res.text();
-    if (Buffer.byteLength(body, 'utf8') > MAX_UPSTREAM_BYTES) throw new Error('response too large');
+    if (new TextEncoder().encode(body).length > MAX_UPSTREAM_BYTES) throw new Error('response too large');
     let parsed = null;
     try { parsed = JSON.parse(body); } catch { if (res.ok) throw new Error('invalid upstream response'); }
     return { status: res.status, parsed, retryAfter: res.headers.get('retry-after') };
@@ -557,7 +557,8 @@ async function signedIn(request, auth, fetchImpl) {
   return ok;
 }
 
-const defaultLog = process.env.NODE_TEST_CONTEXT ? () => {} : e => console.log(JSON.stringify(e));
+// Also runs as a Cloudflare Pages Function (functions/api/finnhub.js), where process may not exist.
+const defaultLog = typeof process !== 'undefined' && process.env && process.env.NODE_TEST_CONTEXT ? () => {} : e => console.log(JSON.stringify(e));
 
 // options: { flags (overrides config/flags.json), apiKey (Finnhub), keys: { provider: key }, order (orderFromEnv), allowedOrigins, rateLimit, clientId, log,
 //            usage (usage-store.js), waitUntil (keeps a flush alive after the response),
