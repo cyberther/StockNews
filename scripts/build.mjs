@@ -1,4 +1,4 @@
-// The static site, for Netlify (netlify.toml) and Cloudflare Pages (wrangler.toml).
+// The static site, for Netlify (netlify.toml) and Cloudflare Pages (build settings in its dashboard: docs/phase-a-setup.md).
 //
 //   node scripts/build.mjs           -> dist/ (BUILD_OUT to change it)
 //

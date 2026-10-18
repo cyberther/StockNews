@@ -44,6 +44,8 @@ povești noi. Alternativ, păstrezi cron-ul și setezi secretul `SCAN_FETCH=off`
    (preview automat pe celelalte branch-uri, inclusiv acesta).
 3. Variabile (Production și Preview): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `VAPID_PUBLIC_KEY`,
    `NODE_VERSION=22`. Opțional pentru gateway: `TWELVEDATA_KEY`, `FMP_KEY`, `ALPHAVANTAGE_KEY`.
+   Configurația stă în dashboard: un `wrangler.toml` în repo ar deveni sursa de adevăr și ar șterge
+   la fiecare deploy de producție variabilele setate în dashboard (s-a întâmplat la prima lansare).
 4. Supabase → Authentication → URL Configuration: adaugă domeniul `*.pages.dev` (și cel final)
    la Redirect URLs; `APP_URL` din `scan` → noul domeniu.
 5. Verifică pe preview: Following, BVB, Portfolio, Watchlist; pe iPhone „Add to Home Screen”.
