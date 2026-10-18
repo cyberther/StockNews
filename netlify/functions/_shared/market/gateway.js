@@ -23,7 +23,10 @@ import { euCompanyNews, euMarketNews, isEu } from './eu-news.js';
 import { EU_ALIASES } from './eu-symbols.js';
 import { usCompanyNews, usMarketNews } from './us-news.js';
 import { roFilings } from './ro-filings.js';
-import FLAGS from '../../../../config/flags.json' with { type: 'json' };
+// The flags' JS copy (kept equal to config/flags.json by test/flags.test.js): importing the
+// JSON itself needs import attributes, which Cloudflare Pages' bundler does not accept.
+import '../../../../templates/shared/hif-flags.js';
+const FLAGS = globalThis.HIFFlags.all();
 
 // Romanian company news from the press's RSS feeds (ro-news.js); no upstream key.
 const ronews = {
