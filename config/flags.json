@@ -8,5 +8,6 @@
   "prefetchUnfollowedNews": false,
   "hiddenModuleRefresh": false,
   "commercialMode": false,
-  "dataSource": "supabase"
+  "dataSource": "supabase",
+  "policy": true
 }
