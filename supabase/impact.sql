@@ -337,3 +337,18 @@ revoke all on function public.admin_ai_pending() from public, anon;
 revoke all on function public.admin_ai_review(bigint, text) from public, anon;
 grant execute on function public.admin_ai_pending() to authenticated;
 grant execute on function public.admin_ai_review(bigint, text) to authenticated;
+
+-- What the batch reads next: events not annotated in all three kinds yet, newest first.
+create or replace function public.ai_annotations_pending(p_secret text, p_limit integer default 20)
+returns table (id text, title text, summary text, event_date date)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if not public.summary_secret_ok(p_secret) then raise exception 'not allowed' using errcode = '42501'; end if;
+  return query
+    select e.id, e.title, e.summary, e.event_date from policy_events e
+    where (select count(*) from ai_annotations a where a.target_type = 'policy_event' and a.target_id = e.id) < 3
+    order by e.event_date desc, e.id desc
+    limit greatest(1, least(coalesce(p_limit, 20), 200));
+end $$;
+revoke all on function public.ai_annotations_pending(text, integer) from public, anon;
+grant execute on function public.ai_annotations_pending(text, integer) to authenticated, anon, service_role;

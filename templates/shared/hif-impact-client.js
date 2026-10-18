@@ -15,6 +15,7 @@ var query = {
   accuracy: function(a, v){ return 'analysis_accuracy?select=*&analysis_id=eq.' + id(a) + '&version=eq.' + ver(v); },
   financials: function(t){ return 'company_financials?select=*&ticker=eq.' + sym(t) + '&order=fiscal_year.desc,provenance.asc&limit=6'; },
   financialsIn: function(ts){ return 'company_financials?select=*&ticker=in.(' + ts.map(function(t){ return '%22' + sym(t) + '%22'; }).join(',') + ')&order=fiscal_year.desc'; },
+  annotations: function(ids){ return 'ai_annotations?select=target_id,kind,content&status=eq.verified&target_id=in.(' + (ids || []).filter(function(i){ return /^[a-z]{2,10}:[A-Za-z0-9._-]{1,60}$/.test(i); }).slice(0, 200).map(function(i){ return '%22' + i + '%22'; }).join(',') + ')'; },
   exposure: function(){ return 'company_exposure?select=*&limit=2000'; }
 };
 // One request; an error is an error, not an empty list.

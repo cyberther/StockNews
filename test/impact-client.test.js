@@ -17,6 +17,8 @@ test('one request per list, exact PostgREST queries', () => {
   assert.equal(C.query.exposure(), 'company_exposure?select=*&limit=2000');
   assert.equal(C.query.financialsIn(['SNP.RO', 'M.RO']), 'company_financials?select=*&ticker=in.(%22SNP.RO%22,%22M.RO%22)&order=fiscal_year.desc');
   assert.throws(() => C.query.financialsIn(['SNP.RO', 'a)b']), /ticker/);
+  // Checked annotations only (RLS shows readers nothing else anyway); event ids quoted, odd ones left out.
+  assert.equal(C.query.annotations(['cdep:1', 'mf:2', 'x)y']), 'ai_annotations?select=target_id,kind,content&status=eq.verified&target_id=in.(%22cdep:1%22,%22mf:2%22)');
   assert.throws(() => C.query.results('x);drop', 1), /id/);
   assert.throws(() => C.query.financials('snp&x=1'), /ticker/);
 });

@@ -549,6 +549,7 @@
 <sc-if value="{{ e.hasSectors }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-ink)">{{ e.sectors }}</div></sc-if>
 <sc-if value="{{ e.hasCompanies }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute)">{{ e.companies }}</div></sc-if>
 <sc-if value="{{ e.hasConcerns }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;border-left:2px solid var(--color-accent);padding-left:8px"><span style="font-family:var(--font-heading);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-accent)">{{ ui.polConcerns }}:</span> {{ e.concerns }}</div></sc-if>
+<sc-if value="{{ e.hasAi }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;max-width:80ch;border-left:2px dashed var(--s-rule);padding-left:8px">{{ e.aiSummary }} <span style="font-size:11px;color:var(--s-mute)">({{ e.aiLabel }})</span></div></sc-if>
 <sc-if value="{{ e.hasAnalysis }}" hint-placeholder-val="{{ false }}"><div><button onClick="{{ e.openAnalysis }}" style="min-height:30px;padding:0 10px;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.impOpenAnalysis }} →</button></div></sc-if>
 <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--s-mute)"><span>{{ e.certainty }}</span><a href="{{ e.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">{{ e.sourceLabel }}</a></div>
 </article>
@@ -1040,6 +1041,20 @@
 </div>
 <div style="font-size:13px;color:var(--s-mute);margin-top:10px;max-width:60ch;text-wrap:pretty">{{ ui.adminNote }}</div>
 <sc-if value="{{ adminErr }}" hint-placeholder-val="{{ false }}"><div role="alert" style="margin-top:12px;font-size:13px;color:var(--color-accent)">{{ adminErr }}</div></sc-if>
+<sc-if value="{{ aiShow }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:24px;font-family:var(--font-heading);font-weight:800;font-size:17px">{{ ui.aiTitle }}</div>
+<div style="font-size:12px;color:var(--s-mute);margin-top:4px;max-width:70ch">{{ ui.aiNote }}</div>
+<sc-if value="{{ aiEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--s-mute);margin-top:10px">{{ ui.aiNone }}</div></sc-if>
+<div style="margin-top:10px;border-top:1px solid var(--s-rule)">
+<sc-for list="{{ aiRows }}" as="r" hint-placeholder-count="1">
+<div style="padding:12px 0;border-bottom:1px solid var(--s-rule);display:grid;gap:6px">
+<div style="font-size:12px;color:var(--s-mute)">{{ r.meta }}</div>
+<div style="font-size:13px;white-space:pre-wrap">{{ r.text }}</div>
+<div style="display:flex;gap:8px"><button onClick="{{ r.verify }}" disabled="{{ adminBusy }}" style="min-height:36px;padding:0 14px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.aiVerify }}</button><button onClick="{{ r.reject }}" disabled="{{ adminBusy }}" style="min-height:36px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.aiReject }}</button></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
 
 <div style="margin-top:24px;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ adminWaitingTitle }}</div>
 <div style="margin-top:10px;border-top:1px solid var(--s-rule)">
@@ -1935,6 +1950,16 @@ class Component extends DCLogic {
     A.rest('rpc/admin_requests', { method:'POST', body:{} })
       .then(r => this.setState({ adminRows: r.ok && Array.isArray(r.body) ? r.body : [], adminErr: r.ok ? '' : (this.copy.adminErr || 'Could not load'), adminBusy:false }))
       .catch(() => this.setState({ adminErr: this.copy.adminErr || 'Could not load', adminBusy:false }));
+    // The local model's annotations waiting for review (supabase/impact.sql, flag aiAnnotations).
+    if (flagOn('aiAnnotations')) A.rest('rpc/admin_ai_pending', { method:'POST', body:{} })
+      .then(r => this.setState({ aiRows: r.ok && Array.isArray(r.body) ? r.body : [] })).catch(() => {});
+  }
+  aiReview(id, decision) {
+    const A = window.HIFAuth;
+    this.setState({ adminBusy:true });
+    A.rest('rpc/admin_ai_review', { method:'POST', body:{ p_id:id, p_decision:decision } })
+      .then(r => { if (!r.ok) this.flash(this.copy.adminErr || 'Failed'); this.loadAdmin(); })
+      .catch(() => { this.flash(this.copy.adminErr || 'Failed'); this.loadAdmin(); });
   }
   adminAct(kind, userId) {
     const A = window.HIFAuth;
@@ -2124,6 +2149,7 @@ class Component extends DCLogic {
         concerns: hits.map(h => h.ticker.replace(/\.RO$/, '') + ' — ' + h.via.map(v => v === 'portfolio' ? (u.polViaPortfolio || 'in your portfolio') : (u.polViaFollowing || 'you follow it')).join(', ')
           + (h.why === 'sector' ? ' (' + (u.polBySector || 'via sector') + ' ' + P.sectorLabel(h.sector, lang) + ')' : ' (' + (u.polMentioned || 'named') + ')')).join(' · '),
         hasConcerns: hits.length > 0,
+        aiSummary: (s.policyAi || {})[e.id] || '', hasAi: !!(s.policyAi || {})[e.id], aiLabel: u.aiVerified || '',
         hasAnalysis: !!byEvent[e.id], openAnalysis: () => byEvent[e.id] && this.setState({ polTab: 'analyses', impSel: { id: byEvent[e.id].id, version: byEvent[e.id].version } }) };
     }).filter(c => !mine || c.hasConcerns);
     const days = [];
@@ -2338,7 +2364,16 @@ class Component extends DCLogic {
     this._polSig = sig;
     this.setState({ policyErr:'' });
     P.load({ sector: s.policySector, ticker: s.policyTicker, q: s.policyQ, status: s.policyStatus })
-      .then(rows => this.setState({ policyRows: rows || [], policyErr:'' }))
+      .then(rows => {
+        this.setState({ policyRows: rows || [], policyErr:'' });
+        // The local model's summaries an admin has checked (flag aiAnnotations), shown labelled.
+        const C = window.HIFImpactClient;
+        if (flagOn('aiAnnotations') && C && rows && rows.length)
+          C.load(C.query.annotations(rows.map(r => r.id))).then(a => {
+            const m = {}; (a || []).forEach(x => { if (x.kind === 'summary' && x.content && x.content.text) m[x.target_id] = String(x.content.text); });
+            this.setState({ policyAi: m });
+          }).catch(() => {});
+      })
       .catch(() => { this._polSig = ''; this.setState({ policyErr: this.copy.polError || 'Could not load', policyRows: [] }); });
   }
   // The BVB tab: Romanian press stories (/ro-news) and the quotes of the companies they
@@ -3403,6 +3438,12 @@ class Component extends DCLogic {
   // The Administration screen's values: requests waiting, then the last 30 days' approvals.
   adminVals(u) {
     const s = this.state, rows = s.adminRows || [], loc = this.appLocale;
+    const aiText = r => r.kind === 'summary' ? String((r.content || {}).text || '')
+      : r.kind === 'entities' ? [].concat((r.content || {}).institutions || [], (r.content || {}).companies || []).join(' · ')
+      : ((r.content || {}).sectors || []).join(' · ');
+    const aiVals = { aiShow: flagOn('aiAnnotations') && !!s.aiRows, aiEmpty: !!s.aiRows && !s.aiRows.length,
+      aiRows: (s.aiRows || []).map(r => ({ key: String(r.id), meta: r.target_id + ' · ' + r.kind + ' · ' + r.model + ' · ' + (u.aiUnverified || 'generated, not checked'),
+        text: aiText(r), verify: () => this.aiReview(r.id, 'verified'), reject: () => this.aiReview(r.id, 'rejected') })) };
     const ago = iso => {
       const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
       return m < 60 ? (u.adminMinAgo || '{n} min ago').replace('{n}', m) : m < 2880 ? (u.adminHAgo || '{n} h ago').replace('{n}', Math.round(m / 60))
@@ -3424,7 +3465,7 @@ class Component extends DCLogic {
       rejectAsk: (u.adminRejectAsk || 'Delete {e}\u2019s account for good?').replace('{e}', r.email)
     }));
     const recent = rows.filter(r => r.approved).map(r => ({ name: r.name || u.adminNoName || '—', email: r.email, when: r.approved_at ? ago(r.approved_at) : '' }));
-    return { adminWaiting: waiting, adminHasWaiting: waiting.length > 0, adminNoWaiting: !waiting.length && !!s.adminRows,
+    return { ...aiVals, adminWaiting: waiting, adminHasWaiting: waiting.length > 0, adminNoWaiting: !waiting.length && !!s.adminRows,
       adminRecent: recent, adminHasRecent: recent.length > 0, adminCount: waiting.length, adminBadge: waiting.length ? String(waiting.length) : '',
       adminHasBadge: !!s.isAdmin && waiting.length > 0, isAdmin: !!s.isAdmin, adminBusy: !!s.adminBusy, adminErr: s.adminErr || '',
       adminWaitingTitle: (u.adminWaiting || 'Waiting · {n}').replace('{n}', waiting.length),

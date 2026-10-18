@@ -148,6 +148,15 @@ test('AI annotations: saved unverified with the secret, reviewed by an admin, sh
   assert.equal((await db.query(`select content->>'text' t, status from public.ai_annotations`)).rows[0].t, 'Rezumat.');
 });
 
+test('AI batch: the events still without annotations, newest first, with the secret only', async () => {
+  await assert.rejects(svc(`select * from public.ai_annotations_pending('wrong', 10)`), /not allowed/);
+  const rows = (await svc(`select id, title from public.ai_annotations_pending('${SECRET}', 10)`)).rows;
+  // cdep:new already has a summary annotation but not entities/sectors: still listed.
+  assert.deepEqual(rows.map(r => r.id), ['cdep:new', 'cdep:old']);
+  await svc(`select public.ai_annotations_save('${SECRET}', '[{"target_id":"cdep:old","kind":"summary","content":{"text":"a"},"model":"m"},{"target_id":"cdep:old","kind":"entities","content":{},"model":"m"},{"target_id":"cdep:old","kind":"sectors","content":{},"model":"m"}]')`);
+  assert.deepEqual((await svc(`select id from public.ai_annotations_pending('${SECRET}', 10)`)).rows.map(r => r.id), ['cdep:new']);
+});
+
 test('the knowledge graph links events, sectors, companies, instruments, policies, scenarios and outcomes', async () => {
   const edges = (await user(APPROVED, 'select src_type, relation, dst_type from public.knowledge_edges')).rows.map(r => r.src_type + '-' + r.relation + '-' + r.dst_type);
   for (const e of ['event-classified_as-sector', 'event-affects-company', 'policy-evidenced_by-event', 'policy-targets-sector',
