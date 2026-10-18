@@ -419,6 +419,8 @@ Deno.serve(async (req) => {
 
   const summary = { started_at, mode: alertsOnly ? 'alerts' : 'scan', tickers: tickers.length, new_stories: fresh.length, pushes,
     errors: errors.length ? errors.slice(0, 20).join('\n') : null };
-  await db.from('scan_runs').insert(summary);
+  // The table has no mode column: an extra field made the insert fail (and "last scan" stop).
+  const { error: runErr } = await db.from('scan_runs').insert({ started_at, tickers: tickers.length, new_stories: fresh.length, pushes, errors: summary.errors });
+  if (runErr) console.log(JSON.stringify({ evt: 'scan.runs_insert_failed', message: runErr.message }));
   return Response.json(summary);
 });
