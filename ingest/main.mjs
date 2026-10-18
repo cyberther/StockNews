@@ -20,7 +20,7 @@ import { createYahoo, yahooClient } from './providers/yahoo.mjs';
 import { eodhd, twelvedata, bvb } from './providers/stubs.mjs';
 import { pressNews } from './news.mjs';
 import { BVB_TOP } from '../netlify/functions/_shared/market/bvb-symbols.js';
-import { runPolicy } from './policy/run.mjs';
+import { runPolicy, relayFetch } from './policy/run.mjs';
 import { bvbCatalog } from './policy/classify.mjs';
 
 const arg = name => { const a = process.argv.find(x => x.startsWith(`--${name}=`)); return a ? a.slice(name.length + 3) : null; };
@@ -75,7 +75,9 @@ let policy = null;
 if (flags.policy !== false && (job === 'eod' || job === 'policy')) {
   const before = meter.counts(), startedAt = new Date().toISOString();
   const taxonomy = readJson('../config/policy-taxonomy.json');
-  try { policy = await runPolicy({ db, now, taxonomy, catalog: bvbCatalog() }); }
+  // POLICY_RELAY=supabase (the workflow sets it): the Chamber pages through Supabase.
+  const relay = !dry && env('POLICY_RELAY') === 'supabase' ? relayFetch(db) : null;
+  try { policy = await runPolicy({ db, now, taxonomy, catalog: bvbCatalog(), relay }); }
   catch (e) { policy = { events: 0, created: 0, changed: 0, errors: ['policy: ' + e.message] }; }
   const after = meter.counts(), requests = Object.fromEntries(Object.keys(after).map(k => [k, after[k] - (before[k] || 0)]).filter(([, n]) => n));
   policy.requests = requests;

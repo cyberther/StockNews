@@ -96,3 +96,45 @@ test('rows read back from Postgres (jsonb reorders object keys) do not count as 
   const s = await runPolicy(args(db, f));
   assert.equal(s.changed, 0);
 });
+
+test('a network failure reports its cause, not just "fetch failed"', async () => {
+  const db = fakeDb();
+  const err = Object.assign(new TypeError('fetch failed'), { cause: Object.assign(new Error('connect ETIMEDOUT 1.2.3.4:443'), { code: 'ETIMEDOUT' }) });
+  const s = await runPolicy(args(db, fetcher({ laws2026: err })));
+  assert.ok(s.errors.includes('cdep-laws-2026: fetch failed (ETIMEDOUT connect ETIMEDOUT 1.2.3.4:443)'), s.errors.join('|'));
+});
+
+import { relayFetch } from '../ingest/policy/run.mjs';
+
+test('relay: the Chamber pages through Supabase (pg_net), polled until the answer is in', async () => {
+  const calls = [];
+  let polls = 0;
+  const db = { async rpc(name, args) {
+    calls.push([name, args]);
+    if (name === 'policy_fetch_start') return 42;
+    if (name === 'policy_fetch_result') return ++polls < 3 ? [] : [{ status_code: 200, timed_out: false, error_msg: null, content: '<table>ok</table>' }];
+  } };
+  const get = relayFetch(db, { intervalMs: 1, timeoutMs: 1000 });
+  assert.equal(await get('https://www.cdep.ro/ords/pls/proiecte/upl_pck2015.lista?anl=2026'), '<table>ok</table>');
+  assert.deepEqual(calls[0], ['policy_fetch_start', { p_url: 'https://www.cdep.ro/ords/pls/proiecte/upl_pck2015.lista?anl=2026' }]);
+  assert.deepEqual(calls[1], ['policy_fetch_result', { p_id: 42 }]);
+});
+
+test('relay: an HTTP error, a timeout or no answer in time is an error', async () => {
+  const mk = row => relayFetch({ async rpc(n) { return n === 'policy_fetch_start' ? 7 : row ? [row] : []; } }, { intervalMs: 1, timeoutMs: 20 });
+  await assert.rejects(mk({ status_code: 503, timed_out: false, content: '' })('https://www.cdep.ro/x'), /HTTP 503/);
+  await assert.rejects(mk({ status_code: null, timed_out: true, content: null })('https://www.cdep.ro/x'), /timed out/);
+  await assert.rejects(mk(null)('https://www.cdep.ro/x'), /no answer/);
+});
+
+test('with a relay, only the Chamber pages go through it; the ministry is fetched directly', async () => {
+  const relayed = [], direct = [];
+  const pages = { anp: fx('cdep-initiatives.html'), anl: fx('cdep-laws.html') };
+  const db = fakeDb();
+  const s = await runPolicy({ ...args(db, { fetchText: async u => { direct.push(u); return fx('mf.xml'); } }),
+    relay: async u => { relayed.push(u); return /anp=2026/.test(u) ? pages.anp : /anl=2026/.test(u) ? pages.anl : '<table></table>'; } });
+  assert.equal(relayed.length, 4);
+  assert.equal(direct.length, 1);
+  assert.ok(/mfinante/.test(direct[0]));
+  assert.ok(s.events > 3);
+});
