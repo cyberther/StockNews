@@ -1,90 +1,153 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Policy Intelligence | Market Pulse</title>
+<html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scenario Calculator | Market Pulse</title>
 <style>
 :root{color-scheme:dark;font:15px/1.55 system-ui,Arial,sans-serif;background:#121212;color:#f5f5f7}
-*{box-sizing:border-box}body{margin:0}header{border-bottom:1px solid #333;padding:15px max(20px,calc((100vw - 1120px)/2));display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-a{color:#e4bd57}h1{font-size:clamp(25px,4vw,36px);margin:.4em 0}h2{font-size:19px;margin:0 0 10px}small,.muted{color:#aeb1b7}
-main{max-width:1160px;margin:auto;padding:22px 18px 70px}.lead{max-width:780px;color:#bfc0c4}
-.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
-.panel{border:1px solid #333;background:#1b1b1b;padding:20px;border-radius:10px;min-width:0}
+*{box-sizing:border-box}body{margin:0;background:#121212}header{border-bottom:1px solid #333;padding:15px max(16px,calc((100vw - 1120px)/2));display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+a{color:#e4bd57}h1{font-size:clamp(24px,4vw,34px);margin:.3em 0}h2{font-size:18px;margin:0 0 10px}.muted{color:#aeb1b7}
+main{max-width:1160px;margin:auto;padding:20px 16px 70px}.lead{max-width:800px;color:#bfc0c4}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.panel{border:1px solid #333;background:#1b1b1b;padding:18px;border-radius:8px;min-width:0}
 .full{grid-column:1/-1}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;color:#c3c3c8;font-size:13px}
-input,textarea,select{display:block;width:100%;margin-top:5px;padding:10px;background:#111;color:#fff;border:1px solid #555;border-radius:5px;font:inherit;min-width:0}
-textarea{min-height:82px;resize:vertical}input:focus,textarea:focus{outline:2px solid #c7a64b;outline-offset:1px}
-button{padding:11px 15px;background:#d4af37;color:#161616;border:0;border-radius:5px;font:inherit;font-weight:700;cursor:pointer}
-button.secondary{background:#303030;color:#eee;border:1px solid #555}
-.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{background:#121212;border:1px solid #393939;padding:15px;border-radius:8px}.kpi strong{font-size:23px;display:block;color:#e6c65e}
+input{display:block;width:100%;margin-top:5px;padding:9px;background:#111;color:#fff;border:1px solid #555;border-radius:5px;font:inherit;min-width:0}
+input:focus{outline:2px solid #c7a64b;outline-offset:1px}input[aria-invalid=true]{border-color:#ff8787}
+button{padding:10px 14px;background:#d4af37;color:#161616;border:0;border-radius:5px;font:inherit;font-weight:700;cursor:pointer}
+button.secondary{background:#303030;color:#eee;border:1px solid #555}button[aria-pressed=true]{outline:2px solid #f3d98b}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{background:#121212;border:1px solid #393939;padding:13px;border-radius:8px;min-width:0}.kpi strong{font-size:20px;display:block;color:#e6c65e;overflow-wrap:anywhere}
 .tag{display:inline-block;border:1px solid #8b7242;border-radius:20px;padding:2px 9px;color:#f3d98b;font-size:12px}.warn{border-left:3px solid #d4af37;background:#292418;padding:12px 14px;margin-top:14px}
-.bad{color:#ff8787}.good{color:#83ddb2}table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:9px;border-bottom:1px solid #333}th{color:#aeb1b7;font-weight:500}
-#explain{white-space:pre-wrap}.foot{font-size:12px;color:#aeb1b7;margin-top:30px}
+.formula{white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:13px;background:#111;border:1px solid #333;padding:10px;border-radius:6px;overflow-x:auto}
+.err{color:#ff8787}.hint{font-size:12px;color:#aeb1b7}
 @media(max-width:720px){.layout{grid-template-columns:1fr}.full{grid-column:auto}.fields,.kpis{grid-template-columns:1fr}}
 </style></head>
-<body><header><div><strong>MARKET PULSE</strong> <span class="muted">/ POLICY INTELLIGENCE</span></div><a href="./StockNewsWeb.dc.html">← Back to Market Pulse</a></header>
+<body><header><div><strong>MARKET PULSE</strong> <span class="muted" data-t="crumb"></span></div><a href="./StockNewsWeb.dc.html#policy" data-t="back"></a></header>
 <main>
-<span class="tag">MVP • Manual-input research tool</span>
-<h1>From policy to economic exposure</h1>
-<p class="lead">Record a documented policy event, model a transparent company-level operating-profit scenario, and calculate the weighted effect on a sample portfolio. No AI conclusions, live legislation or investment signals are asserted.</p>
-<div class="warn" role="note"><strong>Scenario only.</strong> The default event and figures are fictional. Replace them with verified data. The model assumes a linear revenue impact and a constant contribution margin; it is not a stock-price forecast.</div>
+<span class="tag" data-t="tag"></span>
+<h1 data-t="h1"></h1>
+<p class="lead" data-t="lead"></p>
+<div class="warn" role="note" data-t="disclaimer"></div>
+<p class="hint" id="origin"></p>
 <div class="layout">
-<section class="panel"><h2>1. Policy event and evidence</h2>
-<label>Event title<input id="title" maxlength="180" value="Illustrative sector tax change"></label>
-<div class="fields"><label>Country<input id="country" maxlength="80" value="Romania"></label>
-<label>Policy status<select id="status"><option>Statement</option><option>Draft legislation</option><option>Adopted law</option><option>Effective</option><option>Implemented</option></select></label>
-</div>
-<label>Primary official source URL<input id="source" type="url" placeholder="https://official-source.example/document"></label>
-<label>How the policy affects revenue<textarea id="mechanism">Illustrative assumption: a policy reduces revenue in the exposed part of a company's business.</textarea></label>
-<p class="muted">Statements, bills, enacted laws and implementation are different evidence states. A URL is not automatically verified; verify it independently before using the analysis.</p>
-</section>
-<section class="panel"><h2>2. Company scenario inputs</h2>
+<section class="panel"><h2 data-t="budget"></h2>
 <div class="fields">
-<label>Company / ticker<input id="ticker" maxlength="50" value="EXAMPLE"></label>
-<label>Annual revenue (million currency units)<input id="revenue" type="number" min="0" step="any" value="1000"></label>
-<label>Current operating margin (%)<input id="margin" type="number" min="-100" max="100" step="any" value="15"></label>
-<label>Share of revenue exposed (%)<input id="exposure" type="number" min="0" max="100" step="any" value="40"></label>
-<label>Revenue shock to exposed activity (%)<input id="shock" type="number" min="-100" max="100" step="any" value="-5"></label>
-<label>Offset / mitigation (%)<input id="mitigation" type="number" min="0" max="100" step="any" value="20"></label>
-<label>Contribution margin on changed revenue (%)<input id="contribution" type="number" min="0" max="100" step="any" value="30"></label>
-<label>Portfolio weight in this company (%)<input id="weight" type="number" min="0" max="100" step="any" value="10"></label>
-</div><div class="actions"><button id="calculate">Calculate scenario</button><button class="secondary" id="reset">Reset illustrative case</button></div>
+<label><span data-t="cost"></span><input id="cost" type="number" step="any" inputmode="decimal"></label>
+<label><span data-t="funded_pct"></span><input id="funded_pct" type="number" min="0" max="100" step="any" inputmode="decimal"></label>
+<label><span data-t="gdp"></span><input id="gdp" type="number" min="1" step="any" inputmode="decimal"></label>
+<label><span data-t="start"></span><input id="start" type="date"></label>
+<label><span data-t="end"></span><input id="end" type="date"></label>
+</div>
+<p class="hint" data-t="costHint"></p>
 </section>
-<section class="panel full"><h2>3. Calculated result</h2>
-<div class="kpis"><div class="kpi"><small>Baseline operating profit</small><strong id="base">—</strong></div><div class="kpi"><small>Scenario operating profit</small><strong id="projected">—</strong></div><div class="kpi"><small>Operating profit change</small><strong id="change">—</strong></div></div>
-<p id="explain" aria-live="polite"></p>
-<div class="warn"><strong>Portfolio interpretation:</strong> <span id="portfolio">—</span></div>
+<section class="panel"><h2 data-t="company"></h2>
+<div class="fields">
+<label><span data-t="revenue"></span><input id="revenue" type="number" min="0" step="any" inputmode="decimal"></label>
+<label><span data-t="operating_profit"></span><input id="operating_profit" type="number" step="any" inputmode="decimal"></label>
+<label><span data-t="exposure"></span><input id="exposure" type="number" min="0" max="100" step="any" inputmode="decimal"></label>
+<label><span data-t="shock"></span><input id="shock" type="number" min="-100" max="100" step="any" inputmode="decimal"></label>
+<label><span data-t="mitigation"></span><input id="mitigation" type="number" min="0" max="100" step="any" inputmode="decimal"></label>
+<label><span data-t="contribution"></span><input id="contribution" type="number" min="0" max="100" step="any" inputmode="decimal"></label>
+</div>
 </section>
-<section class="panel full"><h2>4. Research checkpoints</h2>
-<table><thead><tr><th>Question</th><th>What to verify</th></tr></thead><tbody>
-<tr><td>Was the policy adopted?</td><td>Official text, adoption date, effective date and implementation status</td></tr>
-<tr><td>Is the exposure real?</td><td>Company segment reports and business geography</td></tr>
-<tr><td>Does the earnings bridge hold?</td><td>Contribution margin, contractual passthrough, timing and one-off costs</td></tr>
-<tr><td>Is the impact priced in?</td><td>Valuation, consensus assumptions and other market drivers</td></tr>
-<tr><td>How did it perform?</td><td>Capture assumptions at publication; compare against later outcomes</td></tr>
-</tbody></table></section>
-</div><p class="foot">Research prototype. Values remain in this page only and are not submitted to a server. All results are illustrative, not regulated or personalized investment advice.</p>
+<section class="panel full"><h2 data-t="scenario"></h2>
+<div class="fields">
+<label><span data-t="impl_pct"></span><input id="impl_pct" type="number" min="0" max="100" step="any" inputmode="decimal"></label>
+<label><span data-t="delay_months"></span><input id="delay_months" type="number" min="0" max="120" step="1" inputmode="numeric"></label>
+</div>
+<div class="actions"><button class="secondary" id="full" data-t="full"></button><button class="secondary" id="partial" data-t="partial"></button><button class="secondary" id="delayed" data-t="delayed"></button></div>
+<div class="actions"><button id="share" data-t="share"></button><button class="secondary" id="reset" data-t="reset"></button></div>
+<p class="hint" id="shareNote" aria-live="polite"></p>
+</section>
+<section class="panel full"><h2 data-t="results"></h2>
+<div class="kpis"><div class="kpi"><small data-t="kBalance"></small><strong id="kBalance">—</strong></div><div class="kpi"><small data-t="kYear"></small><strong id="kYear">—</strong></div><div class="kpi"><small data-t="kCompany"></small><strong id="kCompany">—</strong></div></div>
+<p id="error" class="err" role="alert"></p>
+<h2 style="margin-top:16px" data-t="formulas"></h2>
+<div class="formula" id="formula" aria-live="polite"></div>
+</section>
+</div>
+<p class="hint" data-t="foot"></p>
 </main>
 <script src="../shared/hif-scenario.js"></script>
+<script src="../shared/hif-impact.js"></script>
+<script src="../shared/hif-impact-client.js"></script>
 <script>
 'use strict';
-const defaults={title:'Illustrative sector tax change',country:'Romania',status:'Statement',source:'',mechanism:'Illustrative assumption: a policy reduces revenue in the exposed part of a company\'s business.',ticker:'EXAMPLE',revenue:'1000',margin:'15',exposure:'40',shock:'-5',mitigation:'20',contribution:'30',weight:'10'};
-const ids=['title','country','status','source','mechanism','ticker','revenue','margin','exposure','shock','mitigation','contribution','weight'];
-const byId=id=>document.getElementById(id);
-function fmt(n){return new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(n);}
-// The arithmetic lives in templates/shared/hif-scenario.js (tested in test/scenario.test.js).
-function calculate(){
-try{
-const input={};for(const k of ['revenue','margin','exposure','shock','mitigation','contribution'])input[k]=byId(k).value.trim();
-const weight=Number(byId('weight').value);if(!Number.isFinite(weight)||weight<0||weight>100)throw Error('weight must be between 0 and 100');
-const r=window.HIFScenario.compute(input);
-byId('base').textContent=fmt(r.base)+' M';
-byId('projected').textContent=fmt(r.projected)+' M';
-byId('change').textContent=fmt(r.profitDelta)+' M'+(r.deltaPct===null?' (baseline zero)':' ('+fmt(r.deltaPct)+'%)');
-byId('change').className=r.profitDelta<0?'bad':r.profitDelta>0?'good':'';
-byId('explain').textContent='Formula: '+r.formula.replace('\n','.\n')+' M. These are changes in operating profit, not share prices.';
-byId('portfolio').textContent='At '+fmt(weight)+'% portfolio weight, '+byId('ticker').value.trim()+' represents '+fmt(weight)+'% direct allocation exposure. A portfolio return impact cannot be calculated from operating earnings without a defensible valuation-to-price model.';
-}catch(error){byId('explain').textContent='Input error: '+error.message;for(const x of ['base','projected','change'])byId(x).textContent='—';byId('portfolio').textContent='Correct inputs to calculate.';}
+// The scenario calculator: the impact engine (templates/shared/hif-impact.js, tested in
+// test/impact-engine.test.js) on editable inputs. Its starting point comes from the link
+// (an analysis' assumptions, opened from the Policy screen); the link is also how a scenario
+// is kept or shared. Nothing is stored or sent anywhere.
+const T = {
+  ro: { crumb:'/ CALCULATOR DE SCENARII', back:'← Înapoi la Politici', tag:'Calcul transparent, fără predicții', h1:'Calculator de scenarii', lead:'Efectul direct al unei măsuri asupra soldului bugetar și asupra rezultatului din exploatare al unei companii, cu formulele afișate. Schimbă orice ipoteză.', disclaimer:'Nu este o recomandare de investiții. Modelul estimează efectul contabil direct asupra bugetului și a profitului operațional, nu prețul acțiunilor.', budget:'Buget', cost:'Cost anual pentru buget, lei (+ cheltuială, − venit)', funded_pct:'Acoperit de o sursă de finanțare (%)', gdp:'PIB nominal, lei', start:'Intrare în vigoare', end:'Sfârșit (gol = permanentă)', costHint:'Toate sumele sunt anuale, pentru un an întreg de aplicare.', company:'Companie', revenue:'Venituri anuale, lei', operating_profit:'Rezultat din exploatare, lei', exposure:'Venituri expuse (%)', shock:'Șoc asupra veniturilor expuse (%)', mitigation:'Compensare (%)', contribution:'Cât ajunge în rezultatul din exploatare (%)', scenario:'Scenariu', impl_pct:'Implementare (%)', delay_months:'Întârziere (luni)', full:'Integral', partial:'Parțial (50%)', delayed:'Întârziat (6 luni)', share:'Copiază linkul scenariului', reset:'Revino la ipotezele analizei', results:'Rezultate', kBalance:'Efect net asupra soldului (pe an)', kYear:'Efect în anul de start', kCompany:'Rezultat din exploatare (pondere)', formulas:'Formule', foot:'Valorile rămân în această pagină și în link; nimic nu e trimis unui server.', copied:'Linkul a fost copiat.', copyFail:'Linkul e în bara de adrese.', origin:'Pornit din analiza {a}, versiunea {v}, compania {t}.', none:'Completează câmpurile companiei pentru efectul asupra ei.' },
+  en: { crumb:'/ SCENARIO CALCULATOR', back:'← Back to Policy', tag:'Transparent arithmetic, no predictions', h1:'Scenario calculator', lead:'The direct effect of a measure on the budget balance and on a company\'s operating profit, with the formulas shown. Change any assumption.', disclaimer:'Not investment advice. The model estimates the direct accounting effect on the budget and on operating profit, not share prices.', budget:'Budget', cost:'Annual cost to the budget, lei (+ spending, − revenue)', funded_pct:'Covered by a funding source (%)', gdp:'Nominal GDP, lei', start:'In force from', end:'Until (empty = permanent)', costHint:'All amounts are annual, for a full year of application.', company:'Company', revenue:'Annual revenue, lei', operating_profit:'Operating profit, lei', exposure:'Revenue exposed (%)', shock:'Shock to the exposed revenue (%)', mitigation:'Offset (%)', contribution:'Share reaching operating profit (%)', scenario:'Scenario', impl_pct:'Implementation (%)', delay_months:'Delay (months)', full:'Full', partial:'Partial (50%)', delayed:'Delayed (6 months)', share:'Copy the scenario link', reset:'Back to the analysis\' assumptions', results:'Results', kBalance:'Net effect on the balance (a year)', kYear:'Effect in the starting year', kCompany:'Operating profit (share)', formulas:'Formulas', foot:'Values stay in this page and its link; nothing is sent to a server.', copied:'Link copied.', copyFail:'The link is in the address bar.', origin:'Started from analysis {a}, version {v}, company {t}.', none:'Fill in the company fields for its effect.' },
+  de: { crumb:'/ SZENARIO-RECHNER', back:'← Zurück zu Politik', tag:'Transparente Rechnung, keine Prognosen', h1:'Szenario-Rechner', lead:'Die direkte Wirkung einer Maßnahme auf den Haushaltssaldo und das Betriebsergebnis eines Unternehmens, mit den Formeln. Jede Annahme ist änderbar.', disclaimer:'Keine Anlageberatung. Das Modell schätzt die direkte buchhalterische Wirkung auf den Haushalt und das Betriebsergebnis, nicht Aktienkurse.', budget:'Haushalt', cost:'Jährliche Kosten für den Haushalt, Lei (+ Ausgabe, − Einnahme)', funded_pct:'Durch eine Finanzierungsquelle gedeckt (%)', gdp:'Nominales BIP, Lei', start:'In Kraft ab', end:'Bis (leer = dauerhaft)', costHint:'Alle Beträge sind jährlich, für ein volles Anwendungsjahr.', company:'Unternehmen', revenue:'Jahresumsatz, Lei', operating_profit:'Betriebsergebnis, Lei', exposure:'Betroffener Umsatz (%)', shock:'Schock auf den betroffenen Umsatz (%)', mitigation:'Ausgleich (%)', contribution:'Anteil im Betriebsergebnis (%)', scenario:'Szenario', impl_pct:'Umsetzung (%)', delay_months:'Verzögerung (Monate)', full:'Vollständig', partial:'Teilweise (50%)', delayed:'Verzögert (6 Monate)', share:'Szenario-Link kopieren', reset:'Zurück zu den Annahmen der Analyse', results:'Ergebnisse', kBalance:'Nettowirkung auf den Saldo (pro Jahr)', kYear:'Wirkung im Startjahr', kCompany:'Betriebsergebnis (Anteil)', formulas:'Formeln', foot:'Die Werte bleiben auf dieser Seite und im Link; nichts wird an einen Server gesendet.', copied:'Link kopiert.', copyFail:'Der Link steht in der Adressleiste.', origin:'Ausgangspunkt: Analyse {a}, Version {v}, Unternehmen {t}.', none:'Füllen Sie die Unternehmensfelder für dessen Wirkung aus.' }
+};
+const lang = (() => {
+  try { const d = JSON.parse(localStorage.getItem('hif.web.v2') || '{}').d || {}; const l = String(d.appLang || '').toLowerCase(); if (T[l]) return l; } catch (e) {}
+  const n = (navigator.language || 'en').slice(0, 2); return T[n] ? n : 'en';
+})();
+const t = T[lang], C = window.HIFImpactClient, I = window.HIFImpact;
+document.documentElement.lang = lang;
+document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t[el.dataset.t] || ''; });
+const NUM = ['cost', 'funded_pct', 'gdp', 'impl_pct', 'delay_months', 'revenue', 'operating_profit', 'exposure', 'shock', 'mitigation', 'contribution'];
+const byId = id => document.getElementById(id);
+const DEFAULTS = { cost: 1000000000, funded_pct: 0, gdp: 2000000000000, start: new Date().toISOString().slice(0, 10), impl_pct: 100, delay_months: 0 };
+const fromLink = C.decodeHash(location.hash);
+const origin = Object.assign({}, DEFAULTS, fromLink);
+let meta = { a: fromLink.a, v: fromLink.v, t: fromLink.t };
+if (meta.a) byId('origin').textContent = t.origin.replace('{a}', meta.a).replace('{v}', meta.v || 1).replace('{t}', meta.t || '—');
+const nf = n => new Intl.NumberFormat(lang === 'ro' ? 'ro-RO' : lang === 'de' ? 'de-DE' : 'en-GB', { maximumFractionDigits: 2 }).format(n).replace('-', '−');
+const lei = n => (Math.abs(n) >= 1e9 ? nf(n / 1e9) + (lang === 'en' ? ' bn' : lang === 'de' ? ' Mrd.' : ' mld.') : Math.abs(n) >= 1e6 ? nf(n / 1e6) + (lang === 'en' ? ' m' : lang === 'de' ? ' Mio.' : ' mil.') : nf(n)) + ' lei';
+
+function fill(p) {
+  ['start', 'end'].concat(NUM).forEach(k => { byId(k).value = p[k] == null ? '' : String(p[k]); byId(k).removeAttribute('aria-invalid'); });
 }
-byId('calculate').addEventListener('click',calculate);
-byId('reset').addEventListener('click',()=>{for(const id of ids)byId(id).value=defaults[id];calculate();});
+function read() {
+  const p = Object.assign({}, meta);
+  NUM.concat(['start', 'end']).forEach(k => { const v = byId(k).value.trim(); if (v !== '') p[k] = k === 'start' || k === 'end' ? v : Number(v); });
+  return p;
+}
+function calculate() {
+  const p = read();
+  byId('error').textContent = '';
+  NUM.concat(['start', 'end']).forEach(k => byId(k).removeAttribute('aria-invalid'));
+  const s = { impl_pct: p.impl_pct, delay_months: p.delay_months, start: p.start, end: p.end || null };
+  const lines = [];
+  try {
+    const b = I.budget(Object.assign({ cost: p.cost, funded_pct: p.funded_pct, gdp: p.gdp }, s));
+    const y0 = Number(String(p.start).slice(0, 4));
+    byId('kBalance').textContent = lei(b.annual) + ' (' + nf(b.annualPctGdp) + '%)';
+    byId('kYear').textContent = lei(b.byYear[y0]);
+    lines.push(b.formula);
+  } catch (e) { fail(e); return; }
+  const coKeys = ['revenue', 'operating_profit', 'exposure', 'shock', 'mitigation', 'contribution'];
+  if (coKeys.every(k => p[k] !== undefined)) {
+    try {
+      const c = I.company(p, s);
+      byId('kCompany').textContent = lei(c.annual) + (c.pctOfProfit == null ? '' : ' (' + nf(c.pctOfProfit) + '%)');
+      lines.push((meta.t || '') + '\n' + c.formula);
+    } catch (e) { fail(e); return; }
+  } else { byId('kCompany').textContent = '—'; lines.push(t.none); }
+  byId('formula').textContent = C.localizeFormula(lines.join('\n\n'), lang);
+}
+function fail(e) {
+  const k = (String(e.message).match(/^(\w+)/) || [])[1];
+  if (k && byId(k)) byId(k).setAttribute('aria-invalid', 'true');
+  // The engine names the field in English: show its label instead.
+  byId('error').textContent = k && t[k] ? t[k] + ': ' + String(e.message).slice(k.length).trim() : e.message;
+  ['kBalance', 'kYear', 'kCompany'].forEach(id => { byId(id).textContent = '—'; });
+}
+function preset(impl, delay) { byId('impl_pct').value = impl; byId('delay_months').value = delay; calculate(); }
+document.querySelectorAll('input').forEach(el => el.addEventListener('input', calculate));
+byId('full').addEventListener('click', () => preset(100, 0));
+byId('partial').addEventListener('click', () => preset(50, 0));
+byId('delayed').addEventListener('click', () => preset(100, 6));
+byId('reset').addEventListener('click', () => { fill(origin); calculate(); });
+byId('share').addEventListener('click', () => {
+  const h = C.encodeHash(read());
+  history.replaceState(null, '', h);
+  const done = () => { byId('shareNote').textContent = t.copied; };
+  if (navigator.clipboard) navigator.clipboard.writeText(location.href).then(done, () => { byId('shareNote').textContent = t.copyFail; });
+  else byId('shareNote').textContent = t.copyFail;
+});
+fill(origin);
 calculate();
 </script></body></html>

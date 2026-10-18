@@ -44,6 +44,10 @@ test('budget: net effect on the balance, share of GDP, effect per year', () => {
   assert.match(b.formula, /−12000000000 × \(1 − 25%\) = −9000000000/);
   const rev = I.budget({ cost: -5e9, funded_pct: 0, gdp: 2e12, start: '2026-07-01', impl_pct: 50, delay_months: 0 });
   assert.equal(rev.net, 5e9);
+  // A year of the measure at its implementation share, and that as a share of GDP.
+  assert.equal(rev.annual, 2.5e9);
+  assert.equal(rev.annualPctGdp, 0.125);
+  assert.match(rev.formula, /Annual effect = 5000000000 × 50% = 2500000000/);
   assert.equal(rev.byYear[2026], 1.25e9);
 });
 
@@ -58,10 +62,12 @@ test('company: the PR #82 example, then scaled by the scenario', () => {
   assert.equal(full.revenueDelta, -16);
   assert.equal(full.profitDelta, -4.8);
   assert.equal(full.pctOfProfit, -3.2);
+  assert.equal(full.annual, -4.8);
   const half = I.company(co, { impl_pct: 50, start: '2026-07-01', delay_months: 0 });
   assert.equal(half.byYear[2026], -1.2);
   assert.equal(half.byYear[2027], -2.4);
   assert.equal(half.pctOfProfit, -1.6);
+  assert.equal(half.annual, -2.4);
   assert.match(full.formula, /1000 × 40% × −5% × \(1 − 20%\) = −16/);
 });
 

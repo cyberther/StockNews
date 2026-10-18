@@ -14,6 +14,7 @@ var query = {
   results: function(a, v){ return 'impact_results?select=scenario,subject,engine_version,vals,formula,computed_at&analysis_id=eq.' + id(a) + '&version=eq.' + ver(v) + '&order=computed_at.asc'; },
   accuracy: function(a, v){ return 'analysis_accuracy?select=*&analysis_id=eq.' + id(a) + '&version=eq.' + ver(v); },
   financials: function(t){ return 'company_financials?select=*&ticker=eq.' + sym(t) + '&order=fiscal_year.desc,provenance.asc&limit=6'; },
+  financialsIn: function(ts){ return 'company_financials?select=*&ticker=in.(' + ts.map(function(t){ return '%22' + sym(t) + '%22'; }).join(',') + ')&order=fiscal_year.desc'; },
   exposure: function(){ return 'company_exposure?select=*&limit=2000'; }
 };
 // One request; an error is an error, not an empty list.
@@ -108,6 +109,26 @@ function decodeHash(h){
   return out;
 }
 
-root.HIFImpactClient = { query: query, load: load, latest: latest, frozen: frozen, concerns: concerns,
+// The engine writes its formulas in English; the labels (never the figures) in the app's language.
+var FORMULA = {
+  ro: [['Net effect on the balance', 'Efect net asupra soldului'], ['Annual effect', 'Efect anual'], ['Share of GDP', 'Pondere în PIB'], ['Effect in', 'Efect în'],
+    ['Revenue change', 'Variația veniturilor'], ['Operating profit change', 'Variația rezultatului din exploatare'],
+    ['Share of operating profit', 'Pondere în rezultatul din exploatare'], ['In', 'În']],
+  de: [['Net effect on the balance', 'Nettowirkung auf den Saldo'], ['Annual effect', 'Jahreswirkung'], ['Share of GDP', 'Anteil am BIP'], ['Effect in', 'Wirkung'],
+    ['Revenue change', 'Umsatzänderung'], ['Operating profit change', 'Änderung des Betriebsergebnisses'],
+    ['Share of operating profit', 'Anteil am Betriebsergebnis'], ['In', 'In']]
+};
+function localizeFormula(text, lang){
+  var map = FORMULA[lang];
+  if (!map) return String(text || '');
+  return String(text || '').split('\n').map(function(line){
+    for (var i = 0; i < map.length; i++) if (line.indexOf(map[i][0] + ' ') === 0) return map[i][1] + line.slice(map[i][0].length);
+    return line;
+  }).join('\n');
+}
+var UNITS = { months: { ro: 'luni', de: 'Monate', en: 'months' } };
+function unitLabel(u, lang){ return UNITS[u] ? (UNITS[u][lang] || UNITS[u].en) : u; }
+
+root.HIFImpactClient = { localizeFormula: localizeFormula, unitLabel: unitLabel, query: query, load: load, latest: latest, frozen: frozen, concerns: concerns,
   portfolioEffect: portfolioEffect, calcParams: calcParams, encodeHash: encodeHash, decodeHash: decodeHash };
 })();

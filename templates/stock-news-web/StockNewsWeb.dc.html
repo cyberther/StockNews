@@ -21,7 +21,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-flags.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-markets.js"></script><script src="../shared/hif-refresh.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-policy.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}.m-chips{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch}.m-chips>*{flex:none;white-space:nowrap}}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-flags.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-markets.js"></script><script src="../shared/hif-refresh.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-policy.js"></script><script src="../shared/hif-scenario.js"></script><script src="../shared/hif-impact.js"></script><script src="../shared/hif-impact-client.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}.m-chips{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch}.m-chips>*{flex:none;white-space:nowrap}}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -510,6 +510,12 @@
 <div style="font-size:13px;color:var(--s-mute);margin-top:6px;max-width:70ch;text-wrap:pretty">{{ ui.polNote }}</div></div>
 <a href="{{ polScenarioUrl }}" style="flex:none;color:var(--color-accent);border:1px solid var(--s-rule);padding:9px 12px;text-decoration:none;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase">{{ ui.polScenario }} ↗</a>
 </div>
+<sc-if value="{{ impOn }}" hint-placeholder-val="{{ false }}">
+<div role="tablist" class="m-chips" style="display:flex;flex-wrap:wrap;gap:8px;padding:12px var(--gx);border-bottom:1px solid var(--s-rule)">
+<sc-for list="{{ impTabs }}" as="t" hint-placeholder-count="3"><button role="tab" onClick="{{ t.pick }}" aria-selected="{{ t.on }}" style="min-height:34px;padding:0 14px;border:1px solid var(--color-accent);background:{{ t.bg }};color:{{ t.fg }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ t.label }}</button></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ impTabEvents }}" hint-placeholder-val="{{ true }}">
 <div class="m-chips" style="display:flex;flex-wrap:wrap;gap:8px;padding:14px var(--gx);border-bottom:1px solid var(--s-rule);align-items:center">
 <sc-for list="{{ polSectors }}" as="f" hint-placeholder-count="5">
 <button onClick="{{ f.pick }}" aria-pressed="{{ f.on }}" style="min-height:30px;padding:0 11px;border:1px solid var(--s-rule);background:{{ f.bg }};color:{{ f.fg }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ f.label }}</button>
@@ -518,6 +524,10 @@
 <div style="display:flex;flex-wrap:wrap;gap:10px;padding:12px var(--gx);border-bottom:1px solid var(--s-rule);align-items:center">
 <select value="{{ polTicker }}" onChange="{{ setPolTicker }}" aria-label="{{ ui.polAllCompanies }}" style="min-height:34px;padding:0 10px;background:var(--s-bg);color:var(--s-ink);border:1px solid var(--s-rule);font:inherit;font-size:13px">
 <sc-for list="{{ polTickerOptions }}" as="o" hint-placeholder-count="3"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+</select>
+<input type="search" value="{{ polQText }}" onChange="{{ onPolQ }}" placeholder="{{ ui.impSearch }}" aria-label="{{ ui.impSearch }}" autocomplete="off" style="flex:1 1 200px;min-width:0;max-width:340px;min-height:34px;padding:0 10px;background:var(--s-bg);color:var(--s-ink);border:1px solid var(--s-rule);font:inherit;font-size:13px">
+<select value="{{ polStatus }}" onChange="{{ setPolStatus }}" aria-label="{{ ui.impAllStatuses }}" style="min-height:34px;padding:0 10px;background:var(--s-bg);color:var(--s-ink);border:1px solid var(--s-rule);font:inherit;font-size:13px">
+<sc-for list="{{ polStatusOptions }}" as="o" hint-placeholder-count="3"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
 </select>
 <button onClick="{{ togglePolMine }}" aria-pressed="{{ polMineOn }}" style="min-height:34px;padding:0 12px;border:1px solid var(--color-accent);background:{{ polMineBg }};color:{{ polMineFg }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.polMine }}</button>
 </div>
@@ -539,10 +549,96 @@
 <sc-if value="{{ e.hasSectors }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-ink)">{{ e.sectors }}</div></sc-if>
 <sc-if value="{{ e.hasCompanies }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute)">{{ e.companies }}</div></sc-if>
 <sc-if value="{{ e.hasConcerns }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;border-left:2px solid var(--color-accent);padding-left:8px"><span style="font-family:var(--font-heading);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-accent)">{{ ui.polConcerns }}:</span> {{ e.concerns }}</div></sc-if>
+<sc-if value="{{ e.hasAnalysis }}" hint-placeholder-val="{{ false }}"><div><button onClick="{{ e.openAnalysis }}" style="min-height:30px;padding:0 10px;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.impOpenAnalysis }} →</button></div></sc-if>
 <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--s-mute)"><span>{{ e.certainty }}</span><a href="{{ e.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">{{ e.sourceLabel }}</a></div>
 </article>
 </sc-for>
 </sc-for>
+</sc-if>
+
+<sc-if value="{{ impTabAnalyses }}" hint-placeholder-val="{{ false }}">
+<div style="padding:12px var(--gx);border-bottom:1px solid var(--s-rule);font-size:12px;color:var(--s-mute);max-width:90ch">{{ impDisclaimer }}</div>
+<sc-if value="{{ impLoading }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ ui.impLoading }}</div></sc-if>
+<sc-if value="{{ impHasError }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ impError }}</div></sc-if>
+<sc-if value="{{ impListShow }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ impListEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ ui.impNoAnalyses }}</div></sc-if>
+<sc-for list="{{ impList }}" as="a" hint-placeholder-count="1">
+<article style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px">
+<button onClick="{{ a.open }}" style="text-align:left;background:none;border:0;padding:0;color:var(--s-ink);cursor:pointer;font-family:var(--font-heading);font-weight:700;font-size:17px;line-height:1.3">{{ a.title }} →</button>
+<div style="font-size:12px;color:var(--s-mute)">{{ a.meta }}</div>
+<div style="font-size:12px">{{ a.sectors }} · {{ a.companies }}</div>
+<sc-if value="{{ a.hasConcerns }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;border-left:2px solid var(--color-accent);padding-left:8px"><span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;font-size:11px;color:var(--color-accent)">{{ ui.impTouches }}:</span> {{ a.concerns }}</div></sc-if>
+</article>
+</sc-for>
+</sc-if>
+<sc-if value="{{ impDetailShow }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px">
+<div><button onClick="{{ impBack }}" style="min-height:30px;padding:0 10px;border:1px solid var(--s-rule);background:transparent;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">← {{ ui.impBack }}</button></div>
+<h2 style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:24px;line-height:1.2;text-wrap:pretty">{{ impDTitle }}</h2>
+<div style="font-size:12px;color:var(--s-mute)">{{ impDMeta }}</div>
+<sc-if value="{{ impDHasVersions }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ impDVersions }}" as="v" hint-placeholder-count="2"><button onClick="{{ v.pick }}" aria-pressed="{{ v.on }}" style="min-height:28px;padding:0 9px;border:1px solid var(--s-rule);background:transparent;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ v.label }}</button></sc-for></div></sc-if>
+<div class="m-g1" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+<sc-for list="{{ impDKpis }}" as="k" hint-placeholder-count="3"><div style="border:1px solid var(--s-rule);padding:10px 12px;min-width:0"><div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ k.label }}</div><div style="font-family:var(--font-heading);font-weight:700;font-size:15px;margin-top:4px">{{ k.v }}</div></div></sc-for>
+</div>
+<div style="font-size:13px;border-left:2px solid var(--color-accent);padding-left:8px"><span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;font-size:11px;color:var(--color-accent)">{{ ui.impTouches }}:</span> {{ impDTouches }}</div>
+<sc-if value="{{ impDHasPortfolio }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px"><span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.impPortfolio }}:</span> {{ impDPortfolio }}</div></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ impDCalc }}" as="c" hint-placeholder-count="1"><a href="{{ c.url }}" style="color:var(--color-accent);border:1px solid var(--color-accent);padding:8px 12px;text-decoration:none;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase">{{ c.label }} ↗</a></sc-for></div>
+</div>
+<section style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase">1 · {{ ui.impFacts }}</div><div style="font-size:12px;color:var(--s-mute)">{{ ui.impFactsNote }}</div>
+<sc-for list="{{ impDFacts }}" as="f" hint-placeholder-count="2"><div style="font-size:13px;line-height:1.45;border-left:2px solid var(--s-rule);padding-left:10px">{{ f.text }} <span style="color:var(--s-mute);font-size:12px">· {{ f.date }} ·</span> <a href="{{ f.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent);font-size:12px">{{ f.src }}</a></div></sc-for>
+<div style="font-size:13px"><span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.impFunding }}:</span> {{ impDFunding }}</div>
+<div style="font-size:13px"><span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.impSustain }}:</span> {{ impDSustain }}</div>
+</section>
+<section style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase">2 · {{ ui.impAssumptions }}</div><div style="font-size:12px;color:var(--s-mute)">{{ ui.impAssumptionsNote }}</div>
+<sc-for list="{{ impDAssumptions }}" as="a" hint-placeholder-count="2"><div style="font-size:13px;line-height:1.45;border-left:2px dashed var(--s-rule);padding-left:10px"><b>{{ a.label }}: {{ a.value }}</b> <span style="color:var(--s-mute);font-size:12px">({{ a.range }})</span><div style="color:var(--s-mute);font-size:12px">{{ a.why }}</div></div></sc-for>
+</section>
+<section style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase">3 · {{ ui.impResults }}</div><div style="font-size:12px;color:var(--s-mute)">{{ ui.impResultsNote }}</div>
+<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;min-width:480px;font-size:13px">
+<thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--s-rule);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)"></th><sc-for list="{{ impDScen }}" as="h" hint-placeholder-count="3"><th style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--s-rule);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ h.label }}</th></sc-for></tr></thead>
+<tbody><sc-for list="{{ impDResults }}" as="r" hint-placeholder-count="3"><tr><td style="padding:6px 8px;border-bottom:1px solid var(--s-rule)">{{ r.label }}</td><sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="3"><td style="padding:6px 8px;border-bottom:1px solid var(--s-rule);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap">{{ c.v }}</td></sc-for></tr></sc-for></tbody>
+</table></div>
+<div><button onClick="{{ impToggleFormula }}" aria-expanded="{{ impDFormulaOpen }}" style="min-height:30px;padding:0 10px;border:1px solid var(--s-rule);background:transparent;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.impFormula }}</button></div>
+<sc-if value="{{ impDFormulaOpen }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ impDFormulas }}" as="f" hint-placeholder-count="3"><div style="font-size:12px"><div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ f.label }}</div><div style="white-space:pre-wrap;font-family:ui-monospace,monospace;background:var(--s-panel);padding:8px 10px;overflow-x:auto">{{ f.text }}</div></div></sc-for></sc-if>
+</section>
+<section style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase">4 · {{ ui.impRisks }}</div>
+<sc-for list="{{ impDRisks }}" as="r" hint-placeholder-count="2"><div style="font-size:13px"><span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ r.kind }}:</span> {{ r.text }}</div></sc-for>
+</section>
+<sc-if value="{{ impDHasAccuracy }}" hint-placeholder-val="{{ false }}"><section style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase">{{ ui.impAccuracy }}</div><div style="font-size:12px;color:var(--s-mute)">{{ ui.impAccNote }}</div>
+<sc-for list="{{ impDAccuracy }}" as="r" hint-placeholder-count="1"><div style="font-size:13px">{{ r.text }} · <a href="{{ r.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">↗</a></div></sc-for></section></sc-if>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ impTabCompanies }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ impCoShow }}" hint-placeholder-val="{{ false }}">
+<div style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px">
+<div><button onClick="{{ impCoBack }}" style="min-height:30px;padding:0 10px;border:1px solid var(--s-rule);background:transparent;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">← {{ ui.impBack }}</button></div>
+<h2 style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:24px">{{ impCoTitle }}</h2>
+<sc-if value="{{ impCoHasVia }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--color-accent)">{{ impCoVia }}</div></sc-if>
+<div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.impCoLast12 }}</div>
+<div class="m-g2" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px"><sc-for list="{{ impCoCounts }}" as="c" hint-placeholder-count="4"><div style="border:1px solid var(--s-rule);padding:10px 12px"><div style="font-family:var(--font-heading);font-weight:800;font-size:22px">{{ c.n }}</div><div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ c.label }}</div></div></sc-for></div>
+<div><button onClick="{{ impCoEvents }}" style="min-height:32px;padding:0 12px;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.impCoEvents }} →</button></div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;margin-top:6px">{{ ui.impCoFin }}</div>
+<sc-if value="{{ impCoNoFin }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--s-mute)">{{ ui.impCoNoFin }}</div></sc-if>
+<sc-for list="{{ impCoFinRows }}" as="f" hint-placeholder-count="1"><div style="font-size:13px;line-height:1.5;border-left:2px solid var(--s-rule);padding-left:10px"><b>{{ f.year }}</b> · {{ f.revenue }} · {{ f.op }} · {{ f.net }}<div style="font-size:12px;color:var(--s-mute)">{{ f.geo }} {{ f.note }} · <a href="{{ f.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">{{ f.src }}</a></div></div></sc-for>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;margin-top:6px">{{ ui.impTabAnalyses }}</div>
+<sc-for list="{{ impCoAnalyses }}" as="a" hint-placeholder-count="1"><button onClick="{{ a.open }}" style="text-align:left;background:none;border:0;padding:0;color:var(--color-accent);cursor:pointer;font:inherit;font-size:14px">{{ a.title }} →</button></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ impCoListShow }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:10px;padding:12px var(--gx);border-bottom:1px solid var(--s-rule);align-items:center">
+<input type="search" value="{{ impCoQ }}" onChange="{{ onImpCoQ }}" placeholder="{{ ui.impCoSearch }}" aria-label="{{ ui.impCoSearch }}" autocomplete="off" style="flex:1 1 220px;min-width:0;max-width:360px;min-height:34px;padding:0 10px;background:var(--s-bg);color:var(--s-ink);border:1px solid var(--s-rule);font:inherit;font-size:13px">
+<button onClick="{{ toggleImpCoMine }}" aria-pressed="{{ impCoMineOn }}" style="min-height:34px;padding:0 12px;border:1px solid var(--color-accent);background:{{ impCoMineBg }};color:{{ impCoMineFg }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.impMine }}</button>
+</div>
+<sc-if value="{{ impCoLoading }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ ui.impLoading }}</div></sc-if>
+<sc-if value="{{ impCoEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ ui.impCoNone }}</div></sc-if>
+<sc-for list="{{ impCoList }}" as="c" hint-placeholder-count="3">
+<button onClick="{{ c.open }}" style="display:grid;gap:3px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--s-rule);padding:12px var(--gx);color:var(--s-ink);cursor:pointer;font:inherit">
+<span><b style="font-family:var(--font-heading)">{{ c.ticker }}</b> <span style="color:var(--s-mute);font-size:13px">{{ c.name }}</span> <span style="color:var(--color-accent);font-size:12px">{{ c.mine }}</span></span>
+<span style="font-size:12px;color:var(--s-mute)">{{ c.counts }}</span>
+</button>
+</sc-for>
+</sc-if>
+</sc-if>
 </div>
 </sc-if>
 
@@ -869,6 +965,7 @@
 <div style="padding:20px 0 18px"><div style="font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ ui.alertTypes }}</div><div style="font-size:13px;color:var(--s-mute);margin-top:5px;max-width:64ch;text-wrap:pretty">{{ ui.alertsWhat }}</div></div>
 <sc-if value="{{ pushRow.show }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ ui.pushDevice }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px;text-wrap:pretty">{{ pushRow.note }}</div></div><sc-if value="{{ pushRow.canAct }}" hint-placeholder-val="{{ true }}"><button onClick="{{ pushRow.act }}" style="flex:none;min-height:36px;padding:0 14px;background:{{ pushRow.bg }};border:1px solid var(--color-accent);color:{{ pushRow.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ pushRow.actionLabel }}</button></sc-if></div>
+<sc-if value="{{ pushRow.policyShow }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ ui.impAlerts }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px;text-wrap:pretty">{{ ui.impAlertsNote }}</div></div><button onClick="{{ pushRow.policyToggle }}" aria-pressed="{{ pushRow.policyOn }}" style="flex:none;min-height:36px;padding:0 14px;background:{{ pushRow.policyBg }};border:1px solid var(--color-accent);color:{{ pushRow.policyInk }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ pushRow.policyLabel }}</button></div></sc-if>
 <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--s-rule)"><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">{{ ui.pushTest }}</div><div aria-live="polite" style="font-size:12px;color:var(--s-mute);margin-top:3px;text-wrap:pretty">{{ pushRow.testNote }}</div></div><button onClick="{{ pushRow.test }}" disabled="{{ pushRow.testBusy }}" style-hover="border-color:var(--color-accent)" style="flex:none;min-height:36px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ pushRow.testLabel }}</button></div>
 </sc-if>
 </div>
@@ -1726,7 +1823,13 @@ class Component extends DCLogic {
   // Push alerts on this device (real accounts only; hidden until the server has a key).
   refreshPush() {
     if (!window.HIFPush) return;
-    window.HIFPush.status().then(st => { if (st !== this.state.devicePush) this.setState({ devicePush:st }); }).catch(() => {});
+    window.HIFPush.status().then(st => {
+      if (st !== this.state.devicePush) this.setState({ devicePush:st });
+      // The policy alerts switch of this device (Phase C), when alerts are on here.
+      if (st === 'on' && flagOn('policyAlerts') && window.HIFPush.policyAlerts)
+        window.HIFPush.policyAlerts().then(v => this.setState({ devicePolicy: v })).catch(() => {});
+      else if (this.state.devicePolicy != null) this.setState({ devicePolicy: null });
+    }).catch(() => {});
   }
   togglePushDevice() {
     const P = window.HIFPush; if (!P || this.state.pushBusy) return;
@@ -1863,7 +1966,7 @@ class Component extends DCLogic {
       if (this.state.feedTab === 'bvb' && !this._bvbAsked) { this._bvbAsked = true; this.syncBvb(); }
       if (this.state.feedTab === 'eu' && !this._euAsked) { this._euAsked = true; this.syncEu(); }
     }
-    if (this.state.screen === 'policy' && this.state.session) this.syncPolicy();
+    if (this.state.screen === 'policy' && this.state.session) { this.syncPolicy(); this.syncImpact(); }
     const pfSig = this.state.screen === 'portfolio' ? (this.state.pfRange || '1mo') + '|' + held : '';
     if (pfSig && pfSig !== this._pfSig) this.syncPortfolioCharts();
     this._pfSig = pfSig;
@@ -1999,6 +2102,9 @@ class Component extends DCLogic {
     const rows = s.policyRows || [], follows = s.follows || [], positions = s.positions || {};
     const mine = !!s.policyMine;
     const set = patch => this.setState(Object.assign({ policyRows: null }, patch));
+    // Events an impact analysis covers (Phase C): their cards link to it.
+    const byEvent = {};
+    if (flagOn('impact') && window.HIFImpactClient && s.impRows) window.HIFImpactClient.latest(s.impRows).forEach(a => (a.events || []).forEach(id => { byEvent[id] = a; }));
     const tone = st => st === 'adopted' || st === 'in_force' || st === 'implemented' ? 'var(--color-accent)' : st === 'stopped' ? 'var(--s-faint)' : 'var(--s-mute)';
     const cards = rows.map(e => {
       const hits = P.affects(e, follows, positions);
@@ -2017,14 +2123,26 @@ class Component extends DCLogic {
         figures: (e.figures || []).map(f => f.text).join(' · '), hasFigures: !!(e.figures || []).length,
         concerns: hits.map(h => h.ticker.replace(/\.RO$/, '') + ' — ' + h.via.map(v => v === 'portfolio' ? (u.polViaPortfolio || 'in your portfolio') : (u.polViaFollowing || 'you follow it')).join(', ')
           + (h.why === 'sector' ? ' (' + (u.polBySector || 'via sector') + ' ' + P.sectorLabel(h.sector, lang) + ')' : ' (' + (u.polMentioned || 'named') + ')')).join(' · '),
-        hasConcerns: hits.length > 0 };
+        hasConcerns: hits.length > 0,
+        hasAnalysis: !!byEvent[e.id], openAnalysis: () => byEvent[e.id] && this.setState({ polTab: 'analyses', impSel: { id: byEvent[e.id].id, version: byEvent[e.id].version } }) };
     }).filter(c => !mine || c.hasConcerns);
     const days = [];
     cards.forEach(c => { const d = days[days.length - 1]; if (d && d.day === c.day) d.items.push(c); else days.push({ day: c.day, items: [c] }); });
     const fmtDay = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString(this.appLocale, { weekday:'short', day:'numeric', month:'long', year:'numeric', timeZone:'UTC' });
-    const tickers = [...new Set([].concat(follows, Object.keys(positions)).filter(t => /\.RO$/.test(t)))].sort();
-    return {
+    const tickers = [...new Set([].concat(follows, Object.keys(positions), s.policyTicker ? [s.policyTicker] : []).filter(t => /\.RO$/.test(t)))].sort();
+    const statuses = ['statement', 'draft', 'adopted', 'in_force', 'implemented', 'stopped'];
+    return Object.assign({
       isPolicy: true,
+      polQText: s.policyQText != null ? s.policyQText : (s.policyQ || ''),
+      onPolQ: e => {
+        const v = e && e.target ? e.target.value : '';
+        this.setState({ policyQText: v });
+        clearTimeout(this._polQT);
+        this._polQT = setTimeout(() => { if ((this.state.policyQ || '') !== v.trim()) set({ policyQ: v.trim() }); }, 450);
+      },
+      polStatus: s.policyStatus || '',
+      polStatusOptions: [{ value: '', label: u.impAllStatuses || 'Any status' }].concat(statuses.map(v => ({ value: v, label: P.statusLabel(v, lang) }))),
+      setPolStatus: e => set({ policyStatus: e && e.target ? e.target.value : '' }),
       polDays: days.map(d => ({ key: d.day, label: fmtDay(d.day), items: d.items })),
       polLoading: !s.policyRows && !s.policyErr, polError: s.policyErr || '', polHasError: !!s.policyErr,
       polEmpty: !!s.policyRows && !cards.length, polEmptyText: mine ? (u.polMineEmpty || '') : (u.polEmpty || ''),
@@ -2037,7 +2155,177 @@ class Component extends DCLogic {
       polMineOn: mine, togglePolMine: () => this.setState({ policyMine: !mine }),
       polMineBg: mine ? 'var(--color-accent)' : 'transparent', polMineFg: mine ? 'var(--s-on-accent)' : 'var(--s-ink)',
       polScenarioUrl: './intelligence.html'
+    }, this.impactView(u, lang));
+  }
+  // Positions in lei with their value at the last quote (for the analyses' portfolio effect).
+  impHoldings() {
+    const s = this.state, pos = s.positions || {}, q = s.quotes || {};
+    return Object.keys(pos).filter(t => /\.RO$/.test(t)).map(t => {
+      const price = q[t] && Number.isFinite(q[t].last) ? q[t].last : null, shares = parseFloat(pos[t] && pos[t].shares);
+      return { ticker: t, currency: 'RON', value: price != null && shares > 0 ? price * shares : null };
+    });
+  }
+  // Phase C (flag impact): the Policy screen's tabs; the impact analyses with their facts,
+  // assumptions, frozen model results and risks kept apart; the companies' exposure; the
+  // calculator link. Every figure shown is a fact (with its source), an assumption (with why
+  // and its range) or a result (with its formula).
+  impactView(u, lang) {
+    const s = this.state, C = window.HIFImpactClient, I = window.HIFImpact;
+    if (!flagOn('impact') || !C || !I) return { impOn: false, impTabEvents: true };
+    const tab = s.polTab || 'events', follows = s.follows || [], positions = s.positions || {};
+    const short = t => String(t || '').replace(/\.RO$/, '');
+    const nf = (n, d) => new Intl.NumberFormat(this.appLocale, { maximumFractionDigits: d == null ? 2 : d }).format(n).replace('-', '−');
+    const lei = n => n == null || !Number.isFinite(Number(n)) ? '—' : Math.abs(n) >= 1e9 ? nf(n / 1e9) + ' ' + u.impBn + ' ' + u.impLei
+      : Math.abs(n) >= 1e6 ? nf(n / 1e6, 1) + ' ' + u.impMn + ' ' + u.impLei : nf(n, 0) + ' ' + u.impLei;
+    const pct = (n, d) => n == null || !Number.isFinite(Number(n)) ? 'n/a' : (n > 0 ? '+' : '') + nf(n, d == null ? 1 : d) + '%';
+    const dmy = iso => iso ? new Date(iso + 'T12:00:00Z').toLocaleDateString(this.appLocale, { day:'numeric', month:'short', year:'numeric', timeZone:'UTC' }) : '';
+    const via = v => v.map(x => x === 'portfolio' ? u.polViaPortfolio : u.polViaFollowing).join(', ');
+    const tabBtn = (id, label) => ({ key: id, label, on: tab === id, bg: tab === id ? 'var(--color-accent)' : 'transparent',
+      fg: tab === id ? 'var(--s-on-accent)' : 'var(--s-ink)', pick: () => this.setState({ polTab: id }) });
+    const list = s.impRows ? C.latest(s.impRows) : null;
+    const scLabel = { full: u.impScFull, partial: u.impScPartial, delayed: u.impScDelayed };
+    const approved = a => ({ yes: u.impYes, no: u.impNo })[a] || u.impUnknown;
+    const out = {
+      impOn: true, impTabs: [tabBtn('events', u.impTabEvents), tabBtn('analyses', u.impTabAnalyses), tabBtn('companies', u.impTabCompanies)],
+      impTabEvents: tab === 'events', impTabAnalyses: tab === 'analyses', impTabCompanies: tab === 'companies',
+      impLoading: !s.impRows && !s.impErr, impHasError: !!s.impErr, impError: s.impErr || '', impDisclaimer: u.impDisclaimer
     };
+
+    // Analyses: the list, or one analysis.
+    const row = s.impSel && s.impRows ? s.impRows.find(a => a.id === s.impSel.id && a.version === s.impSel.version) : null;
+    out.impListShow = tab === 'analyses' && !row;
+    out.impListEmpty = !!list && !list.length;
+    out.impList = (list || []).map(a => {
+      const A = a.body || {}, hits = C.concerns(A, follows, positions);
+      return { key: a.id, title: a.title, meta: u.impVersion + ' ' + a.version + ' · ' + u.impPublished + ' ' + dmy(a.published_at) + ' · ' + u.impApproved + ': ' + approved((A.budget || {}).approved),
+        companies: (A.companies || []).map(c => short(c.ticker)).join(', '), sectors: (a.sectors || []).map(id => id === 'fiscal-general' ? u.polGeneral : window.HIFPolicy.sectorLabel(id, lang)).join(' · '),
+        concerns: hits.map(h => short(h.ticker) + ' (' + via(h.via) + ')').join(' · '), hasConcerns: hits.length > 0,
+        open: () => this.setState({ impSel: { id: a.id, version: a.version }, impFormula: '' }) };
+    });
+    out.impDetailShow = tab === 'analyses' && !!row;
+    if (row) {
+      const A = row.body, key = row.id + ':' + row.version, fz = (s.impRes || {})[key], fin = (s.impFin || {})[key] || [];
+      const val = k => ((A.assumptions || []).find(x => x.key === k) || {}).value;
+      const start = val('start'), end = val('end'), y0 = Number(String(start).slice(0, 4));
+      const comps = (A.companies || []).map(c => c.ticker), sc = I.SCENARIOS;
+      const show = (a, v) => a.unit === 'RON' ? lei(v) : a.unit === 'date' ? dmy(v) : nf(v) + (a.unit === '%' ? '%' : a.unit ? ' ' + C.unitLabel(a.unit, lang) : '');
+      const cell = f => sc.map(k => ({ key: k, v: fz && fz[k] ? f(fz[k]) : '…' }));
+      const full = (fz && fz.full) || {}, b = full.budget;
+      const hits = C.concerns(A, follows, positions);
+      const pe = fz ? C.portfolioEffect(fz, this.impHoldings(), 'full') : null;
+      const allV = (s.impRows || []).filter(a => a.id === row.id).map(a => a.version).sort((x, y) => y - x);
+      Object.assign(out, {
+        impDTitle: row.title, impBack: () => this.setState({ impSel: null }),
+        impDMeta: u.impVersion + ' ' + row.version + ' · ' + u.impPublished + ' ' + dmy(row.published_at) + (b ? ' · ' + u.impEngine + ' ' + b.engine_version : ''),
+        impDVersions: allV.length > 1 ? allV.map(v => ({ key: String(v), label: 'v' + v, on: v === row.version, pick: () => this.setState({ impSel: { id: row.id, version: v } }) })) : [],
+        impDHasVersions: allV.length > 1,
+        impDKpis: [
+          { key: 'ap', label: u.impApproved, v: approved((A.budget || {}).approved) },
+          { key: 'bal', label: u.impBalance + ' (' + u.impScFull.toLowerCase() + ')', v: b ? lei(b.annual) + ' ' + u.impPerYear + ' · ' + pct(b.annualPctGdp, 2) + ' ' + u.impOfGdp : '…' },
+          { key: 'in', label: u.impInForce, v: dmy(start) + (end ? ' – ' + dmy(end) : '') }
+        ],
+        impDTouches: hits.length ? hits.map(h => short(h.ticker) + ' (' + via(h.via) + '): ' + (full[h.ticker] ? pct(full[h.ticker].pctOfProfit) + ' ' + u.impOfOpProfit : u.impNoFigures)).join(' · ') : u.impTouchesNone,
+        impDPortfolio: !pe ? '' : pe.weighted != null ? pct(pe.weighted) + ' · ' + pe.formula + ' — ' + u.impPortfolioNote : pe.reason === 'no_values' ? u.impNoQuotes : u.impNotHeld,
+        impDHasPortfolio: !!pe && Object.keys(positions).some(t => comps.indexOf(t) >= 0),
+        impDFacts: (A.facts || []).map(f => ({ key: f.key, text: f.text, url: f.source_url, date: dmy(f.source_date), src: u.polSource + ' ↗' })),
+        impDFunding: (A.budget || {}).funding_source || u.impUnknown,
+        impDSustain: ((A.budget || {}).recurring ? u.impRecurring : u.impTemporary) + '. ' + ((A.budget || {}).sustainability_note || ''),
+        impDAssumptions: (A.assumptions || []).map(a => ({ key: a.key, label: a.label, value: show(a, a.value), why: a.why, range: u.impRange + ': ' + show(a, a.range[0]) + ' – ' + show(a, a.range[1]) })),
+        impDScen: sc.map(k => ({ key: k, label: scLabel[k] })),
+        impDResults: !fz ? [] : [
+          { key: 'bal', label: u.impBalance + ' (' + u.impPerYear + ')', cells: cell(r => r.budget ? lei(r.budget.annual) : '—') },
+          { key: 'gdp', label: '% ' + u.impOfGdp, cells: cell(r => r.budget ? pct(r.budget.annualPctGdp, 2) : '—') },
+          { key: 'b0', label: u.impBalance + ': ' + u.impEffectIn + ' ' + y0, cells: cell(r => r.budget ? lei(r.budget.byYear[y0]) : '—') },
+          { key: 'b1', label: u.impBalance + ': ' + u.impEffectIn + ' ' + (y0 + 1), cells: cell(r => r.budget ? lei(r.budget.byYear[y0 + 1]) : '—') }
+        ].concat([].concat.apply([], comps.map(t => [
+          { key: t + 'p', label: short(t) + ': ' + u.impOfOpProfit, cells: cell(r => r[t] ? pct(r[t].pctOfProfit) : u.impNoFigures) },
+          { key: t + 'y', label: short(t) + ': ' + u.impEffectIn + ' ' + y0, cells: cell(r => r[t] ? lei(r[t].byYear[y0]) : u.impNoFigures) }
+        ]))),
+        impDFormulaOpen: !!s.impFormula, impToggleFormula: () => this.setState({ impFormula: s.impFormula ? '' : 'on' }),
+        impDFormulas: !fz ? [] : sc.map(k => ({ key: k, label: scLabel[k],
+          text: C.localizeFormula([fz[k] && fz[k].budget ? fz[k].budget.formula : ''].concat(comps.map(t => fz[k] && fz[k][t] ? short(t) + '\n' + fz[k][t].formula : '')).filter(Boolean).join('\n\n'), lang) })),
+        impDRisks: (A.risks || []).map((r, i) => ({ key: String(i), kind: u['impRisk_' + r.kind] || r.kind, text: r.text })),
+        impDCalc: comps.map(t => ({ key: t, label: u.impCalc + ': ' + short(t), url: './intelligence.html' + C.encodeHash(C.calcParams(A, t, fin)) })),
+        impDAccuracy: ((s.impAcc || {})[key] || []).map(r => ({ key: [r.scenario, r.subject, r.period].join(':'),
+          text: (r.subject === 'budget' ? u.impBalance : short(r.subject)) + ' ' + r.period + ' (' + scLabel[r.scenario] + '): ' + u.impEstimated + ' ' + lei(Number(r.estimated)) + ', ' + u.impObserved + ' ' + lei(Number(r.observed))
+            + (r.rel_error != null ? ' (' + pct(Number(r.rel_error) * 100) + ')' : '') + ' · ' + (r.direction ? u.impDirOk : u.impDirBad), url: r.source_url })),
+        impDHasAccuracy: !!((s.impAcc || {})[key] || []).length
+      });
+    }
+
+    // Companies: search, counts, one company.
+    if (tab === 'companies') {
+      const B = window.HIFBVB, fold = x => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const q = fold(s.impCoQ), ex = s.impExp || [];
+      const mineOnly = !!s.impCoMine, mineSet = new Set([].concat(follows, Object.keys(positions)));
+      out.impCoQ = s.impCoQ || '';
+      out.onImpCoQ = e => this.setState({ impCoQ: e && e.target ? e.target.value : '' });
+      out.impCoMineOn = mineOnly; out.toggleImpCoMine = () => this.setState({ impCoMine: !mineOnly });
+      out.impCoMineBg = mineOnly ? 'var(--color-accent)' : 'transparent'; out.impCoMineFg = mineOnly ? 'var(--s-on-accent)' : 'var(--s-ink)';
+      out.impCoLoading = !s.impExp;
+      const rows = ex.filter(r => /\.RO$/.test(r.ticker) && (!mineOnly || mineSet.has(r.ticker)) && (!q || fold(r.ticker).indexOf(q) >= 0 || fold(B && B.name(r.ticker)).indexOf(q) >= 0))
+        .sort((x, y) => (y.analyses * 100 + y.mentioned * 10 + y.adopted) - (x.analyses * 100 + x.mentioned * 10 + x.adopted) || x.ticker.localeCompare(y.ticker)).slice(0, 80);
+      out.impCoList = s.impCo ? [] : rows.map(r => {
+        const v = C.concerns({ companies: [{ ticker: r.ticker }] }, follows, positions)[0];
+        return { key: r.ticker, ticker: short(r.ticker), name: (B && B.name(r.ticker)) || '', mine: v ? via(v.via) : '', isMine: !!v,
+          counts: r.mentioned + ' ' + u.impCoMentioned + ' · ' + r.via_sector + ' ' + u.impCoSector + ' · ' + r.adopted + ' ' + u.impCoAdopted + ' · ' + r.analyses + ' ' + u.impCoAnalyses,
+          open: () => this.setState({ impCo: r.ticker }) };
+      });
+      out.impCoEmpty = !!s.impExp && !s.impCo && !rows.length;
+      out.impCoShow = !!s.impCo; out.impCoListShow = !s.impCo;
+      if (s.impCo) {
+        const t = s.impCo, r = ex.find(x => x.ticker === t) || { mentioned: 0, via_sector: 0, adopted: 0, analyses: 0 };
+        const fin = ((s.impCoFin || {})[t] || []).filter(f => f.verified);
+        const v = C.concerns({ companies: [{ ticker: t }] }, follows, positions)[0];
+        Object.assign(out, {
+          impCoTitle: short(t) + ((B && B.name(t)) ? ' · ' + B.name(t) : ''), impCoBack: () => this.setState({ impCo: null }),
+          impCoVia: v ? via(v.via) : '', impCoHasVia: !!v,
+          impCoCounts: [{ key: 'm', n: r.mentioned, label: u.impCoMentioned }, { key: 's', n: r.via_sector, label: u.impCoSector }, { key: 'a', n: r.adopted, label: u.impCoAdopted }, { key: 'n', n: r.analyses, label: u.impCoAnalyses }],
+          impCoFinRows: fin.map(f => ({ key: f.fiscal_year + f.provenance, year: String(f.fiscal_year), revenue: u.impCoRevenue + ': ' + lei(Number(f.revenue)), op: u.impCoOp + ': ' + lei(Number(f.operating_profit)),
+            net: f.net_profit != null ? u.impCoNet + ': ' + lei(Number(f.net_profit)) : '', geo: [f.geo_ro_pct, f.geo_eu_pct, f.geo_other_pct].some(x => x != null) ? u.impCoGeo + ': RO ' + (f.geo_ro_pct ?? '—') + '% · UE ' + (f.geo_eu_pct ?? '—') + '% · ' + (f.geo_other_pct ?? '—') + '%' : '',
+            url: f.source_url, src: u.polSource + ' ↗', note: u.impCoVerified })),
+          impCoNoFin: !fin.length && !!(s.impCoFin || {})[t],
+          impCoAnalyses: (list || []).filter(a => ((a.body || {}).companies || []).some(c => c.ticker === t)).map(a => ({ key: a.id, title: a.title, open: () => this.setState({ polTab: 'analyses', impSel: { id: a.id, version: a.version } }) })),
+          impCoEvents: () => this.setState({ polTab: 'events', policyTicker: t, policyRows: null })
+        });
+      }
+    }
+    return out;
+  }
+  // Phase C data: the analyses (once), one analysis' results, accuracy and figures when it is
+  // opened, the exposure counts when the Companies tab opens, one company's figures.
+  syncImpact() {
+    const C = window.HIFImpactClient, s = this.state;
+    if (!flagOn('impact') || !C || !s.session) return;
+    const err = () => this.copy.impError || 'Could not load';
+    if (!s.impRows && !this._impAsk) {
+      this._impAsk = true;
+      C.load(C.query.analyses()).then(rows => this.setState({ impRows: rows || [], impErr: '' }))
+        .catch(() => { this._impAsk = false; this.setState({ impRows: [], impErr: err() }); });
+    }
+    const sel = s.impSel, row = sel && s.impRows && s.impRows.find(a => a.id === sel.id && a.version === sel.version);
+    if (row) {
+      const key = row.id + ':' + row.version;
+      if (!(s.impRes || {})[key] && this._impResKey !== key) {
+        this._impResKey = key;
+        const tickers = ((row.body || {}).companies || []).map(c => c.ticker);
+        Promise.all([C.load(C.query.results(row.id, row.version)), C.load(C.query.accuracy(row.id, row.version)).catch(() => []),
+          tickers.length ? C.load(C.query.financialsIn(tickers)).catch(() => []) : Promise.resolve([])])
+          .then(([res, acc, fin]) => this.setState(st => ({ impRes: Object.assign({}, st.impRes, { [key]: C.frozen(res || []) }),
+            impAcc: Object.assign({}, st.impAcc, { [key]: acc || [] }), impFin: Object.assign({}, st.impFin, { [key]: fin || [] }) })))
+          .catch(() => { this._impResKey = ''; this.setState({ impErr: err() }); });
+      }
+    }
+    if (s.polTab === 'companies' && !s.impExp && !this._impExpAsk) {
+      this._impExpAsk = true;
+      C.load(C.query.exposure()).then(rows => this.setState({ impExp: rows || [] }))
+        .catch(() => { this._impExpAsk = false; this.setState({ impExp: [], impErr: err() }); });
+    }
+    if (s.impCo && !(s.impCoFin || {})[s.impCo] && this._impCoKey !== s.impCo) {
+      const t = s.impCo; this._impCoKey = t;
+      C.load(C.query.financials(t)).then(rows => this.setState(st => ({ impCoFin: Object.assign({}, st.impCoFin, { [t]: rows || [] }) })))
+        .catch(() => { this._impCoKey = ''; });
+    }
   }
   // The Policy screen (templates/shared/hif-policy.js): official events for the chosen sector
   // and company, one request; loaded when the screen opens or a filter changes (the data
@@ -2045,11 +2333,11 @@ class Component extends DCLogic {
   syncPolicy() {
     const P = window.HIFPolicy, s = this.state;
     if (!flagOn('policy') || !P || !s.session) return;
-    const sig = (s.policySector || '') + '|' + (s.policyTicker || '');
+    const sig = [s.policySector || '', s.policyTicker || '', s.policyQ || '', s.policyStatus || ''].join('|');
     if (this._polSig === sig && s.policyRows) return;
     this._polSig = sig;
     this.setState({ policyErr:'' });
-    P.load({ sector: s.policySector, ticker: s.policyTicker })
+    P.load({ sector: s.policySector, ticker: s.policyTicker, q: s.policyQ, status: s.policyStatus })
       .then(rows => this.setState({ policyRows: rows || [], policyErr:'' }))
       .catch(() => { this._polSig = ''; this.setState({ policyErr: this.copy.polError || 'Could not load', policyRows: [] }); });
   }
@@ -4179,6 +4467,13 @@ class Component extends DCLogic {
           note: ({ on:u.pushDeviceOn, off:u.pushDeviceOff, denied:u.pushDeviceDenied, 'ios-install':u.pushDeviceIos, unsupported:u.pushDeviceNo })[dp] || '',
           canAct: dp === 'on' || dp === 'off', actionLabel: s.pushBusy ? '…' : (dp === 'on' ? u.pushTurnOff : u.pushTurnOn),
           act: () => this.togglePushDevice(),
+          policyShow: dp === 'on' && typeof s.devicePolicy === 'boolean', policyOn: s.devicePolicy === true,
+          policyLabel: s.devicePolicy ? (u.pushOn || 'On') : (u.pushOff || 'Off'),
+          policyBg: s.devicePolicy ? 'var(--color-accent)' : 'transparent', policyInk: s.devicePolicy ? 'var(--s-on-accent)' : 'var(--color-accent)',
+          policyToggle: () => {
+            const P = window.HIFPush; if (!P || !P.policyAlerts) return;
+            P.policyAlerts(!s.devicePolicy).then(v => { if (v !== null) this.setState({ devicePolicy: v }); else this.flash((u.pushFailed || 'Could not save').toUpperCase()); }).catch(() => {});
+          },
           bg: dp === 'on' ? 'transparent' : 'var(--color-accent)', ink: dp === 'on' ? 'var(--color-accent)' : 'var(--s-on-accent)',
           // A test alert to every device of the account (also checks a phone from the computer).
           testBusy: !!s.pushTestBusy, testLabel: s.pushTestBusy ? '…' : (u.pushTestSend || 'Send a test'),

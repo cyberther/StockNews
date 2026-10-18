@@ -54,10 +54,11 @@ function budget(p){
     byYear[y] = round(net * impl / 100 * m / 12);
     lines.push('Effect in ' + y + ' = ' + fmt(net) + ' × ' + fmt(impl) + '% × ' + fmt(m) + '/12 = ' + fmt(byYear[y]));
   });
-  var pctGdp = round(net / gdp * 100);
-  return { net: net, pctGdp: pctGdp, byYear: byYear,
+  var pctGdp = round(net / gdp * 100), annual = round(net * impl / 100), annualPctGdp = round(annual / gdp * 100);
+  return { net: net, pctGdp: pctGdp, annual: annual, annualPctGdp: annualPctGdp, byYear: byYear,
     formula: 'Net effect on the balance = ' + fmt(-cost) + ' × (1 − ' + fmt(funded) + '%) = ' + fmt(net) + '\n' +
-      'Share of GDP = ' + fmt(net) + ' / ' + fmt(gdp) + ' = ' + fmt(pctGdp) + '%\n' + lines.join('\n') };
+      'Annual effect = ' + fmt(net) + ' × ' + fmt(impl) + '% = ' + fmt(annual) + '\n' +
+      'Share of GDP = ' + fmt(annual) + ' / ' + fmt(gdp) + ' = ' + fmt(annualPctGdp) + '%\n' + lines.join('\n') };
 }
 
 function company(c, s){
@@ -74,7 +75,7 @@ function company(c, s){
     lines.push('In ' + y + ' = ' + fmt(profitDelta) + ' × ' + fmt(impl) + '% × ' + fmt(m) + '/12 = ' + fmt(byYear[y]));
   });
   var pct = op === 0 ? null : round(runRate / Math.abs(op) * 100);
-  return { revenueDelta: revenueDelta, profitDelta: profitDelta, pctOfProfit: pct, byYear: byYear,
+  return { revenueDelta: revenueDelta, profitDelta: profitDelta, annual: runRate, pctOfProfit: pct, byYear: byYear,
     formula: 'Revenue change = ' + fmt(rev) + ' × ' + fmt(exp) + '% × ' + fmt(shock) + '% × (1 − ' + fmt(mit) + '%) = ' + fmt(revenueDelta) + '\n' +
       'Operating profit change = ' + fmt(revenueDelta) + ' × ' + fmt(con) + '% = ' + fmt(profitDelta) + '\n' +
       'Share of operating profit = ' + fmt(profitDelta) + ' × ' + fmt(impl) + '% / |' + fmt(op) + '| = ' + (pct === null ? 'n/a' : fmt(pct) + '%') + '\n' +

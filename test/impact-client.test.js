@@ -15,6 +15,8 @@ test('one request per list, exact PostgREST queries', () => {
   assert.equal(C.query.accuracy('sample-measure', 1), 'analysis_accuracy?select=*&analysis_id=eq.sample-measure&version=eq.1');
   assert.equal(C.query.financials('SNP.RO'), 'company_financials?select=*&ticker=eq.SNP.RO&order=fiscal_year.desc,provenance.asc&limit=6');
   assert.equal(C.query.exposure(), 'company_exposure?select=*&limit=2000');
+  assert.equal(C.query.financialsIn(['SNP.RO', 'M.RO']), 'company_financials?select=*&ticker=in.(%22SNP.RO%22,%22M.RO%22)&order=fiscal_year.desc');
+  assert.throws(() => C.query.financialsIn(['SNP.RO', 'a)b']), /ticker/);
   assert.throws(() => C.query.results('x);drop', 1), /id/);
   assert.throws(() => C.query.financials('snp&x=1'), /ticker/);
 });
@@ -67,4 +69,21 @@ test('the calculator link: parameters in the hash, anything invalid dropped', ()
   assert.deepEqual(C.decodeHash(h), p);
   assert.deepEqual(C.decodeHash('#funded_pct=140&exposure=abc&start=2026-13-45&t=<b>&a=X Y&shock=-5&evil=1'), { shock: -5 });
   assert.deepEqual(C.decodeHash(''), {});
+});
+
+test('formulas read in the app language; figures untouched', () => {
+  const f = 'Net effect on the balance = −100 × (1 − 0%) = −100\nShare of GDP = −100 / 1000 = −10%\nEffect in 2026 = −100 × 100% × 12/12 = −100\nRevenue change = 1 × 2% = 3\nOperating profit change = 3 × 30% = 0.9\nShare of operating profit = 0.9 × 100% / |9| = 10%\nIn 2026 = 0.9 × 100% × 12/12 = 0.9';
+  const ro = C.localizeFormula(f, 'ro');
+  assert.match(ro, /^Efect net asupra soldului = −100 × \(1 − 0%\) = −100$/m);
+  assert.match(ro, /^Pondere în PIB = /m);
+  assert.match(ro, /^Efect în 2026 = /m);
+  assert.match(ro, /^Variația veniturilor = 1 × 2% = 3$/m);
+  assert.match(ro, /^Variația rezultatului din exploatare = /m);
+  assert.match(ro, /^Pondere în rezultatul din exploatare = /m);
+  assert.match(ro, /^În 2026 = 0\.9/m);
+  assert.match(C.localizeFormula(f, 'de'), /^Nettowirkung auf den Saldo = /m);
+  assert.equal(C.localizeFormula(f, 'en'), f);
+  assert.equal(C.unitLabel('months', 'ro'), 'luni');
+  assert.equal(C.unitLabel('months', 'de'), 'Monate');
+  assert.equal(C.unitLabel('l', 'ro'), 'l');
 });
