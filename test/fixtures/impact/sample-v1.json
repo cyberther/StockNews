@@ -1,0 +1,33 @@
+{
+  "id": "sample-measure",
+  "version": 1,
+  "published_at": "2026-10-19",
+  "title": "Măsură de test",
+  "policy": "sample-policy",
+  "events": ["cdep:1"],
+  "facts": [
+    { "key": "rate", "text": "Cota crește la 21%.", "value": 21, "unit": "%", "source_url": "https://www.cdep.ro/x", "source_date": "2026-07-01" }
+  ],
+  "budget": { "approved": "yes", "approved_fact": "rate", "funding_source": null, "funding_fact": null,
+              "recurring": true, "horizon_years": null, "sustainability_note": "Măsură permanentă." },
+  "assumptions": [
+    { "key": "cost", "label": "Cost anual", "value": 12000000000, "unit": "RON", "why": "test", "range": [0, 20000000000] },
+    { "key": "funded_pct", "label": "Finanțat", "value": 25, "unit": "%", "why": "test", "range": [0, 100] },
+    { "key": "gdp", "label": "PIB", "value": 2000000000000, "unit": "RON", "why": "test", "range": [1000000000000, 3000000000000] },
+    { "key": "start", "label": "Intrare în vigoare", "value": "2026-01-01", "unit": "date", "why": "test", "range": ["2026-01-01", "2027-12-31"] },
+    { "key": "partial_pct", "label": "Implementare parțială", "value": 50, "unit": "%", "why": "test", "range": [0, 100] },
+    { "key": "delay_months", "label": "Întârziere", "value": 6, "unit": "months", "why": "test", "range": [0, 24] },
+    { "key": "exp", "label": "Expunere", "value": 40, "unit": "%", "why": "test", "range": [0, 100] },
+    { "key": "shock", "label": "Șoc", "value": -5, "unit": "%", "why": "test", "range": [-100, 100] },
+    { "key": "mit", "label": "Atenuare", "value": 20, "unit": "%", "why": "test", "range": [0, 100] },
+    { "key": "contrib", "label": "Contribuție", "value": 30, "unit": "%", "why": "test", "range": [0, 100] }
+  ],
+  "sectors": ["fiscal-general"],
+  "companies": [
+    { "ticker": "M.RO", "why": "test", "exposure_pct": { "ref": "exp" }, "shock_pct": { "ref": "shock" },
+      "mitigation_pct": { "ref": "mit" }, "contribution_pct": { "ref": "contrib" } },
+    { "ticker": "SNP.RO", "why": "test", "exposure_pct": { "ref": "exp" }, "shock_pct": { "ref": "shock" },
+      "mitigation_pct": { "ref": "mit" }, "contribution_pct": { "ref": "contrib" } }
+  ],
+  "risks": [{ "kind": "timing", "text": "Poate fi amânată." }]
+}
