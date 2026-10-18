@@ -14,6 +14,7 @@
     "check": "node --check scripts/server.mjs && node --check netlify/functions/finnhub.js && node --check netlify/functions/_shared/market-proxy.js && node --check templates/shared/hif-live.js"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "playwright": "^1.64.0"
   }
 }
