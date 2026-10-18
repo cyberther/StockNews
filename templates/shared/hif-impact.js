@@ -13,7 +13,7 @@ var LIMITS = { cost: [-1e15, 1e15], funded_pct: [0, 100], gdp: [1, 1e16], impl_p
   revenue: S.LIMITS.revenue, operating_profit: [-1e15, 1e15], exposure: S.LIMITS.exposure, shock: S.LIMITS.shock,
   mitigation: S.LIMITS.mitigation, contribution: S.LIMITS.contribution };
 var DATE = /^\d{4}-\d{2}-\d{2}$/;
-var round = function(n){ return Math.round(n * 1e10) / 1e10; };
+var round = function(n){ var r = Math.round(n * 1e10) / 1e10; return r === 0 ? 0 : r; };   // no −0 on screen
 var fmt = S.fmt;
 
 function num(name, v){
@@ -28,26 +28,29 @@ function date(name, v){
 }
 
 // Months of a calendar year in which a measure starting on `start`, `delay` months late, is in
-// force: 0..12, a part month counted by its days.
-function monthsInForce(start, delay, year){
+// force: 0..12, a part month counted by its days. A temporary measure stops after `end`
+// (inclusive; not moved by the delay).
+function pos(d, endOfDay){
+  var days = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+  return d.getUTCFullYear() * 12 + d.getUTCMonth() + (d.getUTCDate() - (endOfDay ? 0 : 1)) / days;
+}
+function monthsInForce(start, delay, year, end){
   date('start', start);
   var d = new Date(start + 'T00:00:00Z');
   d.setUTCMonth(d.getUTCMonth() + Number(delay || 0));
-  var y = d.getUTCFullYear();
-  if (y > year) return 0;
-  if (y < year) return 12;
-  var days = new Date(Date.UTC(y, d.getUTCMonth() + 1, 0)).getUTCDate();
-  return round(12 - d.getUTCMonth() - (d.getUTCDate() - 1) / days);
+  var from = Math.max(pos(d), year * 12), to = (year + 1) * 12;
+  if (end != null) to = Math.min(to, pos(new Date(date('end', end) + 'T00:00:00Z'), true));
+  return round(Math.max(0, to - from));
 }
 
 // cost: + spending or revenue lost by the budget, − revenue gained. net < 0 widens the deficit.
 function budget(p){
   var cost = num('cost', p.cost), funded = num('funded_pct', p.funded_pct), gdp = num('gdp', p.gdp);
-  var impl = num('impl_pct', p.impl_pct), delay = num('delay_months', p.delay_months), start = date('start', p.start);
+  var impl = num('impl_pct', p.impl_pct), delay = num('delay_months', p.delay_months), start = date('start', p.start), end = p.end == null ? null : date('end', p.end);
   var net = round(-cost * (1 - funded / 100));
   var y0 = Number(start.slice(0, 4)), byYear = {}, lines = [];
   [y0, y0 + 1].forEach(function(y){
-    var m = monthsInForce(start, delay, y);
+    var m = monthsInForce(start, delay, y, end);
     byYear[y] = round(net * impl / 100 * m / 12);
     lines.push('Effect in ' + y + ' = ' + fmt(net) + ' × ' + fmt(impl) + '% × ' + fmt(m) + '/12 = ' + fmt(byYear[y]));
   });
@@ -60,13 +63,13 @@ function budget(p){
 function company(c, s){
   var rev = num('revenue', c.revenue), op = num('operating_profit', c.operating_profit);
   var exp = num('exposure', c.exposure), shock = num('shock', c.shock), mit = num('mitigation', c.mitigation), con = num('contribution', c.contribution);
-  var impl = num('impl_pct', s.impl_pct), delay = num('delay_months', s.delay_months), start = date('start', s.start);
+  var impl = num('impl_pct', s.impl_pct), delay = num('delay_months', s.delay_months), start = date('start', s.start), end = s.end == null ? null : date('end', s.end);
   var revenueDelta = round(rev * exp / 100 * shock / 100 * (1 - mit / 100));
   var profitDelta = round(revenueDelta * con / 100);
   var runRate = round(profitDelta * impl / 100);
   var y0 = Number(start.slice(0, 4)), byYear = {}, lines = [];
   [y0, y0 + 1].forEach(function(y){
-    var m = monthsInForce(start, delay, y);
+    var m = monthsInForce(start, delay, y, end);
     byYear[y] = round(profitDelta * impl / 100 * m / 12);
     lines.push('In ' + y + ' = ' + fmt(profitDelta) + ' × ' + fmt(impl) + '% × ' + fmt(m) + '/12 = ' + fmt(byYear[y]));
   });
@@ -90,10 +93,10 @@ function assumption(analysis, key, fallback){
   return a ? a.value : fallback;
 }
 function scenarioParams(analysis, scenario){
-  var start = assumption(analysis, 'start');
-  if (scenario === 'partial') return { impl_pct: Number(assumption(analysis, 'partial_pct', 50)), delay_months: 0, start: start };
-  if (scenario === 'delayed') return { impl_pct: 100, delay_months: Number(assumption(analysis, 'delay_months', 6)), start: start };
-  return { impl_pct: 100, delay_months: 0, start: start };
+  var start = assumption(analysis, 'start'), end = assumption(analysis, 'end', null);
+  if (scenario === 'partial') return { impl_pct: Number(assumption(analysis, 'partial_pct', 50)), delay_months: 0, start: start, end: end };
+  if (scenario === 'delayed') return { impl_pct: 100, delay_months: Number(assumption(analysis, 'delay_months', 6)), start: start, end: end };
+  return { impl_pct: 100, delay_months: 0, start: start, end: end };
 }
 
 // The latest verified year of each company's figures.
@@ -110,7 +113,7 @@ function run(analysis, financials){
   SCENARIOS.forEach(function(sc){
     var p = scenarioParams(analysis, sc);
     out.budget[sc] = budget({ cost: assumption(analysis, 'cost'), funded_pct: assumption(analysis, 'funded_pct', 0),
-      gdp: assumption(analysis, 'gdp'), start: p.start, impl_pct: p.impl_pct, delay_months: p.delay_months });
+      gdp: assumption(analysis, 'gdp'), start: p.start, end: p.end, impl_pct: p.impl_pct, delay_months: p.delay_months });
   });
   (analysis.companies || []).forEach(function(c){
     var f = fin[c.ticker];

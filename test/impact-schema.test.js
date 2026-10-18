@@ -32,6 +32,7 @@ test('each broken analysis fails with an error that names the key', () => {
   fails(a => { a.budget.approved_fact = 'nope'; }, /budget\.approved_fact/);
   fails(a => { a.risks[0].kind = 'political'; }, /risks\[0\]\.kind/);
   fails(a => { a.events = ['<script>']; }, /events/);
+  fails(a => { a.assumptions.push({ key: 'end', label: 'Sfârșit', value: '2025-12-31', unit: 'date', why: 't', range: ['2025-01-01', '2027-12-31'] }); }, /assumptions\.end.*after start/);
   fails(a => { a.assumptions[6].value = 140; }, /exposure.*between 0 and 100|outside/);
 });
 

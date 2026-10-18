@@ -71,6 +71,8 @@ export function validateAnalysis(a, { taxonomy, tickers, file } = {}) {
     else if (s.value < lo || s.value > hi) err(k + ': value ' + s.value + ' is outside its range [' + lo + ', ' + hi + ']');
   });
   REQUIRED.forEach(k => { if (keys.get(k) !== 'assumptions') err('assumptions.' + k + ' is required'); });
+  const val = k => ((a.assumptions || []).find(x => x && x.key === k) || {}).value;
+  if (keys.get('end') === 'assumptions' && !(isDate(val('end')) && val('end') >= val('start'))) err('assumptions.end must be a date on or after start');
 
   const b = a.budget || {};
   if (!['yes', 'no', 'unknown'].includes(b.approved)) err('budget.approved must be yes, no or unknown');

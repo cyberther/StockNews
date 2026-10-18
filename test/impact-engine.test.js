@@ -23,6 +23,18 @@ test('months in force in a year, from the start date plus the delay', () => {
   assert.equal(I.monthsInForce('2027-01-01', 0, 2026), 0);
 });
 
+test('a temporary measure: months in force stop at the end date (inclusive)', () => {
+  assert.equal(I.monthsInForce('2026-08-01', 0, 2026, '2026-10-31'), 3);
+  assert.equal(I.monthsInForce('2026-08-05', 0, 2026, '2026-10-31'), 2.8709677419);
+  assert.equal(I.monthsInForce('2026-08-01', 1, 2026, '2026-10-31'), 2);
+  assert.equal(I.monthsInForce('2026-08-01', 6, 2027, '2026-10-31'), 0);
+  assert.equal(I.monthsInForce('2026-11-01', 0, 2027, '2027-01-31'), 1);
+  const b = I.budget({ cost: 1.2e9, funded_pct: 0, gdp: 2e12, start: '2026-08-01', end: '2026-10-31', impl_pct: 100, delay_months: 0 });
+  assert.equal(b.byYear[2026], -3e8);
+  assert.equal(b.byYear[2027], 0);
+  assert.throws(() => I.budget({ cost: 1, funded_pct: 0, gdp: 1, start: '2026-08-01', end: 'never', impl_pct: 100, delay_months: 0 }), /end/);
+});
+
 test('budget: net effect on the balance, share of GDP, effect per year', () => {
   const b = I.budget({ cost: 1.2e10, funded_pct: 25, gdp: 2e12, start: '2026-01-01', impl_pct: 100, delay_months: 0 });
   assert.equal(b.net, -9e9);
@@ -59,9 +71,11 @@ test('company: zero baseline gives no percentage; a loss is measured against its
 });
 
 test('scenario parameters come from the analysis assumptions', () => {
-  assert.deepEqual(I.scenarioParams(sample, 'full'), { impl_pct: 100, delay_months: 0, start: '2026-01-01' });
-  assert.deepEqual(I.scenarioParams(sample, 'partial'), { impl_pct: 50, delay_months: 0, start: '2026-01-01' });
-  assert.deepEqual(I.scenarioParams(sample, 'delayed'), { impl_pct: 100, delay_months: 6, start: '2026-01-01' });
+  assert.deepEqual(I.scenarioParams(sample, 'full'), { impl_pct: 100, delay_months: 0, start: '2026-01-01', end: null });
+  assert.deepEqual(I.scenarioParams(sample, 'partial'), { impl_pct: 50, delay_months: 0, start: '2026-01-01', end: null });
+  assert.deepEqual(I.scenarioParams(sample, 'delayed'), { impl_pct: 100, delay_months: 6, start: '2026-01-01', end: null });
+  const temp = { ...sample, assumptions: [...sample.assumptions, { key: 'end', value: '2026-10-31' }] };
+  assert.equal(I.scenarioParams(temp, 'full').end, '2026-10-31');
 });
 
 test('resolve reads an assumption or a fact by key, and refuses anything else', () => {
