@@ -7,11 +7,15 @@ import { readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
-import { stripTypeScriptTypes } from 'node:module';
+import * as nodeModule from 'node:module';
+
+// Node 22.13+; older Node skips the syntax check locally, but CI (Node 22) must run it.
+const { stripTypeScriptTypes } = nodeModule;
 
 const src = readFileSync(new URL('../supabase/functions/scan/index.ts', import.meta.url), 'utf8');
 
-test('scan/index.ts is valid TypeScript syntax', () => {
+test('scan/index.ts is valid TypeScript syntax', { skip: !stripTypeScriptTypes && !process.env.CI && 'needs Node 22.13+' }, () => {
+  assert.ok(stripTypeScriptTypes, 'Node 22.13+ is needed to check the Edge Function syntax');
   const js = stripTypeScriptTypes(src);
   const file = join(mkdtempSync(join(tmpdir(), 'scan-')), 'index.mjs');
   writeFileSync(file, js);
