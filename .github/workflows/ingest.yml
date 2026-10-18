@@ -1,0 +1,68 @@
+name: Ingest market data
+
+# Prices, news and analyst counts into Supabase (ingest/main.mjs), so the apps read them from
+# the database instead of calling a provider per visitor.
+#   intraday  every 15 minutes, staggered off the hour, 07:00-21:59 UTC on weekdays: covers
+#             Bucharest's opening (07:00 or 08:00 UTC) to New York's close (20:00 or 21:00
+#             UTC) in summer and winter. Each run itself only asks for markets trading or
+#             just closed (templates/shared/hif-markets.js); a run with none makes no request.
+#   eod       once after New York's close: closing prices, the day's press, recommendations.
+# Off until the repository variable INGEST_ENABLED is 'true' (Settings → Secrets and
+# variables → Actions → Variables), so nothing runs before the secrets are in place.
+# Keep the cron in step with CRON in ingest/health.mjs.
+on:
+  schedule:
+    - cron: '7,22,37,52 7-21 * * 1-5'
+    - cron: '40 21 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Which job
+        type: choice
+        options: [intraday, eod]
+        default: intraday
+
+permissions:
+  contents: read
+  issues: write
+
+# One run at a time; a run still going when the next is due is not cancelled.
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    if: vars.INGEST_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      JOB: ${{ github.event.schedule == '40 21 * * 1-5' && 'eod' || inputs.job || 'intraday' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # Runtime dependencies only (yahoo-finance2); no install scripts.
+      - run: npm ci --omit=dev --ignore-scripts
+      - name: Run
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SCAN_URL: ${{ secrets.SCAN_URL }}
+          SCAN_SECRET: ${{ secrets.SCAN_SECRET }}
+        run: node ingest/main.mjs --job="$JOB"
+      - name: Alert when over budget
+        if: always() && hashFiles('summary.json') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node ingest/notify.mjs --title="Ingest: over budget" --file=summary.json --field=over
+      - name: Alert when the run failed
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo '{"problems":["ingest '"$JOB"' run failed"]}' > failed.json
+          node ingest/notify.mjs --title="Ingest: run failed" --file=failed.json --field=problems
