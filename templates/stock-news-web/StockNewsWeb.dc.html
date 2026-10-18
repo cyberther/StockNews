@@ -21,7 +21,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-flags.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-markets.js"></script><script src="../shared/hif-refresh.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-flags.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-markets.js"></script><script src="../shared/hif-refresh.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-policy.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}.m-chips{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch}.m-chips>*{flex:none;white-space:nowrap}}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -102,6 +102,7 @@
 <sc-if value="{{ moreOpen }}" hint-placeholder-val="{{ false }}">
 <div class="app-more" onClick="{{ closeMore }}" style="position:fixed;inset:0;z-index:39;background:rgba(0,0,0,0.5)">
 <div onClick="{{ stopProp }}" role="menu" style="position:absolute;left:0;right:0;bottom:calc(57px + env(safe-area-inset-bottom));background:var(--s-bg);border-top:1px solid var(--s-rule)">
+<sc-for list="{{ moreNav }}" as="n" hint-placeholder-count="1"><button role="menuitem" onClick="{{ n.go }}" style="display:flex;width:100%;align-items:center;justify-content:space-between;min-height:52px;padding:0 20px;background:transparent;border:0;border-bottom:1px solid var(--s-rule);cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-ink)"><span>{{ n.label }}</span><span style="font-size:12px;color:var(--s-mute)">{{ n.count }}</span></button></sc-for>
 <button role="menuitem" onClick="{{ goAccountMore }}" style="display:flex;width:100%;align-items:center;min-height:52px;padding:0 20px;background:transparent;border:0;border-bottom:1px solid var(--s-rule);cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-ink)">{{ ui.account }}</button>
 <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}"><button role="menuitem" onClick="{{ gearAdmin }}" style="display:flex;width:100%;align-items:center;gap:8px;min-height:52px;padding:0 20px;background:transparent;border:0;border-bottom:1px solid var(--s-rule);cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-ink)"><span style="flex:1;text-align:left">{{ ui.adminTitle }}</span><sc-if value="{{ adminHasBadge }}" hint-placeholder-val="{{ false }}"><span style="min-width:22px;height:22px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;background:var(--color-accent);color:var(--s-on-accent);font-size:12px;letter-spacing:0">{{ adminBadge }}</span></sc-if></button></sc-if>
 <button role="menuitem" onClick="{{ gearSignOut }}" style="display:flex;width:100%;align-items:center;min-height:52px;padding:0 20px;background:transparent;border:0;border-bottom:1px solid var(--s-rule);cursor:pointer;font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent)">{{ ui.signOut }}</button>
@@ -499,6 +500,49 @@
 </div>
 </div>
 </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPolicy }}" hint-placeholder-val="{{ false }}">
+<div data-m="fade">
+<div style="padding:22px var(--gx) 18px;border-bottom:1px solid var(--s-rule);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end">
+<div style="flex:1 1 320px;min-width:0"><div style="font-family:var(--font-heading);font-weight:800;font-size:32px;letter-spacing:-0.03em;line-height:1">{{ ui.polTitle }}</div>
+<div style="font-size:13px;color:var(--s-mute);margin-top:6px;max-width:70ch;text-wrap:pretty">{{ ui.polNote }}</div></div>
+<a href="{{ polScenarioUrl }}" style="flex:none;color:var(--color-accent);border:1px solid var(--s-rule);padding:9px 12px;text-decoration:none;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase">{{ ui.polScenario }} ↗</a>
+</div>
+<div class="m-chips" style="display:flex;flex-wrap:wrap;gap:8px;padding:14px var(--gx);border-bottom:1px solid var(--s-rule);align-items:center">
+<sc-for list="{{ polSectors }}" as="f" hint-placeholder-count="5">
+<button onClick="{{ f.pick }}" aria-pressed="{{ f.on }}" style="min-height:30px;padding:0 11px;border:1px solid var(--s-rule);background:{{ f.bg }};color:{{ f.fg }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ f.label }}</button>
+</sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;padding:12px var(--gx);border-bottom:1px solid var(--s-rule);align-items:center">
+<select value="{{ polTicker }}" onChange="{{ setPolTicker }}" aria-label="{{ ui.polAllCompanies }}" style="min-height:34px;padding:0 10px;background:var(--s-bg);color:var(--s-ink);border:1px solid var(--s-rule);font:inherit;font-size:13px">
+<sc-for list="{{ polTickerOptions }}" as="o" hint-placeholder-count="3"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+</select>
+<button onClick="{{ togglePolMine }}" aria-pressed="{{ polMineOn }}" style="min-height:34px;padding:0 12px;border:1px solid var(--color-accent);background:{{ polMineBg }};color:{{ polMineFg }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.polMine }}</button>
+</div>
+<sc-if value="{{ polLoading }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ ui.polLoading }}</div></sc-if>
+<sc-if value="{{ polHasError }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ polError }}</div></sc-if>
+<sc-if value="{{ polEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ polEmptyText }}</div></sc-if>
+<sc-for list="{{ polDays }}" as="d" hint-placeholder-count="2">
+<div style="padding:14px var(--gx) 8px;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute);border-bottom:1px solid var(--s-rule)">{{ d.label }}</div>
+<sc-for list="{{ d.items }}" as="e" hint-placeholder-count="2">
+<article style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:6px">
+<div style="display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline">
+<span style="font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;color:{{ e.statusColor }};border:1px solid {{ e.statusColor }};padding:2px 7px">{{ e.status }}</span>
+<span style="font-size:12px;color:var(--s-mute)">{{ e.meta }}</span>
+</div>
+<div style="font-family:var(--font-heading);font-weight:700;font-size:17px;line-height:1.3;text-wrap:pretty">{{ e.title }}</div>
+<sc-if value="{{ e.hasSummary }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--s-mute);max-width:80ch">{{ e.summary }}</div></sc-if>
+<div style="font-size:12px;color:var(--s-mute)">{{ e.stage }}</div>
+<sc-if value="{{ e.hasFigures }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px"><span style="color:var(--s-mute)">{{ ui.polFigures }}:</span> {{ e.figures }}</div></sc-if>
+<sc-if value="{{ e.hasSectors }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-ink)">{{ e.sectors }}</div></sc-if>
+<sc-if value="{{ e.hasCompanies }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute)">{{ e.companies }}</div></sc-if>
+<sc-if value="{{ e.hasConcerns }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;border-left:2px solid var(--color-accent);padding-left:8px"><span style="font-family:var(--font-heading);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-accent)">{{ ui.polConcerns }}:</span> {{ e.concerns }}</div></sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--s-mute)"><span>{{ e.certainty }}</span><a href="{{ e.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">{{ e.sourceLabel }}</a></div>
+</article>
+</sc-for>
+</sc-for>
 </div>
 </sc-if>
 
@@ -1411,7 +1455,7 @@ function hydrate(defaults) {
   return out;
 }
 class Component extends DCLogic {
-  state = hydrate({ screen:'portfolio', plan:null, lang:null, appLang:null, follows:[], selected:'', feedTab:'following', query:'', toast:'', prev:'feed',
+  state = hydrate({ screen:'portfolio', plan:null, lang:null, appLang:null, follows:[], selected:'', feedTab:'following', policyRows:null, policyErr:'', policySector:'', policyTicker:'', policyMine:false, query:'', toast:'', prev:'feed',
     quotes:{}, liveNews:{}, liveRecs:{}, charts:{}, liveEarnings:{}, liveEarnDates:{}, liveFilings:{}, roFilings:{}, roDates:{}, filingsView:'all', filingsMore:0, chartRange:'1d', chartHover:null, chartCursor:null, overlays:{ sma:true, earn:true }, push:{}, screenFilter:'all',
     liveStatus:'demo', liveError:'', liveHits:null, liveMode:'off', refreshing:false, detailLoading:false,
     session:null, onboarded:false, locked:false, authMode:'up', authName:'', authEmail:'', authPw:'', pwShow:false, authErr:'', authBad:null,
@@ -1819,6 +1863,7 @@ class Component extends DCLogic {
       if (this.state.feedTab === 'bvb' && !this._bvbAsked) { this._bvbAsked = true; this.syncBvb(); }
       if (this.state.feedTab === 'eu' && !this._euAsked) { this._euAsked = true; this.syncEu(); }
     }
+    if (this.state.screen === 'policy' && this.state.session) this.syncPolicy();
     const pfSig = this.state.screen === 'portfolio' ? (this.state.pfRange || '1mo') + '|' + held : '';
     if (pfSig && pfSig !== this._pfSig) this.syncPortfolioCharts();
     this._pfSig = pfSig;
@@ -1944,6 +1989,69 @@ class Component extends DCLogic {
       this.setState(st => ({ quotes: Object.assign({}, st.quotes, res.quotes), liveNews: Object.assign({}, st.liveNews, res.news),
         liveMode: res.mode, liveStatus: got ? 'live' : st.liveStatus }));
     }).catch(() => {});
+  }
+  // What the Policy screen shows: filters, and the events by day, each with its fixed status
+  // label, source, certainty, sectors, companies (and why they are linked) and whether it
+  // concerns the reader.
+  policyView(u, screen) {
+    const s = this.state, P = window.HIFPolicy, lang = String(this.appLang || 'EN').toLowerCase();
+    if (screen !== 'policy' || !P) return { isPolicy: screen === 'policy' };
+    const rows = s.policyRows || [], follows = s.follows || [], positions = s.positions || {};
+    const mine = !!s.policyMine;
+    const set = patch => this.setState(Object.assign({ policyRows: null }, patch));
+    const tone = st => st === 'adopted' || st === 'in_force' || st === 'implemented' ? 'var(--color-accent)' : st === 'stopped' ? 'var(--s-faint)' : 'var(--s-mute)';
+    const cards = rows.map(e => {
+      const hits = P.affects(e, follows, positions);
+      const named = (e.companies || []).filter(c => c.why === 'mentioned').map(c => c.ticker);
+      const bySector = (e.companies || []).filter(c => c.why === 'sector');
+      return { key: e.id, day: e.event_date, hits,
+        status: P.statusLabel(e.status, lang).toUpperCase(), statusColor: tone(e.status),
+        meta: [e.institution, e.initiator !== e.institution ? e.initiator : null, e.doc_number].filter(Boolean).join(' · '),
+        stage: e.stage || '', title: e.title, summary: e.summary || '', hasSummary: !!e.summary,
+        certainty: P.certaintyLabel(e.certainty, lang), url: e.source_url, sourceLabel: (u.polSource || 'Official source') + ' ↗',
+        sectors: (e.sectors || []).map(id => id === 'fiscal-general' ? (u.polGeneral || 'General measure') : P.sectorLabel(id, lang)).join(' · '),
+        hasSectors: !!(e.sectors || []).length,
+        companies: named.map(t => t.replace(/\.RO$/, '') + ' (' + (u.polMentioned || 'named') + ')')
+          .concat(bySector.length ? [bySector.map(c => c.ticker.replace(/\.RO$/, '')).join(', ')] : []).join(' · '),
+        hasCompanies: !!(e.companies || []).length,
+        figures: (e.figures || []).map(f => f.text).join(' · '), hasFigures: !!(e.figures || []).length,
+        concerns: hits.map(h => h.ticker.replace(/\.RO$/, '') + ' — ' + h.via.map(v => v === 'portfolio' ? (u.polViaPortfolio || 'in your portfolio') : (u.polViaFollowing || 'you follow it')).join(', ')
+          + (h.why === 'sector' ? ' (' + (u.polBySector || 'via sector') + ' ' + P.sectorLabel(h.sector, lang) + ')' : ' (' + (u.polMentioned || 'named') + ')')).join(' · '),
+        hasConcerns: hits.length > 0 };
+    }).filter(c => !mine || c.hasConcerns);
+    const days = [];
+    cards.forEach(c => { const d = days[days.length - 1]; if (d && d.day === c.day) d.items.push(c); else days.push({ day: c.day, items: [c] }); });
+    const fmtDay = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString(this.appLocale, { weekday:'short', day:'numeric', month:'long', year:'numeric', timeZone:'UTC' });
+    const tickers = [...new Set([].concat(follows, Object.keys(positions)).filter(t => /\.RO$/.test(t)))].sort();
+    return {
+      isPolicy: true,
+      polDays: days.map(d => ({ key: d.day, label: fmtDay(d.day), items: d.items })),
+      polLoading: !s.policyRows && !s.policyErr, polError: s.policyErr || '', polHasError: !!s.policyErr,
+      polEmpty: !!s.policyRows && !cards.length, polEmptyText: mine ? (u.polMineEmpty || '') : (u.polEmpty || ''),
+      polSectors: [{ id: '', label: u.polAllSectors || 'All sectors' }].concat(Object.keys(P.SECTORS).map(id => ({ id, label: P.sectorLabel(id, lang) })))
+        .map(o => ({ key: o.id || 'all', label: o.label, on: (s.policySector || '') === o.id,
+          bg: (s.policySector || '') === o.id ? 'var(--color-accent)' : 'transparent', fg: (s.policySector || '') === o.id ? 'var(--s-on-accent)' : 'var(--s-ink)',
+          pick: () => set({ policySector: o.id }) })),
+      polTickerOptions: [{ value: '', label: u.polAllCompanies || 'All BVB companies' }].concat(tickers.map(t => ({ value: t, label: t }))),
+      polTicker: s.policyTicker || '', setPolTicker: e => set({ policyTicker: e && e.target ? e.target.value : '' }),
+      polMineOn: mine, togglePolMine: () => this.setState({ policyMine: !mine }),
+      polMineBg: mine ? 'var(--color-accent)' : 'transparent', polMineFg: mine ? 'var(--s-on-accent)' : 'var(--s-ink)',
+      polScenarioUrl: './intelligence.html'
+    };
+  }
+  // The Policy screen (templates/shared/hif-policy.js): official events for the chosen sector
+  // and company, one request; loaded when the screen opens or a filter changes (the data
+  // changes once a day).
+  syncPolicy() {
+    const P = window.HIFPolicy, s = this.state;
+    if (!flagOn('policy') || !P || !s.session) return;
+    const sig = (s.policySector || '') + '|' + (s.policyTicker || '');
+    if (this._polSig === sig && s.policyRows) return;
+    this._polSig = sig;
+    this.setState({ policyErr:'' });
+    P.load({ sector: s.policySector, ticker: s.policyTicker })
+      .then(rows => this.setState({ policyRows: rows || [], policyErr:'' }))
+      .catch(() => { this._polSig = ''; this.setState({ policyErr: this.copy.polError || 'Could not load', policyRows: [] }); });
   }
   // The BVB tab: Romanian press stories (/ro-news) and the quotes of the companies they
   // name, plus the largest Bucharest listings, in one batch.
@@ -3461,6 +3569,7 @@ class Component extends DCLogic {
     const navList = [
       this.navItem('portfolio', u.pfTitle, String(Object.keys(s.positions || {}).length)),
       this.navItem('feed', u.feed, String(feed.length)),
+      ...(flagOn('policy') ? [this.navItem('policy', u.policy || 'Policy', s.policyRows ? String(s.policyRows.length) : '')] : []),
       this.navItem('watchlist', u.watchlist, isFree ? s.follows.length + '/3' : String(s.follows.length)),
       this.navItem('ledger', u.ledger, String((s.dismissed || []).length))
     ];
@@ -3628,6 +3737,7 @@ class Component extends DCLogic {
       togglePlan: () => this.setState({ plan: isFree ? 'pro' : 'free' }),
       isFeed: screen === 'feed', isWatch: screen === 'watchlist', isPortfolio: screen === 'portfolio', isSearch: screen === 'search',
       isLedger: screen === 'ledger',
+      ...this.policyView(u, screen),
       isDetail: screen === 'detail', isPaywall: screen === 'paywall', isAccount: screen === 'account',
       isSecurity: screen === 'security',
       isAdminScreen: screen === 'admin' && !!s.isAdmin,
@@ -3845,6 +3955,8 @@ class Component extends DCLogic {
           return { key:'more', label: u.account, on, off: !on, current: undefined, go: () => this.setState(st => ({ moreOpen: !st.moreOpen })) };
         })()]),
       moreOpen: !!s.moreOpen && vw <= 760, closeMore: () => this.setState({ moreOpen:false }),
+      // Sections past the bar's first four (the ledger, once Policy is in) open from More.
+      moreNav: navList.slice(4).map(n => Object.assign({}, n, { go: () => { this.setState({ moreOpen:false }); n.go(); } })),
       tape: (s.follows.length ? s.follows : Object.keys(FOLLOWS)).slice(0, vw >= 900 ? 16 : 0).map(t => { const r = rec(t); return { ticker:r.ticker, price:r.price, move:r.move, up:r.up, down:!r.up }; }),
       detailCols: vw >= 1100 ? 'minmax(0,1fr) 320px' : 'minmax(0,1fr)',
       // The dot lights only for data that is recent and from a market that is trading.

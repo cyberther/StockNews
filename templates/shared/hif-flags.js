@@ -10,6 +10,7 @@
 //   hiddenModuleRefresh         refreshing modules that aren't on screen (on hold)
 //   commercialMode              hide data whose licence is dev_only from public and paid features
 //   dataSource                  'supabase' (market data from the ingestion tables) or 'gateway' (/api/finnhub)
+//   policy                      the Policy screen and the daily official-sources job (Phase B)
 (function(){
 var FLAGS = {
   following: true,
@@ -21,7 +22,8 @@ var FLAGS = {
   prefetchUnfollowedNews: false,
   hiddenModuleRefresh: false,
   commercialMode: false,
-  dataSource: 'supabase'
+  dataSource: 'supabase',
+  policy: true
 };
 var root = typeof window !== 'undefined' ? window : globalThis;
 root.HIFFlags = {

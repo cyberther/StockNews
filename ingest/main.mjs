@@ -4,6 +4,9 @@
 //     env: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (GitHub secrets),
 //          SCAN_URL, SCAN_SECRET (optional: push alerts through the scan Edge Function)
 //
+//   node ingest/main.mjs --job=policy
+//     the official policy sources only (ingest/policy/); the eod job runs them too
+//
 //   node ingest/main.mjs --job=intraday --dry-run --watchlist=AAPL,SNP.RO [--now=ISO]
 //     real providers and feeds, an in-memory database: shows what a run would fetch and
 //     how many outside requests it makes, without any credentials.
@@ -17,13 +20,15 @@ import { createYahoo, yahooClient } from './providers/yahoo.mjs';
 import { eodhd, twelvedata, bvb } from './providers/stubs.mjs';
 import { pressNews } from './news.mjs';
 import { BVB_TOP } from '../netlify/functions/_shared/market/bvb-symbols.js';
+import { runPolicy } from './policy/run.mjs';
+import { bvbCatalog } from './policy/classify.mjs';
 
 const arg = name => { const a = process.argv.find(x => x.startsWith(`--${name}=`)); return a ? a.slice(name.length + 3) : null; };
 const has = name => process.argv.includes(`--${name}`);
 const readJson = p => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
 
 const job = arg('job');
-if (job !== 'intraday' && job !== 'eod') { console.error('usage: node ingest/main.mjs --job=intraday|eod [--dry-run --watchlist=A,B]'); process.exit(2); }
+if (!['intraday', 'eod', 'policy'].includes(job)) { console.error('usage: node ingest/main.mjs --job=intraday|eod|policy [--dry-run --watchlist=A,B]'); process.exit(2); }
 const flags = readJson('../config/flags.json');
 const limits = readJson('../config/budgets.json');
 const now = arg('now') ? new Date(arg('now')) : new Date();
@@ -34,7 +39,7 @@ const meter = countingFetch(plainFetch);
 globalThis.fetch = meter.fetch;
 
 function memoryDb(seed) {
-  const t = { ingest_provider_state: [], ingest_usage: [], ticker_names: [], market_recommendations: [], stories: [], ...seed };
+  const t = { ingest_provider_state: [], ingest_usage: [], ticker_names: [], market_recommendations: [], stories: [], policy_events: [], policy_event_history: [], ...seed };
   return { t,
     async read(table) { return (t[table] || []).slice(); },
     async upsert(table, rows, { onConflict = 'id', ignoreDuplicates } = {}) {
@@ -61,13 +66,31 @@ const alerts = !dry && scanUrl && scanSecret ? async () => {
   if (!res.ok) throw new Error('scan ' + res.status);
 } : null;
 
-const summary = await runIngest({ job, now, db, providers, news: pressNews, flags, limits, bvbTop: BVB_TOP, meter, alerts });
-const out = { ...summary, dryRun: dry, at: now.toISOString() };
-if (dry) out.sample = { quotes: (db.t.market_quotes || []).slice(0, 5), stories: (db.t.stories || []).length };
+const summary = job === 'policy' ? { job, ok: true, symbols: 0, quotes: 0, newStories: 0, recs: 0, requests: {}, over: [], errors: [] }
+  : await runIngest({ job, now, db, providers, news: pressNews, flags, limits, bvbTop: BVB_TOP, meter, alerts });
+
+// Official policy sources: once a day (eod), or on their own (--job=policy). Their requests are
+// counted apart, in their own ingest_runs row.
+let policy = null;
+if (flags.policy !== false && (job === 'eod' || job === 'policy')) {
+  const before = meter.counts(), startedAt = new Date().toISOString();
+  const taxonomy = readJson('../config/policy-taxonomy.json');
+  try { policy = await runPolicy({ db, now, taxonomy, catalog: bvbCatalog() }); }
+  catch (e) { policy = { events: 0, created: 0, changed: 0, errors: ['policy: ' + e.message] }; }
+  const after = meter.counts(), requests = Object.fromEntries(Object.keys(after).map(k => [k, after[k] - (before[k] || 0)]).filter(([, n]) => n));
+  policy.requests = requests;
+  await db.insert('ingest_runs', [{ job: 'policy', started_at: startedAt, finished_at: new Date().toISOString(), ok: !policy.errors.length,
+    symbols: policy.events, requests, errors: policy.errors.join('\n').slice(0, 4000) || null }]);
+}
+const out = { ...summary, policy, dryRun: dry, at: now.toISOString() };
+if (dry) out.sample = { quotes: (db.t.market_quotes || []).slice(0, 5), stories: (db.t.stories || []).length,
+  policyEvents: (db.t.policy_events || []).length, policyExamples: (db.t.policy_events || []).filter(e => e.sectors.length).slice(0, 3)
+    .map(e => ({ id: e.id, status: e.status, title: e.title.slice(0, 90), sectors: e.sectors, companies: e.companies.slice(0, 3) })) };
 console.log(JSON.stringify(out, null, 2));
 writeFileSync('summary.json', JSON.stringify(out));
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY,
   `### ingest ${job}\n\n| symbols | quotes | new stories | recs | outside requests | ok |\n|---|---|---|---|---|---|\n` +
   `| ${out.symbols} | ${out.quotes} | ${out.newStories} | ${out.recs} | ${JSON.stringify(out.requests)} | ${out.ok} |\n\n` +
   (out.errors.length ? 'Errors:\n\n' + out.errors.map(e => '- ' + e).join('\n') + '\n' : '') +
-  (out.over.length ? 'Over budget:\n\n' + out.over.map(e => '- ' + e).join('\n') + '\n' : ''));
+  (out.over.length ? 'Over budget:\n\n' + out.over.map(e => '- ' + e).join('\n') + '\n' : '') +
+  (policy ? `\n### policy\n\n| events | new | changed | requests | errors |\n|---|---|---|---|---|\n| ${policy.events} | ${policy.created} | ${policy.changed} | ${JSON.stringify(policy.requests)} | ${policy.errors.length} |\n` : ''));

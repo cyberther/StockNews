@@ -6,7 +6,8 @@ name: Ingest market data
 #             Bucharest's opening (07:00 or 08:00 UTC) to New York's close (20:00 or 21:00
 #             UTC) in summer and winter. Each run itself only asks for markets trading or
 #             just closed (templates/shared/hif-markets.js); a run with none makes no request.
-#   eod       once after New York's close: closing prices, the day's press, recommendations.
+#   eod       once after New York's close: closing prices, the day's press, recommendations,
+#             and the official policy sources (ingest/policy/).
 # Off until the repository variable INGEST_ENABLED is 'true' (Settings → Secrets and
 # variables → Actions → Variables), so nothing runs before the secrets are in place.
 # Keep the cron in step with CRON in ingest/health.mjs.
@@ -19,7 +20,7 @@ on:
       job:
         description: Which job
         type: choice
-        options: [intraday, eod]
+        options: [intraday, eod, policy]
         default: intraday
 
 permissions:
