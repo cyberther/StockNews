@@ -21,7 +21,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-flags.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-flags.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-markets.js"></script><script src="../shared/hif-refresh.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>:root{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -1854,29 +1854,66 @@ class Component extends DCLogic {
       });
     }).catch(e => this.setState({ refreshing:false, liveStatus:'error', liveError:e.message }));
   }
-  // Keeps the open app current: every 5 minutes, and when the tab comes back into view
-  // after a minute or more away. Hidden tabs don't poll, and the adapter's caches
-  // (quotes 60s, news 5 min) mean each round only re-fetches what has expired.
+  // Keeps the open app current without polling a page nobody is looking at
+  // (templates/shared/hif-refresh.js): checked every minute, refreshed only while the page is
+  // visible, someone used it in the last 15 minutes, and a market of the symbols in view trades
+  // (or has closed since the last look). Only the screen in view is refreshed, unless the
+  // hiddenModuleRefresh flag is on.
   startAutoRefresh() {
     this.stopAutoRefresh();
+    if (!this._lastAct) this._lastAct = Date.now();
     const tick = () => {
-      if (document.hidden || !this.state.session) return;
+      const R = window.HIFRefresh;
+      if (!this.state.session || !R) return;
+      if (!R.shouldRefresh({ hidden: document.hidden, lastActivity: this._lastAct, lastRefresh: this._lastAuto || 0, now: Date.now(), symbols: this.refreshSymbols() })) return;
       this._lastAuto = Date.now();
-      this.syncLive();
-      this.syncPositions();
+      this.refreshVisible();
+    };
+    this._auto = setInterval(tick, 60000);
+    // New summaries for recent stories, every 2 minutes while the feed is open and in use (only
+    // the last day's stories still without one are asked again: usually one small request).
+    this._sumTick = setInterval(() => {
+      const R = window.HIFRefresh, idle = !R || Date.now() - (this._lastAct || 0) > R.IDLE_MS;
+      if (!document.hidden && !idle && this.state.screen === 'feed') this.syncSummaries(true);
+    }, 2 * 60000);
+    // Coming back to the page counts as using it.
+    this._onVis = () => { if (!document.hidden) { this.touch(); tick(); } };
+    document.addEventListener('visibilitychange', this._onVis);
+  }
+  // The symbols whose markets decide whether a refresh is worth it.
+  refreshSymbols() {
+    const s = this.state, B = window.HIFBVB;
+    const list = (s.follows || []).concat(Object.keys(s.positions || {}));
+    if (s.screen === 'feed' && s.feedTab === 'bvb') list.push(...((B && B.top) || []).slice(0, 1));
+    if (s.selected) list.push(s.selected);
+    return [...new Set(list)];
+  }
+  refreshVisible() {
+    const s = this.state, all = !!(window.HIFFlags && window.HIFFlags.get('hiddenModuleRefresh'));
+    const on = screen => all || s.screen === screen;
+    if (on('feed') || on('watchlist') || on('detail') || on('portfolio')) this.syncLive();
+    if (on('portfolio')) { this.syncPositions(); this.syncPortfolioCharts(); }
+    if (on('feed')) {
       this.syncSummaries(true);
       this.syncHistory(true);
-      if (this.state.screen === 'portfolio') this.syncPortfolioCharts();
-      if (this.state.feedTab === 'market') this.syncMarket();
-      if (this.state.feedTab === 'bvb') this.syncBvb();
-      if (this.state.feedTab === 'eu') this.syncEu();
-    };
-    this._auto = setInterval(tick, 5 * 60000);
-    // New summaries for recent stories, every 2 minutes while the feed is open (only the last
-    // day's stories still without one are asked again: usually one small request).
-    this._sumTick = setInterval(() => { if (!document.hidden && this.state.screen === 'feed') this.syncSummaries(true); }, 2 * 60000);
-    this._onVis = () => { if (!document.hidden && Date.now() - (this._lastAuto || 0) > 60000) tick(); };
-    document.addEventListener('visibilitychange', this._onVis);
+      if (s.feedTab === 'market') this.syncMarket();
+      if (s.feedTab === 'bvb') this.syncBvb();
+      if (s.feedTab === 'eu') this.syncEu();
+    }
+  }
+  // "Live · 14:05", "Delayed · as of 13:20" or "Market closed · as of Fri 22:00": data is never
+  // called live when it is old or the market is shut.
+  freshLabel() {
+    const s = this.state, R = window.HIFRefresh, u = this.copy || {};
+    const syms = this.refreshSymbols(), Q = s.quotes || {};
+    const asOf = syms.reduce((m, t) => Math.max(m, (Q[t] && Q[t].asOf) || 0), 0) || s.lastScan || 0;
+    if (!R || !asOf) return null;
+    const kind = R.freshness(asOf, syms, Date.now());
+    const d = new Date(asOf), p = n => String(n).padStart(2, '0');
+    const same = new Date().toDateString() === d.toDateString();
+    const t = (same ? '' : d.toLocaleDateString(window.HIF_LOCALE || [], { weekday:'short', day:'numeric', month:'short' }) + ' ') + p(d.getHours()) + ':' + p(d.getMinutes());
+    const fmt = { live: u.asOfLive || 'Live · {t}', delayed: u.asOfDelayed || 'Delayed · as of {t}', closed: u.asOfClosed || 'Market closed · as of {t}' }[kind];
+    return { kind, text: fmt.replace('{t}', t) };
   }
   stopAutoRefresh() {
     clearInterval(this._auto);
@@ -3798,10 +3835,11 @@ class Component extends DCLogic {
       moreOpen: !!s.moreOpen && vw <= 760, closeMore: () => this.setState({ moreOpen:false }),
       tape: (s.follows.length ? s.follows : Object.keys(FOLLOWS)).slice(0, vw >= 900 ? 16 : 0).map(t => { const r = rec(t); return { ticker:r.ticker, price:r.price, move:r.move, up:r.up, down:!r.up }; }),
       detailCols: vw >= 1100 ? 'minmax(0,1fr) 320px' : 'minmax(0,1fr)',
-      liveOn: live, liveOff: !live,
+      // The dot lights only for data that is recent and from a market that is trading.
+      liveOn: live && (this.freshLabel() || { kind:'live' }).kind === 'live', liveOff: !(live && (this.freshLabel() || { kind:'live' }).kind === 'live'),
       liveLabel: live
-        ? (s.liveMode === 'proxy' ? 'LIVE · FINNHUB' : 'LIVE · FINNHUB (DIRECT)')
-        : (s.refreshing ? 'FINNHUB …' : (s.liveStatus === 'error' ? 'FINNHUB · ' + (s.liveError || 'error').toUpperCase() : 'NO LIVE DATA')),
+        ? ((this.freshLabel() || { text: 'LIVE' }).text.toUpperCase())
+        : (s.refreshing ? '…' : (s.liveStatus === 'error' ? 'MARKET DATA · ' + (s.liveError || 'error').toUpperCase() : 'NO LIVE DATA')),
       refreshTicker: () => { this.syncLive([stock.ticker], true); this.syncDetail(stock.ticker, true); },
       refreshLabel: s.refreshing ? '…' : '↻',
       signOut: () => { this.logEvent('signout'); if (s.authLive) window.HIFAuth.signOut(false); this.setState({ session:null, locked:false, authPw:'', authErr:'', twofaSetup:false }); this.go('portfolio'); this.flash(u.signOut.toUpperCase()); },
