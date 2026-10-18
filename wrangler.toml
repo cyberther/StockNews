@@ -1,0 +1,7 @@
+# Cloudflare Pages (docs/phase-a-setup.md). Build command: npm run build; output: dist.
+# Variables are set in the dashboard (Settings → Variables and Secrets): SUPABASE_URL,
+# SUPABASE_ANON_KEY, VAPID_PUBLIC_KEY, and optionally TWELVEDATA_KEY / FMP_KEY /
+# ALPHAVANTAGE_KEY for the gateway's backup providers. Never the service-role key.
+name = "aa-market-pulse"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"

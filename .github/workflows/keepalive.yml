@@ -1,0 +1,24 @@
+name: Keep scheduled workflows enabled
+
+# GitHub disables scheduled workflows in a repository with no activity for 60 days. Once a
+# month this re-enables them through the API (no empty commits). GitHub also emails a
+# warning a week before it disables a workflow; that email means this did not work.
+on:
+  schedule:
+    - cron: '0 5 1 * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Enable
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          for wf in ingest.yml health.yml keepalive.yml; do gh workflow enable "$wf"; done

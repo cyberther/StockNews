@@ -113,7 +113,8 @@ function takeFragment() {
 }
 
 async function getConfig() {
-  for (const url of ['/api/config']) {
+  // config.json: written by the Cloudflare Pages build; /api/config: Netlify and the Node server.
+  for (const url of ['/config.json', '/api/config']) {
     try {
       const r = await fetch(url, { headers: { accept: 'application/json' }, credentials: 'same-origin' });
       if (!r.ok) continue;
