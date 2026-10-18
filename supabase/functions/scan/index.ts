@@ -279,9 +279,23 @@ Deno.serve(async (req) => {
   const { data: wl, error: wlErr } = await db.from('watchlist').select('user_id,ticker,push');
   if (wlErr) return Response.json({ error: 'watchlist: ' + wlErr.message }, { status: 500 });
 
+  // Alerts only (?mode=alerts, or the SCAN_FETCH secret set to 'off'): the ingestion job
+  // (ingest/, GitHub Actions) has already stored the news; this run only sends the push
+  // alerts for stories not alerted yet, and fetches nothing itself.
+  const alertsOnly = new URL(req.url).searchParams.get('mode') === 'alerts' || env('SCAN_FETCH') === 'off';
+  let tickers: string[] = [];
+  const fresh: Story[] = [];
+  if (alertsOnly) {
+    const { data, error } = await db.from('stories').select('id,ticker,headline,source,url,summary,published_at')
+      .is('alerted_at', null).gt('found_at', new Date(Date.now() - 3600000).toISOString()).limit(500);
+    if (error) errors.push('stories: ' + error.message);
+    fresh.push(...(data || []));
+    tickers = [...new Set(fresh.map(s => s.ticker))];
+  } else {
+
   // Every distinct ticker; past the Finnhub budget, successive runs take turns.
   const allTickers = [...new Set((wl || []).map(r => r.ticker).concat(flagOn('FLAG_US_MARKET') ? MARKET_TOP : []).filter(t => TICKER_RE.test(t)))].sort();
-  let tickers = allTickers;
+  tickers = allTickers;
   if (tickers.length > MAX_TICKERS) {
     const slots = Math.ceil(tickers.length / MAX_TICKERS);
     const slot = Math.floor(Date.now() / (10 * 60000)) % slots;
@@ -318,7 +332,6 @@ Deno.serve(async (req) => {
   const found = followed.concat(press.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; }));
 
   // Insert what is new; ON CONFLICT DO NOTHING returns only the rows actually inserted.
-  const fresh: Story[] = [];
   for (let i = 0; i < found.length; i += 500) {
     const { data, error } = await db.from('stories')
       .upsert(found.slice(i, i + 500), { onConflict: 'id', ignoreDuplicates: true })
@@ -335,6 +348,7 @@ Deno.serve(async (req) => {
     s.url = url; s.source = publisherFor(url, s.source);
     await db.from('stories').update({ url, source: s.source }).eq('id', s.id);
   });
+  } // end of fetching (not in alerts-only mode)
 
   // Alerts: recent new stories, for users with push on for that ticker.
   const recent = fresh.filter(s => Date.now() - Date.parse(s.published_at) < FRESH_MS);
@@ -370,6 +384,16 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Each story is alerted at most once, whether or not anyone had push on for it.
+  if (alertsOnly && fresh.length) {
+    // In slices: the ids go in the request's URL.
+    const at = new Date().toISOString();
+    for (let i = 0; i < fresh.length; i += 100) {
+      const { error } = await db.from('stories').update({ alerted_at: at }).in('id', fresh.slice(i, i + 100).map(s => s.id));
+      if (error) errors.push('alerted_at: ' + error.message);
+    }
+  }
+
   // New accounts waiting for the owner's approval (supabase/approval.sql): one alert to the
   // admins' devices, once per account.
   const { data: waiting } = await db.from('account_status').select('user_id,email')
@@ -392,7 +416,7 @@ Deno.serve(async (req) => {
     if (sent) await db.from('account_status').update({ notified_at: new Date().toISOString() }).in('user_id', waiting.map(w => w.user_id));
   }
 
-  const summary = { started_at, tickers: tickers.length, new_stories: fresh.length, pushes,
+  const summary = { started_at, mode: alertsOnly ? 'alerts' : 'scan', tickers: tickers.length, new_stories: fresh.length, pushes,
     errors: errors.length ? errors.slice(0, 20).join('\n') : null };
   await db.from('scan_runs').insert(summary);
   return Response.json(summary);
