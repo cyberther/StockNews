@@ -16,3 +16,9 @@ node_modules
 
 # Browser test output (screenshots, logs)
 .playwright-mcp/
+
+# Local Cloudflare (wrangler pages dev) state
+.wrangler/
+# Ingestion run outputs
+summary.json
+health.json

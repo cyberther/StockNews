@@ -1,0 +1,35 @@
+name: Ingest health
+
+# Every morning, weekends included: did yesterday's ingestion runs happen and work, and is
+# the Supabase project awake (the read itself keeps a free project from pausing)? Problems
+# open a GitHub issue, or add to the open one (ingest/health.mjs, ingest/notify.mjs).
+on:
+  schedule:
+    - cron: '15 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  health:
+    if: vars.INGEST_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node ingest/health.mjs
+      - name: Alert
+        if: always() && hashFiles('health.json') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node ingest/notify.mjs --title="Ingest: health" --file=health.json --field=problems
