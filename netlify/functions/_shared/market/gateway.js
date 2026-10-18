@@ -23,6 +23,7 @@ import { euCompanyNews, euMarketNews, isEu } from './eu-news.js';
 import { EU_ALIASES } from './eu-symbols.js';
 import { usCompanyNews, usMarketNews } from './us-news.js';
 import { roFilings } from './ro-filings.js';
+import FLAGS from '../../../../config/flags.json' with { type: 'json' };
 
 // Romanian company news from the press's RSS feeds (ro-news.js); no upstream key.
 const ronews = {
@@ -106,6 +107,13 @@ export function orderFromEnv(env) {
     if (list.length) out[cap] = list;
   });
   return out;
+}
+// Feeds switched off by config/flags.json. /us-news with names= is the followed US
+// companies' press (the background scan), which belongs to Following and stays on.
+function onHold(cap, q, flags) {
+  if (cap === 'marketNewsEU') return !flags.euMarket;
+  if (cap === 'marketNewsUS') return !flags.usMarket && !q.get('names');
+  return false;
 }
 // The paths the apps already call, mapped to capabilities.
 const ROUTES = {
@@ -551,7 +559,7 @@ async function signedIn(request, auth, fetchImpl) {
 
 const defaultLog = process.env.NODE_TEST_CONTEXT ? () => {} : e => console.log(JSON.stringify(e));
 
-// options: { apiKey (Finnhub), keys: { provider: key }, order (orderFromEnv), allowedOrigins, rateLimit, clientId, log,
+// options: { flags (overrides config/flags.json), apiKey (Finnhub), keys: { provider: key }, order (orderFromEnv), allowedOrigins, rateLimit, clientId, log,
 //            usage (usage-store.js), waitUntil (keeps a flush alive after the response),
 //            auth: { supabaseUrl, anonKey, publicSymbols, fetch } (without it, nothing is gated: local use) }
 export async function handleMarketRequest(request, options = {}) {
@@ -562,6 +570,7 @@ export async function handleMarketRequest(request, options = {}) {
   const url = new URL(request.url);
   const cap = ROUTES[url.searchParams.get('path') || ''];
   if (!cap) return json({ error: 'path not allowed' }, 400);
+  if (onHold(cap, url.searchParams, { ...FLAGS, ...(options.flags || {}) })) return json({ error: 'feature on hold' }, 404, { 'cache-control': 'public, max-age=300' });
   const parsed = parse(cap, url.searchParams);
   if (parsed.error) return json({ error: parsed.error }, 400);
   const auth = options.auth;

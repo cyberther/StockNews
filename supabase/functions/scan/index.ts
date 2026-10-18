@@ -32,7 +32,9 @@ const FRESH_MS = 3 * 3600 * 1000;     // alert only on stories published in the 
 const TICKER_RE = /^[A-Z0-9][A-Z0-9.\-]{0,11}$/;
 // The app's US Market tab (templates/shared/hif-data.js MARKET_TOP): stored whoever follows
 // them, so the AI summary job writes their summaries too. No alerts unless followed.
+// On hold (config/flags.json usMarket: false) unless the function's FLAG_US_MARKET secret is 'true'.
 const MARKET_TOP = ['NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'AVGO', 'TSLA', 'TSM', 'JPM'];
+const flagOn = (name: string) => env(name) === 'true';
 
 type Story = { id: string; ticker: string; headline: string; source: string | null; url: string | null;
   summary: string | null; published_at: string };
@@ -278,7 +280,7 @@ Deno.serve(async (req) => {
   if (wlErr) return Response.json({ error: 'watchlist: ' + wlErr.message }, { status: 500 });
 
   // Every distinct ticker; past the Finnhub budget, successive runs take turns.
-  const allTickers = [...new Set((wl || []).map(r => r.ticker).concat(MARKET_TOP).filter(t => TICKER_RE.test(t)))].sort();
+  const allTickers = [...new Set((wl || []).map(r => r.ticker).concat(flagOn('FLAG_US_MARKET') ? MARKET_TOP : []).filter(t => TICKER_RE.test(t)))].sort();
   let tickers = allTickers;
   if (tickers.length > MAX_TICKERS) {
     const slots = Math.ceil(tickers.length / MAX_TICKERS);
@@ -309,7 +311,9 @@ Deno.serve(async (req) => {
   const usNames = (usNameRows || []).filter(r => r.name).slice(0, 80)
     .map(r => r.ticker + ':' + String(r.name).replace(/[^\w .,&'()-]/g, ' ').slice(0, 80)).join('|');
   const press = (await pressMarketNews('/ro-news', 'bvb feed', errors))
-    .concat(await pressMarketNews('/eu-news', 'eu feed', errors))
+    // The EU Market tab's feed (every XETRA and London story) only while that tab is on;
+    // followed .DE and .L shares get theirs from companyNews above.
+    .concat(flagOn('FLAG_EU_MARKET') ? await pressMarketNews('/eu-news', 'eu feed', errors) : [])
     .concat(await pressMarketNews('/us-news&names=' + encodeURIComponent(usNames), 'us press', errors, t => usTickers.has(t)));
   const found = followed.concat(press.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; }));
 

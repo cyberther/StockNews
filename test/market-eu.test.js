@@ -83,7 +83,7 @@ test('the EU Market feed files each story under the company named first, and is 
   // Named only in the text (Markets wrap), or a round-up: not in the tab.
   assert.deepEqual(rows.map(x => [x.url, x.related]), [['https://a.de/1', 'BAS.DE'], ['https://a.co.uk/4', 'TSCO.L']]);
   assert.deepEqual(await euCompanyNews('LHA.DE'), []);
-  const r = await handleMarketRequest(req('path=/eu-news'), { keys: {}, log: () => {}, auth: { supabaseUrl: 'https://x.supabase.co', anonKey: 'k' } });
+  const r = await handleMarketRequest(req('path=/eu-news'), { flags: { euMarket: true }, keys: {}, log: () => {}, auth: { supabaseUrl: 'https://x.supabase.co', anonKey: 'k' } });
   assert.equal(r.status, 200);
   assert.equal(JSON.parse(await r.text()).length, 2);
 });

@@ -1,0 +1,12 @@
+{
+  "following": true,
+  "bvb": true,
+  "portfolio": true,
+  "usMarket": false,
+  "euMarket": false,
+  "universeScan": false,
+  "prefetchUnfollowedNews": false,
+  "hiddenModuleRefresh": false,
+  "commercialMode": false,
+  "dataSource": "supabase"
+}
