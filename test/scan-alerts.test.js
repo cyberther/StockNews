@@ -37,3 +37,12 @@ test('MARKET_TOP and the EU feed only with their flags', () => {
   assert.match(src, /concat\(flagOn\('FLAG_US_MARKET'\) \? MARKET_TOP : \[\]\)/);
   assert.match(src, /flagOn\('FLAG_EU_MARKET'\) \? await pressMarketNews\('\/eu-news'/);
 });
+
+test('the test alert answers the app on Cloudflare Pages (production and branch previews) as well as Netlify', () => {
+  const line = src.split('\n').find(l => l.includes('const ok = origin &&'));
+  const re = new RegExp(line.match(/\/\^(.+?)\$\//)[0].slice(1, -1));
+  for (const o of ['https://aa-market-pulse.pages.dev', 'https://staging.aa-market-pulse.pages.dev', 'https://973e7c03.aa-market-pulse.pages.dev',
+    'https://aa-market-pulse.netlify.app', 'https://staging--aa-market-pulse.netlify.app']) assert.ok(re.test(o), o);
+  for (const o of ['https://evil.pages.dev', 'https://aa-market-pulse.pages.dev.evil.com', 'http://aa-market-pulse.pages.dev', 'https://x.y.aa-market-pulse.pages.dev'])
+    assert.ok(!re.test(o), o);
+});
