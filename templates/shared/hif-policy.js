@@ -41,6 +41,11 @@ function query(o){
   var q = 'policy_events?select=' + COLS;
   if (o.sector && Object.prototype.hasOwnProperty.call(SECTORS, o.sector)) q += '&sectors=cs.' + encodeURIComponent('{' + o.sector + '}');
   if (o.ticker && SYMBOL.test(o.ticker)) q += '&companies=cs.' + encodeURIComponent(JSON.stringify([{ ticker: o.ticker }]));
+  // Title search: PostgREST's syntax characters removed; letters with diacritics become '_'
+  // (any one character), so ş/ș, ţ/ț and words typed without them all match.
+  var text = String(o.q || '').replace(/[*,().:%\\"'&=#?;<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80).replace(/[ăâîșşțţĂÂÎȘŞȚŢ]/g, '_');
+  if (text) q += '&title=ilike.' + encodeURIComponent('*' + text + '*').replace(/%2A/g, '*');
+  if (o.status && Object.prototype.hasOwnProperty.call(STATUS, o.status)) q += '&status=eq.' + o.status;
   return q + '&order=event_date.desc,id.desc&limit=' + (Number(o.limit) > 0 ? Math.min(500, Number(o.limit)) : 200);
 }
 // One request; an error is an error, not an empty list.
