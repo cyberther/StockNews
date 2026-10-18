@@ -52,3 +52,8 @@ test('Finance Ministry releases are statements, whatever their title says', () =
   assert.equal(law.status, 'statement');
   assert.equal(law.certainty, 'official_statement');
 });
+
+test('a Chamber row whose link is not a path on www.cdep.ro is skipped', () => {
+  const html = '<table><tr><td>1.</td><td><a href="@evil.example/ords/pls/proiecte/upl_pck2015.proiect?cam=2&idp=1">PL-x 1/02.02.2026</a></td><td>Titlu</td><td>la Senat<br>25.02.2026</td></tr></table>';
+  assert.deepEqual(parseCdepList(html, { kind: 'initiatives' }), []);
+});

@@ -19,7 +19,7 @@ export function parseCdepList(html, { kind }) {
   for (const row of String(html || '').match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || []) {
     const cells = row.match(/<td[^>]*>[\s\S]*?<\/td>/gi) || [];
     if (cells.length < 4) continue;
-    const link = /href="([^"]*upl_pck2015\.proiect[^"]*idp=(\d+)[^"]*)"[^>]*>([^<]+)</i.exec(cells[1]);
+    const link = /href="(\/ords\/[^"]*upl_pck2015\.proiect[^"]*idp=(\d+)[^"]*)"[^>]*>([^<]+)</i.exec(cells[1]);
     if (!link) continue;
     const doc = text(link[3]), title = text(cells[2]);
     if (!title) continue;
@@ -39,12 +39,12 @@ export function parseCdepList(html, { kind }) {
       certainty: 'official_procedure'
     };
     if (kind === 'laws') {
-      const law = /href="([^"]*legis_pck\.htp_act[^"]*)"[^>]*>([^<]+)</i.exec(cells[3]);
+      const law = /href="(\/ords\/[^"]*legis_pck\.htp_act[^"]*)"[^>]*>([^<]+)</i.exec(cells[3]);
       if (!law) continue;
       Object.assign(item, { status: 'adopted', certainty: 'official_act', doc_number: text(law[2]),
         stage: 'promulgată: ' + stageText, law_url: BASE + law[1].replace(/&amp;/g, '&') });
     } else {
-      const law = /href="([^"]*legis_pck\.htp_act[^"]*)"[^>]*>([^<]+)</i.exec(cells[3]);
+      const law = /href="(\/ords\/[^"]*legis_pck\.htp_act[^"]*)"[^>]*>([^<]+)</i.exec(cells[3]);
       const st = fold(stageText);
       if (law) Object.assign(item, { status: 'adopted', certainty: 'official_act', doc_number: text(law[2]), law_url: BASE + law[1].replace(/&amp;/g, '&') });
       // Passed by the deciding chamber, or sent for promulgation: adopted, as a procedure.
