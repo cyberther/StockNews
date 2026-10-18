@@ -44,7 +44,11 @@ export async function runPolicy({ db, fetchText: get = fetchText, now = new Date
         if (prev && prev.status === 'adopted' && r.status !== 'adopted') continue;
         found.set(r.id, r);
       }
-    } catch (e) { errors.push(`${src.name}: ${e.message}`); }
+    } catch (e) {
+      // fetch() says only "fetch failed"; the cause (timeout, refused, TLS) is what helps.
+      const c = e.cause, why = c ? [c.code, c.message].filter(Boolean).join(' ') : '';
+      errors.push(`${src.name}: ${e.message}${why ? ' (' + why.slice(0, 160) + ')' : ''}`);
+    }
   }
 
   const existing = new Map((await db.read('policy_events', 'select=' + ['id', ...KEEP].join(','))).map(r => [r.id, r]));

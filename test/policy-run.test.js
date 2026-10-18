@@ -96,3 +96,10 @@ test('rows read back from Postgres (jsonb reorders object keys) do not count as 
   const s = await runPolicy(args(db, f));
   assert.equal(s.changed, 0);
 });
+
+test('a network failure reports its cause, not just "fetch failed"', async () => {
+  const db = fakeDb();
+  const err = Object.assign(new TypeError('fetch failed'), { cause: Object.assign(new Error('connect ETIMEDOUT 1.2.3.4:443'), { code: 'ETIMEDOUT' }) });
+  const s = await runPolicy(args(db, fetcher({ laws2026: err })));
+  assert.ok(s.errors.includes('cdep-laws-2026: fetch failed (ETIMEDOUT connect ETIMEDOUT 1.2.3.4:443)'), s.errors.join('|'));
+});
