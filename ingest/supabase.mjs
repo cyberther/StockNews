@@ -32,6 +32,10 @@ export function createDb({ url, key, fetch: fetchImpl = globalThis.fetch }) {
       return call(table, `${table}?on_conflict=${encodeURIComponent(onConflict)}`, { method: 'POST', body: JSON.stringify(rows),
         headers: headers({ prefer: `resolution=${ignoreDuplicates ? 'ignore' : 'merge'}-duplicates,return=representation` }) });
     },
+    // A database function (PostgREST /rpc), with the service key.
+    rpc(name, args) {
+      return call(name, `rpc/${name}`, { method: 'POST', body: JSON.stringify(args || {}), headers: headers() });
+    },
     insert(table, rows) {
       return call(table, table, { method: 'POST', body: JSON.stringify(rows), headers: headers({ prefer: 'return=minimal' }) });
     }

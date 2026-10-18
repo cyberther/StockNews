@@ -12,8 +12,8 @@ const UA = 'Mozilla/5.0 (compatible; MarketPulsePolicy/1.0; +https://github.com/
 export function policySources(now) {
   const year = Number(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Bucharest', year: 'numeric' }).format(now));
   const cdep = y => [
-    { name: `cdep-initiatives-${y}`, url: cdepUrl('initiatives', y), parse: h => parseCdepList(h, { kind: 'initiatives' }) },
-    { name: `cdep-laws-${y}`, url: cdepUrl('laws', y), parse: h => parseCdepList(h, { kind: 'laws' }) }
+    { name: `cdep-initiatives-${y}`, url: cdepUrl('initiatives', y), relay: true, parse: h => parseCdepList(h, { kind: 'initiatives' }) },
+    { name: `cdep-laws-${y}`, url: cdepUrl('laws', y), relay: true, parse: h => parseCdepList(h, { kind: 'laws' }) }
   ];
   return [...cdep(year), ...cdep(year - 1), { name: 'mf-press', url: MF_RSS, parse: parseMfRss }];
 }
@@ -26,18 +26,38 @@ export async function fetchText(url) {
   return body;
 }
 
+// www.cdep.ro does not answer GitHub's runners (connect timeout), but does answer Supabase:
+// there, its pages are fetched by the database (pg_net, supabase/policy-relay.sql, which only
+// accepts the Chamber's list URLs) and read back when the answer is in.
+export function relayFetch(db, { intervalMs = 1000, timeoutMs = 45000 } = {}) {
+  return async url => {
+    const id = await db.rpc('policy_fetch_start', { p_url: url });
+    const until = Date.now() + timeoutMs;
+    while (Date.now() < until) {
+      await new Promise(r => setTimeout(r, intervalMs));
+      const rows = await db.rpc('policy_fetch_result', { p_id: id });
+      const r = Array.isArray(rows) ? rows[0] : rows;
+      if (!r) continue;
+      if (r.timed_out) throw new Error('relay timed out');
+      if (r.status_code !== 200) throw new Error('relay HTTP ' + (r.status_code || 0) + (r.error_msg ? ' ' + String(r.error_msg).slice(0, 120) : ''));
+      return r.content || '';
+    }
+    throw new Error('relay: no answer in ' + Math.round(timeoutMs / 1000) + ' s');
+  };
+}
+
 const KEEP = ['title', 'summary', 'event_date', 'institution', 'initiator', 'doc_number', 'source_url', 'status', 'stage', 'certainty', 'sectors', 'caen', 'companies', 'figures'];
 // Compared with object keys sorted: Postgres jsonb stores them in its own order.
 const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object'
   ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v ?? null;
 const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
 
-export async function runPolicy({ db, fetchText: get = fetchText, now = new Date(), taxonomy, catalog }) {
+export async function runPolicy({ db, fetchText: get = fetchText, relay = null, now = new Date(), taxonomy, catalog }) {
   const errors = [], found = new Map();
   // Laws come after initiatives in the list, so an initiative that became law ends up as the law.
   for (const src of policySources(now)) {
     try {
-      const rows = src.parse(await get(src.url));
+      const rows = src.parse(await (src.relay && relay ? relay : get)(src.url));
       if (!rows.length) { errors.push(`${src.name}: no rows`); continue; }
       for (const r of rows) {
         const prev = found.get(r.id);

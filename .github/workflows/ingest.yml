@@ -53,6 +53,8 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SCAN_URL: ${{ secrets.SCAN_URL }}
           SCAN_SECRET: ${{ secrets.SCAN_SECRET }}
+          # www.cdep.ro does not answer GitHub's runners: its pages are fetched through Supabase.
+          POLICY_RELAY: supabase
         run: node ingest/main.mjs --job="$JOB"
       - name: Alert when over budget
         if: always() && hashFiles('summary.json') != ''
