@@ -40,7 +40,7 @@ async function main() {
   const problems = [];
   let runs = [];
   try {
-    const db = createDb({ url: process.env.SUPABASE_URL, key: process.env.SUPABASE_SERVICE_ROLE_KEY });
+    const db = createDb({ url: String(process.env.SUPABASE_URL || '').trim(), key: String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim() });
     // Also keeps a free-tier project active: it pauses after 7 days without activity.
     const next = new Date(Date.parse(day + 'T00:00:00Z') + 86400000).toISOString();
     runs = await db.read('ingest_runs', `select=job,started_at,ok&started_at=gte.${day}T00:00:00Z&started_at=lt.${encodeURIComponent(next)}`);

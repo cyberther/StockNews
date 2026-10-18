@@ -46,13 +46,15 @@ function memoryDb(seed) {
     async insert(table, rows) { (t[table] = t[table] || []).push(...rows); return rows; } };
 }
 
+// Secrets piped into GitHub can carry a trailing newline, which no HTTP header accepts.
+const env = k => String(process.env[k] || '').trim();
 const dry = has('dry-run');
 const db = dry
   ? memoryDb({ watchlist: (arg('watchlist') || '').split(',').filter(Boolean).map(ticker => ({ ticker })), holdings: (arg('holdings') || '').split(',').filter(Boolean).map(ticker => ({ ticker })) })
-  : createDb({ url: process.env.SUPABASE_URL, key: process.env.SUPABASE_SERVICE_ROLE_KEY, fetch: plainFetch });
+  : createDb({ url: env('SUPABASE_URL'), key: env('SUPABASE_SERVICE_ROLE_KEY'), fetch: plainFetch });
 
 const providers = [createYahoo({ client: await yahooClient(meter.fetch) }), eodhd, twelvedata, bvb];
-const scanUrl = process.env.SCAN_URL, scanSecret = process.env.SCAN_SECRET;
+const scanUrl = env('SCAN_URL'), scanSecret = env('SCAN_SECRET');
 const alerts = !dry && scanUrl && scanSecret ? async () => {
   const u = new URL(scanUrl); u.searchParams.set('mode', 'alerts');
   const res = await plainFetch(u, { method: 'POST', headers: { authorization: 'Bearer ' + scanSecret }, signal: AbortSignal.timeout(60000) });
