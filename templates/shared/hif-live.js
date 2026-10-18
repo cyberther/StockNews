@@ -7,6 +7,12 @@
 // function resolves to null and the templates keep rendering the demo data from hif-data.js.
 //
 // Free-tier endpoints only. /quotes (many symbols at once) exists only through the proxy.
+//
+// With the dataSource flag at 'supabase' (templates/shared/hif-flags.js) and Supabase set up,
+// prices, company news and analyst counts come from the tables the ingestion jobs fill
+// (supabase/market-data.sql): one request each per refresh, whatever the number of symbols,
+// and never a call to a market data provider. Charts, search and company profiles still go
+// through the proxy, on the reader's own action.
 (function(){
 // The page runtime evaluates helmet scripts twice; a second copy would replace the
 // adapter and throw away its response cache (so every refresh refetched everything).
@@ -14,7 +20,9 @@ if (window.HIFLive) return;
 const DIRECT = 'https://finnhub.io/api/v1';
 const PROXY = '/api/finnhub';
 const cache = new Map();
-const TTL = { ronews: 600000, profile: 24 * 3600000, quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000, edates: 6 * 3600000, filings: 1800000 };
+const TTL = { ronews: 600000, profile: 24 * 3600000, quote: 60000, news: 300000, search: 300000, recs: 900000, chart: 300000, earnings: 900000, edates: 6 * 3600000, filings: 1800000,
+  // A recommendation the gateway failed to get is not asked for again for a day.
+  recsfail: 24 * 3600000 };
 let proxyState = 'unknown'; // 'unknown' | 'yes' | 'no'
 let batchQuotes = true;      // false once the proxy has turned /quotes down (an older server)
 
@@ -81,7 +89,69 @@ async function fetchOnce(path, params, token){
   }
   return callDirect(path, params, token);
 }
-function available(token){ return proxyState !== 'no' || !!token; }
+function available(token){ return sbMode() || proxyState !== 'no' || !!token; }
+
+// ---- Supabase (dataSource: 'supabase')
+function sbMode(){
+  const F = window.HIFFlags, A = window.HIFAuth;
+  return !!(F && F.get('dataSource') === 'supabase' && A && A.rest && (!A.enabled || A.enabled()));
+}
+// PostgREST in() list; symbols contain dots, so each is quoted.
+const inList = syms => encodeURIComponent('(' + syms.map(s => '"' + String(s).replace(/"/g, '') + '"').join(',') + ')');
+async function sb(path){
+  const r = await window.HIFAuth.rest(path);
+  if (!r || !r.ok || !Array.isArray(r.body)) throw new Error('supabase ' + ((r && r.status) || 0));
+  return r.body;
+}
+// Analyst counts exist for US listings only (Finnhub's free plan and Yahoo alike): nothing
+// is asked for BMW.DE or SNP.RO.
+function hasRecs(symbol){ const M = window.HIFMarkets; return M ? M.marketOf(symbol) === 'US' : !/\./.test(symbol); }
+function sbQuote(r){
+  if (!r || r.price == null) return null;
+  const q = shapeQuote({ c: Number(r.price), dp: r.change_pct, d: r.change }, r.symbol);
+  if (q) { q.asOf = Date.parse(r.market_time || r.fetched_at) || null; q.fetchedAt = Date.parse(r.fetched_at) || null; q.source = r.source || ''; }
+  return q;
+}
+function storyRow(r){
+  const i = String(r.id).indexOf(':');
+  return newsRow({ id: String(r.id).slice(i + 1), related: r.ticker, headline: r.headline, source: r.source, url: r.url,
+    summary: r.summary, datetime: Math.floor(Date.parse(r.published_at) / 1000) });
+}
+function recRow(r){
+  const total = (r.buy || 0) + (r.hold || 0) + (r.sell || 0);
+  return r.status === 'ok' && total ? { buyPct: Math.round((r.buy || 0) / total * 100) + '%', detail: (r.buy || 0) + ' / ' + (r.hold || 0) + ' / ' + (r.sell || 0), period: r.period || '' } : null;
+}
+async function sbQuotes(symbols){
+  const out = {}, need = [];
+  Array.from(new Set(symbols || [])).forEach(s => { const hit = fresh('quote', s); if (hit) out[s] = hit; else need.push(s); });
+  if (!need.length) return out;
+  const rows = await sb('market_quotes?select=symbol,price,change,change_pct,prev_close,currency,market_time,fetched_at,source&symbol=in.' + inList(need.sort()));
+  rows.forEach(r => { const q = sbQuote(r); if (q) out[r.symbol] = put('quote', r.symbol, q); });
+  return out;
+}
+// The last 30 days' stories of many symbols in one request: { SYMBOL: rows }.
+async function sbNews(symbols){
+  const out = {}, need = [];
+  symbols.forEach(s => { const hit = fresh('news', s); if (hit) out[s] = hit; else need.push(s); });
+  if (!need.length) return out;
+  const since = new Date(Date.now() - 30 * 86400000).toISOString();
+  const rows = await sb('stories?select=id,ticker,headline,source,url,summary,published_at&ticker=in.' + inList(need) +
+    '&published_at=gte.' + encodeURIComponent(since) + '&order=published_at.desc&limit=' + Math.min(2000, need.length * 60));
+  const by = {};
+  rows.forEach(r => { (by[r.ticker] = by[r.ticker] || []).push(storyRow(r)); });
+  need.forEach(s => { out[s] = put('news', s, by[s] || []); });
+  return out;
+}
+async function sbRecs(symbols){
+  const out = {}, need = [];
+  symbols.filter(hasRecs).forEach(s => { const hit = cache.get('recs:' + s); if (hit && Date.now() - hit.at < TTL.recs) { if (hit.value) out[s] = hit.value; } else need.push(s); });
+  if (!need.length) return out;
+  const rows = await sb('market_recommendations?select=symbol,status,buy,hold,sell,period&symbol=in.' + inList(need));
+  const by = {};
+  rows.forEach(r => { by[r.symbol] = recRow(r); });
+  need.forEach(s => { const v = put('recs', s, by[s] || null); if (v) out[s] = v; });
+  return out;
+}
 
 // Small prices keep their digits (0.9940, 4.125), so a quote under 10 isn't rounded away.
 function fmtPrice(v){ if (v == null) return null; const n = Number(v), a = Math.abs(n); return n.toFixed(a < 1 ? 4 : a < 10 ? 3 : 2); }
@@ -101,6 +171,7 @@ function isoDay(off){ return new Date(Date.now() + off * 86400000).toISOString()
 async function quote(symbol, token){
   if (!available(token)) return null;
   const hit = fresh('quote', symbol); if (hit) return hit;
+  if (sbMode()) { try { return (await sbQuotes([symbol]))[symbol] || null; } catch (e) { return null; } }
   const j = await get('/quote', { symbol: symbol }, token);
   return put('quote', symbol, shapeQuote(j, symbol));
 }
@@ -121,6 +192,7 @@ async function quotes(symbols, token){
   const need = [];
   Array.from(new Set(symbols || [])).forEach(s => { const hit = fresh('quote', s); if (hit) out[s] = hit; else need.push(s); });
   if (!need.length) return out;
+  if (sbMode()) { try { return Object.assign(out, await sbQuotes(need)); } catch (e) { return out; } }
   need.sort();
   if (proxyState !== 'no' && batchQuotes) {
     try {
@@ -146,6 +218,7 @@ async function profile(symbol, token){
 async function news(symbol, token, limit){
   if (!available(token)) return null;
   const hit = fresh('news', symbol); if (hit) return hit.slice(0, limit || 8);
+  if (sbMode()) return ((await sbNews([symbol]))[symbol] || []).slice(0, limit || 5);
   const j = await get('/company-news', { symbol: symbol, from: isoDay(-30), to: isoDay(0) }, token);
   const rows = (Array.isArray(j) ? j : []).filter(n => n && n.headline)
     .sort((a,b) => b.datetime - a.datetime)
@@ -166,7 +239,13 @@ async function pressNews(path, kind){
   const rows = (Array.isArray(j) ? j : []).filter(n => n && n.headline && n.related).sort((a,b) => b.datetime - a.datetime).map(newsRow);
   return put(kind, 'all', rows);
 }
-function roNews(){ return pressNews('/ro-news', 'ronews'); }
+function roNews(){
+  if (!sbMode()) return pressNews('/ro-news', 'ronews');
+  const hit = fresh('ronews', 'all'); if (hit) return Promise.resolve(hit);
+  const since = new Date(Date.now() - 7 * 86400000).toISOString();
+  return sb('stories?select=id,ticker,headline,source,url,summary,published_at&ticker=like.*.RO&published_at=gte.' + encodeURIComponent(since) + '&order=published_at.desc&limit=300')
+    .then(rows => put('ronews', 'all', rows.map(storyRow)));
+}
 // German and British press stories about XETRA and London listings (the EU Market tab).
 function euNews(){ return pressNews('/eu-news', 'eunews'); }
 
@@ -314,12 +393,15 @@ async function filings(symbol){
 
 // { buyPct, detail } from the most recent recommendation period, or null when the plan blocks it.
 async function recommendation(symbol, token){
-  if (!available(token)) return null;
+  if (!available(token) || !hasRecs(symbol)) return null;
   const hit = fresh('recs', symbol); if (hit) return hit;
+  if (sbMode()) { try { return (await sbRecs([symbol]))[symbol] || null; } catch (e) { return null; } }
+  if (fresh('recsfail', symbol)) return null;
   let j;
-  // A failed call (busy, rate limited) isn't remembered as "no analysts": asked again later.
+  // A failed call (busy, rate limited, a plan without this market) is not asked again for a
+  // day: before, BMW.DE's always-refused request went out on every 5-minute refresh.
   try { j = await get('/stock/recommendation', { symbol: symbol }, token); }
-  catch (e) { return null; }
+  catch (e) { put('recsfail', symbol, true); return null; }
   const r = Array.isArray(j) && j.length ? j[0] : null;
   if (!r) return put('recs', symbol, null);
   const buy = (r.strongBuy || 0) + (r.buy || 0), hold = r.hold || 0, sell = (r.sell || 0) + (r.strongSell || 0);
@@ -377,6 +459,17 @@ async function load(symbols, token, opts){
   const o = opts || {};
   const out = { quotes:{}, news:{}, recs:{}, errors:[], mode:'off' };
   if (!symbols || !symbols.length || !available(token)) return out;
+  if (sbMode()) {
+    // Three requests, whatever the number of symbols.
+    const [q, n, r] = await Promise.all([
+      sbQuotes(symbols).catch(e => { out.errors.push('quotes: ' + e.message); return {}; }),
+      o.news === false ? {} : sbNews(symbols).catch(e => { out.errors.push('news: ' + e.message); return {}; }),
+      o.recs === false ? {} : sbRecs(symbols).catch(e => { out.errors.push('recs: ' + e.message); return {}; })
+    ]);
+    const lim = o.newsLimit || 300;
+    Object.keys(n).forEach(s => { n[s] = n[s].slice(0, lim); });
+    return Object.assign(out, { quotes: q, news: n, recs: r, mode: 'supabase' });
+  }
   // Every quote in one request first; news and analysts are per symbol.
   try { out.quotes = await quotes(symbols, token); } catch (e) { out.errors.push('quotes: ' + e.message); }
   for (const sym of symbols) {
@@ -416,6 +509,6 @@ function translatedUrl(url, lang){
 }
 
 window.HIFLive = { candles, filings, quote, quotes, roNews, euNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
-  get mode(){ return proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
+  get mode(){ return sbMode() ? 'supabase' : proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();
