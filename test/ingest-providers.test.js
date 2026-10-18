@@ -9,7 +9,7 @@ const fakeClient = (rows, summary) => {
   return { calls, quote: async (symbols, opts) => { calls.quote.push(symbols); return rows.filter(r => symbols.includes(r.symbol)); },
     quoteSummary: async (sym, opts) => { calls.summary.push([sym, opts]); return summary(sym); } };
 };
-const row = (symbol, price, extra) => Object.assign({ symbol, regularMarketPrice: price, regularMarketChange: 0.5, regularMarketChangePercent: 1.25,
+const row = (symbol, price, extra) => Object.assign({ symbol, longName: symbol + ' Inc.', regularMarketPrice: price, regularMarketChange: 0.5, regularMarketChangePercent: 1.25,
   regularMarketPreviousClose: price - 0.5, currency: 'USD', regularMarketTime: new Date('2026-10-20T13:45:00Z') }, extra);
 
 test('licences', () => assert.deepEqual(LICENSES, ['dev_only', 'commercial_display', 'redistribution']));
@@ -23,7 +23,7 @@ test('yahoo is dev_only and maps a batch to the quotes table shape', async () =>
   assert.deepEqual(client.calls.quote, [['AAPL', 'SNP.RO', 'PZC.L', 'BRK-B']]);
   const by = Object.fromEntries(out.map(q => [q.symbol, q]));
   assert.deepEqual(by.AAPL, { symbol: 'AAPL', price: 230.1, change: 0.5, change_pct: 1.25, prev_close: 229.6, currency: 'USD',
-    market_time: '2026-10-20T13:45:00.000Z', source: 'yahoo', license: 'dev_only' });
+    market_time: '2026-10-20T13:45:00.000Z', source: 'yahoo', license: 'dev_only', name: 'AAPL Inc.' });
   assert.equal(by['SNP.RO'].currency, 'RON');
   assert.equal(by['PZC.L'].currency, 'GBp');   // London stays in pence, as in the apps
   assert.equal(by['BRK.B'].price, 470);        // back to the apps' spelling

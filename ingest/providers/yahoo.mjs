@@ -26,7 +26,9 @@ export function createYahoo({ client }) {
           const t = r.regularMarketTime instanceof Date ? r.regularMarketTime : r.regularMarketTime ? new Date(r.regularMarketTime) : null;
           out.push({ symbol: fromYahoo(String(r.symbol).toUpperCase()), price, change: num(r.regularMarketChange),
             change_pct: num(r.regularMarketChangePercent), prev_close: num(r.regularMarketPreviousClose),
-            currency: currency(r.currency), market_time: t && !isNaN(t) ? t.toISOString() : null, ...base });
+            currency: currency(r.currency), market_time: t && !isNaN(t) ? t.toISOString() : null, ...base,
+            // The company name, for public.ticker_names (not a column of market_quotes).
+            name: String(r.longName || r.shortName || '').trim() || null });
         }
       }
       return out;

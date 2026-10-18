@@ -3,7 +3,7 @@
 //   { name, license, configured, supports(capability),
 //     quotes(symbols) -> Quote[], recommendation(symbol) -> Rec | null }
 //
-// Quote: { symbol, price, change, change_pct, prev_close, currency, market_time, source, license }
+// Quote: { symbol, price, change, change_pct, prev_close, currency, market_time, source, license, name? }
 // Rec:   { symbol, status: 'ok', buy, hold, sell, period, source, license }
 //
 // Every provider states the licence its data comes under (supabase/market-data.sql):
