@@ -55,3 +55,17 @@ test('scan_runs gets only its own columns (the mode stays in the response)', () 
   const names = cols[1].split(',').map(s => s.trim().split(':')[0]).filter(Boolean).sort();
   assert.deepEqual(names, ['errors', 'new_stories', 'pushes', 'started_at', 'tickers']);
 });
+
+test('policy alerts: worked out in SQL, sent once a day at most per run, marked even with no device', () => {
+  const start = src.indexOf('// Policy alerts'), end = src.indexOf('// end of policy alerts');
+  assert.ok(start > 0 && end > start, 'policy alerts block');
+  const block = src.slice(start, end);
+  assert.match(block, /flagOn\('FLAG_POLICY_ALERTS'\)/);
+  assert.match(block, /rpc\('policy_alerts_due', \{ p_since:/);
+  assert.match(block, /rpc\('policy_alerts_mark', \{ p_until:/);
+  assert.doesNotMatch(block, /fetch\(/);
+  // Marking does not depend on having sent anything (no device, VAPID missing).
+  const mark = block.indexOf("rpc('policy_alerts_mark'"), send = block.indexOf('sendNotification');
+  assert.ok(mark > 0 && send > 0);
+  assert.doesNotMatch(block.slice(block.lastIndexOf('if', mark), mark), /sent|pushes/);
+});

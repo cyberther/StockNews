@@ -11,6 +11,9 @@
 //   commercialMode              hide data whose licence is dev_only from public and paid features
 //   dataSource                  'supabase' (market data from the ingestion tables) or 'gateway' (/api/finnhub)
 //   policy                      the Policy screen and the daily official-sources job (Phase B)
+//   impact                      impact analyses, companies' exposure, the calculator, the portfolio card (Phase C)
+//   policyAlerts                push alerts for policy events and analyses (Edge Function: FLAG_POLICY_ALERTS)
+//   aiAnnotations               the local model's annotations: admin review and verified ones shown (Phase C)
 (function(){
 var FLAGS = {
   following: true,
@@ -23,7 +26,10 @@ var FLAGS = {
   hiddenModuleRefresh: false,
   commercialMode: false,
   dataSource: 'supabase',
-  policy: true
+  policy: true,
+  impact: true,
+  policyAlerts: true,
+  aiAnnotations: false
 };
 var root = typeof window !== 'undefined' ? window : globalThis;
 root.HIFFlags = {
