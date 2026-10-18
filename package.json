@@ -16,5 +16,8 @@
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
     "playwright": "^1.64.0"
+  },
+  "dependencies": {
+    "yahoo-finance2": "4.0.3"
   }
 }

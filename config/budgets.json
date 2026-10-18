@@ -1,0 +1,11 @@
+{
+  "_comment": "Calls allowed. providers: per provider per day (all jobs); jobs: per job per run. Yahoo counts HTTP requests (quotes in batches of 50, plus its cookie/crumb handshake). feeds = the RSS feeds of the press. Started conservatively; raise with care.",
+  "providers": {
+    "yahoo": { "perDay": 400 },
+    "feeds": { "perDay": 2000 }
+  },
+  "jobs": {
+    "intraday": { "perRun": 40 },
+    "eod": { "perRun": 120 }
+  }
+}
