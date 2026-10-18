@@ -85,7 +85,9 @@ test('intraday: one batch for the open markets\' symbols, written with their lic
   const s = await runIngest(b.args);
   assert.deepEqual(b.yahoo.calls.quotes, [['SAP.DE', 'SNP.RO', 'TLV.RO']]);
   assert.deepEqual(b.db.t.market_quotes.map(q => [q.symbol, q.license]).sort(), [['SAP.DE', 'dev_only'], ['SNP.RO', 'dev_only'], ['TLV.RO', 'dev_only']]);
-  assert.ok(b.db.t.market_quotes.every(q => !('name' in q) && q.fetched_at === TUE_EU.toISOString()));
+  assert.ok(b.db.t.market_quotes.every(q => q.fetched_at === TUE_EU.toISOString()));
+  // The company name travels with the price, so the apps need no profile lookups.
+  assert.equal(b.db.t.market_quotes.find(q => q.symbol === 'SAP.DE').name, 'SAP.DE Co');
   // Names learnt from the quotes go to ticker_names.
   assert.ok(b.db.t.ticker_names.some(r => r.ticker === 'SAP.DE' && r.name === 'SAP.DE Co'));
   assert.equal(s.quotes, 3);

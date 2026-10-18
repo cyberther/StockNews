@@ -47,7 +47,7 @@ export async function runIngest({ job, now = new Date(), db, providers, news, fl
         breaker.success(p.name);
         const newNames = rows.filter(r => r.name && !names.has(r.symbol)).map(r => ({ ticker: r.symbol, name: r.name, updated_at: startedAt }));
         newNames.forEach(r => names.set(r.ticker, r.name));
-        if (rows.length) await db.upsert('market_quotes', rows.map(({ name, ...q }) => ({ ...q, fetched_at: startedAt })), { onConflict: 'symbol' });
+        if (rows.length) await db.upsert('market_quotes', rows.map(q => ({ ...q, name: q.name || names.get(q.symbol) || null, fetched_at: startedAt })), { onConflict: 'symbol' });
         if (newNames.length) await db.upsert('ticker_names', newNames, { onConflict: 'ticker' });
         quotes = rows.length;
         break;

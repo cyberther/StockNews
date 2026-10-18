@@ -20,6 +20,7 @@ create table if not exists public.market_quotes (
   change_pct   numeric,
   prev_close   numeric,
   currency     text,
+  name         text,                                -- company name, so the apps need no profile lookups
   market_time  timestamptz,                         -- the last trade the price is from
   fetched_at   timestamptz not null default now(),  -- when the job read it
   source       text        not null,
@@ -27,6 +28,9 @@ create table if not exists public.market_quotes (
   constraint market_quotes_symbol check (symbol ~ '^[A-Z0-9][A-Z0-9.\-]{0,11}$'),
   constraint market_quotes_license check (license in ('dev_only', 'commercial_display', 'redistribution'))
 );
+
+-- Added after the first version of this file.
+alter table public.market_quotes add column if not exists name text;
 
 -- Analyst recommendations, read once a day (end-of-day job). status 'none' remembers that a
 -- source has nothing for the symbol, so it is not asked again for 24 hours.

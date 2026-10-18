@@ -89,12 +89,21 @@ async function fetchOnce(path, params, token){
   }
   return callDirect(path, params, token);
 }
-function available(token){ return sbMode() || proxyState !== 'no' || !!token; }
+function available(token){ return sbWanted() || proxyState !== 'no' || !!token; }
 
 // ---- Supabase (dataSource: 'supabase')
-function sbMode(){
+function sbWanted(){
   const F = window.HIFFlags, A = window.HIFAuth;
-  return !!(F && F.get('dataSource') === 'supabase' && A && A.rest && (!A.enabled || A.enabled()));
+  return !!(F && F.get('dataSource') === 'supabase' && A && A.rest);
+}
+function sbMode(){ const A = window.HIFAuth; return sbWanted() && (!A.enabled || A.enabled()); }
+// Whether Supabase is set up is known once the saved sign-in is restored: wait for it, so
+// the first requests of a visit don't go to the gateway by mistake. Without Supabase (the
+// demo), the gateway is used as before.
+async function useSb(){
+  if (!sbWanted()) return false;
+  try { await window.HIFAuth.ready; } catch (e) {}
+  return sbMode();
 }
 // PostgREST in() list; symbols contain dots, so each is quoted.
 const inList = syms => encodeURIComponent('(' + syms.map(s => '"' + String(s).replace(/"/g, '') + '"').join(',') + ')');
@@ -109,7 +118,8 @@ function hasRecs(symbol){ const M = window.HIFMarkets; return M ? M.marketOf(sym
 function sbQuote(r){
   if (!r || r.price == null) return null;
   const q = shapeQuote({ c: Number(r.price), dp: r.change_pct, d: r.change }, r.symbol);
-  if (q) { q.asOf = Date.parse(r.market_time || r.fetched_at) || null; q.fetchedAt = Date.parse(r.fetched_at) || null; q.source = r.source || ''; }
+  if (q) { q.asOf = Date.parse(r.market_time || r.fetched_at) || null; q.fetchedAt = Date.parse(r.fetched_at) || null; q.source = r.source || '';
+    q.name = r.name || ''; q.currency = r.currency ? String(r.currency) : ''; }
   return q;
 }
 function storyRow(r){
@@ -125,7 +135,7 @@ async function sbQuotes(symbols){
   const out = {}, need = [];
   Array.from(new Set(symbols || [])).forEach(s => { const hit = fresh('quote', s); if (hit) out[s] = hit; else need.push(s); });
   if (!need.length) return out;
-  const rows = await sb('market_quotes?select=symbol,price,change,change_pct,prev_close,currency,market_time,fetched_at,source&symbol=in.' + inList(need.sort()));
+  const rows = await sb('market_quotes?select=symbol,name,price,change,change_pct,prev_close,currency,market_time,fetched_at,source&symbol=in.' + inList(need.sort()));
   rows.forEach(r => { const q = sbQuote(r); if (q) out[r.symbol] = put('quote', r.symbol, q); });
   return out;
 }
@@ -171,7 +181,7 @@ function isoDay(off){ return new Date(Date.now() + off * 86400000).toISOString()
 async function quote(symbol, token){
   if (!available(token)) return null;
   const hit = fresh('quote', symbol); if (hit) return hit;
-  if (sbMode()) { try { return (await sbQuotes([symbol]))[symbol] || null; } catch (e) { return null; } }
+  if (await useSb()) { try { return (await sbQuotes([symbol]))[symbol] || null; } catch (e) { return null; } }
   const j = await get('/quote', { symbol: symbol }, token);
   return put('quote', symbol, shapeQuote(j, symbol));
 }
@@ -192,7 +202,7 @@ async function quotes(symbols, token){
   const need = [];
   Array.from(new Set(symbols || [])).forEach(s => { const hit = fresh('quote', s); if (hit) out[s] = hit; else need.push(s); });
   if (!need.length) return out;
-  if (sbMode()) { try { return Object.assign(out, await sbQuotes(need)); } catch (e) { return out; } }
+  if (await useSb()) { try { return Object.assign(out, await sbQuotes(need)); } catch (e) { return out; } }
   need.sort();
   if (proxyState !== 'no' && batchQuotes) {
     try {
@@ -218,7 +228,7 @@ async function profile(symbol, token){
 async function news(symbol, token, limit){
   if (!available(token)) return null;
   const hit = fresh('news', symbol); if (hit) return hit.slice(0, limit || 8);
-  if (sbMode()) return ((await sbNews([symbol]))[symbol] || []).slice(0, limit || 5);
+  if (await useSb()) return ((await sbNews([symbol]))[symbol] || []).slice(0, limit || 5);
   const j = await get('/company-news', { symbol: symbol, from: isoDay(-30), to: isoDay(0) }, token);
   const rows = (Array.isArray(j) ? j : []).filter(n => n && n.headline)
     .sort((a,b) => b.datetime - a.datetime)
@@ -239,9 +249,9 @@ async function pressNews(path, kind){
   const rows = (Array.isArray(j) ? j : []).filter(n => n && n.headline && n.related).sort((a,b) => b.datetime - a.datetime).map(newsRow);
   return put(kind, 'all', rows);
 }
-function roNews(){
-  if (!sbMode()) return pressNews('/ro-news', 'ronews');
-  const hit = fresh('ronews', 'all'); if (hit) return Promise.resolve(hit);
+async function roNews(){
+  if (!(await useSb())) return pressNews('/ro-news', 'ronews');
+  const hit = fresh('ronews', 'all'); if (hit) return hit;
   const since = new Date(Date.now() - 7 * 86400000).toISOString();
   return sb('stories?select=id,ticker,headline,source,url,summary,published_at&ticker=like.*.RO&published_at=gte.' + encodeURIComponent(since) + '&order=published_at.desc&limit=300')
     .then(rows => put('ronews', 'all', rows.map(storyRow)));
@@ -395,7 +405,7 @@ async function filings(symbol){
 async function recommendation(symbol, token){
   if (!available(token) || !hasRecs(symbol)) return null;
   const hit = fresh('recs', symbol); if (hit) return hit;
-  if (sbMode()) { try { return (await sbRecs([symbol]))[symbol] || null; } catch (e) { return null; } }
+  if (await useSb()) { try { return (await sbRecs([symbol]))[symbol] || null; } catch (e) { return null; } }
   if (fresh('recsfail', symbol)) return null;
   let j;
   // A failed call (busy, rate limited, a plan without this market) is not asked again for a
@@ -459,7 +469,7 @@ async function load(symbols, token, opts){
   const o = opts || {};
   const out = { quotes:{}, news:{}, recs:{}, errors:[], mode:'off' };
   if (!symbols || !symbols.length || !available(token)) return out;
-  if (sbMode()) {
+  if (await useSb()) {
     // Three requests, whatever the number of symbols.
     const [q, n, r] = await Promise.all([
       sbQuotes(symbols).catch(e => { out.errors.push('quotes: ' + e.message); return {}; }),
@@ -508,7 +518,7 @@ function translatedUrl(url, lang){
   return 'https://translate.google.com/translate?sl=auto&tl=' + tl + '&hl=' + tl + '&u=' + encodeURIComponent(url);
 }
 
-window.HIFLive = { candles, filings, quote, quotes, roNews, euNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
+window.HIFLive = { usesSupabase: useSb, candles, filings, quote, quotes, roNews, euNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return sbMode() ? 'supabase' : proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();

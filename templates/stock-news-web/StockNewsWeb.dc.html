@@ -1610,6 +1610,8 @@ class Component extends DCLogic {
       if (this.state.feedTab === 'market') this.syncMarket();
       if (this.state.feedTab === 'bvb') this.syncBvb();
       if (this.state.feedTab === 'eu') this.syncEu();
+      // The opening load counts as a refresh: the first timed one comes 5 minutes later.
+      this._lastAuto = Date.now();
       this.startAutoRefresh();
       this.syncDetail(this.state.selected);
       this.state.follows.forEach(t => this.syncSpark(t));
@@ -1750,11 +1752,19 @@ class Component extends DCLogic {
       if (Object.keys(res.quotes).length) this.setState(st => ({ quotes: Object.assign({}, st.quotes, res.quotes) }));
     }).catch(() => {});
     if (!L.profile) return;
-    const WEEK = 7 * 86400000, P = this.state.profiles || {};
-    const need = held.concat(this.state.follows || []).filter((t, i, a) => a.indexOf(t) === i && (force || !P[t] || Date.now() - (P[t].at || 0) > WEEK));
-    need.reduce((chain, t) => chain.then(() => L.profile(t, this.token).then(pr => {
-      if (pr) this.setState(st => ({ profiles: Object.assign({}, st.profiles, { [t]: Object.assign({ at: Date.now() }, pr) }) }));
-    }).catch(() => {})), Promise.resolve());
+    const WEEK = 7 * 86400000, DAY = 86400000, P = this.state.profiles || {}, miss = this._profMiss || (this._profMiss = {});
+    // A symbol without a profile is not asked again for a day (before: on every refresh).
+    const need = held.concat(this.state.follows || []).filter((t, i, a) => a.indexOf(t) === i && (force || !P[t] || Date.now() - (P[t].at || 0) > WEEK) && !(Date.now() - (miss[t] || 0) < DAY));
+    if (!need.length) return;
+    const keep = (t, pr) => this.setState(st => ({ profiles: Object.assign({}, st.profiles, { [t]: Object.assign({ at: Date.now() }, pr) }) }));
+    (L.usesSupabase ? L.usesSupabase() : Promise.resolve(false)).then(sb => {
+      // From Supabase, names and currencies come with the prices (market_quotes): no lookups.
+      if (sb) return L.quotes(need, this.token).then(qs => need.forEach(t => {
+        const q = qs[t];
+        if (q && q.name) keep(t, { name: q.name, currency: String(q.currency || 'USD').toUpperCase() }); else miss[t] = Date.now();
+      }));
+      return need.reduce((chain, t) => chain.then(() => L.profile(t, this.token).then(pr => { if (pr) keep(t, pr); else miss[t] = Date.now(); }).catch(() => {})), Promise.resolve());
+    }).catch(() => {});
   }
   loadPlan() {
     window.HIFAuth.plan().then(p => {
@@ -1892,7 +1902,9 @@ class Component extends DCLogic {
     const s = this.state, all = !!(window.HIFFlags && window.HIFFlags.get('hiddenModuleRefresh'));
     const on = screen => all || s.screen === screen;
     if (on('feed') || on('watchlist') || on('detail') || on('portfolio')) this.syncLive();
-    if (on('portfolio')) { this.syncPositions(); this.syncPortfolioCharts(); }
+    // Daily-bar charts (1M and longer) change only in their last bar: loaded when the screen or
+    // range opens, refreshed here only for the intraday ranges.
+    if (on('portfolio')) { this.syncPositions(); if (/^(1d|5d)$/.test(s.pfRange || '1mo')) this.syncPortfolioCharts(); }
     if (on('feed')) {
       this.syncSummaries(true);
       this.syncHistory(true);

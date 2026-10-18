@@ -93,3 +93,37 @@ test('gateway mode: a failed recommendation is remembered for 24 hours', async (
     assert.equal(fetchCalls.length, before + 1);
   } finally { flags.dataSource = 'supabase'; }
 });
+
+test('before the saved sign-in is restored, a request waits for it and still goes to Supabase', async () => {
+  reset();
+  const real = window.HIFAuth;
+  let open;
+  const ready = new Promise(r => { open = r; });
+  let enabled = false;
+  window.HIFAuth = { ...real, ready, enabled: () => enabled };
+  restReply = () => ({ ok: true, body: [{ symbol: 'OKLO', price: 80, change_pct: 2, currency: 'USD', name: 'Oklo Inc.', market_time: '2026-10-20T13:45:00Z', fetched_at: '2026-10-20T13:52:00Z' }] });
+  try {
+    const p = L.quotes(['OKLO'], '');
+    await new Promise(r => setTimeout(r, 20));
+    assert.equal(fetchCalls.length + restCalls.length, 0);
+    enabled = true; open();
+    const q = (await p).OKLO;
+    assert.equal(fetchCalls.length, 0);
+    assert.equal(restCalls.length, 1);
+    assert.equal(q.name, 'Oklo Inc.');
+    assert.equal(q.currency, 'USD');
+  } finally { window.HIFAuth = real; }
+});
+
+test('Supabase not set up at all (demo): the gateway is used as before', async () => {
+  reset();
+  const real = window.HIFAuth;
+  window.HIFAuth = { ...real, ready: Promise.resolve(), enabled: () => false };
+  fetchReply = () => new Response(JSON.stringify({ quotes: { AAPL: { c: 5, dp: 1 } } }), { status: 200, headers: { 'content-type': 'application/json' } });
+  try {
+    const out = await L.quotes(['AAPL'], '');
+    assert.equal(restCalls.length, 0);
+    assert.equal(fetchCalls.length, 1);
+    assert.equal(out.AAPL.price, '5.000');
+  } finally { window.HIFAuth = real; }
+});

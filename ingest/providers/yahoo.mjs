@@ -27,7 +27,7 @@ export function createYahoo({ client }) {
           out.push({ symbol: fromYahoo(String(r.symbol).toUpperCase()), price, change: num(r.regularMarketChange),
             change_pct: num(r.regularMarketChangePercent), prev_close: num(r.regularMarketPreviousClose),
             currency: currency(r.currency), market_time: t && !isNaN(t) ? t.toISOString() : null, ...base,
-            // The company name, for public.ticker_names (not a column of market_quotes).
+            // The company name (market_quotes.name and public.ticker_names).
             name: String(r.longName || r.shortName || '').trim() || null });
         }
       }

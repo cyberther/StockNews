@@ -87,3 +87,9 @@ test('stories get alerted_at, for the scan\'s alerts-only mode', async () => {
   const r = await db.query(`select column_name from information_schema.columns where table_name = 'stories' and column_name = 'alerted_at'`);
   assert.equal(r.rows.length, 1);
 });
+
+test('market_quotes carries the company name', async () => {
+  await db.query(`update public.market_quotes set name = 'OMV Petrom' where symbol = 'SNP.RO'`);
+  const r = await as('authenticated', APPROVED, `select name from public.market_quotes where symbol = 'SNP.RO'`);
+  assert.equal(r.rows[0].name, 'OMV Petrom');
+});
