@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Policy Intelligence | Market Pulse</title>
+<style>
+:root{color-scheme:dark;font:15px/1.55 system-ui,Arial,sans-serif;background:#121212;color:#f5f5f7}
+*{box-sizing:border-box}body{margin:0}header{border-bottom:1px solid #333;padding:15px max(20px,calc((100vw - 1120px)/2));display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+a{color:#e4bd57}h1{font-size:clamp(25px,4vw,36px);margin:.4em 0}h2{font-size:19px;margin:0 0 10px}small,.muted{color:#aeb1b7}
+main{max-width:1160px;margin:auto;padding:22px 18px 70px}.lead{max-width:780px;color:#bfc0c4}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
+.panel{border:1px solid #333;background:#1b1b1b;padding:20px;border-radius:10px;min-width:0}
+.full{grid-column:1/-1}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;color:#c3c3c8;font-size:13px}
+input,textarea,select{display:block;width:100%;margin-top:5px;padding:10px;background:#111;color:#fff;border:1px solid #555;border-radius:5px;font:inherit;min-width:0}
+textarea{min-height:82px;resize:vertical}input:focus,textarea:focus{outline:2px solid #c7a64b;outline-offset:1px}
+button{padding:11px 15px;background:#d4af37;color:#161616;border:0;border-radius:5px;font:inherit;font-weight:700;cursor:pointer}
+button.secondary{background:#303030;color:#eee;border:1px solid #555}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpi{background:#121212;border:1px solid #393939;padding:15px;border-radius:8px}.kpi strong{font-size:23px;display:block;color:#e6c65e}
+.tag{display:inline-block;border:1px solid #8b7242;border-radius:20px;padding:2px 9px;color:#f3d98b;font-size:12px}.warn{border-left:3px solid #d4af37;background:#292418;padding:12px 14px;margin-top:14px}
+.bad{color:#ff8787}.good{color:#83ddb2}table{border-collapse:collapse;width:100%}th,td{text-align:left;padding:9px;border-bottom:1px solid #333}th{color:#aeb1b7;font-weight:500}
+#explain{white-space:pre-wrap}.foot{font-size:12px;color:#aeb1b7;margin-top:30px}
+@media(max-width:720px){.layout{grid-template-columns:1fr}.full{grid-column:auto}.fields,.kpis{grid-template-columns:1fr}}
+</style></head>
+<body><header><div><strong>MARKET PULSE</strong> <span class="muted">/ POLICY INTELLIGENCE</span></div><a href="./StockNewsWeb.dc.html">← Back to markets</a></header>
+<main>
+<span class="tag">MVP • Manual-input research tool</span>
+<h1>From policy to economic exposure</h1>
+<p class="lead">Record a documented policy event, model a transparent company-level operating-profit scenario, and calculate the weighted effect on a sample portfolio. No AI conclusions, live legislation or investment signals are asserted.</p>
+<div class="warn" role="note"><strong>Scenario only.</strong> The default event and figures are fictional. Replace them with verified data. The model assumes a linear revenue impact and a constant contribution margin; it is not a stock-price forecast.</div>
+<div class="layout">
+<section class="panel"><h2>1. Policy event and evidence</h2>
+<label>Event title<input id="title" maxlength="180" value="Illustrative sector tax change"></label>
+<div class="fields"><label>Country<input id="country" maxlength="80" value="Romania"></label>
+<label>Policy status<select id="status"><option>Statement</option><option>Draft legislation</option><option>Adopted law</option><option>Effective</option><option>Implemented</option></select></label>
+</div>
+<label>Primary official source URL<input id="source" type="url" placeholder="https://official-source.example/document"></label>
+<label>How the policy affects revenue<textarea id="mechanism">Illustrative assumption: a policy reduces revenue in the exposed part of a company's business.</textarea></label>
+<p class="muted">Statements, bills, enacted laws and implementation are different evidence states. A URL is not automatically verified; verify it independently before using the analysis.</p>
+</section>
+<section class="panel"><h2>2. Company scenario inputs</h2>
+<div class="fields">
+<label>Company / ticker<input id="ticker" maxlength="50" value="EXAMPLE"></label>
+<label>Annual revenue (million currency units)<input id="revenue" type="number" min="0" step="any" value="1000"></label>
+<label>Current operating margin (%)<input id="margin" type="number" min="-100" max="100" step="any" value="15"></label>
+<label>Share of revenue exposed (%)<input id="exposure" type="number" min="0" max="100" step="any" value="40"></label>
+<label>Revenue shock to exposed activity (%)<input id="shock" type="number" min="-100" max="100" step="any" value="-5"></label>
+<label>Offset / mitigation (%)<input id="mitigation" type="number" min="0" max="100" step="any" value="20"></label>
+<label>Contribution margin on changed revenue (%)<input id="contribution" type="number" min="0" max="100" step="any" value="30"></label>
+<label>Portfolio weight in this company (%)<input id="weight" type="number" min="0" max="100" step="any" value="10"></label>
+</div><div class="actions"><button id="calculate">Calculate scenario</button><button class="secondary" id="reset">Reset illustrative case</button></div>
+</section>
+<section class="panel full"><h2>3. Calculated result</h2>
+<div class="kpis"><div class="kpi"><small>Baseline operating profit</small><strong id="base">—</strong></div><div class="kpi"><small>Scenario operating profit</small><strong id="projected">—</strong></div><div class="kpi"><small>Operating profit change</small><strong id="change">—</strong></div></div>
+<p id="explain" aria-live="polite"></p>
+<div class="warn"><strong>Portfolio interpretation:</strong> <span id="portfolio">—</span></div>
+</section>
+<section class="panel full"><h2>4. Research checkpoints</h2>
+<table><thead><tr><th>Question</th><th>What to verify</th></tr></thead><tbody>
+<tr><td>Was the policy adopted?</td><td>Official text, adoption date, effective date and implementation status</td></tr>
+<tr><td>Is the exposure real?</td><td>Company segment reports and business geography</td></tr>
+<tr><td>Does the earnings bridge hold?</td><td>Contribution margin, contractual passthrough, timing and one-off costs</td></tr>
+<tr><td>Is the impact priced in?</td><td>Valuation, consensus assumptions and other market drivers</td></tr>
+<tr><td>How did it perform?</td><td>Capture assumptions at publication; compare against later outcomes</td></tr>
+</tbody></table></section>
+</div><p class="foot">Research prototype. Values remain in this page only and are not submitted to a server. All results are illustrative, not regulated or personalized investment advice.</p>
+</main>
+<script>
+'use strict';
+const defaults={title:'Illustrative sector tax change',country:'Romania',status:'Statement',source:'',mechanism:'Illustrative assumption: a policy reduces revenue in the exposed part of a company\'s business.',ticker:'EXAMPLE',revenue:'1000',margin:'15',exposure:'40',shock:'-5',mitigation:'20',contribution:'30',weight:'10'};
+const ids=['title','country','status','source','mechanism','ticker','revenue','margin','exposure','shock','mitigation','contribution','weight'];
+const byId=id=>document.getElementById(id);
+function numeric(id,min,max){const el=byId(id);if(el.value.trim()==='')throw Error(id+' is required');const n=Number(el.value);if(!Number.isFinite(n)||n<min||n>max)throw Error(id+' must be between '+min+' and '+max);return n;}
+function fmt(n){return new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(n);}
+function calculate(){
+try{
+const revenue=numeric('revenue',0,1e15),margin=numeric('margin',-100,100),exposure=numeric('exposure',0,100),shock=numeric('shock',-100,100),mitigation=numeric('mitigation',0,100),contribution=numeric('contribution',0,100),weight=numeric('weight',0,100);
+const base=revenue*margin/100;
+const revenueDelta=revenue*exposure/100*shock/100*(1-mitigation/100);
+const profitDelta=revenueDelta*contribution/100;
+const projected=base+profitDelta;
+const deltaPct=base===0?null:profitDelta/Math.abs(base)*100;
+byId('base').textContent=fmt(base)+' M';
+byId('projected').textContent=fmt(projected)+' M';
+byId('change').textContent=fmt(profitDelta)+' M'+(deltaPct===null?' (baseline zero)':' ('+fmt(deltaPct)+'%)');
+byId('change').className=profitDelta<0?'bad':profitDelta>0?'good':'';
+byId('explain').textContent='Formula: Revenue change = '+fmt(revenue)+' × '+fmt(exposure)+'% × '+fmt(shock)+'% × (1 − '+fmt(mitigation)+'%) = '+fmt(revenueDelta)+' M.\nOperating profit change = '+fmt(revenueDelta)+' × '+fmt(contribution)+'% = '+fmt(profitDelta)+' M. These are changes in operating profit, not share prices.';
+byId('portfolio').textContent='At '+fmt(weight)+'% portfolio weight, '+byId('ticker').value.trim()+' represents '+fmt(weight)+'% direct allocation exposure. A portfolio return impact cannot be calculated from operating earnings without a defensible valuation-to-price model.';
+}catch(error){byId('explain').textContent='Input error: '+error.message;for(const x of ['base','projected','change'])byId(x).textContent='—';byId('portfolio').textContent='Correct inputs to calculate.';}
+}
+byId('calculate').addEventListener('click',calculate);
+byId('reset').addEventListener('click',()=>{for(const id of ids)byId(id).value=defaults[id];calculate();});
+calculate();
+</script></body></html>
