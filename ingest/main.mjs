@@ -7,6 +7,10 @@
 //   node ingest/main.mjs --job=policy
 //     the official policy sources only (ingest/policy/); the eod job runs them too
 //
+//   node ingest/main.mjs --job=impact
+//     the impact analyses and company figures from the repository (ingest/impact/); the eod
+//     and policy jobs run it too, after the policy sources
+//
 //   node ingest/main.mjs --job=intraday --dry-run --watchlist=AAPL,SNP.RO [--now=ISO]
 //     real providers and feeds, an in-memory database: shows what a run would fetch and
 //     how many outside requests it makes, without any credentials.
@@ -22,13 +26,15 @@ import { pressNews } from './news.mjs';
 import { BVB_TOP } from '../netlify/functions/_shared/market/bvb-symbols.js';
 import { runPolicy, relayFetch } from './policy/run.mjs';
 import { bvbCatalog } from './policy/classify.mjs';
+import { runImpact } from './impact/run.mjs';
+import { catalogTickers } from './impact/schema.mjs';
 
 const arg = name => { const a = process.argv.find(x => x.startsWith(`--${name}=`)); return a ? a.slice(name.length + 3) : null; };
 const has = name => process.argv.includes(`--${name}`);
 const readJson = p => JSON.parse(readFileSync(new URL(p, import.meta.url), 'utf8'));
 
 const job = arg('job');
-if (!['intraday', 'eod', 'policy'].includes(job)) { console.error('usage: node ingest/main.mjs --job=intraday|eod|policy [--dry-run --watchlist=A,B]'); process.exit(2); }
+if (!['intraday', 'eod', 'policy', 'impact'].includes(job)) { console.error('usage: node ingest/main.mjs --job=intraday|eod|policy|impact [--dry-run --watchlist=A,B]'); process.exit(2); }
 const flags = readJson('../config/flags.json');
 const limits = readJson('../config/budgets.json');
 const now = arg('now') ? new Date(arg('now')) : new Date();
@@ -66,7 +72,7 @@ const alerts = !dry && scanUrl && scanSecret ? async () => {
   if (!res.ok) throw new Error('scan ' + res.status);
 } : null;
 
-const summary = job === 'policy' ? { job, ok: true, symbols: 0, quotes: 0, newStories: 0, recs: 0, requests: {}, over: [], errors: [] }
+const summary = job === 'policy' || job === 'impact' ? { job, ok: true, symbols: 0, quotes: 0, newStories: 0, recs: 0, requests: {}, over: [], errors: [] }
   : await runIngest({ job, now, db, providers, news: pressNews, flags, limits, bvbTop: BVB_TOP, meter, alerts });
 
 // Official policy sources: once a day (eod), or on their own (--job=policy). Their requests are
@@ -84,7 +90,24 @@ if (flags.policy !== false && (job === 'eod' || job === 'policy')) {
   await db.insert('ingest_runs', [{ job: 'policy', started_at: startedAt, finished_at: new Date().toISOString(), ok: !policy.errors.length,
     symbols: policy.events, requests, errors: policy.errors.join('\n').slice(0, 4000) || null }]);
 }
-const out = { ...summary, policy, dryRun: dry, at: now.toISOString() };
+
+// Impact analyses (analyses/, config/company-financials.json): after the policy events they refer to.
+let impact = null;
+if (flags.impact !== false && (job === 'eod' || job === 'policy' || job === 'impact')) {
+  const startedAt = new Date().toISOString();
+  try {
+    impact = await runImpact({ db, now, dir: new URL('../analyses/', import.meta.url).pathname, financials: readJson('../config/company-financials.json'),
+      taxonomy: readJson('../config/policy-taxonomy.json'), tickers: catalogTickers() });
+  } catch (e) { impact = { analyses: 0, inserted: 0, results: 0, outcomes: 0, financials: 0, errors: ['impact: ' + e.message] }; }
+  await db.insert('ingest_runs', [{ job: 'impact', started_at: startedAt, finished_at: new Date().toISOString(), ok: !impact.errors.length,
+    symbols: impact.inserted, requests: {}, errors: impact.errors.join('\n').slice(0, 4000) || null }]);
+}
+// The policy push alerts (new events, status changes, analyses) go out with the stories' alerts
+// in the scan Edge Function; this run's events are new, so ask it once more now.
+if ((policy || impact) && alerts) {
+  try { await alerts(); } catch (e) { (impact || policy).errors.push('alerts: ' + e.message); }
+}
+const out = { ...summary, policy, impact, dryRun: dry, at: now.toISOString() };
 if (dry) out.sample = { quotes: (db.t.market_quotes || []).slice(0, 5), stories: (db.t.stories || []).length,
   policyEvents: (db.t.policy_events || []).length, policyExamples: (db.t.policy_events || []).filter(e => e.sectors.length).slice(0, 3)
     .map(e => ({ id: e.id, status: e.status, title: e.title.slice(0, 90), sectors: e.sectors, companies: e.companies.slice(0, 3) })) };
@@ -95,4 +118,5 @@ if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMM
   `| ${out.symbols} | ${out.quotes} | ${out.newStories} | ${out.recs} | ${JSON.stringify(out.requests)} | ${out.ok} |\n\n` +
   (out.errors.length ? 'Errors:\n\n' + out.errors.map(e => '- ' + e).join('\n') + '\n' : '') +
   (out.over.length ? 'Over budget:\n\n' + out.over.map(e => '- ' + e).join('\n') + '\n' : '') +
+  (impact ? `\n### impact\n\n| analyses | new | results | outcomes | figures | errors |\n|---|---|---|---|---|---|\n| ${impact.analyses} | ${impact.inserted} | ${impact.results} | ${impact.outcomes} | ${impact.financials} | ${impact.errors.length} |\n` + impact.errors.map(e => '- ' + e).join('\n') + '\n' : '') +
   (policy ? `\n### policy\n\n| events | new | changed | requests | errors |\n|---|---|---|---|---|\n| ${policy.events} | ${policy.created} | ${policy.changed} | ${JSON.stringify(policy.requests)} | ${policy.errors.length} |\n` : ''));

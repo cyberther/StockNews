@@ -20,7 +20,7 @@ on:
       job:
         description: Which job
         type: choice
-        options: [intraday, eod, policy]
+        options: [intraday, eod, policy, impact]
         default: intraday
 
 permissions:
