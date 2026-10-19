@@ -203,3 +203,31 @@ test('cache misses that spend quota need a signed-in user; RSS news and landing 
   assert.equal(publicRequest('chart', { symbol: 'NVDA' }), false);
   reset();
 });
+
+test('licences: dev_only providers serve as now; with commercialMode they are not asked, and the answer says why', async () => {
+  let calls = 0;
+  const chart = { chart: { result: [{ meta: { regularMarketPrice: 1 }, timestamp: [1], indicators: { quote: [{ close: [1] }] } }] } };
+  globalThis.fetch = async () => { calls++; return ok(chart); };
+  const off = await handleMarketRequest(req('path=/chart&symbol=SNP.RO&range=1mo'), {});
+  assert.equal(off.status, 200);
+  assert.equal(off.headers.get('x-market-source'), 'yahoo');
+  resetGatewayForTests(); calls = 0;
+  const on = await handleMarketRequest(req('path=/chart&symbol=SNP.RO&range=1mo'), { flags: { commercialMode: true } });
+  assert.equal(on.status, 503);
+  assert.equal((await on.json()).error, 'no licensed provider');
+  assert.equal(calls, 0);
+  // A provider on a paid plan is declared licensed (MARKET_LICENSE_YAHOO=commercial_display).
+  resetGatewayForTests();
+  const paid = await handleMarketRequest(req('path=/chart&symbol=SNP.RO&range=1mo'), { flags: { commercialMode: true }, licenses: { yahoo: 'commercial_display' } });
+  assert.equal(paid.status, 200);
+  // Press headlines with their links (the feeds) stay available.
+  resetGatewayForTests();
+  globalThis.fetch = async () => new Response('<rss><channel></channel></rss>', { status: 200 });
+  const news = await handleMarketRequest(req('path=/ro-news'), { flags: { commercialMode: true } });
+  assert.notEqual(news.status, 503);
+});
+
+test('licences from the environment: MARKET_LICENSE_<PROVIDER>', async () => {
+  const { licensesFromEnv } = await import('../netlify/functions/_shared/market/gateway.js');
+  assert.deepEqual(licensesFromEnv({ MARKET_LICENSE_TWELVEDATA: 'commercial_display', MARKET_LICENSE_YAHOO: 'nonsense', OTHER: 'x' }), { twelvedata: 'commercial_display' });
+});
