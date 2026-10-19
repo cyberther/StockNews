@@ -1489,6 +1489,21 @@
 </div>
 </div>
 </sc-if>
+<sc-if value="{{ devSetupShow }}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-modal="true" aria-label="{{ ui.setupTitle }}" style="position:fixed;inset:0;z-index:45;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;justify-content:center;padding:16px">
+<div style="width:100%;max-width:460px;background:var(--s-bg);border:1px solid var(--s-rule);padding:22px 20px calc(18px + env(safe-area-inset-bottom))">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:24px;letter-spacing:-0.02em">{{ ui.setupTitle }}</div>
+<div style="font-size:13px;color:var(--s-mute);margin-top:6px;line-height:1.5">{{ ui.setupNote }}</div>
+<sc-for list="{{ devSetupRows }}" as="r" hint-placeholder-count="2">
+<div style="display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--s-rule)">
+<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">{{ r.title }}</div><div style="font-size:12px;color:var(--s-mute);margin-top:3px;line-height:1.45">{{ r.note }}</div><sc-if value="{{ r.status }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--color-accent);margin-top:4px">{{ r.status }}</div></sc-if></div>
+<sc-if value="{{ r.canAct }}" hint-placeholder-val="{{ true }}"><button onClick="{{ r.act }}" style="flex:none;min-height:40px;padding:0 14px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.setupOn }}</button></sc-if>
+</div>
+</sc-for>
+<button onClick="{{ devSetupFinish }}" style="width:100%;min-height:46px;margin-top:16px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ devSetupFinishLabel }}</button>
+</div>
+</div>
+</sc-if>
 <sc-if value="{{ isLocked }}" hint-placeholder-val="{{ false }}">
 <div style="position:fixed;inset:0;z-index:50;background:var(--s-bg);display:flex;align-items:center;justify-content:center;padding:40px">
 <div style="width:100%;max-width:420px">
@@ -1836,6 +1851,32 @@ class Component extends DCLogic {
     }
   }
   // Push alerts on this device (real accounts only; hidden until the server has a key).
+  // Locked on a device that unlocks with Face ID / Touch ID: ask for it straight away, once per
+  // lock and again each time the app comes back on screen. If the browser wants a tap first
+  // (or the reader cancels), the button and the password stay on the lock screen.
+  autoBio() {
+    const s = this.state, H = window.HIFUnlock, uid = s.session && s.session.userId;
+    if (!s.locked) { this._bioLock = null; return; }
+    if (!s.authLive || !H || !H.autoTry || !uid || !H.enabled(uid) || document.hidden || this._bioLock) return;
+    this._bioLock = 'L' + Date.now();
+    if (!H.autoTry(this._bioLock)) return;
+    H.unlock(uid).then(r => {
+      if (r.ok && this.state.locked) { this.setState({ locked:false, lockPw:'', lockErr:'' }); this.touch(); }
+    }).catch(() => {});
+  }
+  // The first sign-in on a device (per account): offer alerts and Face ID / Touch ID, once,
+  // when both are known and nothing else is on screen (onboarding, lock, two-factor, approval).
+  maybeDeviceSetup() {
+    const s = this.state, H = window.HIFUnlock, A = window.HIFAuth, uid = s.session && s.session.userId;
+    // Another account on this device: its own question.
+    if (this._setupUid !== uid) { this._setupUid = uid; if (s.setupList) { this.setState({ setupList: null }); return; } }
+    if (s.setupList || !H || !H.setupItems || !uid || !s.authLive || !s.onboarded || s.locked || s.pending) return;
+    if (!s.devicePush || s.bioAvail === undefined) return;
+    if (A && A.mfa && A.mfa().needed) return;
+    const items = H.setupItems({ userId: uid, push: s.devicePush, bioAvail: !!s.bioAvail, bioOn: H.enabled(uid) });
+    if (items.length) this.setState({ setupList: items, setupRes: {} });
+    else if (!H.setupAsked(uid)) H.markSetupAsked(uid);
+  }
   refreshPush() {
     if (!window.HIFPush) return;
     window.HIFPush.status().then(st => {
@@ -1976,6 +2017,8 @@ class Component extends DCLogic {
   }
   componentDidUpdate(prevProps) {
     if (prevProps && prevProps.finnhubToken !== this.props.finnhubToken) this.syncLive();
+    this.autoBio();
+    this.maybeDeviceSetup();
     this.syncLiveChart();
     this.queueWatchlistSync();
     this.queueHoldingsSync();
@@ -2060,7 +2103,7 @@ class Component extends DCLogic {
       if (!document.hidden && !idle && this.state.screen === 'feed') this.syncSummaries(true);
     }, 2 * 60000);
     // Coming back to the page counts as using it.
-    this._onVis = () => { if (!document.hidden) { this.touch(); tick(); } };
+    this._onVis = () => { if (!document.hidden) { this.touch(); tick(); if (this.state.locked) { this._bioLock = null; this.autoBio(); } } };
     document.addEventListener('visibilitychange', this._onVis);
   }
   // The symbols whose markets decide whether a refresh is worth it.
@@ -2618,6 +2661,34 @@ class Component extends DCLogic {
           if (r.error !== 'cancelled') { this.logEvent('unlock_failed', 'face id'); this.setState({ lockErr: u.bioNotRecognised || 'Not recognised. Try again or use your password.' }); }
         }) }
     };
+  }
+  deviceSetupVals(u) {
+    const s = this.state, H = window.HIFUnlock, uid = (s.session && s.session.userId) || '';
+    const list = s.setupList || [], res = s.setupRes || {};
+    const finish = () => { if (H && uid) H.markSetupAsked(uid); this.setState({ setupList: [] }); };
+    const mark = (k, v) => this.setState(st => ({ setupRes: Object.assign({}, st.setupRes, { [k]: v }) }));
+    const row = k => {
+      const st = res[k];
+      const base = { key: k, title: k === 'push' ? u.setupPush : k === 'bio' ? u.setupBio : u.setupIos,
+        note: k === 'push' ? u.setupPushNote : k === 'bio' ? u.setupBioNote : u.setupIosNote,
+        canAct: k !== 'ios-install' && st !== 'on' && st !== 'busy', status: st === 'on' ? u.setupIsOn : st === 'failed' ? u.setupFailed : '' };
+      base.act = () => {
+        mark(k, 'busy');
+        if (k === 'push') {
+          const P = window.HIFPush; if (!P) return mark(k, 'failed');
+          // Asked from this tap: the browser shows its own permission prompt.
+          P.enable().then(r => { mark(k, r && r.ok ? 'on' : 'failed'); this.refreshPush(); }).catch(() => mark(k, 'failed'));
+        } else if (k === 'bio') {
+          H.enable(uid, s.session && s.session.email, s.session && s.session.name)
+            .then(r => mark(k, r.ok ? 'on' : r.error === 'cancelled' ? '' : 'failed')).catch(() => mark(k, 'failed'));
+        }
+      };
+      return base;
+    };
+    const rows = list.map(row);
+    const anyOn = rows.some(r => res[r.key] === 'on');
+    return { devSetupShow: !!s.session && !s.locked && rows.length > 0, devSetupRows: rows,
+      devSetupFinishLabel: anyOn ? u.setupFinish : u.setupLater, devSetupFinish: finish };
   }
   alertVals(u) {
     const s = this.state, rows = s.alertRows, lang = String(this.lang || 'EN').toLowerCase(), SUMS = s.summaries || {};
@@ -4075,6 +4146,7 @@ class Component extends DCLogic {
       lc: this.liveChartVals(u),
       ...this.adminVals(u),
       isAuth: !signedIn, isOnboard: signedIn && !s.onboarded && !s.pending, isLocked: signedIn && !!s.locked,
+      ...this.deviceSetupVals(u),
       // A new account the owner hasn't approved yet (supabase/approval.sql): only this screen.
       isPending: signedIn && !!s.pending && !s.locked, pendingEmail: (s.session && s.session.email) || '',
       pendingBusy: !!s.pendingBusy,
