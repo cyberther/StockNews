@@ -8,8 +8,8 @@
 -- `data`. The ticker page's "Insider & filings" shows them as tables, newest first.
 --
 -- Run once in the Supabase SQL editor, after summaries.sql (it uses summary_secret_ok);
--- safe to run again. Only the last 6 months are kept (undated documents are not stored), and
--- figures are read only for the last month's documents.
+-- safe to run again. Only the last 6 months are kept (undated documents are not stored); their
+-- figures are read for all of them, the companies people follow or hold first.
 
 create table if not exists public.filings (
   id            bigint generated always as identity primary key,
@@ -96,9 +96,12 @@ begin
   end if;
   return query
     select f.id, f.ticker, f.url, f.title, f.kind, f.published_at from public.filings f
+    -- Every kept document (6 months; filings_prune drops older ones), the companies people
+    -- follow or hold first, then by kind and newest.
     where f.extract_status is null and f.kind in ('insider', 'results', 'dividend', 'agm', 'holding')
-      and f.published_at > now() - interval '1 month'
-    order by array_position(array['insider', 'holding', 'dividend', 'results', 'agm'], f.kind),
+    order by (exists (select 1 from public.watchlist w where w.ticker = f.ticker)
+              or exists (select 1 from public.holdings h where h.ticker = f.ticker)) desc,
+             array_position(array['insider', 'holding', 'dividend', 'results', 'agm'], f.kind),
              f.published_at desc nulls last
     limit least(greatest(coalesce(p_limit, 2), 1), 50);
 end $$;
