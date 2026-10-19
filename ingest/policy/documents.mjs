@@ -27,12 +27,15 @@ export function documentLinks(event, html) {
   if (id.startsWith('just:')) return [{ kind: 'act', url: event.source_url }];
   if (!id.startsWith('cdep:')) return [];
   const abs = h => h.startsWith('http') ? h : h.startsWith('/') ? 'https://www.cdep.ro' + h : 'https://www.cdep.ro/ords/pls/proiecte/' + h;
+  // Only the Chamber's own documents are followed (the page is fetched from outside).
+  const onCdep = u => /^https:\/\/www\.cdep\.ro\//.test(u);
   const found = {};
   for (const m of String(html || '').matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)) {
     const row = m[1], link = /href="([^"]+\.pdf)"/i.exec(row);
     if (!link || /\/comisii\//.test(link[1])) continue;
     const label = htmlText(row).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[şș]/g, 's').replace(/[ţț]/g, 't');
     const url = abs(link[1]);
+    if (!onCdep(url)) continue;
     if (/expunerea de motive/.test(label)) found.motive = found.motive || url;
     else if (/opinia consiliului fiscal/.test(label)) found.fiscal_council = found.fiscal_council || url;
     else if (/fisa financiara|fisei financiare/.test(label)) found.financial = found.financial || url;
@@ -42,7 +45,7 @@ export function documentLinks(event, html) {
   }
   if (found.law && /forma pentru promulgare/.test(String(html).normalize('NFD'))) {
     const promo = [...String(html).matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)].map(x => x[1]).find(r => /Forma pentru promulgare/i.test(r) && /\.pdf"/i.test(r));
-    if (promo) found.law = abs(/href="([^"]+\.pdf)"/i.exec(promo)[1]);
+    if (promo && onCdep(abs(/href="([^"]+\.pdf)"/i.exec(promo)[1]))) found.law = abs(/href="([^"]+\.pdf)"/i.exec(promo)[1]);
   }
   delete found.lawFrom;
   if (found.law) delete found.initiator;

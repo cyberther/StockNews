@@ -159,6 +159,10 @@ begin
   if jsonb_typeof(a) = 'object' then
     aid := a->>'id';
     if aid !~ '^auto-[a-z0-9-]{1,56}$' then raise exception 'automatic analysis ids start with auto-'; end if;
+    -- Fact links become hrefs in the app: https only.
+    if exists (select 1 from jsonb_array_elements(coalesce(a->'facts', '[]')) f where coalesce(f->>'source_url', '') !~ '^https://[^\s"''<>]+$') then
+      raise exception 'fact source urls must be https';
+    end if;
     if exists (select 1 from impact_analyses x where x.id = aid and x.doc_sha256 = sha) then
       return jsonb_build_object('saved', 0, 'kind', 'duplicate');
     end if;
