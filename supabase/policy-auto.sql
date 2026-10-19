@@ -256,19 +256,21 @@ grant execute on function public.admin_withdraw_analysis(text, integer, text) to
 --   state_aid  state aid it received                                  gains
 --   tax_payer  an analysis puts a cost on it (full scenario)           loses
 --   named      an analysis puts a gain on it (full scenario)           gains
+drop view if exists public.company_state_exposure;
+drop view if exists public.state_links;
 create or replace view public.state_links with (security_invoker = true) as
   select c->>'ticker' as subject_ticker, case when c->>'why' = 'sector' then 'sector' else 'named' end as link_type, 'neutral'::text as direction,
-         e.id as event_id, null::text as analysis_id, e.source_url as evidence_url, null::numeric as amount_ron, e.event_date::date as at
+         e.id as event_id, null::text as analysis_id, e.source_url as evidence_url, null::numeric as amount_ron, e.event_date::date as at, e.title as title
     from public.policy_events e, jsonb_array_elements(e.companies) c
   union all
-  select p.ticker, 'contract', 'gains', null, null, p.source_url, p.value_ron, p.signed_on from public.public_contracts p
+  select p.ticker, 'contract', 'gains', null, null, p.source_url, p.value_ron, p.signed_on, p.authority || coalesce(' · CPV ' || p.cpv, '') from public.public_contracts p
   union all
-  select s.ticker, 'state_aid', 'gains', null, null, s.source_url, s.amount_ron, s.granted_on from public.state_aid s
+  select s.ticker, 'state_aid', 'gains', null, null, s.source_url, s.amount_ron, s.granted_on, s.granter || coalesce(' · ' || nullif(s.scheme, ''), '') from public.state_aid s
   union all
   select r.subject, case when (r.vals->>'profitDelta')::numeric < 0 then 'tax_payer' else 'named' end,
          case when (r.vals->>'profitDelta')::numeric < 0 then 'loses' else 'gains' end,
          a.events[1], a.id, coalesce(a.body->'facts'->0->>'source_url', (select x.source_url from public.policy_events x where x.id = a.events[1])),
-         abs((r.vals->>'profitDelta')::numeric), a.published_at
+         abs((r.vals->>'profitDelta')::numeric), a.published_at, a.title
     from public.impact_results r join public.impact_analyses a on a.id = r.analysis_id and a.version = r.version
    where r.scenario = 'full' and r.subject <> 'budget' and a.withdrawn_at is null
      and (r.vals->>'profitDelta') is not null and (r.vals->>'profitDelta')::numeric <> 0

@@ -27,7 +27,8 @@ test('a good proposal becomes an analysis the existing checks accept, with resul
   assert.deepEqual(validateAnalysis(r.analysis, { taxonomy, tickers: catalogTickers() }).errors, undefined);
   const cost = r.analysis.assumptions.find(a => a.key === 'cost');
   assert.equal(cost.value, 759000000);
-  assert.match(cost.why, /amount/);
+  assert.match(cost.why, /759\.000\.000 lei/);
+  assert.doesNotMatch(JSON.stringify(r.analysis.assumptions.map(a => a.why).concat(r.analysis.budget.sustainability_note)), /\bf_[a-z]/, 'no internal keys in what readers see');
   assert.ok(r.results.some(x => x.scenario === 'full' && x.subject === 'budget' && x.vals.net === -759000000));
   assert.ok(r.analysis.facts.every(f => f.source_url === 'https://gov.ro/nota-781' && f.quote));
 });

@@ -14,6 +14,8 @@
 //   impact                      impact analyses, companies' exposure, the calculator, the portfolio card (Phase C)
 //   policyAlerts                push alerts for policy events and analyses (Edge Function: FLAG_POLICY_ALERTS)
 //   aiAnnotations               the local model's annotations: admin review and verified ones shown (Phase C)
+//   autoImpact                  fact sheets and automatic analyses on the Policy screen (Politici 2.0)
+//   whoGains                    the "Cine câștigă" tab: links, company exposure, money by purchase (Politici 2.0)
 (function(){
 var FLAGS = {
   following: true,
@@ -29,7 +31,9 @@ var FLAGS = {
   policy: true,
   impact: true,
   policyAlerts: true,
-  aiAnnotations: false
+  aiAnnotations: false,
+  autoImpact: false,
+  whoGains: false
 };
 var root = typeof window !== 'undefined' ? window : globalThis;
 root.HIFFlags = {

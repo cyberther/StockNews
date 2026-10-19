@@ -88,11 +88,12 @@ export function validateProposal(p, ctx) {
   const cost = byRole.get(type.cost), end = byRole.get('end');
   const signed = p.budget && p.budget.direction === 'revenue' ? -cost.value : cost.value;
   const lit = (key, label, value, unit, why) => ({ key, label, value, unit, range: [value, value], why });
+  const ro = d => d.split('-').reverse().join('.'), money = n => Math.abs(n).toLocaleString('ro-RO', { maximumFractionDigits: 2 });
   const scen = k => { const a = lib.get(k); return { key: k, label: a.label, value: chosen.has(k) ? chosen.get(k) : a.default, unit: a.unit, range: a.range, why: a.why }; };
   const assumptions = [
-    lit('start', 'Intrare în vigoare', start.value, 'date', 'Data din document (fapt f_' + start.key + ').'),
-    ...(end && typeof end.value === 'string' && end.value >= start.value ? [lit('end', 'Sfârșit', end.value, 'date', 'Data din document (fapt f_' + end.key + ').')] : []),
-    lit('cost', 'Efect bugetar anual (lei)', signed, 'RON', '= fapt f_' + cost.key + ' (' + cost.value + ' lei), ' + (signed < 0 ? 'venit pentru buget' : 'cost pentru buget') + ', așa cum îl scrie documentul.'),
+    lit('start', 'Intrare în vigoare', start.value, 'date', 'Data scrisă în document: ' + ro(start.value) + ' („' + start.quote.slice(0, 160) + '”).'),
+    ...(end && typeof end.value === 'string' && end.value >= start.value ? [lit('end', 'Sfârșit', end.value, 'date', 'Data scrisă în document: ' + ro(end.value) + ' („' + end.quote.slice(0, 160) + '”).')] : []),
+    lit('cost', 'Efect bugetar anual (lei)', signed, 'RON', 'Suma scrisă în document: ' + money(cost.value) + ' lei (' + (signed < 0 ? 'venit pentru buget' : 'cost pentru buget') + ', „' + cost.quote.slice(0, 160) + '”).'),
     { key: 'gdp', label: gdp.label, value: gdp.default, unit: gdp.unit, range: gdp.range, why: gdp.why + ' Sursa: ' + gdp.source_url },
     scen('partial_pct'), scen('delay_months'),
     ...companies.flatMap(c => [scen('mitigation_pct'), scen('contribution_pct')].map(a => ({ ...a, key: slug(c.ticker).replace(/-/g, '_') + '_' + a.key })))
@@ -103,7 +104,7 @@ export function validateProposal(p, ctx) {
     policy: 'auto-' + slug(ctx.eventId), events: [ctx.eventId], summary: typeof p.summary === 'string' ? p.summary.slice(0, 600) : '',
     facts: facts.map(f => ({ key: 'f_' + f.key, text: f.text.slice(0, 600), quote: f.quote, value: f.value ?? null, unit: f.unit ?? null, ...src })),
     budget: { approved: ['yes', 'no', 'unknown'].includes(ctx.approved) ? ctx.approved : 'unknown', approved_fact: null, funding_source: null, funding_fact: null,
-      recurring: false, horizon_years: null, sustainability_note: end ? 'Măsură cu termen: până la ' + end.value + ' (fapt f_' + end.key + ').' : 'Documentul nu spune dacă măsura e permanentă sau temporară.' },
+      recurring: false, horizon_years: null, sustainability_note: end ? 'Măsură cu termen, până la ' + ro(end.value) + ', după document.' : 'Documentul nu spune dacă măsura e permanentă sau temporară.' },
     assumptions, sectors: (ctx.sectors || []).filter(s => ctx.taxonomy && ctx.taxonomy.sectors && ctx.taxonomy.sectors[s]),
     companies: companies.map(c => {
       const k = slug(c.ticker).replace(/-/g, '_');

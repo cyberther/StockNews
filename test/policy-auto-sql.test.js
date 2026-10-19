@@ -134,6 +134,8 @@ test('who gains: links with evidence, exposure per company, money per kind of pu
   assert.equal(tax.evidence_url, 'https://www.cdep.ro/20.pdf');
   assert.equal(links.filter(l => l.t === 'SNP.RO' && l.link_type === 'tax_payer').length, 1, 'one link per analysis, from the full scenario');
   assert.ok(has('SNP.RO', 'named', 'neutral'));
+  const titled = (await user(APPROVED, `select title from public.state_links where link_type = 'contract' and amount_ron = 5000`)).rows[0];
+  assert.equal(titled.title, 'Primăria Y · CPV 66110000-4');
   assert.ok(has('SNG.RO', 'sector', 'neutral'), 'a sector link has no direction without a fact');
   const ex = (await user(APPROVED, `select ticker, contracts_12m_ron::float c, contracts_12m_pct_revenue::float p, measures_lose from public.company_state_exposure where ticker in ('TLV.RO','SNP.RO') order by ticker`)).rows;
   assert.deepEqual(ex.find(r => r.ticker === 'TLV.RO'), { ticker: 'TLV.RO', c: 6000, p: 6, measures_lose: 0 });   // 1000 (Task 5) + 5000; the 500-day-old one is out

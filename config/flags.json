@@ -12,5 +12,7 @@
   "policy": true,
   "impact": true,
   "policyAlerts": true,
-  "aiAnnotations": false
+  "aiAnnotations": false,
+  "autoImpact": false,
+  "whoGains": false
 }

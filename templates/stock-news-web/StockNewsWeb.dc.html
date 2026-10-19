@@ -550,6 +550,9 @@
 <sc-if value="{{ e.hasCompanies }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute)">{{ e.companies }}</div></sc-if>
 <sc-if value="{{ e.hasConcerns }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;border-left:2px solid var(--color-accent);padding-left:8px"><span style="font-family:var(--font-heading);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-accent)">{{ ui.polConcerns }}:</span> {{ e.concerns }}</div></sc-if>
 <sc-if value="{{ e.hasAi }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;max-width:80ch;border-left:2px dashed var(--s-rule);padding-left:8px">{{ e.aiSummary }} <span style="font-size:11px;color:var(--s-mute)">({{ e.aiLabel }})</span></div></sc-if>
+<sc-if value="{{ e.hasSheetSummary }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;max-width:80ch;border-left:2px dashed var(--s-rule);padding-left:8px"><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">{{ ui.polSheetSummary }}:</span> {{ e.sheetSummary }}</div></sc-if>
+<sc-if value="{{ e.hasSheetDocs }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px"><span style="color:var(--s-mute)">{{ ui.polDocs }}:</span><sc-for list="{{ e.sheetDocs }}" as="d" hint-placeholder-count="1"><a href="{{ d.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">{{ d.label }}</a></sc-for></div></sc-if>
+<sc-if value="{{ e.hasWhyNo }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);max-width:80ch"><span style="font-family:var(--font-heading);font-weight:800;letter-spacing:0.06em;text-transform:uppercase">{{ ui.polWhyTitle }}:</span> {{ e.whyNo }}</div></sc-if>
 <sc-if value="{{ e.hasAnalysis }}" hint-placeholder-val="{{ false }}"><div><button onClick="{{ e.openAnalysis }}" style="min-height:30px;padding:0 10px;border:1px solid var(--color-accent);background:transparent;color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.impOpenAnalysis }} →</button></div></sc-if>
 <div style="display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--s-mute)"><span>{{ e.certainty }}</span><a href="{{ e.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">{{ e.sourceLabel }}</a></div>
 </article>
@@ -565,6 +568,7 @@
 <sc-if value="{{ impListEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ ui.impNoAnalyses }}</div></sc-if>
 <sc-for list="{{ impList }}" as="a" hint-placeholder-count="1">
 <article style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px">
+<sc-if value="{{ a.hasFlag }}" hint-placeholder-val="{{ false }}"><div style="font-family:var(--font-heading);font-weight:800;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--color-accent)">{{ a.flag }}</div></sc-if>
 <button onClick="{{ a.open }}" style="text-align:left;background:none;border:0;padding:0;color:var(--s-ink);cursor:pointer;font-family:var(--font-heading);font-weight:700;font-size:17px;line-height:1.3">{{ a.title }} →</button>
 <div style="font-size:12px;color:var(--s-mute)">{{ a.meta }}</div>
 <div style="font-size:12px">{{ a.sectors }} · {{ a.companies }}</div>
@@ -577,14 +581,20 @@
 <div><button onClick="{{ impBack }}" style="min-height:30px;padding:0 10px;border:1px solid var(--s-rule);background:transparent;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">← {{ ui.impBack }}</button></div>
 <h2 style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:24px;line-height:1.2;text-wrap:pretty">{{ impDTitle }}</h2>
 <div style="font-size:12px;color:var(--s-mute)">{{ impDMeta }}</div>
+<sc-if value="{{ impDAuto }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;border:1px solid var(--color-accent);padding:8px 10px;max-width:90ch"><b style="font-family:var(--font-heading);letter-spacing:0.06em;text-transform:uppercase;color:var(--color-accent)">{{ ui.autoLabel }}</b><div style="margin-top:4px;color:var(--s-ink)">{{ ui.autoWarn }}</div></div></sc-if>
+<sc-if value="{{ impDWithdrawn }}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size:13px;border:1px solid var(--lc-red);padding:8px 10px;max-width:90ch">{{ impDWithdrawnText }}</div></sc-if>
+<sc-if value="{{ impDCanWithdraw }}" hint-placeholder-val="{{ false }}"><div><button onClick="{{ impWithdraw }}" style="min-height:30px;padding:0 10px;border:1px solid var(--lc-red);background:transparent;color:var(--lc-red);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.withdrawBtn }}</button></div></sc-if>
 <sc-if value="{{ impDHasVersions }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ impDVersions }}" as="v" hint-placeholder-count="2"><button onClick="{{ v.pick }}" aria-pressed="{{ v.on }}" style="min-height:28px;padding:0 9px;border:1px solid var(--s-rule);background:transparent;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ v.label }}</button></sc-for></div></sc-if>
+<sc-if value="{{ impDShowBody }}" hint-placeholder-val="{{ true }}">
 <div class="m-g1" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
 <sc-for list="{{ impDKpis }}" as="k" hint-placeholder-count="3"><div style="border:1px solid var(--s-rule);padding:10px 12px;min-width:0"><div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ k.label }}</div><div style="font-family:var(--font-heading);font-weight:700;font-size:15px;margin-top:4px">{{ k.v }}</div></div></sc-for>
 </div>
 <div style="font-size:13px;border-left:2px solid var(--color-accent);padding-left:8px"><span style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;font-size:11px;color:var(--color-accent)">{{ ui.impTouches }}:</span> {{ impDTouches }}</div>
 <sc-if value="{{ impDHasPortfolio }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px"><span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.impPortfolio }}:</span> {{ impDPortfolio }}</div></sc-if>
 <div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ impDCalc }}" as="c" hint-placeholder-count="1"><a href="{{ c.url }}" style="color:var(--color-accent);border:1px solid var(--color-accent);padding:8px 12px;text-decoration:none;font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase">{{ c.label }} ↗</a></sc-for></div>
+</sc-if>
 </div>
+<sc-if value="{{ impDShowBody }}" hint-placeholder-val="{{ true }}">
 <section style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase">1 · {{ ui.impFacts }}</div><div style="font-size:12px;color:var(--s-mute)">{{ ui.impFactsNote }}</div>
 <sc-for list="{{ impDFacts }}" as="f" hint-placeholder-count="2"><div style="font-size:13px;line-height:1.45;border-left:2px solid var(--s-rule);padding-left:10px">{{ f.text }} <span style="color:var(--s-mute);font-size:12px">· {{ f.date }} ·</span> <a href="{{ f.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent);font-size:12px">{{ f.src }}</a></div></sc-for>
 <div style="font-size:13px"><span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.impFunding }}:</span> {{ impDFunding }}</div>
@@ -608,7 +618,48 @@
 <sc-for list="{{ impDAccuracy }}" as="r" hint-placeholder-count="1"><div style="font-size:13px">{{ r.text }} · <a href="{{ r.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">↗</a></div></sc-for></section></sc-if>
 </sc-if>
 </sc-if>
+</sc-if>
 
+<sc-if value="{{ gainsShow }}" hint-placeholder-val="{{ false }}">
+<div role="note" style="padding:12px var(--gx);border-bottom:1px solid var(--s-rule);font-size:13px;line-height:1.5;border-left:3px solid var(--color-accent);background:var(--s-panel);max-width:100%">{{ ui.gainsLegal }}</div>
+<div class="m-chips" style="display:flex;flex-wrap:wrap;gap:8px;padding:12px var(--gx);border-bottom:1px solid var(--s-rule);align-items:center">
+<sc-for list="{{ gainsViews }}" as="v" hint-placeholder-count="3"><button onClick="{{ v.pick }}" aria-pressed="{{ v.on }}" style="min-height:30px;padding:0 11px;border:1px solid var(--s-rule);background:{{ v.bg }};color:{{ v.fg }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ v.label }}</button></sc-for>
+<button onClick="{{ toggleGainsMine }}" aria-pressed="{{ gainsMineOn }}" style="min-height:30px;padding:0 11px;border:1px solid var(--color-accent);background:{{ gainsMineBg }};color:{{ gainsMineFg }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.gainsMine }}</button>
+</div>
+<sc-if value="{{ gainsLoading }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ ui.polLoading }}</div></sc-if>
+<sc-if value="{{ gainsHasError }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ gainsError }}</div></sc-if>
+<sc-if value="{{ gainsEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px var(--gx);color:var(--s-mute);font-size:13px">{{ ui.gainsEmpty }}</div></sc-if>
+<sc-if value="{{ gainsMeasuresShow }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ gainsMeasureRows }}" as="m" hint-placeholder-count="2">
+<article style="padding:14px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:6px">
+<div style="font-family:var(--font-heading);font-weight:700;font-size:16px;line-height:1.3;text-wrap:pretty">{{ m.title }}</div>
+<div style="display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--s-mute)"><span>{{ m.date }}</span><a href="{{ m.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">{{ m.src }}</a></div>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<sc-for list="{{ m.items }}" as="i" hint-placeholder-count="2"><span style="font-size:12px;border:1px solid var(--s-rule);padding:3px 8px"><b style="color:{{ i.color }}">{{ i.dir }}</b> · {{ i.text }}</span></sc-for>
+</div>
+</article>
+</sc-for>
+</sc-if>
+<sc-if value="{{ gainsCompaniesShow }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ gainsCompanyRows }}" as="c" hint-placeholder-count="2">
+<article style="padding:14px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:6px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ c.ticker }}</div>
+<div style="font-size:13px">{{ c.money }}</div>
+<div style="font-size:12px;color:var(--s-mute)">{{ c.measures }}</div>
+<sc-for list="{{ c.top }}" as="t" hint-placeholder-count="1"><div style="font-size:12px;border-left:2px solid var(--s-rule);padding-left:8px">{{ t.text }} · <a href="{{ t.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">{{ ui.gainsEvidence }} ↗</a></div></sc-for>
+</article>
+</sc-for>
+</sc-if>
+<sc-if value="{{ gainsSectorsShow }}" hint-placeholder-val="{{ false }}">
+<div class="m-g1" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0">
+<section style="padding:14px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:6px;align-content:start"><div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.1em;text-transform:uppercase">{{ ui.gainsCpv }}</div>
+<sc-for list="{{ gainsCpvRows }}" as="r" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;font-size:13px;border-bottom:1px solid var(--s-rule);padding:4px 0"><span>{{ r.label }}</span><b>{{ r.value }}</b></div></sc-for></section>
+<section style="padding:14px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:6px;align-content:start"><div style="font-family:var(--font-heading);font-weight:800;font-size:12px;letter-spacing:0.1em;text-transform:uppercase">{{ ui.gainsActs }}</div>
+<sc-for list="{{ gainsActRows }}" as="r" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;font-size:13px;border-bottom:1px solid var(--s-rule);padding:4px 0"><span>{{ r.label }}</span><b>{{ r.value }}</b></div></sc-for></section>
+</div>
+</sc-if>
+</sc-if>
+<!-- /gains -->
 <sc-if value="{{ impTabCompanies }}" hint-placeholder-val="{{ false }}">
 <sc-if value="{{ impCoShow }}" hint-placeholder-val="{{ false }}">
 <div style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px">
@@ -2257,6 +2308,7 @@ class Component extends DCLogic {
           + (h.why === 'sector' ? ' (' + (u.polBySector || 'via sector') + ' ' + P.sectorLabel(h.sector, lang) + ')' : ' (' + (u.polMentioned || 'named') + ')')).join(' · '),
         hasConcerns: hits.length > 0,
         aiSummary: (s.policyAi || {})[e.id] || '', hasAi: !!(s.policyAi || {})[e.id], aiLabel: u.aiVerified || '',
+        ...this.sheetFields(u, (s.policySheets || {})[e.id], !!byEvent[e.id]),
         hasAnalysis: !!byEvent[e.id], openAnalysis: () => byEvent[e.id] && this.setState({ polTab: 'analyses', impSel: { id: byEvent[e.id].id, version: byEvent[e.id].version } }) };
     }).filter(c => !mine || c.hasConcerns);
     const days = [];
@@ -2290,6 +2342,15 @@ class Component extends DCLogic {
       polScenarioUrl: '/calculator'
     }, this.impactView(u, lang));
   }
+  // A fact sheet on an event card: the automatic summary, the documents read, and why there is
+  // no impact analysis (only when there is none).
+  sheetFields(u, sh, hasAnalysis) {
+    const reasons = sh && Array.isArray(sh.reasons) && !hasAnalysis ? sh.reasons.map(c => u['polWhy_' + c]).filter(Boolean) : [];
+    const docs = sh && sh.base && Array.isArray(sh.base.documents) ? sh.base.documents.filter(d => d.status === 'ok' && /^https:\/\//.test(d.url || ''))
+      .map(d => ({ key: d.url, label: (u['polDoc_' + d.kind] || d.kind) + ' ↗', url: d.url })) : [];
+    return { sheetSummary: (sh && sh.summary) || '', hasSheetSummary: !!(sh && sh.summary), whyNo: reasons.join('; '), hasWhyNo: reasons.length > 0,
+      sheetDocs: docs, hasSheetDocs: docs.length > 0 };
+  }
   // Positions in lei with their value at the last quote (for the analyses' portfolio effect).
   impHoldings() {
     const s = this.state, pos = s.positions || {}, q = s.quotes || {};
@@ -2319,7 +2380,8 @@ class Component extends DCLogic {
     const scLabel = { full: u.impScFull, partial: u.impScPartial, delayed: u.impScDelayed };
     const approved = a => ({ yes: u.impYes, no: u.impNo })[a] || u.impUnknown;
     const out = {
-      impOn: true, impTabs: [tabBtn('events', u.impTabEvents), tabBtn('analyses', u.impTabAnalyses), tabBtn('companies', u.impTabCompanies)],
+      impOn: true, impTabs: [tabBtn('events', u.impTabEvents), tabBtn('analyses', u.impTabAnalyses), tabBtn('companies', u.impTabCompanies)]
+        .concat(flagOn('whoGains') ? [tabBtn('gains', u.gainsTab)] : []),
       impTabEvents: tab === 'events', impTabAnalyses: tab === 'analyses', impTabCompanies: tab === 'companies',
       impLoading: !s.impRows && !s.impErr, impHasError: !!s.impErr, impError: s.impErr || '', impDisclaimer: u.impDisclaimer
     };
@@ -2330,7 +2392,9 @@ class Component extends DCLogic {
     out.impListEmpty = !!list && !list.length;
     out.impList = (list || []).map(a => {
       const A = a.body || {}, hits = C.concerns(A, follows, positions);
-      return { key: a.id, title: a.title, meta: u.impVersion + ' ' + a.version + ' · ' + u.impPublished + ' ' + dmy(a.published_at) + ' · ' + u.impApproved + ': ' + approved((A.budget || {}).approved),
+      const auto = (a.origin || A.origin) === 'auto';
+      return { key: a.id, auto, withdrawn: !!a.withdrawn_at, flag: a.withdrawn_at ? u.withdrawnLabel : auto ? u.autoLabel : '', hasFlag: !!a.withdrawn_at || auto,
+        title: a.title, meta: u.impVersion + ' ' + a.version + ' · ' + u.impPublished + ' ' + dmy(a.published_at) + ' · ' + u.impApproved + ': ' + approved((A.budget || {}).approved),
         companies: (A.companies || []).map(c => short(c.ticker)).join(', '), sectors: (a.sectors || []).map(id => id === 'fiscal-general' ? u.polGeneral : window.HIFPolicy.sectorLabel(id, lang)).join(' · '),
         concerns: hits.map(h => short(h.ticker) + ' (' + via(h.via) + ')').join(' · '), hasConcerns: hits.length > 0,
         open: () => this.setState({ impSel: { id: a.id, version: a.version }, impFormula: '' }) };
@@ -2349,6 +2413,10 @@ class Component extends DCLogic {
       const allV = (s.impRows || []).filter(a => a.id === row.id).map(a => a.version).sort((x, y) => y - x);
       Object.assign(out, {
         impDTitle: row.title, impBack: () => this.setState({ impSel: null }),
+        impDAuto: (row.origin || A.origin) === 'auto' && !row.withdrawn_at, impDWithdrawn: !!row.withdrawn_at, impDShowBody: !row.withdrawn_at,
+        impDWithdrawnText: row.withdrawn_at ? u.withdrawnLabel + ' (' + dmy(String(row.withdrawn_at).slice(0, 10)) + '): ' + (row.withdrawn_reason || '') : '',
+        impDCanWithdraw: !!s.isAdmin && row.origin === 'auto' && !row.withdrawn_at,
+        impWithdraw: () => this.withdrawAnalysis(row, u),
         impDMeta: u.impVersion + ' ' + row.version + ' · ' + u.impPublished + ' ' + dmy(row.published_at) + (b ? ' · ' + u.impEngine + ' ' + b.engine_version : ''),
         impDVersions: allV.length > 1 ? allV.map(v => ({ key: String(v), label: 'v' + v, on: v === row.version, pick: () => this.setState({ impSel: { id: row.id, version: v } }) })) : [],
         impDHasVersions: allV.length > 1,
@@ -2386,6 +2454,7 @@ class Component extends DCLogic {
       });
     }
 
+    if (tab === 'gains' && flagOn('whoGains')) Object.assign(out, this.gainsView(u, lang, lei, dmy, short));
     // Companies: search, counts, one company.
     if (tab === 'companies') {
       const B = window.HIFBVB, fold = x => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -2425,6 +2494,61 @@ class Component extends DCLogic {
     }
     return out;
   }
+  // Politici 2.0, "Cine câștigă": who gains or loses from the state's acts and money, each with
+  // its evidence; by measure, by company, and where the money goes. Information only: the legal
+  // band above it is fixed in the markup.
+  gainsView(u, lang, lei, dmy, short) {
+    const s = this.state, P = window.HIFPolicy, g = s.gains, view = s.gainsTabView || 'measures', mine = !!s.gainsMine;
+    const mineSet = new Set([].concat(s.follows || [], Object.keys(s.positions || {})));
+    const btn = (id, label) => ({ key: id, label, on: view === id, bg: view === id ? 'var(--color-accent)' : 'transparent',
+      fg: view === id ? 'var(--s-on-accent)' : 'var(--s-ink)', pick: () => this.setState({ gainsTabView: id }) });
+    const dir = d => d === 'gains' ? u.gainsGains : d === 'loses' ? u.gainsLoses : u.gainsNeutral;
+    const tone = d => d === 'gains' ? 'var(--lc-green)' : d === 'loses' ? 'var(--lc-red)' : 'var(--s-mute)';
+    const out = { gainsShow: true, gainsViews: [btn('measures', u.gainsMeasures), btn('companies', u.gainsCompanies), btn('sectors', u.gainsSectors)],
+      gainsMineOn: mine, toggleGainsMine: () => this.setState({ gainsMine: !mine }),
+      gainsMineBg: mine ? 'var(--color-accent)' : 'transparent', gainsMineFg: mine ? 'var(--s-on-accent)' : 'var(--s-ink)',
+      gainsLoading: !g, gainsHasError: !!s.gainsErr, gainsError: s.gainsErr || '',
+      gainsMeasuresShow: view === 'measures', gainsCompaniesShow: view === 'companies', gainsSectorsShow: view === 'sectors' };
+    if (!g) return Object.assign(out, { gainsMeasureRows: [], gainsCompanyRows: [], gainsCpvRows: [], gainsActRows: [], gainsEmpty: false });
+    const links = g.links.filter(l => !mine || mineSet.has(l.subject_ticker));
+    // By measure: an act or an analysis, the companies it touches and how.
+    const groups = new Map();
+    links.filter(l => l.link_type !== 'contract' && l.link_type !== 'state_aid').forEach(l => {
+      const k = l.analysis_id || l.event_id; if (!k) return;
+      const gr = groups.get(k) || { key: k, title: l.title || k, url: l.evidence_url, at: l.at, items: [] };
+      gr.items.push({ key: l.subject_ticker + l.link_type, text: short(l.subject_ticker) + ' — ' + (u['link_' + l.link_type] || l.link_type), dir: dir(l.direction), color: tone(l.direction) });
+      groups.set(k, gr);
+    });
+    out.gainsMeasureRows = [...groups.values()].filter(gr => gr.items.some(i => i.dir !== u.gainsNeutral) || gr.items.length > 0)
+      .sort((a, b) => String(b.at || '').localeCompare(String(a.at || ''))).slice(0, 80)
+      .map(gr => ({ key: gr.key, title: gr.title, date: gr.at ? dmy(String(gr.at).slice(0, 10)) : '', url: gr.url, src: u.gainsEvidence + ' ↗', items: gr.items.slice(0, 12) }));
+    // By company: public money in 12 months, and measures for and against.
+    out.gainsCompanyRows = g.exposure.filter(r => !mine || mineSet.has(r.ticker)).filter(r => Number(r.contracts_12m_ron) > 0 || Number(r.aid_12m_ron) > 0 || r.measures_gain > 0 || r.measures_lose > 0)
+      .slice(0, 80).map(r => {
+        const top = g.links.filter(l => l.subject_ticker === r.ticker && (l.link_type === 'contract' || l.link_type === 'state_aid')).sort((a, b) => Number(b.amount_ron) - Number(a.amount_ron)).slice(0, 3);
+        return { key: r.ticker, ticker: short(r.ticker),
+          money: u.gainsContracts12m + ': ' + lei(Number(r.contracts_12m_ron)) + (r.contracts_12m_pct_revenue != null ? ' (' + Number(r.contracts_12m_pct_revenue).toLocaleString(this.appLocale) + '% ' + u.gainsPctRevenue + ')' : '')
+            + (Number(r.aid_12m_ron) > 0 ? ' · ' + u.gainsAid12m + ': ' + lei(Number(r.aid_12m_ron)) : ''),
+          measures: r.measures_gain + ' ' + u.gainsGains + ' · ' + r.measures_lose + ' ' + u.gainsLoses,
+          top: top.map(l => ({ key: l.evidence_url + l.amount_ron, text: (l.title || '') + ' · ' + lei(Number(l.amount_ron)) + (l.at ? ' · ' + dmy(String(l.at).slice(0, 10)) : ''), url: l.evidence_url })) };
+      });
+    // Where the money goes: contracts by kind of purchase, acts by sector, last 12 months.
+    const sum = (rows, keyOf, val) => { const m = new Map(); rows.forEach(r => { const k = keyOf(r); m.set(k, (m.get(k) || 0) + val(r)); }); return [...m.entries()]; };
+    out.gainsCpvRows = sum(g.flows.filter(f => f.dimension === 'cpv'), f => f.key, f => Number(f.inflow_ron) || 0).sort((a, b) => b[1] - a[1]).slice(0, 15)
+      .map(([k, v]) => ({ key: k, label: P.cpvLabel(k, lang), value: lei(v) }));
+    out.gainsActRows = sum(g.flows.filter(f => f.dimension === 'sector'), f => f.key, f => Number(f.measures) || 0).sort((a, b) => b[1] - a[1]).slice(0, 15)
+      .map(([k, v]) => ({ key: k, label: k === 'fiscal-general' ? u.polGeneral : P.sectorLabel(k, lang), value: String(v) }));
+    out.gainsEmpty = view === 'measures' ? !out.gainsMeasureRows.length : view === 'companies' ? !out.gainsCompanyRows.length : !out.gainsCpvRows.length && !out.gainsActRows.length;
+    return out;
+  }
+  // Politici 2.0: an admin hides a wrong automatic analysis; the reason is shown to readers.
+  withdrawAnalysis(row, u) {
+    const A = window.HIFAuth, reason = window.prompt(u.withdrawAsk || 'Reason:');
+    if (!A || !A.rest || !reason || reason.trim().length < 5) return;
+    A.rest('rpc/admin_withdraw_analysis', { method:'POST', body:{ p_id: row.id, p_version: row.version, p_reason: reason.trim() } })
+      .then(r => { if (!r || !r.ok) throw new Error('withdraw'); this._impAsk = false; this.setState({ impRows: null }); })
+      .catch(() => this.flash(String(this.copy.impError || 'Could not save').toUpperCase()));
+  }
   // Phase C data: the analyses (once), one analysis' results, accuracy and figures when it is
   // opened, the exposure counts when the Companies tab opens, one company's figures.
   syncImpact() {
@@ -2433,7 +2557,7 @@ class Component extends DCLogic {
     const err = () => this.copy.impError || 'Could not load';
     if (!s.impRows && !this._impAsk) {
       this._impAsk = true;
-      C.load(C.query.analyses()).then(rows => this.setState({ impRows: rows || [], impErr: '' }))
+      C.load(C.query.analyses(flagOn('autoImpact'))).then(rows => this.setState({ impRows: rows || [], impErr: '' }))
         .catch(() => { this._impAsk = false; this.setState({ impRows: [], impErr: err() }); });
     }
     const sel = s.impSel, row = sel && s.impRows && s.impRows.find(a => a.id === sel.id && a.version === sel.version);
@@ -2454,6 +2578,13 @@ class Component extends DCLogic {
       C.load(C.query.exposure()).then(rows => this.setState({ impExp: rows || [] }))
         .catch(() => { this._impExpAsk = false; this.setState({ impExp: [], impErr: err() }); });
     }
+    // Politici 2.0 (flag whoGains): links, exposure and flows, once, when the tab opens.
+    if (s.polTab === 'gains' && flagOn('whoGains') && !s.gains && !this._gainsAsk && window.HIFPolicy && window.HIFPolicy.loadLinks) {
+      const P = window.HIFPolicy; this._gainsAsk = true;
+      Promise.all([P.loadLinks({}), P.loadExposure(), P.loadFlows()])
+        .then(([links, exposure, flows]) => this.setState({ gains: { links: links || [], exposure: exposure || [], flows: flows || [] }, gainsErr: '' }))
+        .catch(() => { this._gainsAsk = false; this.setState({ gains: { links: [], exposure: [], flows: [] }, gainsErr: err() }); });
+    }
     if (s.impCo && !(s.impCoFin || {})[s.impCo] && this._impCoKey !== s.impCo) {
       const t = s.impCo; this._impCoKey = t;
       C.load(C.query.financials(t)).then(rows => this.setState(st => ({ impCoFin: Object.assign({}, st.impCoFin, { [t]: rows || [] }) })))
@@ -2467,12 +2598,16 @@ class Component extends DCLogic {
     const P = window.HIFPolicy, s = this.state;
     if (!flagOn('policy') || !P || !s.session) return;
     const sig = [s.policySector || '', s.policyTicker || '', s.policyQ || '', s.policyStatus || ''].join('|');
-    if (this._polSig === sig && s.policyRows) return;
-    this._polSig = sig;
-    this.setState({ policyErr:'' });
+    // Once per filter: a load still on its way is not started again (each update comes here).
+    if (this._polSig === sig && (s.policyRows || this._polBusy)) return;
+    this._polSig = sig; this._polBusy = true;
+    if (s.policyErr) this.setState({ policyErr:'' });
     P.load({ sector: s.policySector, ticker: s.policyTicker, q: s.policyQ, status: s.policyStatus })
       .then(rows => {
+        this._polBusy = false;
+        if (this._polSig !== sig) return;
         this.setState({ policyRows: rows || [], policyErr:'' });
+        this.syncSheets(rows || []);
         // The local model's summaries an admin has checked (flag aiAnnotations), shown labelled.
         const C = window.HIFImpactClient;
         if (flagOn('aiAnnotations') && C && rows && rows.length)
@@ -2481,7 +2616,17 @@ class Component extends DCLogic {
             this.setState({ policyAi: m });
           }).catch(() => {});
       })
-      .catch(() => { this._polSig = ''; this.setState({ policyErr: this.copy.polError || 'Could not load', policyRows: [] }); });
+      .catch(() => { this._polBusy = false; this._polSig = ''; this.setState({ policyErr: this.copy.polError || 'Could not load', policyRows: [] }); });
+  }
+  // Politici 2.0 (flag autoImpact): each event's fact sheet (summary, documents, reasons).
+  syncSheets(rows) {
+    if (!flagOn('autoImpact')) return;
+    const P = window.HIFPolicy;
+    if (!P || !P.loadSheets || !rows.length) return;
+    P.loadSheets(rows.map(r => r.id)).then(list => {
+      const m = {}; (list || []).forEach(x => { m[x.event_id] = x; });
+      this.setState(st => ({ policySheets: Object.assign({}, st.policySheets, m) }));
+    }).catch(() => {});
   }
   // The BVB tab: Romanian press stories (/ro-news) and the quotes of the companies they
   // name, plus the largest Bucharest listings, in one batch.
