@@ -30,16 +30,19 @@ test('titles are told apart: dealings, reports, marketing', () => {
 
 test('a .RO company: its own feed and the press, with no bvb.ro', async () => {
   const seen = [];
+  // Every date from one instant: a feed stamped "now" when it is read made the press item a
+  // second newer than the company's whenever the clock ticked between the two reads.
+  const t0 = new Date(), before = h => new Date(t0.getTime() - h * 3600000);
   globalThis.fetch = async url => {
     const u = String(url); seen.push(u);
     if (u === ISSUERS['BNET.RO'].feed) return new Response(rss([
-      { title: 'Tranzacții PDMR în Oferta de răscumpărare acțiuni BNET (OPC)', link: 'https://investors.bittnet.ro/tranzactii-pdmr/' },
+      { title: 'Tranzacții PDMR în Oferta de răscumpărare acțiuni BNET (OPC)', link: 'https://investors.bittnet.ro/tranzactii-pdmr/', at: t0 },
       { title: 'Plata cupon 13 BNET27A', link: 'https://investors.bittnet.ro/plata-cupon-13/', at: day(-3) },
       { title: 'Raport anual 2025', link: 'https://investors.bittnet.ro/raport-anual-2025/', at: day(-60) }]), { status: 200 });
     const f = RO_FEEDS.find(x => x.url === u);
     if (f) return new Response(rss(f.source === 'Profit.ro' ? [
-      { title: 'Directorul general al Bittnet a cumpărat acțiuni BNET de 200.000 lei', link: 'https://www.profit.ro/bnet-1' },
-      { title: 'Bittnet lansează un curs nou de inteligență artificială', link: 'https://www.profit.ro/bnet-2' }] : []), { status: 200 });
+      { title: 'Directorul general al Bittnet a cumpărat acțiuni BNET de 200.000 lei', link: 'https://www.profit.ro/bnet-1', at: before(1) },
+      { title: 'Bittnet lansează un curs nou de inteligență artificială', link: 'https://www.profit.ro/bnet-2', at: before(1) }] : []), { status: 200 });
     throw new Error('unexpected ' + u);
   };
   const r = await roFilings('BNET.RO', 30);
