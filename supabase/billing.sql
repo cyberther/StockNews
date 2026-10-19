@@ -204,3 +204,56 @@ begin
 end $$;
 revoke all on function public.billing_apply(text, jsonb) from public, anon, authenticated;
 grant execute on function public.billing_apply(text, jsonb) to service_role;
+
+-- ---------------------------------------------------------------------------------------
+-- The rules that only apply with the commercial switch on. (approval.sql and impact.sql
+-- recreate the two read policies below without them: run this file again after either.)
+
+-- Tickers followed and positions held: the plan's limit (Free 5, Pro 100); 100 for everyone
+-- while the commercial rules are off, as before.
+create or replace function public.plan_limit(p_uid uuid, p_what text) returns integer
+language sql stable security definer set search_path = public as $$
+  select (select (value -> (case when not public.commercial_mode() or public.current_plan(p_uid) = 'pro' then 'pro' else 'free' end) ->> p_what)::int
+          from app_config where key = 'limits');
+$$;
+revoke all on function public.plan_limit(uuid, text) from public, anon, authenticated;
+
+create or replace function public.watchlist_cap() returns trigger language plpgsql security definer set search_path = public as $$
+declare lim integer := coalesce(public.plan_limit(new.user_id, 'tickers'), 100);
+begin
+  if (select count(*) from watchlist where user_id = new.user_id) >= lim then
+    raise exception 'watchlist is limited to % tickers', lim using errcode = '23514';
+  end if;
+  return new;
+end $$;
+create or replace function public.holdings_cap() returns trigger language plpgsql security definer set search_path = public as $$
+declare lim integer := coalesce(public.plan_limit(new.user_id, 'positions'), 100);
+begin
+  if (select count(*) from holdings where user_id = new.user_id) >= lim then
+    raise exception 'holdings are limited to % positions', lim using errcode = '23514';
+  end if;
+  return new;
+end $$;
+
+-- Impact results (and the accuracy view over them) and the day digests: Pro. The analyses
+-- themselves (facts, assumptions, risks) stay readable by every approved account.
+do $$
+begin
+  if to_regclass('public.impact_results') is not null then
+    execute 'drop policy if exists "read results" on public.impact_results';
+    execute 'create policy "read results" on public.impact_results for select to authenticated using (public.is_pro())';
+  end if;
+  if to_regclass('public.ticker_digests') is not null then
+    execute 'drop policy if exists "read digests" on public.ticker_digests';
+    execute 'create policy "read digests" on public.ticker_digests for select to authenticated using (public.is_pro())';
+  end if;
+end $$;
+
+-- Who of these accounts gets push alerts (news and policy, supabase/functions/scan): all of
+-- them while the commercial rules are off, else the Pro ones.
+create or replace function public.pro_users(p_ids uuid[]) returns setof uuid
+language sql stable security definer set search_path = public as $$
+  select u from unnest(p_ids) u where not public.commercial_mode() or public.current_plan(u) = 'pro';
+$$;
+revoke all on function public.pro_users(uuid[]) from public, anon, authenticated;
+grant execute on function public.pro_users(uuid[]) to service_role;
