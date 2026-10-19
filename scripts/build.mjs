@@ -55,15 +55,29 @@ writeFileSync(join(output, '_headers'), [
   // The home-screen manifest: with nosniff, browsers only read it under its own type.
   '/templates/stock-news-web/manifest.webmanifest',
   '  Content-Type: application/manifest+json',
+  '/manifest.webmanifest',
+  '  Content-Type: application/manifest+json',
   ''
 ].join('\n'));
 
-// Redirects (the same as netlify.toml's, which Netlify applies first).
+// Clean addresses (the same as netlify.toml's, which Netlify applies first): the app at / and
+// /login, the legal page at /legal, the scenario calculator at /calculator, all served in place
+// (200). The pages' relative files (./assets, ./support.js, ../shared/...) then resolve from the
+// site root, so those paths are served too. Cloudflare drops .html from page paths (and
+// redirects to the short form), so its targets are written without it.
+const page = name => `/templates/stock-news-web/${name}${cloudflare ? '' : '.html'}`;
 writeFileSync(join(output, '_redirects'), [
-  '/ /templates/stock-news-web/StockNewsWeb.dc.html 302',
-  '/legal /templates/stock-news-web/legal.html 301',
-  '/mobile /templates/stock-news-web/StockNewsWeb.dc.html 301',
-  '/templates/stock-news-dark/* /templates/stock-news-web/StockNewsWeb.dc.html 301',
+  `/ ${page('StockNewsWeb.dc')} 200`,
+  `/login ${page('StockNewsWeb.dc')} 200`,
+  `/legal ${page('legal')} 200`,
+  `/calculator ${page('intelligence')} 200`,
+  '/shared/* /templates/shared/:splat 200',
+  '/assets/* /templates/stock-news-web/assets/:splat 200',
+  '/ds-base.js /templates/stock-news-web/ds-base.js 200',
+  '/support.js /templates/stock-news-web/support.js 200',
+  '/manifest.webmanifest /templates/stock-news-web/manifest.webmanifest 200',
+  '/mobile / 301',
+  '/templates/stock-news-dark/* / 301',
   ''
 ].join('\n'));
 // Cloudflare Pages: functions only for /api/*, so pages and assets never count against the

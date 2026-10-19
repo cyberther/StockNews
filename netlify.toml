@@ -7,28 +7,64 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Convenience: open the web app at the site root.
+# Clean addresses (the same as scripts/build.mjs writes to _redirects): pages served in place.
 [[redirects]]
   from = "/"
   to = "/templates/stock-news-web/StockNewsWeb.dc.html"
-  status = 302
+  status = 200
+
+[[redirects]]
+  from = "/login"
+  to = "/templates/stock-news-web/StockNewsWeb.dc.html"
+  status = 200
 
 # Terms, privacy policy, disclaimer and sources (templates/stock-news-web/legal.html).
 [[redirects]]
   from = "/legal"
   to = "/templates/stock-news-web/legal.html"
-  status = 301
+  status = 200
+
+[[redirects]]
+  from = "/calculator"
+  to = "/templates/stock-news-web/intelligence.html"
+  status = 200
+
+# The pages' relative files, resolved from the site root.
+[[redirects]]
+  from = "/shared/*"
+  to = "/templates/shared/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/assets/*"
+  to = "/templates/stock-news-web/assets/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/ds-base.js"
+  to = "/templates/stock-news-web/ds-base.js"
+  status = 200
+
+[[redirects]]
+  from = "/support.js"
+  to = "/templates/stock-news-web/support.js"
+  status = 200
+
+[[redirects]]
+  from = "/manifest.webmanifest"
+  to = "/templates/stock-news-web/manifest.webmanifest"
+  status = 200
 
 # The mobile app is no longer published (scripts/build-netlify.mjs); old links land on the
 # web app, which has its own phone layout.
 [[redirects]]
   from = "/mobile"
-  to = "/templates/stock-news-web/StockNewsWeb.dc.html"
+  to = "/"
   status = 301
 
 [[redirects]]
   from = "/templates/stock-news-dark/*"
-  to = "/templates/stock-news-web/StockNewsWeb.dc.html"
+  to = "/"
   status = 301
 
 
