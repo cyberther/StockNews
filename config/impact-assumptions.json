@@ -1,0 +1,62 @@
+[
+  {
+    "key": "gdp_2026",
+    "label": "PIB nominal 2026 (lei)",
+    "kind": "data",
+    "unit": "RON",
+    "why": "Derivat din comunicatul Ministerului Finanțelor despre execuția bugetară pe primele nouă luni: deficitul de 78,52 mld. lei reprezintă 3,82% din PIB, deci PIB = 78,52 mld. / 3,82%. Intervalul vine din rotunjirea procentului la două zecimale.",
+    "source_url": "https://mfinante.gov.ro/ro/despre-minister/-/asset_publisher/uwgr/content/id/20574560",
+    "source_date": "2026-10-16",
+    "range": [2052810457516, 2058191349934],
+    "default": 2055497382199,
+    "applies_to": ["tax_rate_change", "budget_program", "price_cap"]
+  },
+  {
+    "key": "partial_pct",
+    "label": "Implementare parțială (%)",
+    "kind": "scenario",
+    "unit": "%",
+    "why": "Scenariul „parțial” arată ce se întâmplă dacă măsura se aplică doar pe jumătate (de exemplu o cotă redusă la jumătate sau jumătate din beneficiari). Nu e o predicție, ci una dintre cele trei variante comparate.",
+    "source_url": null,
+    "source_date": null,
+    "range": [20, 100],
+    "default": 50,
+    "applies_to": ["tax_rate_change", "budget_program", "price_cap", "contract_award"]
+  },
+  {
+    "key": "delay_months",
+    "label": "Întârziere (luni)",
+    "kind": "scenario",
+    "unit": "months",
+    "why": "Scenariul „întârziat” mută efectul cu un număr de luni, pentru normele de aplicare și termenele de declarare care urmează de obicei după un act. Nu e o predicție, ci una dintre cele trei variante comparate.",
+    "source_url": null,
+    "source_date": null,
+    "range": [0, 12],
+    "default": 1,
+    "applies_to": ["tax_rate_change", "budget_program", "price_cap", "contract_award"]
+  },
+  {
+    "key": "mitigation_pct",
+    "label": "Compensare de către companie (%)",
+    "kind": "scenario",
+    "unit": "%",
+    "why": "Cât din șoc compensează compania (prin prețuri, costuri sau volume). Implicit 0: arătăm efectul direct, fără să presupunem o reacție pe care documentul nu o descrie.",
+    "source_url": null,
+    "source_date": null,
+    "range": [0, 100],
+    "default": 0,
+    "applies_to": ["tax_rate_change", "price_cap"]
+  },
+  {
+    "key": "contribution_pct",
+    "label": "Cât din variația veniturilor ajunge în rezultatul din exploatare (%)",
+    "kind": "scenario",
+    "unit": "%",
+    "why": "Pentru o taxă sau o cotă plătită din venituri, efectul trece integral în rezultatul din exploatare (100%): e o cheltuială fără costuri evitate. Alt procent ar cere date despre structura costurilor companiei.",
+    "source_url": null,
+    "source_date": null,
+    "range": [0, 100],
+    "default": 100,
+    "applies_to": ["tax_rate_change", "price_cap", "contract_award"]
+  }
+]

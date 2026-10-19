@@ -110,3 +110,47 @@ Pornirea (manuală):
 cp tools/systemd/market-pulse-policy-ai.* ~/.config/systemd/user/
 systemctl --user daemon-reload && systemctl --user enable --now market-pulse-policy-ai.timer
 ```
+
+## Analize automate și fișe (Politici 2.0)
+Design: `docs/plans/2026-10-19-politici-automat-design.md`. Comutatoare: `autoImpact` (fișele și analizele
+automate în aplicație) și `whoGains` (tab-ul „Cine câștigă”). Ambele sunt oprite până la verificarea pe staging.
+
+**Fluxul:**
+1. **Jobul `eod`** (cloud, fără AI):
+   - adună actele de la Camera Deputaților, Ministerul Finanțelor, notele Guvernului (`ingest/policy/gov.mjs`)
+     și ordonanțele din portalul legislativ (`ingest/policy/just.mjs`);
+   - descarcă documentele pe care le poate atinge (`ingest/policy/documents.mjs`: `pdftotext`; PDF-urile
+     scanate rămân „necitibile”, fără OCR);
+   - scrie o **fișă de bază** pentru fiecare eveniment;
+   - citește contractele SEAP noi (`ingest/state/seap.mjs`, doar după cod fiscal, `config/company-entities.json`).
+2. **Pe PC, noaptea** (`tools/policy-auto-batch.mjs`, timerul `market-pulse-policy-auto`):
+   - citește documentele Camerei, care nu răspunde serverelor GitHub;
+   - cere modelului local (LM Studio) o propunere pentru fiecare document necitit.
+3. **Validatorul** (`ingest/impact/auto-validate.mjs`) decide:
+   - **analiză**, dacă fiecare citat apare exact în document și își conține valoarea, fiecare ipoteză vine din
+     `config/impact-assumptions.json` (cu sursă) și în interval, companiile au cifre auditate, tipul măsurii e
+     modelat și motorul calculează;
+   - altfel, **fișă cu motive**: `no_figures`, `no_financial_sheet`, `type_not_modelled`, `no_company_data`,
+     `missing_assumption`, `quote_not_found`, `ai_pending`, `source_unreadable`.
+
+**Unde stau:**
+- Analizele automate stau în `impact_analyses` cu `origin = 'auto'`, sunt imuabile ca celelalte (o versiune
+  nouă la un text nou al documentului) și au eticheta „Generată automat, verificată pe textul sursă”.
+- Un administrator le poate **retrage** din aplicație. Analiza rămâne, ascunsă, cu motivul afișat.
+
+**Biblioteca de ipoteze:**
+- Se schimbă doar prin PR. O intrare `data` cere sursă oficială https și dată.
+- O intrare `scenario` (implementare parțială, întârziere, compensare, contribuție) e o alegere de metodă și
+  își spune motivul.
+- Fără o sursă pentru PIB-ul anului unei măsuri (`gdp_<an>`), măsura primește fișă, nu analiză.
+
+**„Cine câștigă”** (view-urile `state_links`, `company_state_exposure`, `sector_state_flows`):
+- doar legături cu dovadă: companie numită, sector, contract, ajutor, cost dintr-o analiză;
+- fără scor compus și fără recomandări;
+- banda legală e fixă în aplicație.
+
+**Pornirea pe PC:**
+```
+cp tools/systemd/market-pulse-policy-auto.* ~/.config/systemd/user/
+systemctl --user daemon-reload && systemctl --user enable --now market-pulse-policy-auto.timer
+```

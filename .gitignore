@@ -22,3 +22,4 @@ node_modules
 # Ingestion run outputs
 summary.json
 health.json
+.superpowers/

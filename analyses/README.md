@@ -13,3 +13,8 @@ Fiecare analiză stă în `analyses/<id>/v<N>.json`. Formatul și formulele sunt
   acurateței.
 
 După ce adaugi o versiune nouă: `npm run impact:lock`, `npm test`, PR.
+
+## Analizele automate
+Analizele generate noaptea din documentele oficiale (`docs/impact-model.md`, „Analize automate”) **nu** stau
+aici, ci doar în Supabase (`impact_analyses.origin = 'auto'`). Ele trec prin validatorul automat în loc de
+review, și au eticheta și avertismentul lor în aplicație. Analizele din acest folder rămân cele revizuite prin PR.

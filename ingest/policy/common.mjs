@@ -1,12 +1,13 @@
 // Shared helpers for the policy sources.
-const ENT = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
+const ENT = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', acirc: 'â', Acirc: 'Â', icirc: 'î', Icirc: 'Î', abreve: 'ă', Abreve: 'Ă',
+  scedil: 'ş', Scedil: 'Ş', tcedil: 'ţ', Tcedil: 'Ţ', ndash: '–', mdash: '—', bdquo: '„', ldquo: '“', rdquo: '”', laquo: '«', raquo: '»' };
 export function text(html) {
   return String(html || '')
     .replace(/<br\s*\/?>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(Number(n)))
     .replace(/&#x([0-9a-f]+);/gi, (m, n) => String.fromCodePoint(parseInt(n, 16)))
-    .replace(/&([a-z]+);/gi, (m, n) => (ENT[n.toLowerCase()] != null ? ENT[n.toLowerCase()] : m))
+    .replace(/&([a-z]+);/gi, (m, n) => (ENT[n] != null ? ENT[n] : ENT[n.toLowerCase()] != null ? ENT[n.toLowerCase()] : m))
     .replace(/\s+/g, ' ')
     .trim();
 }

@@ -129,3 +129,21 @@ Ce s-a făcut în aplicație:
 - [Dow Jones – Terms of Use](https://www.dowjones.com/terms-of-use/) (citat prin [ghidul bibliotecii SCU](https://libguides.scu.edu/az/wsjcom))
 - BBC, despre deschiderea fluxurilor RSS: [digital-lifestyles.info](https://digital-lifestyles.info/2005/05/11/bbc-opens-up-rss-news-feeds) și [clagnut.com](https://clagnut.com/blog/1450/), ambele vechi; de verificat pe bbc.co.uk
 - Directiva (UE) 2019/790, art. 4 și 15; Legea 8/1996 modificată prin Legea 69/2022
+
+## 6. Surse de politici și bani publici (Politici 2.0)
+Verificate pe 19 octombrie 2026, pentru `docs/plans/2026-10-19-politici-automat-design.md`. Clientul se identifică
+cinstit: `MarketPulse/1.0 (+https://www.marketpulse.ro)`. Fixture-urile sunt în `test/fixtures/policy/`.
+
+| Sursă | Ce luăm | Termeni / acces | Verdict |
+|---|---|---|---|
+| **Portalul legislativ** (`legislatie.just.ro`, serviciul SOAP `apiws/FreeWebService.svc`: `GetToken`, `Search`) | actele publicate în Monitorul Oficial: număr, emitent, data intrării în vigoare, text complet | Serviciu web public, pentru reutilizare. Fără robots.txt. Refuză (403) cererile fără User-Agent sau cu cel implicit al curl, dar acceptă un client care se identifică. Textul nu are valoare oficială în instanță: sursa juridică rămâne Monitorul Oficial. | 🟢 |
+| **Guvernul: note de fundamentare** (`gov.ro/ro/guvernul/procesul-legislativ/note-de-fundamentare`) | nota fiecărei hotărâri și ordonanțe, inclusiv secțiunea despre impactul financiar | Site public al Guvernului. Fără robots.txt. Documente publicate pentru transparență (Legea 52/2003). | 🟢 |
+| **SEAP: date deschise** (`data.gov.ro/dataset/achizitii-publice-2026`, publicate de ADR) | contractele trimestriale: autoritate, CPV, valoare RON, data, **CUI-ul câștigătorului** | Licență CC BY 4.0 (cere atribuire: „Sursa: SEAP / data.gov.ro”). robots.txt cere 10 s între cereri și interzice `/api/`, de aceea descărcăm fișierele direct. Format: xlsx sau ods (~22 MB, foaia ~200 MB necomprimată). | 🟢 |
+| **Senatul** (`senat.ro/legis/lista.aspx`) | proiectele aflate la Senat | Pagina ASP.NET merge doar cu postback-uri. Proiectele trec oricum prin Camera Deputaților, pe care o citim deja. | 🟡 amânat |
+| **Ajutoare de stat** (RegAS `ajutordestat.ro`; registrul de transparență al Comisiei Europene) | beneficiarii ajutoarelor | RegAS are certificatul TLS invalid (curl exit 60). Registrul Comisiei are doar căutare manuală, fără export sau API (o cerere AskTheEU confirmă că nu există acces în bloc). | 🔴 deocamdată |
+
+Consecințe pentru plan:
+- Task 7 implementează portalul legislativ și notele de fundamentare de la Guvern; Senatul rămâne amânat.
+- Task 8 implementează SEAP.
+- Ajutoarele de stat rămân în schema bazei (tabelul `state_aid`), fără parser, până apare o sursă cu export.
+- Schemele de ajutor anunțate de Ministerul Finanțelor intră oricum ca documente.

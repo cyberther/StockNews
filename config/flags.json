@@ -14,5 +14,7 @@
   "policyAlerts": true,
   "aiAnnotations": false,
   "billing": true,
-  "legalReviewed": false
+  "legalReviewed": false,
+  "autoImpact": true,
+  "whoGains": true
 }

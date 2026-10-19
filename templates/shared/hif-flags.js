@@ -16,6 +16,8 @@
 //   aiAnnotations               the local model's annotations: admin review and verified ones shown (Phase C)
 //   billing                     the real paywall and the subscription on the Account screen (Phase D)
 //   legalReviewed               allows checkout; false until the terms are checked by a lawyer (Phase D)
+//   autoImpact                  fact sheets and automatic analyses on the Policy screen (Politici 2.0)
+//   whoGains                    the "Cine câștigă" tab: links, company exposure, money by purchase (Politici 2.0)
 (function(){
 var FLAGS = {
   following: true,
@@ -33,7 +35,9 @@ var FLAGS = {
   policyAlerts: true,
   aiAnnotations: false,
   billing: true,
-  legalReviewed: false
+  legalReviewed: false,
+  autoImpact: true,
+  whoGains: true
 };
 var root = typeof window !== 'undefined' ? window : globalThis;
 root.HIFFlags = {

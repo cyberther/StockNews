@@ -13,32 +13,40 @@ function fakeDb(events = []) {
   const t = { policy_events: events.map(e => ({ ...e })), policy_event_history: [], ingest_runs: [] };
   return { t,
     async read(table) { return t[table].map(r => ({ ...r })); },
-    async upsert(table, rows) { for (const r of rows) { const i = t[table].findIndex(x => x.id === r.id); if (i < 0) t[table].push({ ...r }); else t[table][i] = { ...t[table][i], ...r }; } return rows; },
+    // PostgREST refuses a bulk upsert whose rows have different keys (PGRST102).
+    async upsert(table, rows) { const keys = JSON.stringify(Object.keys(rows[0] || {}).sort());
+      if (rows.some(r => JSON.stringify(Object.keys(r).sort()) !== keys)) throw new Error('supabase ' + table + ': 400 All object keys must match');
+      for (const r of rows) { const i = t[table].findIndex(x => x.id === r.id); if (i < 0) t[table].push({ ...r }); else t[table][i] = { ...t[table][i], ...r }; } return rows; },
     async insert(table, rows) { t[table].push(...rows); return rows; } };
 }
 // The fixtures stand in for this year's lists; last year's lists are empty pages.
 function fetcher(over = {}) {
   const calls = [];
-  const pages = { initiatives2026: fx('cdep-initiatives.html'), laws2026: fx('cdep-laws.html'), initiatives2025: '<table></table>', laws2025: '<table></table>', mf: fx('mf.xml'), ...over };
+  const pages = { initiatives2026: fx('cdep-initiatives.html'), laws2026: fx('cdep-laws.html'), initiatives2025: '<table></table>', laws2025: '<table></table>', mf: fx('mf.xml'), gov: fx('gov/note-list.html'), ...over };
   const fetchText = async url => {
     calls.push(url);
-    const key = /anp=(\d+)/.test(url) ? 'initiatives' + RegExp.$1 : /anl=(\d+)/.test(url) ? 'laws' + RegExp.$1 : /mfinante/.test(url) ? 'mf' : '?';
+    const key = /anp=(\d+)/.test(url) ? 'initiatives' + RegExp.$1 : /anl=(\d+)/.test(url) ? 'laws' + RegExp.$1 : /mfinante/.test(url) ? 'mf' : /gov\.ro/.test(url) ? 'gov' : '?';
     const v = pages[key];
     if (v instanceof Error) throw v;
     return v;
   };
   return { calls, fetchText };
 }
-const args = (db, f) => ({ db, fetchText: f.fetchText, now: NOW, taxonomy, catalog });
+// The legislation portal's SOAP service: a token, then the ordinances fixture for every page.
+const justFetch = async (url, init) => ({ ok: true, status: 200,
+  text: async () => /GetToken/.test(init.headers.soapaction) ? '<GetTokenResult>T</GetTokenResult>' : fx('just/search-oug-2026.xml') });
+const args = (db, f) => ({ db, fetchText: f.fetchText, fetchImpl: justFetch, now: NOW, taxonomy, catalog });
 
 test('sources: this year\'s and last year\'s Chamber lists, and the ministry\'s releases', () => {
-  assert.deepEqual(policySources(NOW).map(s => s.name), ['cdep-initiatives-2026', 'cdep-laws-2026', 'cdep-initiatives-2025', 'cdep-laws-2025', 'mf-press']);
+  assert.deepEqual(policySources(NOW).map(s => s.name), ['cdep-initiatives-2026', 'cdep-laws-2026', 'cdep-initiatives-2025', 'cdep-laws-2025', 'mf-press', 'gov-notes', 'just-ordinances']);
 });
 
 test('first run: every event stored, classified, with its first history line', async () => {
   const db = fakeDb(), f = fetcher();
   const s = await runPolicy(args(db, f));
-  assert.equal(f.calls.length, 5);
+  assert.equal(f.calls.length, 6);
+  assert.ok(db.t.policy_events.some(e => e.id === 'gov:hg-781-2026'));
+  assert.equal(db.t.policy_events.filter(e => e.id.startsWith('just:')).length, 3, 'the same ordinances on every page count once');
   const by = Object.fromEntries(db.t.policy_events.map(e => [e.id, e]));
   // PL-x 320/06.10.2025 is on both lists: one event, adopted, the law's number.
   assert.equal(by['cdep:22591'].status, 'adopted');
@@ -134,7 +142,24 @@ test('with a relay, only the Chamber pages go through it; the ministry is fetche
   const s = await runPolicy({ ...args(db, { fetchText: async u => { direct.push(u); return fx('mf.xml'); } }),
     relay: async u => { relayed.push(u); return /anp=2026/.test(u) ? pages.anp : /anl=2026/.test(u) ? pages.anl : '<table></table>'; } });
   assert.equal(relayed.length, 4);
-  assert.equal(direct.length, 1);
+  assert.equal(direct.length, 2);
   assert.ok(/mfinante/.test(direct[0]));
+  assert.ok(/gov\.ro/.test(direct[1]));
   assert.ok(s.events > 3);
+});
+
+test('new and changed events in the same run are stored (rows with different keys go in separate upserts)', async () => {
+  const db = fakeDb(), f = fetcher();
+  await runPolicy(args(db, f));
+  // An event changes and a new one appears in the same run.
+  const laws = fx('cdep-laws.html');
+  const g = fetcher({ gov: fx('gov/note-list.html').replaceAll('HG nr. 781/01.10.2026', 'HG nr. 799/01.10.2026').replace(/hg-nr-781-01-10-2026/g, 'hg-nr-799-01-10-2026') });
+  const before = db.t.policy_events.length;
+  const e = db.t.policy_events.find(x => x.id === 'gov:hg-782-2026'); e.stage = 'altă etapă';
+  const s = await runPolicy(args(db, g));
+  assert.deepEqual(s.errors.filter(x => /keys/.test(x)), []);
+  assert.ok(s.created >= 1 && s.changed >= 1, JSON.stringify(s));
+  assert.ok(db.t.policy_events.some(x => x.id === 'gov:hg-799-2026'));
+  assert.ok(db.t.policy_events.length > before);
+  void laws;
 });

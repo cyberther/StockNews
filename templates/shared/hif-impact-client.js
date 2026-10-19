@@ -10,7 +10,8 @@ function ver(v){ if (!(Number.isInteger(Number(v)) && Number(v) > 0)) throw new 
 function sym(t){ if (!SYMBOL.test(String(t))) throw new Error('bad ticker'); return t; }
 
 var query = {
-  analyses: function(){ return 'impact_analyses?select=id,version,published_at,title,policy,events,sectors,body&order=published_at.desc,id.asc,version.desc&limit=200'; },
+  // With auto (Politici 2.0, after supabase/policy-auto.sql): where each came from and any withdrawal.
+  analyses: function(auto){ return 'impact_analyses?select=id,version,published_at,title,policy,events,sectors,body' + (auto ? ',origin,withdrawn_at,withdrawn_reason' : '') + '&order=published_at.desc,id.asc,version.desc&limit=200'; },
   results: function(a, v){ return 'impact_results?select=scenario,subject,engine_version,vals,formula,computed_at&analysis_id=eq.' + id(a) + '&version=eq.' + ver(v) + '&order=computed_at.asc'; },
   accuracy: function(a, v){ return 'analysis_accuracy?select=*&analysis_id=eq.' + id(a) + '&version=eq.' + ver(v); },
   financials: function(t){ return 'company_financials?select=*&ticker=eq.' + sym(t) + '&order=fiscal_year.desc,provenance.asc&limit=6'; },
