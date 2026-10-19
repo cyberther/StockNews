@@ -36,3 +36,10 @@ test('an article link still opens the article', async () => {
   await sw.tap({ url: 'https://www.marketpulse.ro/', article: 'https://www.zf.ro/a' });
   assert.deepEqual(sw.opened, ['https://www.zf.ro/a']);
 });
+
+test('the app at the site root (/) is found as the open tab; the legal page is not', async () => {
+  const sw = loadSw('https://www.marketpulse.ro', ['https://www.marketpulse.ro/legal', 'https://www.marketpulse.ro/']);
+  await sw.tap({ url: 'https://www.marketpulse.ro/#policy' });
+  assert.deepEqual(sw.opened, []);
+  assert.equal(sw.posted[0][0], 'https://www.marketpulse.ro/');
+});

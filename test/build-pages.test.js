@@ -21,7 +21,24 @@ test('a Cloudflare Pages build writes headers, redirects, routes and a static pu
     assert.ok(existsSync(join(out, f)), f);
   assert.match(readFileSync(join(out, '_headers'), 'utf8'), /connect-src 'self' data: blob: abc\.supabase\.co/);
   const redirects = readFileSync(join(out, '_redirects'), 'utf8');
-  assert.match(redirects, /^\/ \/templates\/stock-news-web\/StockNewsWeb\.dc\.html 302$/m);
+  // Clean addresses: the app at / and /login, the legal page at /legal, the calculator at
+  // /calculator, served in place (200), not redirected. The pages' relative files
+  // (./assets, ../shared, ...) then resolve from the site root, so those are served too.
+  // Cloudflare drops .html from page paths, so the targets name them without it.
+  for (const rule of [
+    '/ /templates/stock-news-web/StockNewsWeb.dc 200',
+    '/login /templates/stock-news-web/StockNewsWeb.dc 200',
+    '/legal /templates/stock-news-web/legal 200',
+    '/calculator /templates/stock-news-web/intelligence 200',
+    '/shared/* /templates/shared/:splat 200',
+    '/assets/* /templates/stock-news-web/assets/:splat 200',
+    '/ds-base.js /templates/stock-news-web/ds-base.js 200',
+    '/support.js /templates/stock-news-web/support.js 200',
+    '/manifest.webmanifest /templates/stock-news-web/manifest.webmanifest 200',
+    '/mobile / 301'
+  ]) assert.ok(redirects.split('\n').includes(rule), rule);
+  assert.doesNotMatch(redirects, / 302$/m);
+  assert.match(readFileSync(join(out, '_headers'), 'utf8'), /^\/manifest\.webmanifest\n  Content-Type: application\/manifest\+json$/m);
   // Netlify serves paths in any case, so links use /stocknewsweb.dc; Cloudflare is
   // case-sensitive: a small page there forwards, keeping the #fragment (sign-in links).
   const fwd = readFileSync(join(out, 'templates/stock-news-web/stocknewsweb.dc.html'), 'utf8');
@@ -43,6 +60,8 @@ test('a Netlify build writes no config.json (its secret scan refuses env values 
   assert.equal(existsSync(join(out, 'config.json')), false);
   assert.equal(existsSync(join(out, 'templates/stock-news-web/stocknewsweb.dc.html')), false);
   assert.ok(existsSync(join(out, '_headers')));
+  // Netlify serves the .html path as is.
+  assert.ok(readFileSync(join(out, '_redirects'), 'utf8').split('\n').includes('/ /templates/stock-news-web/StockNewsWeb.dc.html 200'));
 });
 
 test('the Pages Function answers through the gateway, without Finnhub', async () => {
