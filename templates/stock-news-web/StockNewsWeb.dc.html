@@ -2019,6 +2019,7 @@ class Component extends DCLogic {
     if (prevProps && prevProps.finnhubToken !== this.props.finnhubToken) this.syncLive();
     this.autoBio();
     this.maybeDeviceSetup();
+    if (this.state.screen === 'detail') this.ensureQuote(this.state.selected);
     this.syncLiveChart();
     this.queueWatchlistSync();
     this.queueHoldingsSync();
@@ -2751,6 +2752,17 @@ class Component extends DCLogic {
     this.setState({ selected:ticker, screen:'detail', prev: this.state.screen === 'detail' ? this.state.prev : this.state.screen });
     this.syncLive([ticker]);
     this.syncDetail(ticker);
+    this.ensureQuote(ticker);
+  }
+  // A ticker nobody follows has no price in Supabase: HIFLive.quote asks the gateway for it
+  // (its quote, else its day chart). Once per ticker per visit.
+  ensureQuote(ticker) {
+    const L = window.HIFLive;
+    if (!ticker || !L || !L.quote || !this.state.session || (this.state.quotes || {})[ticker]) return;
+    this._qAsked = this._qAsked || new Set();
+    if (this._qAsked.has(ticker)) return;
+    this._qAsked.add(ticker);
+    L.quote(ticker, this.token).then(q => { if (q) this.setState(st => ({ quotes: Object.assign({}, st.quotes, { [ticker]: q }) })); }).catch(() => {});
   }
   onKey(event) {
     const tag = ((event.target && event.target.tagName) || '').toLowerCase();
