@@ -60,3 +60,16 @@ test('the policy client asks for sheets, links, exposure and flows with safe fil
   assert.match(Q.flows('2025-10-01'), /^sector_state_flows\?select=\*&month=gte\.2025-10-01/);
   assert.match(Q.flows('bad'), /month=gte\.\d{4}-\d{2}-\d{2}/);
 });
+
+test('the legal page explains automatic analyses, "who gains" and the new sources, in Romanian and English', () => {
+  const legal = read('templates/stock-news-web/legal.html');
+  const ro = legal.slice(0, legal.indexOf('<template id="doc-en">')), en = legal.slice(legal.indexOf('<template id="doc-en">'));
+  assert.match(ro, /Analizele de impact automate[\s\S]{0,600}pot conține erori/);
+  assert.match(ro, /„Cine câștigă”[\s\S]{0,400}nu (sunt )?recomandări/);
+  assert.match(ro, /de verificat juridic/i);
+  assert.match(ro, /Sursa: SEAP \/ data\.gov\.ro/);
+  assert.match(ro, /CC BY 4\.0/);
+  assert.match(en, /Automatic impact analyses[\s\S]{0,600}can contain errors/);
+  assert.match(en, /“Who gains”[\s\S]{0,400}not (investment )?recommendations/);
+  assert.match(en, /Source: SEAP \/ data\.gov\.ro/);
+});
