@@ -14,6 +14,8 @@
 //   impact                      impact analyses, companies' exposure, the calculator, the portfolio card (Phase C)
 //   policyAlerts                push alerts for policy events and analyses (Edge Function: FLAG_POLICY_ALERTS)
 //   aiAnnotations               the local model's annotations: admin review and verified ones shown (Phase C)
+//   billing                     the real paywall and the subscription on the Account screen (Phase D)
+//   legalReviewed               allows checkout; false until the terms are checked by a lawyer (Phase D)
 (function(){
 var FLAGS = {
   following: true,
@@ -29,7 +31,9 @@ var FLAGS = {
   policy: true,
   impact: true,
   policyAlerts: true,
-  aiAnnotations: false
+  aiAnnotations: false,
+  billing: true,
+  legalReviewed: false
 };
 var root = typeof window !== 'undefined' ? window : globalThis;
 root.HIFFlags = {

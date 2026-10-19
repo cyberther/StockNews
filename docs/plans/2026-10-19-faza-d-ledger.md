@@ -5,7 +5,7 @@ Proprietarul: „alege tu valorile și începe faza D” — deciziile [decizia 
 
 | Task | Stare | Note |
 |---|---|---|
-| 1 Config | de făcut | |
+| 1 Config | gata | 5/5 teste. Ruling: rândul „Analize de impact” arată „Fapte” la Gratuit și „Complete” la Pro (chei de text, nu simboluri), ca diferența să fie explicită. |
 | 2 Entitlements SQL | de făcut | |
 | 3 Webhook SQL | de făcut | |
 | 4 Limite și Pro pe server | de făcut | |
