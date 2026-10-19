@@ -35,6 +35,16 @@ const TICKER_RE = /^[A-Z0-9][A-Z0-9.\-]{0,11}$/;
 // On hold (config/flags.json usMarket: false) unless the function's FLAG_US_MARKET secret is 'true'.
 const MARKET_TOP = ['NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'AVGO', 'TSLA', 'TSM', 'JPM'];
 const flagOn = (name: string) => env(name) === 'true';
+// Push alerts are a Pro feature once the commercial rules are on (supabase/billing.sql):
+// keeps only the accounts pro_users returns (all of them while they are off). If the check
+// fails, nobody is dropped: an alert too many beats a paying reader missing one.
+async function onlyPro<T>(perUser: Map<string, T>, db: { rpc: Function }, errors: string[]) {
+  if (!perUser.size) return;
+  const { data, error } = await db.rpc('pro_users', { p_ids: [...perUser.keys()] });
+  if (error) { errors.push('pro_users: ' + error.message); return; }
+  const keep = new Set((data || []).map((r: unknown) => typeof r === 'string' ? r : (r as { pro_users: string }).pro_users));
+  for (const id of [...perUser.keys()]) if (!keep.has(id)) perUser.delete(id);
+}
 
 type Story = { id: string; ticker: string; headline: string; source: string | null; url: string | null;
   summary: string | null; published_at: string };
@@ -361,6 +371,7 @@ Deno.serve(async (req) => {
     if (!r.push || !byTicker.has(r.ticker)) return;
     perUser.set(r.user_id, [...(perUser.get(r.user_id) || []), ...byTicker.get(r.ticker)!]);
   });
+  await onlyPro(perUser, db, errors);
 
   let pushes = 0;
   const vapidOk = env('VAPID_PUBLIC_KEY') && env('VAPID_PRIVATE_KEY') && env('VAPID_SUBJECT');
@@ -409,6 +420,7 @@ Deno.serve(async (req) => {
       const seenIds = new Set<string>();
       perUserItems.set(r.user_id, (r.items || []).filter(i => { const k = i.type + ':' + i.id; if (seenIds.has(k)) return false; seenIds.add(k); return true; }));
     });
+    await onlyPro(perUserItems, db, errors);
     if (perUserItems.size && vapidOk) {
       webpush.setVapidDetails(env('VAPID_SUBJECT'), env('VAPID_PUBLIC_KEY'), env('VAPID_PRIVATE_KEY'));
       const { data: subs, error: subErr } = await db.from('push_subscriptions')

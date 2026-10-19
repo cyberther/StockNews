@@ -79,6 +79,19 @@ const PROVIDERS = {
   news: [finnhub], search: [finnhub], recommendation: [finnhub], earningsCalendar: [finnhub]
 };
 const BY_NAME = Object.fromEntries([finnhub, yahoo, twelvedata, fmp, alphavantage, ronews, eunews, usnews, rofilings].map(p => [p.name, p]));
+// What each provider's data may be used for (as ingest/providers): 'dev_only' (free plans,
+// Yahoo: not in a paid product), 'headlines' (press titles with a link to the source),
+// 'commercial_display' (a paid plan that allows it, declared with MARKET_LICENSE_<NAME>).
+// With commercialMode on, dev_only providers are not asked at all.
+const LICENSE = { yahoo: 'dev_only', finnhub: 'dev_only', twelvedata: 'dev_only', fmp: 'dev_only', alphavantage: 'dev_only',
+  ronews: 'headlines', eunews: 'headlines', usnews: 'headlines', rofilings: 'headlines' };
+const LICENSES = ['dev_only', 'headlines', 'commercial_display', 'redistribution'];
+export function licensesFromEnv(env) {
+  const out = {};
+  Object.keys(LICENSE).forEach(n => { const v = String(env['MARKET_LICENSE_' + n.toUpperCase()] || '').trim(); if (LICENSES.includes(v)) out[n] = v; });
+  return out;
+}
+const licenseOf = (p, ctx) => (ctx.licenses && ctx.licenses[p.name]) || LICENSE[p.name] || 'dev_only';
 // Keys by provider, from the environment (never sent anywhere but the provider itself).
 export const keysFromEnv = env => ({ finnhub: env.FINNHUB_KEY, twelvedata: env.TWELVEDATA_KEY, fmp: env.FMP_KEY, alphavantage: env.ALPHAVANTAGE_KEY });
 // Bucharest Stock Exchange listings (.RO): Yahoo has their prices and names, the Romanian
@@ -320,8 +333,9 @@ async function fetchCapability(cap, params, ctx) {
   }
   const run = (async () => {
     // The most telling failure wins: one from a provider that was tried beats "not configured".
-    let fail = null, unconfigured = false, emptyAnswer = null;
+    let fail = null, unconfigured = false, unlicensed = false, emptyAnswer = null;
     for (const p of providersFor(cap, ctx, params)) {
+      if (ctx.commercial && licenseOf(p, ctx) === 'dev_only') { unlicensed = true; continue; }
       const apiKey = p.needsKey ? ctx.keys[p.name] : null;
       if (p.needsKey && !apiKey) { unconfigured = true; continue; }
       if (breakerOpen(p.name) || !paceAllows(p)) { fail = { status: 429, error: 'rate limit exceeded' }; continue; }
@@ -369,7 +383,8 @@ async function fetchCapability(cap, params, ctx) {
     if (emptyAnswer) return remember(key, cap, params, emptyAnswer.data, emptyAnswer.source);
     const staleFor = STALE_FOR[cap] || STALE_DEFAULT;
     if (hit && Date.now() - hit.at < (hit.ttl + staleFor) * 1000) return { status: 200, data: hit.data, source: hit.source, cache: 'stale', ttl: 0 };
-    if (!fail) fail = unconfigured ? { status: 503, error: 'market data is not configured' } : { status: 502, error: 'market data unavailable' };
+    if (!fail) fail = unlicensed && !unconfigured ? { status: 503, error: 'no licensed provider' }
+      : unconfigured ? { status: 503, error: 'market data is not configured' } : { status: 502, error: 'market data unavailable' };
     return { status: fail.status, data: { error: fail.error }, source: null, cache: 'miss', ttl: 0 };
   })();
   inflight.set(key, run);
@@ -585,7 +600,9 @@ export async function handleMarketRequest(request, options = {}) {
     if (who !== true) return json({ error: 'sign in required' }, 401, { 'cache-control': 'no-store' });
   }
 
-  const ctx = { keys: { finnhub: options.apiKey, ...(options.keys || {}) }, log: options.log || defaultLog, usage: options.usage || null, order: options.order || null };
+  const flags = { ...FLAGS, ...(options.flags || {}) };
+  const ctx = { keys: { finnhub: options.apiKey, ...(options.keys || {}) }, log: options.log || defaultLog, usage: options.usage || null, order: options.order || null,
+    commercial: flags.commercialMode === true, licenses: options.licenses || null };
   const r = cap === 'quotes' ? await fetchQuotes(parsed.params.symbols, ctx)
     : cap === 'earningsCalendar' ? await fetchEarningsCalendar(parsed.params, ctx)
     : cap === 'news' && !isLocal(parsed.params.symbol) ? await fetchUsNews(parsed.params, ctx)

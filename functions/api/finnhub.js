@@ -6,7 +6,7 @@
 // Finnhub is not used here even if a key is set. Fails open: any exception is a 503 JSON
 // answer, which the apps treat as "no data", and nothing else on the page depends on it.
 // _routes.json limits functions to /api/*, so pages and assets never invoke one.
-import { handleMarketRequest, keysFromEnv, orderFromEnv } from '../../netlify/functions/_shared/market/gateway.js';
+import { handleMarketRequest, keysFromEnv, orderFromEnv, licensesFromEnv } from '../../netlify/functions/_shared/market/gateway.js';
 
 export function optionsFromEnv(env, request) {
   const keys = keysFromEnv({ ...env, FINNHUB_KEY: '' });
@@ -14,6 +14,7 @@ export function optionsFromEnv(env, request) {
   return {
     keys,
     order: orderFromEnv(env),
+    licenses: licensesFromEnv(env),
     allowedOrigins: env.ALLOWED_ORIGINS,
     rateLimit: env.API_RATE_LIMIT || 600,
     clientId: request.headers.get('cf-connecting-ip') || '',

@@ -71,3 +71,13 @@ test('policy alerts: worked out in SQL, sent once a day at most per run, marked 
   assert.ok(mark > 0 && send > 0);
   assert.doesNotMatch(block.slice(block.lastIndexOf('if', mark), mark), /sent|pushes/);
 });
+
+test('alerts (news and policy) go only to the accounts pro_users keeps (all of them while not commercial)', () => {
+  assert.match(src, /async function onlyPro\b/);
+  assert.match(src, /rpc\('pro_users', \{ p_ids:/);
+  // Both alert paths trim their recipients through it before reading the devices.
+  const news = src.slice(src.indexOf('// Alerts: recent new stories'), src.indexOf('// Each story is alerted at most once'));
+  assert.match(news, /await onlyPro\(perUser/);
+  const policy = src.slice(src.indexOf('// Policy alerts'), src.indexOf('// end of policy alerts'));
+  assert.match(policy, /await onlyPro\(perUserItems/);
+});
