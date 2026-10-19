@@ -184,3 +184,18 @@ test('alerts: the earlier rules still hold after the redefinition (a named compa
   const items = ((await svc(`select items from public.policy_alerts_due(now() - interval '1 day') where user_id = '${APPROVED}'`)).rows[0] || { items: [] }).items;
   assert.deepEqual(items.map(i => i.type + ':' + i.id).sort(), ['analysis:auto-x', 'event:cdep:30', 'event:cdep:32']);
 });
+
+test('SEAP on the PC: files already read are listed; contracts saved once; only recent ones will alert', async () => {
+  const save = (rows, secret = SECRET) => anon(`select public.contracts_save('${secret}', 'https://data.gov.ro/f1.xlsx', '${JSON.stringify(rows)}'::jsonb) n`);
+  const rows = [{ id: 'seap:n1', cui: '5022670', ticker: 'TLV.RO', authority: 'A', title: 'T', cpv: '45000000-7', value_ron: 10, signed_on: new Date().toISOString().slice(0, 10), source_url: 'https://data.gov.ro/f1.xlsx' },
+    { id: 'seap:o1', cui: '5022670', ticker: 'TLV.RO', authority: 'B', title: 'T', cpv: '45000000-7', value_ron: 20, signed_on: '2026-01-15', source_url: 'https://data.gov.ro/f1.xlsx' }];
+  assert.equal((await save(rows)).rows[0].n, 2);
+  assert.equal((await save(rows)).rows[0].n, 0, 'the same contracts again: nothing new');
+  const done = (await anon(`select * from public.state_sources_done('${SECRET}')`)).rows.map(r => Object.values(r)[0]);
+  assert.ok(done.includes('https://data.gov.ro/f1.xlsx'));
+  const a = (await svc(`select id, alerted_at is null waiting from public.public_contracts where id in ('seap:n1','seap:o1') order by id`)).rows;
+  assert.deepEqual(a.map(r => [r.id, r.waiting]), [['seap:n1', true], ['seap:o1', false]]);
+  await assert.rejects(save(rows, 'wrong'), /not allowed/);
+  await assert.rejects(save([{ ...rows[0], id: 'seap:x', source_url: 'http://x' }]), /https/);
+  await assert.rejects(anon(`select * from public.state_sources_done('wrong')`), /not allowed/);
+});

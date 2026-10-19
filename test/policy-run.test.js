@@ -13,7 +13,10 @@ function fakeDb(events = []) {
   const t = { policy_events: events.map(e => ({ ...e })), policy_event_history: [], ingest_runs: [] };
   return { t,
     async read(table) { return t[table].map(r => ({ ...r })); },
-    async upsert(table, rows) { for (const r of rows) { const i = t[table].findIndex(x => x.id === r.id); if (i < 0) t[table].push({ ...r }); else t[table][i] = { ...t[table][i], ...r }; } return rows; },
+    // PostgREST refuses a bulk upsert whose rows have different keys (PGRST102).
+    async upsert(table, rows) { const keys = JSON.stringify(Object.keys(rows[0] || {}).sort());
+      if (rows.some(r => JSON.stringify(Object.keys(r).sort()) !== keys)) throw new Error('supabase ' + table + ': 400 All object keys must match');
+      for (const r of rows) { const i = t[table].findIndex(x => x.id === r.id); if (i < 0) t[table].push({ ...r }); else t[table][i] = { ...t[table][i], ...r }; } return rows; },
     async insert(table, rows) { t[table].push(...rows); return rows; } };
 }
 // The fixtures stand in for this year's lists; last year's lists are empty pages.
@@ -143,4 +146,20 @@ test('with a relay, only the Chamber pages go through it; the ministry is fetche
   assert.ok(/mfinante/.test(direct[0]));
   assert.ok(/gov\.ro/.test(direct[1]));
   assert.ok(s.events > 3);
+});
+
+test('new and changed events in the same run are stored (rows with different keys go in separate upserts)', async () => {
+  const db = fakeDb(), f = fetcher();
+  await runPolicy(args(db, f));
+  // An event changes and a new one appears in the same run.
+  const laws = fx('cdep-laws.html');
+  const g = fetcher({ gov: fx('gov/note-list.html').replaceAll('HG nr. 781/01.10.2026', 'HG nr. 799/01.10.2026').replace(/hg-nr-781-01-10-2026/g, 'hg-nr-799-01-10-2026') });
+  const before = db.t.policy_events.length;
+  const e = db.t.policy_events.find(x => x.id === 'gov:hg-782-2026'); e.stage = 'altă etapă';
+  const s = await runPolicy(args(db, g));
+  assert.deepEqual(s.errors.filter(x => /keys/.test(x)), []);
+  assert.ok(s.created >= 1 && s.changed >= 1, JSON.stringify(s));
+  assert.ok(db.t.policy_events.some(x => x.id === 'gov:hg-799-2026'));
+  assert.ok(db.t.policy_events.length > before);
+  void laws;
 });

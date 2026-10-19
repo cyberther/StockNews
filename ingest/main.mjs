@@ -28,8 +28,7 @@ import { runPolicy, relayFetch } from './policy/run.mjs';
 import { bvbCatalog } from './policy/classify.mjs';
 import { runImpact } from './impact/run.mjs';
 import { runDocuments } from './policy/documents.mjs';
-import { runStateMoney } from './state/seap.mjs';
-import { catalogTickers, cuiIndex } from './impact/schema.mjs';
+import { catalogTickers } from './impact/schema.mjs';
 
 const arg = name => { const a = process.argv.find(x => x.startsWith(`--${name}=`)); return a ? a.slice(name.length + 3) : null; };
 const has = name => process.argv.includes(`--${name}`);
@@ -103,14 +102,8 @@ if (policy && !dry) {
   } catch (e) { policy.errors.push('documents: ' + e.message); }
 }
 
-// Public contracts won by listed companies (SEAP open data, by fiscal code): new files only.
-if (policy && !dry) {
-  try {
-    const money = await runStateMoney({ db, now, cuiIndex: cuiIndex(readJson('../config/company-entities.json')) });
-    policy.contracts = { files: money.files, rows: money.contracts };
-    policy.errors.push(...money.errors.map(e => 'seap: ' + e));
-  } catch (e) { policy.errors.push('seap: ' + e.message); }
-}
+// Public contracts (SEAP) are read on the owner's PC (tools/policy-auto-batch.mjs): data.gov.ro
+// does not answer GitHub's runners.
 
 // Impact analyses (analyses/, config/company-financials.json): after the policy events they refer to.
 let impact = null;

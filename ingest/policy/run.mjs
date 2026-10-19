@@ -93,7 +93,9 @@ export async function runPolicy({ db, fetchText: get = fetchText, fetchImpl = fe
     upserts.push({ ...row, updated_at: at });
     for (const f of ['status', 'stage']) if (!same(old[f], row[f])) history.push({ event_id: item.id, changed_at: at, field: f, old_value: old[f], new_value: row[f] });
   }
-  for (let i = 0; i < upserts.length; i += 500) await db.upsert('policy_events', upserts.slice(i, i + 500), { onConflict: 'id' });
+  // New rows carry first_seen and changed ones don't: PostgREST wants one set of keys per request.
+  for (const part of [upserts.filter(r => r.first_seen), upserts.filter(r => !r.first_seen)])
+    for (let i = 0; i < part.length; i += 500) await db.upsert('policy_events', part.slice(i, i + 500), { onConflict: 'id' });
   if (history.length) await db.insert('policy_event_history', history);
   return { events: found.size, created, changed, errors };
 }

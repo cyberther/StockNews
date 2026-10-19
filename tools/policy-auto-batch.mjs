@@ -16,6 +16,8 @@ import { validateProposal, MEASURE_TYPES } from '../ingest/impact/auto-validate.
 import { catalogTickers } from '../ingest/impact/schema.mjs';
 import { normText } from '../ingest/impact/quote.mjs';
 import { documentLinks, readDocument, bundle } from '../ingest/policy/documents.mjs';
+import { collectContracts } from '../ingest/state/seap.mjs';
+import { cuiIndex as makeCuiIndex } from '../ingest/impact/schema.mjs';
 
 const UA = 'MarketPulse/1.0 (+https://www.marketpulse.ro)';
 const ROLES = ['amount', 'budget_cost', 'start', 'end', 'rate_old', 'rate_new', 'base', 'cap', 'target', 'exposure', 'shock', 'note'];
@@ -73,16 +75,29 @@ async function readChamber({ rpc, secret, fetchImpl, limit, deadline, log }) {
   return read;
 }
 
-export async function runPolicyAuto({ lm, rpc, fetchImpl = fetch, now = new Date(), window = '01-06', maxMinutes = 60, limit = 20, secret, assumptions, financials, tickers, taxonomy, log = () => {} }) {
-  if (!inWindow(now, window)) return { status: 'outside_window', read: 0, analyses: 0, sheets: 0, skipped: 0 };
-  try { await lm.ping(); } catch (e) { log('LM Studio is not answering: postponed'); return { status: 'postponed', read: 0, analyses: 0, sheets: 0, skipped: 0 }; }
+// SEAP's open data (data.gov.ro does not answer GitHub either): new files, by fiscal code.
+async function readSeap({ rpc, secret, fetchImpl, cuiIndex, now, wait, tmp, log }) {
+  if (!cuiIndex || !cuiIndex.size) return 0;
+  try {
+    const done = new Set(((await rpc('state_sources_done', { p_secret: secret })) || []).map(x => typeof x === 'string' ? x : Object.values(x)[0]));
+    const r = await collectContracts({ done, fetchImpl, cuiIndex, now, ...(wait ? { wait } : {}), ...(tmp ? { tmp } : {}),
+      save: (url, rows) => rpc('contracts_save', { p_secret: secret, p_url: url, p_rows: rows }) });
+    r.errors.forEach(e => log('seap: ' + e));
+    return r.contracts;
+  } catch (e) { log('seap: ' + String(e.message || e).slice(0, 160)); return 0; }
+}
+
+export async function runPolicyAuto({ lm, rpc, fetchImpl = fetch, now = new Date(), window = '01-06', maxMinutes = 60, limit = 20, secret, assumptions, financials, tickers, taxonomy, cuiIndex, seapWait, tmp, log = () => {} }) {
+  if (!inWindow(now, window)) return { status: 'outside_window', read: 0, analyses: 0, sheets: 0, skipped: 0, contracts: 0 };
+  const contracts = await readSeap({ rpc, secret, fetchImpl, cuiIndex, now, wait: seapWait, tmp, log });
+  try { await lm.ping(); } catch (e) { log('LM Studio is not answering: postponed'); return { status: 'postponed', read: 0, analyses: 0, sheets: 0, skipped: 0, contracts }; }
   const deadline = Date.now() + maxMinutes * 60000;
   const read = await readChamber({ rpc, secret, fetchImpl, limit, deadline, log });
   const withFigures = [...new Set((financials || []).filter(f => f.verified === true).map(f => f.ticker))];
   const schema = proposalSchema(assumptions, withFigures);
   let analyses = 0, sheets = 0, skipped = 0;
   for (const d of (await rpc('auto_pending', { p_secret: secret, p_limit: limit })) || []) {
-    if (Date.now() > deadline) return { status: 'time_limit', read, analyses, sheets, skipped };
+    if (Date.now() > deadline) return { status: 'time_limit', read, analyses, sheets, skipped, contracts };
     let p;
     try {
       p = await lm.json(PROMPT, `Assumption keys: ${assumptions.map(a => a.key).join(', ')}\nTitle: ${d.title}\n\nDocument:\n${String(d.text).slice(0, MAX_PROMPT)}`, schema);
@@ -102,7 +117,7 @@ export async function runPolicyAuto({ lm, rpc, fetchImpl = fetch, now = new Date
       sheets++;
     }
   }
-  return { status: 'done', read, analyses, sheets, skipped };
+  return { status: 'done', read, analyses, sheets, skipped, contracts };
 }
 
 async function main() {
@@ -113,6 +128,7 @@ async function main() {
   const r = await runPolicyAuto({ lm: localModel({ url: cfg.lmUrl, model: cfg.model, maxTokens: 3000, name: 'policy_proposal' }), rpc: supabaseRpc(cfg),
     secret: cfg.secret, assumptions: json('../config/impact-assumptions.json'), taxonomy: json('../config/policy-taxonomy.json'),
     financials: json('../config/company-financials.json').map(f => ({ ...f, verified: true })), tickers: catalogTickers(), log,
+    cuiIndex: makeCuiIndex(json('../config/company-entities.json')),
     window: env.AI_WINDOW || '01-06', maxMinutes: Math.max(1, Math.min(Number(env.AI_MAX_MINUTES) || 60, 300)),
     limit: Math.max(1, Math.min(Number(env.AI_LIMIT) || 20, 50)) });
   log('policy auto:', JSON.stringify(r));

@@ -94,3 +94,25 @@ test('facts point to the part of the bundle their quote is in; the schema offers
   assert.deepEqual(s.properties.companies.items.properties.ticker.enum, ['SNP.RO']);
   assert.ok(s.properties.measure_type.enum.includes('budget_program'));
 });
+
+test('SEAP\'s files are read on the PC too, before the model, even when the model is down', async () => {
+  const { mkdtempSync, readFileSync: rf } = await import('node:fs');
+  const { join } = await import('node:path');
+  const { tmpdir } = await import('node:os');
+  const { writeXlsx } = await import('./helpers/tiny-xlsx.js');
+  const dir = mkdtempSync(join(tmpdir(), 'seap-pc-')), file = join(dir, 'c.xlsx');
+  writeXlsx(file, [['Autoritate contractanta', 'Cod CPV', 'Numar lot', 'Numar anunt atribuire', 'Data contract', 'Numar contract', 'Valoare contract (RON)', 'Ofertant castigator', 'CUI ofertant castigator'],
+    ['Primăria A', '45000000-7', '1', 'SCNA1', 46203, 'C1', 1000, 'BANCA TRANSILVANIA SA', 5022670]]);
+  const calls = [];
+  const rpc = async (fn, body) => { calls.push([fn, body]); return fn === 'state_sources_done' ? [] : fn === 'contracts_save' ? body.p_rows.length : []; };
+  const page = '<a href="https://data.gov.ro/dataset/e8/resource/r/download/raport-contracte-tiii.xlsx">c</a>';
+  const fetchImpl = async url => /download/.test(url) ? { ok: true, arrayBuffer: async () => rf(file) } : { ok: true, text: async () => page };
+  const lm = { ping: async () => { throw new Error('down'); }, json: async () => ({}) };
+  const r = await runPolicyAuto({ lm, rpc, fetchImpl, now: new Date('2026-10-20T00:30:00Z'), window: 'always', secret: 's'.repeat(40), assumptions, financials: [], tickers: catalogTickers(), taxonomy,
+    cuiIndex: new Map([['5022670', 'TLV.RO']]), seapWait: async () => {}, tmp: dir, log: () => {} });
+  assert.equal(r.status, 'postponed');
+  assert.equal(r.contracts, 1);
+  const save = calls.find(c => c[0] === 'contracts_save')[1];
+  assert.equal(save.p_url, 'https://data.gov.ro/dataset/e8/resource/r/download/raport-contracte-tiii.xlsx');
+  assert.equal(save.p_rows[0].ticker, 'TLV.RO');
+});

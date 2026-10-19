@@ -67,9 +67,10 @@ export async function readContracts(file, { cuiIndex, sourceUrl }) {
   return out;
 }
 
-// The ingestion's part (eod): files not read yet, one at a time, 10 s apart.
-export async function runStateMoney({ db, fetchImpl = fetch, cuiIndex, now = new Date(), wait = ms => new Promise(r => setTimeout(r, ms)), tmp = tmpdir(), datasets = SEAP_DATASETS(now.getUTCFullYear()) }) {
-  const errors = [], done = new Set((await db.read('state_sources', 'select=url')).map(r => r.url));
+// Files not read yet, one at a time, 10 s apart (robots.txt). done: the urls already read;
+// save(url, rows) stores one file's contracts and marks the file read.
+export async function collectContracts({ done, save, fetchImpl = fetch, cuiIndex, now = new Date(), wait = ms => new Promise(r => setTimeout(r, ms)), tmp = tmpdir(), datasets = SEAP_DATASETS(now.getUTCFullYear()) }) {
+  const errors = [];
   let files = 0, contracts = 0;
   for (const ds of datasets) {
     let list = [];
@@ -86,12 +87,22 @@ export async function runStateMoney({ db, fetchImpl = fetch, cuiIndex, now = new
         if (!r.ok) throw new Error('HTTP ' + r.status);
         writeFileSync(path, Buffer.from(await r.arrayBuffer()));
         const rows = await readContracts(path, { cuiIndex, sourceUrl: url });
-        for (let i = 0; i < rows.length; i += 500) await db.upsert('public_contracts', rows.slice(i, i + 500), { onConflict: 'id' });
-        await db.upsert('state_sources', [{ url, kind: 'seap_contracts', rows: rows.length, processed_at: new Date().toISOString() }], { onConflict: 'url' });
-        files++; contracts += rows.length;
+        contracts += (await save(url, rows)) ?? rows.length;
+        done.add(url);
+        files++;
       } catch (e) { errors.push(url.split('/').pop() + ': ' + String(e.message || e).slice(0, 160)); }
       finally { try { unlinkSync(path); } catch (e) {} }
     }
   }
   return { files, contracts, errors };
+}
+
+// With the service role (the ingestion's database client).
+export async function runStateMoney({ db, ...o }) {
+  const done = new Set((await db.read('state_sources', 'select=url')).map(r => r.url));
+  return collectContracts({ ...o, done, save: async (url, rows) => {
+    for (let i = 0; i < rows.length; i += 500) await db.upsert('public_contracts', rows.slice(i, i + 500), { onConflict: 'id' });
+    await db.upsert('state_sources', [{ url, kind: 'seap_contracts', rows: rows.length, processed_at: new Date().toISOString() }], { onConflict: 'url' });
+    return rows.length;
+  } });
 }

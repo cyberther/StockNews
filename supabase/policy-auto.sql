@@ -365,3 +365,39 @@ revoke all on function public.policy_alerts_due(timestamptz) from public, anon, 
 revoke all on function public.policy_alerts_mark(timestamptz) from public, anon, authenticated;
 grant execute on function public.policy_alerts_due(timestamptz) to service_role;
 grant execute on function public.policy_alerts_mark(timestamptz) to service_role;
+
+-- ---------------------------------------------------------------------------------------
+-- SEAP's open data is read on the owner's PC (data.gov.ro does not answer GitHub's runners):
+-- the files already read, and the contracts of one file. A contract signed more than 30 days
+-- ago is stored as already announced, so a first import sends no alerts about old contracts.
+create or replace function public.state_sources_done(p_secret text) returns setof text
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if not public.summary_secret_ok(p_secret) then raise exception 'not allowed' using errcode = '42501'; end if;
+  return query select url from state_sources;
+end $$;
+create or replace function public.contracts_save(p_secret text, p_url text, p_rows jsonb) returns integer
+language plpgsql security definer set search_path = public as $$
+declare r jsonb; n integer := 0; c integer;
+begin
+  if not public.summary_secret_ok(p_secret) then raise exception 'not allowed' using errcode = '42501'; end if;
+  if coalesce(p_url, '') !~ '^https://' then raise exception 'source urls must be https'; end if;
+  if jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) > 5000 then raise exception 'rows must be a list of up to 5000'; end if;
+  for r in select * from jsonb_array_elements(p_rows) loop
+    if coalesce(r->>'source_url', '') !~ '^https://' then raise exception 'source urls must be https'; end if;
+    insert into public_contracts (id, cui, ticker, authority, title, cpv, value_ron, currency, signed_on, duration_months, source_url, alerted_at)
+    values (left(r->>'id', 200), r->>'cui', r->>'ticker', left(coalesce(r->>'authority', ''), 300), left(coalesce(r->>'title', ''), 300), r->>'cpv',
+      (r->>'value_ron')::numeric, coalesce(r->>'currency', 'RON'), (r->>'signed_on')::date, (r->>'duration_months')::integer, r->>'source_url',
+      case when (r->>'signed_on')::date >= current_date - 30 then null else now() end)
+    on conflict (id) do nothing;
+    get diagnostics c = row_count;
+    n := n + c;
+  end loop;
+  insert into state_sources (url, kind, rows) values (p_url, 'seap_contracts', jsonb_array_length(p_rows))
+  on conflict (url) do update set rows = excluded.rows, processed_at = now();
+  return n;
+end $$;
+revoke all on function public.state_sources_done(text) from public;
+revoke all on function public.contracts_save(text, text, jsonb) from public;
+grant execute on function public.state_sources_done(text) to anon, service_role;
+grant execute on function public.contracts_save(text, text, jsonb) to anon, service_role;
