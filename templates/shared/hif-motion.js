@@ -11,6 +11,9 @@
 //   data-m="slide"      slides in from the right (drawers)
 //   data-m="wipe"       reveals left to right (charts)
 //   data-m="draw"       draws an SVG line along its length
+//   data-m="reveal"     waits out of sight and rises in when scrolled into view; several
+//                       arriving together come one after another. "reveal-left",
+//                       "reveal-right" slide in from that side, "reveal-zoom" grows in
 //   data-m="split"      words rise out of a blur one by one (headlines with fixed structure)
 //   data-m="shine"      a sheen runs across the text
 //   data-m="shimmer"    a light sweeps across the button
@@ -60,6 +63,12 @@ const CSS = `
 @keyframes m-flash{from{box-shadow:inset 0 0 0 100vmax color-mix(in srgb,var(--color-accent) 30%,transparent)}to{box-shadow:inset 0 0 0 100vmax transparent}}
 .m-word{display:inline-block;will-change:transform,opacity,filter}
 [data-m~="shine"] .m-word{-webkit-text-fill-color:var(--color-accent)}
+.m-rv [data-m~="reveal"],.m-rv [data-m~="reveal-left"],.m-rv [data-m~="reveal-right"],.m-rv [data-m~="reveal-zoom"]{
+  transition:opacity .75s cubic-bezier(.2,.7,.2,1),transform .75s cubic-bezier(.2,.7,.2,1)}
+.m-rv [data-m~="reveal"]:not([data-m-in]){opacity:0;transform:translateY(36px)}
+.m-rv [data-m~="reveal-left"]:not([data-m-in]){opacity:0;transform:translateX(-48px)}
+.m-rv [data-m~="reveal-right"]:not([data-m-in]){opacity:0;transform:translateX(48px)}
+.m-rv [data-m~="reveal-zoom"]:not([data-m-in]){opacity:0;transform:translateY(18px) scale(.92)}
 @media (prefers-reduced-motion:reduce){[data-m~="shimmer"]::after,[data-m~="beam"]::after,[data-m~="shine"],.m-flash{animation:none}}
 `;
 function injectCss() {
@@ -128,6 +137,23 @@ function split(el) {
   };
   gsap.fromTo(words, { opacity: 0, yPercent: 45, filter: 'blur(10px)' },
     { opacity: 1, yPercent: 0, filter: 'blur(0px)', duration: 0.8, ease: 'power3.out', stagger: 0.07, delay: 0.1, onComplete: restore, onInterrupt: restore });
+}
+
+// ---- scroll reveals ---------------------------------------------------------------------
+// Hidden by the stylesheet while html has .m-rv, shown when data-m-in is set as each comes
+// into view (the observer works against the viewport, inside any scroll container). The
+// runtime rewrites inline styles when it renders, so the state lives in an attribute it
+// doesn't own. Elements arriving together come in page order, 90 ms apart.
+let revealIO = null;
+function onReveal(entries) {
+  const show = entries.filter(e => e.isIntersecting).map(e => e.target);
+  show.forEach(el => revealIO.unobserve(el));
+  show.sort((a, b) => a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+  show.forEach((el, i) => setTimeout(() => el.setAttribute('data-m-in', ''), Math.min(i, 8) * 90));
+}
+function reveal(el) {
+  if (reduced() || !revealIO || el.hasAttribute('data-m-in')) return;
+  revealIO.observe(el);
 }
 
 // ---- numbers ------------------------------------------------------------------------
@@ -286,6 +312,7 @@ function mount(el) {
   if (has(el, 'smooth')) smooth(el);
   if (has(el, 'split')) split(el);
   if (has(el, 'draw')) draw(el);
+  if (/(^|\s)reveal(-left|-right|-zoom)?(\s|$)/.test(el.getAttribute('data-m') || '')) reveal(el);
   if (el.hasAttribute('data-m-count') || el.hasAttribute('data-m-flash')) watchNumbers(el);
 }
 function kindOf(el) { return ['rise', 'fade', 'slide', 'wipe'].find(k => has(el, k)); }
@@ -333,6 +360,10 @@ function start() {
   if (!gsap || !document.body) return false;
   started = true;
   injectCss();
+  if ('IntersectionObserver' in window && !reduced()) {
+    revealIO = new IntersectionObserver(onReveal, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
+    document.documentElement.classList.add('m-rv');
+  }
   gsap.ticker.lagSmoothing(0);
   gsap.ticker.add((time, deltaMs) => {
     const dt = Math.min(0.1, deltaMs / 1000);
