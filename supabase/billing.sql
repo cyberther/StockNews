@@ -134,3 +134,73 @@ revoke all on function public.admin_grant_pro(uuid, timestamptz) from public, an
 revoke all on function public.admin_revoke_pro(uuid) from public, anon;
 grant execute on function public.admin_grant_pro(uuid, timestamptz) to authenticated;
 grant execute on function public.admin_revoke_pro(uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------------------
+-- Webhooks from the payment provider (Lemon Squeezy), after the billing Edge Function has
+-- checked their signature. Every delivery is kept (by the hash of its body): a retry is not
+-- applied twice, and one older than what was applied changes nothing.
+create table if not exists public.billing_events (
+  hash            text        primary key,
+  event_name      text,
+  subscription_id text,
+  user_id         uuid,
+  received_at     timestamptz not null default now(),
+  applied         boolean     not null default false,
+  note            text
+);
+alter table public.billing_events enable row level security;
+alter table public.billing_events force row level security;
+revoke all on public.billing_events from anon, authenticated;
+
+-- Subscription events only ('subscriptions' objects): after a payment the provider also sends
+-- subscription_updated with the new renewal date, so invoice events are only recorded.
+create or replace function public.billing_apply(p_hash text, p_payload jsonb) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare
+  ev text := p_payload->'meta'->>'event_name';
+  uid_text text := p_payload->'meta'->'custom_data'->>'user_id';
+  uid uuid;
+  d jsonb := p_payload->'data';
+  a jsonb := p_payload->'data'->'attributes';
+  st text; ends timestamptz; upd timestamptz; prev timestamptz; portal text;
+  note text;
+begin
+  if p_hash is null or length(p_hash) < 8 then raise exception 'hash required'; end if;
+  if exists (select 1 from billing_events where hash = p_hash) then
+    return jsonb_build_object('applied', false, 'note', 'duplicate');
+  end if;
+  if uid_text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
+    select id into uid from auth.users where id = uid_text::uuid;
+  end if;
+  st := case a->>'status' when 'on_trial' then 'trialing' when 'active' then 'active' when 'past_due' then 'past_due'
+    when 'unpaid' then 'past_due' when 'cancelled' then 'cancelled' when 'expired' then 'expired' when 'paused' then 'expired' end;
+  if d->>'type' is distinct from 'subscriptions' then note := 'not a subscription';
+  elsif uid is null then note := 'unknown user';
+  elsif st is null then note := 'unknown status';
+  end if;
+  if note is null then
+    upd := coalesce((a->>'updated_at')::timestamptz, now());
+    select provider_updated_at into prev from entitlements where user_id = uid and source = 'payment';
+    if prev is not null and prev >= upd then note := 'stale'; end if;
+  end if;
+  insert into billing_events (hash, event_name, subscription_id, user_id, applied, note)
+  values (p_hash, left(ev, 80), left(d->>'id', 80), uid, note is null, note);
+  if note is not null then return jsonb_build_object('applied', false, 'note', note); end if;
+
+  -- The end of what is paid (or of the trial); for a paused or expired one, now.
+  ends := case
+    when st = 'trialing' then coalesce((a->>'trial_ends_at')::timestamptz, (a->>'renews_at')::timestamptz)
+    when st in ('active', 'past_due') then (a->>'renews_at')::timestamptz
+    when st = 'cancelled' then coalesce((a->>'ends_at')::timestamptz, (a->>'renews_at')::timestamptz)
+    else least(coalesce((a->>'ends_at')::timestamptz, now()), now()) end;
+  portal := a->'urls'->>'customer_portal';
+  if portal !~ '^https://[^\s"''<>]+$' then portal := null; end if;
+  insert into entitlements (user_id, source, status, current_period_end, provider, customer_id, subscription_id, portal_url, provider_updated_at, updated_at)
+  values (uid, 'payment', st, ends, 'lemonsqueezy', left(a->>'customer_id', 80), left(d->>'id', 80), portal, upd, now())
+  on conflict (user_id, source) do update set status = excluded.status, current_period_end = excluded.current_period_end,
+    provider = excluded.provider, customer_id = excluded.customer_id, subscription_id = excluded.subscription_id,
+    portal_url = excluded.portal_url, provider_updated_at = excluded.provider_updated_at, updated_at = now();
+  return jsonb_build_object('applied', true, 'note', st);
+end $$;
+revoke all on function public.billing_apply(text, jsonb) from public, anon, authenticated;
+grant execute on function public.billing_apply(text, jsonb) to service_role;
