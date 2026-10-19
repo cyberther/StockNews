@@ -46,6 +46,9 @@ jobs:
           cache: npm
       # Runtime dependencies only (yahoo-finance2); no install scripts.
       - run: npm ci --omit=dev --ignore-scripts
+      # pdftotext reads the policy documents (ingest/policy/documents.mjs): nightly jobs only.
+      - if: env.JOB == 'eod' || env.JOB == 'policy'
+        run: sudo apt-get install -y --no-install-recommends poppler-utils
       - name: Run
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

@@ -174,6 +174,51 @@ revoke all on function public.auto_save(text, jsonb) from public;
 grant execute on function public.auto_pending(text, integer) to anon, service_role;
 grant execute on function public.auto_save(text, jsonb) to anon, service_role;
 
+-- The Chamber's documents are read on the owner's PC (it does not answer GitHub): the batch
+-- asks which Chamber events have no documents yet and saves what it read.
+create or replace function public.docs_missing(p_secret text, p_limit integer default 20)
+returns table (event_id text, source_url text)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if not public.summary_secret_ok(p_secret) then raise exception 'not allowed' using errcode = '42501'; end if;
+  return query
+    select e.id, e.source_url from policy_events e
+     where e.id like 'cdep:%' and not exists (select 1 from policy_documents d where d.event_id = e.id)
+     order by e.event_date desc nulls last, e.id
+     limit least(greatest(coalesce(p_limit, 20), 1), 100);
+end $$;
+create or replace function public.documents_save(p_secret text, p_rows jsonb) returns integer
+language plpgsql security definer set search_path = public as $$
+declare r jsonb; n integer := 0; c integer;
+begin
+  if not public.summary_secret_ok(p_secret) then raise exception 'not allowed' using errcode = '42501'; end if;
+  if jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) > 50 then raise exception 'rows must be a list of up to 50'; end if;
+  for r in select * from jsonb_array_elements(p_rows) loop
+    continue when not exists (select 1 from policy_events e where e.id = r->>'event_id');
+    if coalesce(r->>'url', '') !~ '^https://' then raise exception 'document urls must be https'; end if;
+    insert into policy_documents (event_id, sha256, url, parts, text, chars, status)
+    values (r->>'event_id', r->>'sha256', r->>'url', coalesce(r->'parts', '[]'), left(coalesce(r->>'text', ''), 400000),
+      length(left(coalesce(r->>'text', ''), 400000)), coalesce(r->>'status', 'ok'))
+    on conflict (event_id, sha256) do nothing;
+    get diagnostics c = row_count;
+    n := n + c;
+  end loop;
+  return n;
+end $$;
+revoke all on function public.docs_missing(text, integer) from public;
+revoke all on function public.documents_save(text, jsonb) from public;
+grant execute on function public.docs_missing(text, integer) to anon, service_role;
+grant execute on function public.documents_save(text, jsonb) to anon, service_role;
+
+-- The ingestion rewrites base sheets; one the batch has written stays as the batch wrote it.
+create or replace function public.fact_sheets_keep_auto() returns trigger language plpgsql as $$
+begin
+  if old.origin = 'auto' and new.origin = 'cloud' then return old; end if;
+  return new;
+end $$;
+drop trigger if exists fact_sheets_keep_auto on public.fact_sheets;
+create trigger fact_sheets_keep_auto before update on public.fact_sheets for each row execute function public.fact_sheets_keep_auto();
+
 -- An admin hides a wrong automatic analysis; the reason is shown to readers instead.
 create or replace function public.admin_withdraw_analysis(p_id text, p_version integer, p_reason text) returns integer
 language plpgsql security definer set search_path = public as $$

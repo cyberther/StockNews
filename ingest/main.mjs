@@ -27,6 +27,7 @@ import { BVB_TOP } from '../netlify/functions/_shared/market/bvb-symbols.js';
 import { runPolicy, relayFetch } from './policy/run.mjs';
 import { bvbCatalog } from './policy/classify.mjs';
 import { runImpact } from './impact/run.mjs';
+import { runDocuments } from './policy/documents.mjs';
 import { catalogTickers } from './impact/schema.mjs';
 
 const arg = name => { const a = process.argv.find(x => x.startsWith(`--${name}=`)); return a ? a.slice(name.length + 3) : null; };
@@ -89,6 +90,16 @@ if (flags.policy !== false && (job === 'eod' || job === 'policy')) {
   policy.requests = requests;
   await db.insert('ingest_runs', [{ job: 'policy', started_at: startedAt, finished_at: new Date().toISOString(), ok: !policy.errors.length,
     symbols: policy.events, requests, errors: policy.errors.join('\n').slice(0, 4000) || null }]);
+}
+
+// The documents behind the events (bill, memorandum, government note, release) and a base fact
+// sheet for every event; the Chamber's documents are read on the owner's PC instead.
+if (policy && !dry) {
+  try {
+    const docs = await runDocuments({ db, limit: 40 });
+    policy.documents = { fetched: docs.fetched, unreadable: docs.unreadable, sheets: docs.sheets };
+    policy.errors.push(...docs.errors.map(e => 'documents: ' + e));
+  } catch (e) { policy.errors.push('documents: ' + e.message); }
 }
 
 // Impact analyses (analyses/, config/company-financials.json): after the policy events they refer to.

@@ -94,3 +94,20 @@ test('withdrawal: admins only, once, with a reason; the body still never changes
   await assert.rejects(svc(`update public.impact_analyses set body = '{}' where id = 'auto-gov-hg-1' and version = 1`), /do not change/);
   await assert.rejects(svc(`update public.impact_analyses set withdrawn_reason = 'alt motiv' where id = 'auto-gov-hg-1' and version = 1`), /do not change/);
 });
+
+test('the PC reads the Chamber: it lists events without documents and saves their text; a base sheet never replaces the batch\'s', async () => {
+  await svc(`insert into public.policy_events (id, title, event_date, institution, source_url, status, certainty, sectors, companies) values
+    ('cdep:10', 'Proiect 10', '2026-10-03', 'Camera Deputaților', 'https://www.cdep.ro/10', 'draft', 'official_procedure', '{}', '[]')`);
+  const missing = (await anon(`select event_id, source_url from public.docs_missing('${SECRET}', 10)`)).rows;
+  assert.deepEqual(missing.map(r => r.event_id), ['cdep:10']);
+  const row = { event_id: 'cdep:10', sha256: 'e'.repeat(64), url: 'https://www.cdep.ro/10.pdf', parts: [{ kind: 'law', url: 'https://www.cdep.ro/10.pdf', status: 'ok', from: 0, to: 9 }], text: 'Art. 1. X', status: 'ok' };
+  assert.equal((await anon(`select public.documents_save('${SECRET}', '${JSON.stringify([row, { ...row, event_id: 'cdep:nope' }])}'::jsonb) n`)).rows[0].n, 1);
+  assert.equal((await anon(`select public.documents_save('${SECRET}', '${JSON.stringify([row])}'::jsonb) n`)).rows[0].n, 0, 'same text twice: nothing new');
+  assert.equal((await anon(`select count(*)::int n from public.docs_missing('${SECRET}', 10)`)).rows[0].n, 0);
+  await assert.rejects(anon(`select public.documents_save('wrong', '[]'::jsonb)`), /not allowed/);
+  await assert.rejects(anon(`select public.documents_save('${SECRET}', '${JSON.stringify([{ ...row, url: 'http://x' }])}'::jsonb)`), /https/);
+  // The ingestion's base sheet arrives after the batch's: the batch's stays.
+  await svc(`update public.fact_sheets set base = '{"stage":"nou"}', reasons = '{ai_pending}', origin = 'cloud' where event_id = 'cdep:9'`);
+  const s = (await svc(`select summary, origin, reasons from public.fact_sheets where event_id = 'cdep:9'`)).rows[0];
+  assert.deepEqual([s.summary, s.origin, s.reasons], ['Ce schimbă.', 'auto', ['no_financial_sheet']]);
+});
