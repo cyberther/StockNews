@@ -127,13 +127,14 @@ create policy "read aid" on public.state_aid for select to authenticated using (
 -- ---------------------------------------------------------------------------------------
 -- The local batch: documents not yet read in this version (no automatic sheet or analysis for
 -- the same text), oldest first.
+drop function if exists public.auto_pending(text, integer);
 create or replace function public.auto_pending(p_secret text, p_limit integer default 10)
-returns table (event_id text, title text, status text, url text, parts jsonb, text text, doc_sha256 text)
+returns table (event_id text, title text, status text, sectors text[], url text, parts jsonb, text text, doc_sha256 text)
 language plpgsql stable security definer set search_path = public as $$
 begin
   if not public.summary_secret_ok(p_secret) then raise exception 'not allowed' using errcode = '42501'; end if;
   return query
-    select d.event_id, e.title, e.status, d.url, d.parts, d.text, d.sha256
+    select d.event_id, e.title, e.status, e.sectors, d.url, d.parts, d.text, d.sha256
       from policy_documents d join policy_events e on e.id = d.event_id
      where d.status = 'ok'
        and not exists (select 1 from fact_sheets f where f.event_id = d.event_id and f.origin = 'auto' and f.doc_sha256 = d.sha256)
