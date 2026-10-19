@@ -22,7 +22,10 @@ self.addEventListener('notificationclick', event => {
   event.notification.close();
   const data = event.notification.data || {};
   if (/^https:\/\//.test(data.article || '')) { event.waitUntil(self.clients.openWindow(data.article)); return; }
-  const target = new URL(data.url || '/', self.location.origin);
+  // Always this app's own host: the link's host (APP_URL) may be another address of the app,
+  // where the reader is signed out; only its page and screen (#…) are kept.
+  const link = new URL(data.url || '/', self.location.origin);
+  const target = new URL(link.pathname + link.search + link.hash, self.location.origin);
   event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
     const open = list.find(c => new URL(c.url).origin === target.origin && c.url.indexOf('/templates/stock-news') >= 0);
     if (!open) return self.clients.openWindow(target.href);
