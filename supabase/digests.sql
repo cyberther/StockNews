@@ -60,6 +60,7 @@ begin
       select distinct x.t from (
         select s0.ticker t from public.stories s0 where s0.published_at >= w.t0 and s0.published_at < w.t1) x
       where (p_ticker is null or x.t = upper(p_ticker))
+        and public.summary_scope(x.t)
         and (p_lang = 'ro' or exists (
           select 1 from auth.users u
           where upper(u.raw_user_meta_data->>'content_lang') = upper(p_lang)
