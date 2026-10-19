@@ -26,3 +26,17 @@ test('the start page shows no live quotes or stories to visitors, and labels its
   assert.match(lp, /ui\.lpMockLabel/);
   for (const k of ['lpPoints', 'lpSteps', 'lpHighlights', 'lpFaq']) assert.match(lp, new RegExp(`list="\\{\\{ ${k} \\}\\}"`), k);
 });
+
+// Scroll reveals (hif-motion.js data-m="reveal…"): the sections below the first screen arrive
+// as they come into view. The page runtime rewrites inline styles on every render, so the
+// hidden state is a stylesheet rule keyed on an attribute it doesn't own (data-m-in), and only
+// while html has .m-rv (observer available, motion not reduced): without it all stays visible.
+test('the start page reveals its sections on scroll, robust to re-renders and reduced motion', () => {
+  const motion = readFileSync(new URL('../templates/shared/hif-motion.js', import.meta.url), 'utf8');
+  assert.match(motion, /\.m-rv \[data-m~="reveal"\]:not\(\[data-m-in\]\)\{opacity:0/);
+  assert.match(motion, /setAttribute\('data-m-in', ''\)/);
+  assert.match(motion, /if \('IntersectionObserver' in window && !reduced\(\)\) \{[\s\S]*classList\.add\('m-rv'\)/);
+  const lp = app.slice(app.indexOf('data-screen-label="Landing"'), app.indexOf('<footer style="flex:none;margin-top:auto'));
+  assert.ok((lp.match(/data-m="reveal/g) || []).length >= 15);
+  for (const k of ['reveal-zoom', 'reveal-left', 'reveal spotlight']) assert.match(lp, new RegExp(`data-m="${k}"`), k);
+});
