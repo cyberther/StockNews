@@ -76,6 +76,17 @@ create table if not exists public.state_aid (
   constraint state_aid_url check (source_url ~ '^https://')
 );
 
+-- Open-data files already read (ingest/state/seap.mjs reads each once). Ingestion only.
+create table if not exists public.state_sources (
+  url          text        primary key,
+  kind         text        not null,
+  rows         integer     not null default 0,
+  processed_at timestamptz not null default now()
+);
+alter table public.state_sources enable row level security;
+revoke all on public.state_sources from anon, authenticated;
+grant all on public.state_sources to service_role;
+
 -- Automatic analyses live beside the reviewed ones; withdrawal hides one, with its reason.
 alter table public.impact_analyses add column if not exists origin text not null default 'manual';
 alter table public.impact_analyses add column if not exists doc_sha256 text;

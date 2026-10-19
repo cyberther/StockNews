@@ -83,6 +83,7 @@ test('readers: approved only; nobody writes the tables directly', async () => {
   assert.ok((await user(APPROVED, `select 1 from public.fact_sheets`)).rows.length > 0);
   assert.ok((await user(APPROVED, `select 1 from public.public_contracts`)).rows.length > 0);
   await assert.rejects(user(APPROVED, `select public.auto_pending('${SECRET}', 1)`), /not allowed|permission/);
+  await assert.rejects(user(APPROVED, `select 1 from public.state_sources`), /permission denied/);
 });
 
 test('withdrawal: admins only, once, with a reason; the body still never changes', async () => {
