@@ -27,7 +27,9 @@ self.addEventListener('notificationclick', event => {
   const link = new URL(data.url || '/', self.location.origin);
   const target = new URL(link.pathname + link.search + link.hash, self.location.origin);
   event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-    const open = list.find(c => new URL(c.url).origin === target.origin && c.url.indexOf('/templates/stock-news') >= 0);
+    // The app's tab: at / (or an old /templates/... address), not the legal page or the calculator.
+    const open = list.find(c => { const u = new URL(c.url);
+      return u.origin === target.origin && !/(?:^\/(?:legal|calculator)|(?:legal|intelligence)(?:\.html)?)$/.test(u.pathname); });
     if (!open) return self.clients.openWindow(target.href);
     // The open app shows the alert's stories (it listens for this; see StockNewsWeb).
     if (target.hash) open.postMessage({ type: 'hif-open', hash: target.hash });
