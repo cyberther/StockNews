@@ -3,9 +3,8 @@ name: Ingest health
 # Every morning, weekends included: did yesterday's ingestion runs happen and work, and is
 # the Supabase project awake (the read itself keeps a free project from pausing)? Problems
 # open a GitHub issue, or add to the open one (ingest/health.mjs, ingest/notify.mjs).
+# Started at 06:15 UTC by Supabase pg_cron (supabase/ingest-cron.sql).
 on:
-  schedule:
-    - cron: '15 6 * * *'
   workflow_dispatch:
 
 permissions:
