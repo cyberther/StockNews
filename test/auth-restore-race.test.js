@@ -20,8 +20,8 @@ const TEMPLATES = {
   web: { path: 'templates/stock-news-web/StockNewsWeb.dc.html', key: 'hif.web.v2' },
   dark: { path: 'templates/stock-news-dark/StockNewsDark.dc.html', key: 'hif.dark.v2' },
 };
-const STORE_DELAY = 1500;
-const SETTLE = 4000;
+// Guards against a hang, not a wait: every step below waits for an event, not a duration.
+const TIMEOUT = 60000;
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png' };
 
 async function loadPlaywright() {
@@ -46,24 +46,39 @@ function serveRepo() {
 
 // One page load plus a reload; returns the persisted record after each, and every
 // watchlist/holdings DELETE the app sent to the stub.
-async function run(browser, base, tpl, { savedAccount, sessUser, storeDelay }) {
+async function run(browser, base, tpl, { savedAccount, sessUser, late }) {
   const { path, key } = TEMPLATES[tpl];
   const ctx = await browser.newContext();
   const deletes = [], errors = [];
+  // A load is settled once it has mirrored both tables: each sync ends with a DELETE, and
+  // both run (after their debounce) only once the session has been applied to the restored
+  // record. Waiting for them, not for a fixed time, holds under any CPU load.
+  let onDelete = () => {};
+  const settled = () => {
+    const from = deletes.length;
+    return new Promise(resolve => {
+      onDelete = () => {
+        const seen = new Set(deletes.slice(from).map(q => q.split('?')[0]));
+        if (seen.has('watchlist') && seen.has('holdings')) resolve();
+      };
+    });
+  };
   await ctx.route('**/api/config', r => r.fulfill({ json: { supabaseUrl: 'https://stub.supabase.co', supabaseAnonKey: 'anon' } }));
   await ctx.route('https://stub.supabase.co/**', r => {
     const url = r.request().url(), method = r.request().method();
     const table = (url.match(/\/rest\/v1\/(watchlist|holdings)\b/) || [])[1];
-    if (table && method === 'DELETE') deletes.push(table + decodeURIComponent(url.split(table)[1]));
+    if (table && method === 'DELETE') { deletes.push(table + decodeURIComponent(url.split(table)[1])); onDelete(); }
     if (/\/auth\/v1\/settings/.test(url)) return r.fulfill({ json: {} });
     if (/account_status/.test(url)) return r.fulfill({ json: [{ plan: 'free', suspended: false }] });
     if (method === 'GET') return r.fulfill({ json: [] }); // empty server watchlist and holdings: the worst case
     return r.fulfill({ status: 204, body: '' });
   });
-  // Define window.HIFStore only after the logic has run and HIFAuth.ready has resolved.
+  // Define window.HIFStore only once bootAuth has offered the session to the app (it sets
+  // __hifAuthSub right after applyAuthSession), so the session wins the race on every run.
+  // A fixed delay could expire before HIFAuth.ready under load and test nothing.
   await ctx.route('**/hif-store.js', async r => {
     const res = await r.fetch(), src = await res.text();
-    r.fulfill({ response: res, body: storeDelay ? `setTimeout(function(){${src}\n}, ${storeDelay});` : src });
+    r.fulfill({ response: res, body: late ? `(function wait(){ if (!window.__hifAuthSub) return setTimeout(wait, 10);\n${src}\n})();` : src });
   });
   const record = savedAccount === undefined ? null : { accountId: savedAccount, onboarded: true, follows: ['MSFT', 'AMD'], selected: 'AMD',
     positions: { AMD: { shares: 5, cost: '100' } }, screen: 'feed' };
@@ -78,11 +93,13 @@ async function run(browser, base, tpl, { savedAccount, sessUser, storeDelay }) {
   const page = await ctx.newPage();
   page.on('pageerror', e => errors.push(e.message));
   const saved = () => page.evaluate(k => { const o = JSON.parse(localStorage.getItem(k) || 'null'); return o && o.d; }, key);
+  let done = settled();
   await page.goto(base + '/' + path);
-  await page.waitForTimeout(storeDelay + SETTLE);
+  await done;
   const first = await saved();
+  done = settled();
   await page.reload();
-  await page.waitForTimeout(storeDelay + SETTLE);
+  await done;
   const second = await saved();
   await ctx.close();
   return { loads: [first, second], deletes, errors };
@@ -106,13 +123,13 @@ test.after(async () => {
   if (server) server.close();
 });
 
-// Each case has its own browser context, so they can share the waits.
+// Each case has its own browser context, so they can run side by side.
 describe('auth session vs. late restore', { concurrency: true }, () => {
   for (const tpl of Object.keys(TEMPLATES)) {
-    for (const storeDelay of [0, STORE_DELAY]) {
-      const when = storeDelay ? 'store loads after the session' : 'store loads first';
-      test(`${tpl}: a returning account keeps its saved state (${when})`, { skip }, async () => {
-        const r = await run(browser, base, tpl, { savedAccount: 'user-1', sessUser: 'user-1', storeDelay });
+    for (const late of [false, true]) {
+      const when = late ? 'store loads after the session' : 'store loads first';
+      test(`${tpl}: a returning account keeps its saved state (${when})`, { skip, timeout: TIMEOUT }, async () => {
+        const r = await run(browser, base, tpl, { savedAccount: 'user-1', sessUser: 'user-1', late });
         assert.deepEqual(r.errors, []);
         for (const d of r.loads) {
           assert.equal(d.accountId, 'user-1');
@@ -124,8 +141,8 @@ describe('auth session vs. late restore', { concurrency: true }, () => {
         for (const q of r.deletes) assert.match(q, /ticker=not\.in\./);
       });
 
-      test(`${tpl}: a different account starts fresh (${when})`, { skip }, async () => {
-        const r = await run(browser, base, tpl, { savedAccount: 'user-0', sessUser: 'user-1', storeDelay });
+      test(`${tpl}: a different account starts fresh (${when})`, { skip, timeout: TIMEOUT }, async () => {
+        const r = await run(browser, base, tpl, { savedAccount: 'user-0', sessUser: 'user-1', late });
         assert.deepEqual(r.errors, []);
         for (const d of r.loads) {
           assert.equal(d.accountId, 'user-1');
@@ -135,8 +152,8 @@ describe('auth session vs. late restore', { concurrency: true }, () => {
         }
       });
 
-      test(`${tpl}: a first sign-in with no saved record applies the session (${when})`, { skip }, async () => {
-        const r = await run(browser, base, tpl, { savedAccount: undefined, sessUser: 'user-1', storeDelay });
+      test(`${tpl}: a first sign-in with no saved record applies the session (${when})`, { skip, timeout: TIMEOUT }, async () => {
+        const r = await run(browser, base, tpl, { savedAccount: undefined, sessUser: 'user-1', late });
         assert.deepEqual(r.errors, []);
         for (const d of r.loads) {
           assert.equal(d.accountId, 'user-1');
