@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseGovNotes, GOV_NOTES_URL } from '../ingest/policy/gov.mjs';
 import { parseJustSearch, justSearchBody, justTokenBody } from '../ingest/policy/just.mjs';
-import { policySources } from '../ingest/policy/run.mjs';
+import { pcPolicySources } from '../ingest/policy/run.mjs';
 
 const fx = p => readFileSync(new URL('./fixtures/policy/' + p, import.meta.url), 'utf8');
 const shape = r => {
@@ -52,7 +52,7 @@ test('SOAP requests are plain envelopes with the token; the sources list include
   const b = justSearchBody('TOKEN<x>', 'ordonanta de urgenta', 2026, 1, 50);
   assert.match(b, /<a:NumarPagina>1<\/a:NumarPagina><a:RezultatePagina>50<\/a:RezultatePagina><a:SearchAn>2026<\/a:SearchAn>/);
   assert.match(b, /<tokenKey>TOKEN&lt;x&gt;<\/tokenKey>/);
-  const names = policySources(new Date('2026-10-19T00:00:00Z')).map(s => s.name);
+  const names = pcPolicySources(new Date('2026-10-19T00:00:00Z')).map(s => s.name);
   assert.ok(names.includes('gov-notes'));
   assert.ok(names.includes('just-ordinances'));
 });

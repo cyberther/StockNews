@@ -199,3 +199,21 @@ test('SEAP on the PC: files already read are listed; contracts saved once; only 
   await assert.rejects(save([{ ...rows[0], id: 'seap:x', source_url: 'http://x' }]), /https/);
   await assert.rejects(anon(`select * from public.state_sources_done('wrong')`), /not allowed/);
 });
+
+test('events read on the PC (government notes, ordinances): saved through the secret, only their own ids, with history', async () => {
+  const ev = { id: 'gov:hg-900-2026', title: 'HG 900/2026: test', summary: null, event_date: '2026-10-10', institution: 'Guvernul României', initiator: 'Guvernul României',
+    doc_number: 'HG 900/2026', source_url: 'https://gov.ro/n900', status: 'adopted', stage: 'adoptată 10.10.2026', certainty: 'official_act', sectors: ['energie'], caen: [], companies: [{ ticker: 'H2O.RO', why: 'mentioned' }], figures: [] };
+  const save = (rows, secret = SECRET) => anon(`select public.events_save('${secret}', '${JSON.stringify(rows).replace(/'/g, "''")}'::jsonb) r`);
+  assert.deepEqual((await save([ev])).rows[0].r, { created: 1, changed: 0 });
+  assert.deepEqual((await save([ev])).rows[0].r, { created: 0, changed: 0 });
+  assert.deepEqual((await save([{ ...ev, stage: 'publicată' }])).rows[0].r, { created: 0, changed: 1 });
+  const e = (await svc(`select status, stage, first_seen is not null fs, companies from public.policy_events where id = 'gov:hg-900-2026'`)).rows[0];
+  assert.deepEqual([e.status, e.stage, e.fs, e.companies[0].ticker], ['adopted', 'publicată', true, 'H2O.RO']);
+  assert.equal((await svc(`select count(*)::int n from public.policy_event_history where event_id = 'gov:hg-900-2026'`)).rows[0].n, 2, 'first status, then the stage change');
+  await assert.rejects(save([{ ...ev, id: 'cdep:999' }]), /not allowed for this source/);
+  await assert.rejects(save([{ ...ev, id: 'gov:hg-901-2026', source_url: 'http://gov.ro' }]), /https/);
+  await assert.rejects(save([{ ...ev, id: 'gov:hg-902-2026', status: 'invented' }]), /check|violates/);
+  await assert.rejects(save([ev], 'wrong'), /not allowed/);
+  // Its documents are read on the PC too.
+  assert.ok((await anon(`select event_id from public.docs_missing('${SECRET}', 50)`)).rows.some(r => r.event_id === 'gov:hg-900-2026'));
+});

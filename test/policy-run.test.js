@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { runPolicy, policySources } from '../ingest/policy/run.mjs';
+import { runPolicy, policySources, pcPolicySources } from '../ingest/policy/run.mjs';
 import { bvbCatalog } from '../ingest/policy/classify.mjs';
 
 const fx = n => readFileSync(new URL('./fixtures/policy/' + n, import.meta.url), 'utf8');
@@ -36,17 +36,19 @@ function fetcher(over = {}) {
 const justFetch = async (url, init) => ({ ok: true, status: 200,
   text: async () => /GetToken/.test(init.headers.soapaction) ? '<GetTokenResult>T</GetTokenResult>' : fx('just/search-oug-2026.xml') });
 const args = (db, f) => ({ db, fetchText: f.fetchText, fetchImpl: justFetch, now: NOW, taxonomy, catalog });
+const allArgs = (db, f) => ({ ...args(db, f), sources: [...policySources(NOW), ...pcPolicySources(NOW)] });
 
 test('sources: this year\'s and last year\'s Chamber lists, and the ministry\'s releases', () => {
-  assert.deepEqual(policySources(NOW).map(s => s.name), ['cdep-initiatives-2026', 'cdep-laws-2026', 'cdep-initiatives-2025', 'cdep-laws-2025', 'mf-press', 'gov-notes', 'just-ordinances']);
+  assert.deepEqual(policySources(NOW).map(s => s.name), ['cdep-initiatives-2026', 'cdep-laws-2026', 'cdep-initiatives-2025', 'cdep-laws-2025', 'mf-press']);
+  // gov.ro and legislatie.just.ro answer neither GitHub nor Supabase: the PC reads them.
+  assert.deepEqual(pcPolicySources(NOW).map(s => s.name), ['gov-notes', 'just-ordinances']);
 });
 
 test('first run: every event stored, classified, with its first history line', async () => {
   const db = fakeDb(), f = fetcher();
   const s = await runPolicy(args(db, f));
-  assert.equal(f.calls.length, 6);
-  assert.ok(db.t.policy_events.some(e => e.id === 'gov:hg-781-2026'));
-  assert.equal(db.t.policy_events.filter(e => e.id.startsWith('just:')).length, 3, 'the same ordinances on every page count once');
+  assert.equal(f.calls.length, 5);
+  assert.ok(!db.t.policy_events.some(e => /^(gov|just):/.test(e.id)), 'the PC\'s sources are not read here');
   const by = Object.fromEntries(db.t.policy_events.map(e => [e.id, e]));
   // PL-x 320/06.10.2025 is on both lists: one event, adopted, the law's number.
   assert.equal(by['cdep:22591'].status, 'adopted');
@@ -142,21 +144,21 @@ test('with a relay, only the Chamber pages go through it; the ministry is fetche
   const s = await runPolicy({ ...args(db, { fetchText: async u => { direct.push(u); return fx('mf.xml'); } }),
     relay: async u => { relayed.push(u); return /anp=2026/.test(u) ? pages.anp : /anl=2026/.test(u) ? pages.anl : '<table></table>'; } });
   assert.equal(relayed.length, 4);
-  assert.equal(direct.length, 2);
+  assert.equal(direct.length, 1);
   assert.ok(/mfinante/.test(direct[0]));
-  assert.ok(/gov\.ro/.test(direct[1]));
   assert.ok(s.events > 3);
 });
 
 test('new and changed events in the same run are stored (rows with different keys go in separate upserts)', async () => {
   const db = fakeDb(), f = fetcher();
-  await runPolicy(args(db, f));
+  await runPolicy(allArgs(db, f));
+  assert.equal(db.t.policy_events.filter(e => e.id.startsWith('just:')).length, 3, 'the same ordinances on every page count once');
   // An event changes and a new one appears in the same run.
   const laws = fx('cdep-laws.html');
   const g = fetcher({ gov: fx('gov/note-list.html').replaceAll('HG nr. 781/01.10.2026', 'HG nr. 799/01.10.2026').replace(/hg-nr-781-01-10-2026/g, 'hg-nr-799-01-10-2026') });
   const before = db.t.policy_events.length;
   const e = db.t.policy_events.find(x => x.id === 'gov:hg-782-2026'); e.stage = 'altă etapă';
-  const s = await runPolicy(args(db, g));
+  const s = await runPolicy(allArgs(db, g));
   assert.deepEqual(s.errors.filter(x => /keys/.test(x)), []);
   assert.ok(s.created >= 1 && s.changed >= 1, JSON.stringify(s));
   assert.ok(db.t.policy_events.some(x => x.id === 'gov:hg-799-2026'));

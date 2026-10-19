@@ -116,3 +116,32 @@ test('SEAP\'s files are read on the PC too, before the model, even when the mode
   assert.equal(save.p_url, 'https://data.gov.ro/dataset/e8/resource/r/download/raport-contracte-tiii.xlsx');
   assert.equal(save.p_rows[0].ticker, 'TLV.RO');
 });
+
+test('the government\'s notes and ordinances are read on the PC, classified, and saved through events_save', async () => {
+  const calls = [];
+  const rpc = async (fn, body) => { calls.push([fn, body]); return fn === 'events_save' ? { created: body.p_rows.length, changed: 0 } : []; };
+  const notes = fx('policy/gov/note-list.html'), oug = fx('policy/just/search-oug-2026.xml');
+  const fetchImpl = async (url, init = {}) => {
+    if (/gov\.ro/.test(url)) return { ok: true, status: 200, text: async () => notes };
+    if (/legislatie\.just\.ro/.test(url)) return { ok: true, status: 200, text: async () => /GetToken/.test((init.headers || {}).soapaction || '') ? '<GetTokenResult>T</GetTokenResult>' : oug };
+    return { ok: false, status: 404, text: async () => '' };
+  };
+  const lm = { ping: async () => { throw new Error('down'); }, json: async () => ({}) };
+  const r = await runPolicyAuto({ lm, rpc, fetchImpl, now: new Date('2026-10-20T00:30:00Z'), window: 'always', secret: 's'.repeat(40), assumptions, financials: [], tickers: catalogTickers(), taxonomy, log: () => {} });
+  assert.ok(r.events >= 8, JSON.stringify(r));
+  const rows = calls.filter(c => c[0] === 'events_save').flatMap(c => c[1].p_rows);
+  assert.ok(rows.some(x => x.id === 'gov:hg-781-2026' && Array.isArray(x.sectors) && Array.isArray(x.companies)));
+  assert.ok(rows.some(x => /^just:\d+$/.test(x.id) && x.doc_number.startsWith('OUG')));
+  assert.ok(rows.every(x => /^(gov|just):/.test(x.id)));
+});
+
+test('the document sent to the model fits an 8k-token context with room for the answer', async () => {
+  let sent = '';
+  const big = docText + '\n' + 'x'.repeat(50000);
+  const h = harness({ proposal: good, docs: [{ ...doc, text: big }] });
+  const lm = { ping: async () => {}, json: async (sys, user) => { sent = sys + user; return good; } };
+  await runPolicyAuto({ lm, rpc: async (fn, b) => fn === 'auto_pending' ? [{ ...doc, text: big }] : [], fetchImpl: async () => ({ ok: false, headers: new Map(), text: async () => '' }),
+    now: new Date('2026-10-20T00:30:00Z'), window: 'always', secret: 's'.repeat(40), assumptions, financials: [], tickers: catalogTickers(), taxonomy, log: () => {} });
+  assert.ok(sent.length > 0 && sent.length <= 14000, String(sent.length));
+  void h;
+});

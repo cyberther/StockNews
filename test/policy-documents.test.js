@@ -95,11 +95,11 @@ test('runDocuments: reads what it can reach, gives every event a base sheet, nev
   const pages = { 'https://gov.ro/n1': '<h1>Notă</h1><p>Secțiunea a 4-a Impactul financiar: 759 mil. lei pentru anul 2026.</p>', 'https://mfinante.gov.ro/5': '<p>Comunicatul ministerului despre o măsură nouă.</p>' };
   const fetchImpl = async url => ({ ok: !!pages[url], headers: new Map([['content-type', 'text/html']]), arrayBuffer: async () => Buffer.from(pages[url] || '') });
   const r = await runDocuments({ db, fetchImpl, limit: 10 });
-  assert.equal(r.fetched, 2);
-  const gov = db.tables.policy_documents.find(d => d.event_id === 'gov:hg-1');
-  assert.match(gov.text, /759 mil\. lei/);
-  assert.equal(gov.status, 'ok');
-  assert.ok(!db.tables.policy_documents.some(d => d.event_id === 'cdep:9'), 'the Chamber is read on the PC');
+  assert.equal(r.fetched, 1);
+  const mf = db.tables.policy_documents.find(d => d.event_id === 'mf:5');
+  assert.match(mf.text, /măsură nouă/);
+  assert.equal(mf.status, 'ok');
+  assert.ok(!db.tables.policy_documents.some(d => /^(cdep|gov):/.test(d.event_id)), 'the Chamber and gov.ro are read on the PC');
   const sheet = id => db.tables.fact_sheets.find(s => s.event_id === id);
   assert.deepEqual(sheet('gov:hg-1').reasons, ['ai_pending']);
   assert.deepEqual(sheet('cdep:9').reasons, ['ai_pending']);
@@ -108,5 +108,5 @@ test('runDocuments: reads what it can reach, gives every event a base sheet, nev
   // A second run stores nothing twice.
   const again = await runDocuments({ db, fetchImpl, limit: 10 });
   assert.equal(again.fetched, 0);
-  assert.equal(db.tables.policy_documents.length, 2);
+  assert.equal(db.tables.policy_documents.length, 1);
 });
