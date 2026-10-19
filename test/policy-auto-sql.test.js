@@ -217,3 +217,9 @@ test('events read on the PC (government notes, ordinances): saved through the se
   // Its documents are read on the PC too.
   assert.ok((await anon(`select event_id from public.docs_missing('${SECRET}', 50)`)).rows.some(r => r.event_id === 'gov:hg-900-2026'));
 });
+
+test('security: an automatic analysis whose facts link anywhere but https is refused (they become hrefs in the app)', async () => {
+  const bad = { ...analysis, id: 'auto-gov-hg-x', facts: [{ key: 'f_a', text: 't', source_url: 'javascript:alert(1)' }] };
+  await svc(`insert into public.policy_documents (event_id, sha256, url, parts, text, chars, status) values ('gov:hg-1', '${'9'.repeat(64)}', 'https://gov.ro/n1', '[]', 'x', 1, 'ok')`);
+  await assert.rejects(save({ event_id: 'gov:hg-1', doc_sha256: '9'.repeat(64), analysis: bad, results }), /https/);
+});

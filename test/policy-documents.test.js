@@ -110,3 +110,10 @@ test('runDocuments: reads what it can reach, gives every event a base sheet, nev
   assert.equal(again.fetched, 0);
   assert.equal(db.tables.policy_documents.length, 1);
 });
+
+test('security: a Chamber page\'s links are followed only on www.cdep.ro', () => {
+  const html = '<table><tr><td>Expunerea de motive</td><td><a href="http://127.0.0.1:1234/x.pdf">p</a></td></tr>'
+    + '<tr><td>Forma pentru promulgare</td><td><a href="https://evil.example/l.pdf">p</a></td></tr>'
+    + '<tr><td>Opinia Consiliului Fiscal</td><td><a href="/proiecte/2026/1/f.pdf">p</a></td></tr></table>';
+  assert.deepEqual(documentLinks(cdepEvent, html), [{ kind: 'fiscal_council', url: 'https://www.cdep.ro/proiecte/2026/1/f.pdf' }]);
+});
