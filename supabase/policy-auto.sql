@@ -245,3 +245,58 @@ begin
 end $$;
 revoke all on function public.admin_withdraw_analysis(text, integer, text) from public, anon;
 grant execute on function public.admin_withdraw_analysis(text, integer, text) to authenticated;
+
+-- ---------------------------------------------------------------------------------------
+-- "Cine câștigă": who gains or loses from what the state does, each link with its evidence.
+-- Information, never a recommendation. Read with the reader's own rights (security_invoker):
+-- approved accounts, and Pro-only results stay Pro-only.
+--   named      the company is named in the act                         neutral
+--   sector     its sector is the act's subject                         neutral (no fact of direction)
+--   contract   a public contract it won (SEAP, by fiscal code)         gains
+--   state_aid  state aid it received                                  gains
+--   tax_payer  an analysis puts a cost on it (full scenario)           loses
+--   named      an analysis puts a gain on it (full scenario)           gains
+create or replace view public.state_links with (security_invoker = true) as
+  select c->>'ticker' as subject_ticker, case when c->>'why' = 'sector' then 'sector' else 'named' end as link_type, 'neutral'::text as direction,
+         e.id as event_id, null::text as analysis_id, e.source_url as evidence_url, null::numeric as amount_ron, e.event_date::date as at
+    from public.policy_events e, jsonb_array_elements(e.companies) c
+  union all
+  select p.ticker, 'contract', 'gains', null, null, p.source_url, p.value_ron, p.signed_on from public.public_contracts p
+  union all
+  select s.ticker, 'state_aid', 'gains', null, null, s.source_url, s.amount_ron, s.granted_on from public.state_aid s
+  union all
+  select r.subject, case when (r.vals->>'profitDelta')::numeric < 0 then 'tax_payer' else 'named' end,
+         case when (r.vals->>'profitDelta')::numeric < 0 then 'loses' else 'gains' end,
+         a.events[1], a.id, coalesce(a.body->'facts'->0->>'source_url', (select x.source_url from public.policy_events x where x.id = a.events[1])),
+         abs((r.vals->>'profitDelta')::numeric), a.published_at
+    from public.impact_results r join public.impact_analyses a on a.id = r.analysis_id and a.version = r.version
+   where r.scenario = 'full' and r.subject <> 'budget' and a.withdrawn_at is null
+     and (r.vals->>'profitDelta') is not null and (r.vals->>'profitDelta')::numeric <> 0
+     and a.version = (select max(b.version) from public.impact_analyses b where b.id = a.id and b.withdrawn_at is null);
+
+-- Per company: public contracts and aid in the last 12 months (sums, and contracts as a share of
+-- the latest audited revenue), and how many measures favour or burden it.
+create or replace view public.company_state_exposure with (security_invoker = true) as
+  with t as (select distinct subject_ticker as ticker from public.state_links),
+  rev as (select distinct on (ticker) ticker, revenue from public.company_financials where verified and revenue > 0 order by ticker, fiscal_year desc)
+  select t.ticker,
+         coalesce((select sum(value_ron) from public.public_contracts p where p.ticker = t.ticker and p.signed_on >= current_date - 365), 0) as contracts_12m_ron,
+         round(100 * (select sum(value_ron) from public.public_contracts p where p.ticker = t.ticker and p.signed_on >= current_date - 365) / rev.revenue, 2) as contracts_12m_pct_revenue,
+         coalesce((select sum(amount_ron) from public.state_aid s where s.ticker = t.ticker and s.granted_on >= current_date - 365), 0) as aid_12m_ron,
+         (select count(distinct coalesce(analysis_id, event_id))::int from public.state_links l where l.subject_ticker = t.ticker and l.direction = 'gains' and l.link_type not in ('contract', 'state_aid')) as measures_gain,
+         (select count(distinct coalesce(analysis_id, event_id))::int from public.state_links l where l.subject_ticker = t.ticker and l.direction = 'loses') as measures_lose
+    from t left join rev on rev.ticker = t.ticker;
+
+-- Where the state's money goes, by month: contracts won by listed companies by kind of purchase
+-- (CPV division), and adopted acts per policy sector.
+create or replace view public.sector_state_flows with (security_invoker = true) as
+  select 'cpv'::text as dimension, left(p.cpv, 2) as key, date_trunc('month', p.signed_on)::date as month,
+         sum(p.value_ron) as inflow_ron, count(*)::int as contracts, 0 as measures
+    from public.public_contracts p where p.cpv ~ '^\d{2}' and p.signed_on is not null group by 2, 3
+  union all
+  select 'sector', s, date_trunc('month', e.event_date)::date, null, 0, count(*)::int
+    from public.policy_events e, unnest(e.sectors) s
+   where e.status in ('adopted', 'in_force', 'implemented') and e.event_date is not null group by 2, 3;
+
+grant select on public.state_links, public.company_state_exposure, public.sector_state_flows to authenticated;
+revoke all on public.state_links, public.company_state_exposure, public.sector_state_flows from anon;

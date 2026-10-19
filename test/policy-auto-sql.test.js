@@ -112,3 +112,37 @@ test('the PC reads the Chamber: it lists events without documents and saves thei
   const s = (await svc(`select summary, origin, reasons from public.fact_sheets where event_id = 'cdep:9'`)).rows[0];
   assert.deepEqual([s.summary, s.origin, s.reasons], ['Ce schimbă.', 'auto', ['no_financial_sheet']]);
 });
+
+test('who gains: links with evidence, exposure per company, money per kind of purchase', async () => {
+  await svc(`insert into public.policy_events (id, title, event_date, institution, source_url, status, certainty, sectors, companies) values
+    ('cdep:20', 'Taxă nouă', '2026-09-01', 'Camera Deputaților', 'https://www.cdep.ro/20', 'adopted', 'official_act', '{petrol-gaze}',
+     '[{"ticker":"SNP.RO","why":"mentioned"},{"ticker":"SNG.RO","why":"sector","sector":"petrol-gaze"}]');
+    insert into public.company_financials (ticker, fiscal_year, revenue, operating_profit, source_url, provenance, verified) values
+      ('TLV.RO', 2025, 100000, 50, 'https://x.ro/a.pdf', 'manual', true);
+    insert into public.public_contracts (id, cui, ticker, authority, title, cpv, value_ron, signed_on, source_url) values
+      ('seap:2', '5022670', 'TLV.RO', 'Primăria Y', 'Servicii', '66110000-4', 5000, current_date - 30, 'https://data.gov.ro/y'),
+      ('seap:old', '5022670', 'TLV.RO', 'Primăria Z', 'Servicii', '66110000-4', 7000, current_date - 500, 'https://data.gov.ro/z');
+    insert into public.impact_analyses (id, version, published_at, title, policy, events, sectors, body, content_hash, origin)
+      values ('auto-cdep-20', 1, '2026-09-02', 'Taxă', 'auto-cdep-20', '{cdep:20}', '{petrol-gaze}', '{"facts":[{"source_url":"https://www.cdep.ro/20.pdf"}]}', '${'f'.repeat(64)}', 'auto');
+    insert into public.impact_results (analysis_id, version, engine_version, scenario, subject, vals, formula) values
+      ('auto-cdep-20', 1, '1.0.0', 'full', 'SNP.RO', '{"profitDelta":-100,"pctOfProfit":-2}', 'f'),
+      ('auto-cdep-20', 1, '1.0.0', 'partial', 'SNP.RO', '{"profitDelta":-50}', 'f');`);
+  const links = (await user(APPROVED, `select subject_ticker t, link_type, direction, evidence_url, amount_ron::float a from public.state_links order by t, link_type, a`)).rows;
+  const has = (t, type, dir) => links.find(l => l.t === t && l.link_type === type && l.direction === dir);
+  assert.ok(has('TLV.RO', 'contract', 'gains').evidence_url.startsWith('https://data.gov.ro/'));
+  const tax = has('SNP.RO', 'tax_payer', 'loses');
+  assert.equal(tax.evidence_url, 'https://www.cdep.ro/20.pdf');
+  assert.equal(links.filter(l => l.t === 'SNP.RO' && l.link_type === 'tax_payer').length, 1, 'one link per analysis, from the full scenario');
+  assert.ok(has('SNP.RO', 'named', 'neutral'));
+  assert.ok(has('SNG.RO', 'sector', 'neutral'), 'a sector link has no direction without a fact');
+  const ex = (await user(APPROVED, `select ticker, contracts_12m_ron::float c, contracts_12m_pct_revenue::float p, measures_lose from public.company_state_exposure where ticker in ('TLV.RO','SNP.RO') order by ticker`)).rows;
+  assert.deepEqual(ex.find(r => r.ticker === 'TLV.RO'), { ticker: 'TLV.RO', c: 6000, p: 6, measures_lose: 0 });   // 1000 (Task 5) + 5000; the 500-day-old one is out
+  assert.equal(ex.find(r => r.ticker === 'SNP.RO').measures_lose, 1);
+  assert.equal(ex.find(r => r.ticker === 'SNP.RO').p, null, 'no audited revenue: no percentage');
+  const flows = (await user(APPROVED, `select dimension, key, inflow_ron::float i from public.sector_state_flows where dimension = 'cpv' and key = '66'`)).rows;
+  assert.ok(flows.length >= 1 && flows.some(f => f.i === 5000));
+  // Withdrawn: its links go.
+  await user(ADMIN, `select public.admin_withdraw_analysis('auto-cdep-20', 1, 'Test retragere.')`);
+  assert.equal((await user(APPROVED, `select count(*)::int n from public.state_links where link_type = 'tax_payer'`)).rows[0].n, 0);
+  assert.equal((await user(WAITING, `select count(*)::int n from public.state_links`)).rows[0].n, 0);
+});
