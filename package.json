@@ -11,7 +11,8 @@
     "start": "node scripts/server.mjs",
     "serve": "npm run build && npm start",
     "test": "node --test",
-    "check": "node --check scripts/server.mjs && node --check netlify/functions/finnhub.js && node --check netlify/functions/_shared/market-proxy.js && node --check templates/shared/hif-live.js && node --check functions/api/finnhub.js && node --check ingest/main.mjs"
+    "check": "node --check scripts/server.mjs && node --check netlify/functions/finnhub.js && node --check netlify/functions/_shared/market-proxy.js && node --check templates/shared/hif-live.js && node --check functions/api/finnhub.js && node --check ingest/main.mjs",
+    "impact:lock": "node ingest/impact/schema.mjs --lock"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

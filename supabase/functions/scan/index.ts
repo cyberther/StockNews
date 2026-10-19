@@ -395,6 +395,46 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Policy alerts (supabase/impact.sql): new events, status changes and analyses touching the
+  // companies a user follows with push on or holds, worked out by policy_alerts_due; one push per
+  // user per run, then everything waiting up to that moment is marked, sent or not.
+  let policyPushes = 0;
+  if (alertsOnly && flagOn('FLAG_POLICY_ALERTS')) {
+    const until = new Date().toISOString();
+    const { data: due, error: dueErr } = await db.rpc('policy_alerts_due', { p_since: new Date(Date.now() - 4 * 86400000).toISOString() });
+    if (dueErr) errors.push('policy alerts: ' + dueErr.message);
+    const perUserItems = new Map<string, { type: string; id: string; title: string }[]>();
+    (due || []).forEach((r: { user_id: string; items: { type: string; id: string; title: string }[] }) => {
+      const seenIds = new Set<string>();
+      perUserItems.set(r.user_id, (r.items || []).filter(i => { const k = i.type + ':' + i.id; if (seenIds.has(k)) return false; seenIds.add(k); return true; }));
+    });
+    if (perUserItems.size && vapidOk) {
+      webpush.setVapidDetails(env('VAPID_SUBJECT'), env('VAPID_PUBLIC_KEY'), env('VAPID_PRIVATE_KEY'));
+      const { data: subs, error: subErr } = await db.from('push_subscriptions')
+        .select('endpoint,user_id,p256dh,auth').eq('policy_alerts', true).in('user_id', [...perUserItems.keys()]);
+      if (subErr) errors.push('policy subscriptions: ' + subErr.message);
+      const appUrl = (env('APP_URL') || '/').replace(/#.*$/, '');
+      await pool(subs || [], 6, async sub => {
+        const items = perUserItems.get(sub.user_id) || [];
+        const payload = JSON.stringify({ title: items.length === 1 ? 'Politici: o noutate pentru companiile tale' : `Politici: ${items.length} noutăți pentru companiile tale`,
+          body: items.slice(0, 2).map(i => String(i.title || '').slice(0, 90)).join(' · '), url: appUrl + '#policy', tag: 'market-pulse-policy' });
+        try {
+          await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload, { TTL: 86400, urgency: 'normal' });
+          policyPushes++;
+        } catch (e) {
+          const code = (e as { statusCode?: number }).statusCode;
+          if (code === 404 || code === 410) await db.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+          else errors.push(`policy push ${code || ''}: ${(e as Error).message}`.slice(0, 200));
+        }
+      });
+    }
+    if (!dueErr) {
+      const { error: markErr } = await db.rpc('policy_alerts_mark', { p_until: until });
+      if (markErr) errors.push('policy alerts mark: ' + markErr.message);
+    }
+  }
+  // end of policy alerts
+
   // New accounts waiting for the owner's approval (supabase/approval.sql): one alert to the
   // admins' devices, once per account.
   const { data: waiting } = await db.from('account_status').select('user_id,email')
@@ -417,7 +457,7 @@ Deno.serve(async (req) => {
     if (sent) await db.from('account_status').update({ notified_at: new Date().toISOString() }).in('user_id', waiting.map(w => w.user_id));
   }
 
-  const summary = { started_at, mode: alertsOnly ? 'alerts' : 'scan', tickers: tickers.length, new_stories: fresh.length, pushes,
+  const summary = { started_at, mode: alertsOnly ? 'alerts' : 'scan', tickers: tickers.length, new_stories: fresh.length, pushes, policy_pushes: policyPushes,
     errors: errors.length ? errors.slice(0, 20).join('\n') : null };
   // The table has no mode column: an extra field made the insert fail (and "last scan" stop).
   const { error: runErr } = await db.from('scan_runs').insert({ started_at, tickers: tickers.length, new_stories: fresh.length, pushes, errors: summary.errors });

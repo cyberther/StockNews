@@ -44,3 +44,16 @@ test('status and certainty labels are fixed per value, never taken from the text
   assert.equal(P.certaintyLabel('official_statement', 'ro'), 'Comunicat oficial');
   assert.equal(P.certaintyLabel('official_act', 'en'), 'Official act');
 });
+
+test('search in titles and the status filter go to the server, cleaned', () => {
+  const P = window.HIFPolicy;
+  // Letters with diacritics match either spelling (ş/ș, ţ/ț), as one-character wildcards.
+  assert.match(P.query({ q: 'acciza motorină' }), /&title=ilike\.\*acciza%20motorin_\*/);
+  assert.match(P.query({ q: 'taxă şi' }), /&title=ilike\.\*tax_%20_i\*/);
+  // PostgREST's own syntax characters never reach the filter.
+  assert.match(P.query({ q: 'a*b,c(d)e.f:g' }), /&title=ilike\.\*abcdefg\*/);
+  assert.doesNotMatch(P.query({ q: '   ' }), /title=/);
+  assert.equal(P.query({ q: 'x'.repeat(200) }).match(/x+/)[0].length, 80);
+  assert.match(P.query({ status: 'adopted' }), /&status=eq\.adopted/);
+  assert.doesNotMatch(P.query({ status: 'rumour' }), /status=/);
+});
