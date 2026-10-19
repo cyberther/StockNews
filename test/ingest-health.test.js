@@ -31,10 +31,13 @@ test('issueAction: open a new issue, or comment on the open one with the same ti
   assert.deepEqual(issueAction([{ number: 7, title: 'Ingest: budget', state: 'open' }], 'Ingest: missed runs'), { action: 'create' });
 });
 
-test('the ingest workflow\'s cron is the one the health check expects', async () => {
+test('the ingestion\'s cron (Supabase pg_cron) is the one the health check expects', async () => {
   const { readFileSync } = await import('node:fs');
   const { CRON } = await import('../ingest/health.mjs');
+  const sql = readFileSync(new URL('../supabase/ingest-cron.sql', import.meta.url), 'utf8');
+  assert.ok(sql.includes(`cron.schedule('ingest-intraday', '${CRON.minutes.join(',')} ${CRON.hours[0]}-${CRON.hours[1]} * * 1-5'`));
   const yml = readFileSync(new URL('../.github/workflows/ingest.yml', import.meta.url), 'utf8');
-  assert.ok(yml.includes(`- cron: '${CRON.minutes.join(',')} ${CRON.hours[0]}-${CRON.hours[1]} * * 1-5'`));
   assert.match(yml, /if: vars\.INGEST_ENABLED == 'true'/);
+  // One clock only: the workflow has no schedule of its own any more.
+  assert.doesNotMatch(yml, /^\s*schedule:/m);
 });

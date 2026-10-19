@@ -11,6 +11,11 @@
 //   await HIFUnlock.enable(userId, email, name) -> { ok } | { error }
 //   HIFUnlock.disable(userId)
 //   await HIFUnlock.unlock(userId)       -> { ok } | { error: 'cancelled' | 'failed' }
+//
+// The first sign-in on a device offers what it can do (alerts, Face ID / Touch ID), once:
+//   HIFUnlock.setupItems({ userId, push, bioAvail, bioOn }) -> ['push' | 'ios-install' | 'bio', ...]
+//   HIFUnlock.setupAsked(userId) / HIFUnlock.markSetupAsked(userId)
+// A lock asks Face ID / Touch ID by itself, once per lock: HIFUnlock.autoTry(lockId) -> boolean.
 (function () {
   if (window.HIFUnlock) return;
   const KEY = id => 'hif.unlock.' + id;
@@ -61,5 +66,20 @@
     } catch (e) { return { error: e && e.name === 'NotAllowedError' ? 'cancelled' : 'failed' }; }
   }
 
-  window.HIFUnlock = { available, enabled, enable, disable, unlock };
+  const ASKED = id => 'hif.setup.' + id;
+  function setupAsked(userId) { try { return !!localStorage.getItem(ASKED(userId)); } catch (e) { return true; } }
+  function markSetupAsked(userId) { try { localStorage.setItem(ASKED(userId), String(Date.now())); } catch (e) {} }
+  // push: HIFPush.status() ('on' | 'off' | 'denied' | 'ios-install' | 'unsupported' | 'unavailable').
+  function setupItems(o) {
+    if (!o || !o.userId || setupAsked(o.userId)) return [];
+    const out = [];
+    if (o.push === 'off') out.push('push');
+    else if (o.push === 'ios-install') out.push('ios-install');
+    if (o.bioAvail && !o.bioOn) out.push('bio');
+    return out;
+  }
+  const tried = new Set();
+  function autoTry(lockId) { if (!lockId || tried.has(lockId)) return false; tried.add(lockId); return true; }
+
+  window.HIFUnlock = { available, enabled, enable, disable, unlock, setupItems, setupAsked, markSetupAsked, autoTry };
 })();
