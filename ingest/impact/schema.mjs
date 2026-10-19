@@ -143,6 +143,35 @@ export function validateAssumptionLibrary(list) {
   return { ok: !errors.length, errors };
 }
 
+// Fiscal codes (CUI/CIF): 2-10 digits, the last one a check digit (ANAF's key 753217532).
+export function cuiValid(v) {
+  const d = String(v == null ? '' : v).replace(/^\s*RO\s*/i, '').trim();
+  if (!/^\d{2,10}$/.test(d)) return false;
+  const body = d.slice(0, -1).split('').reverse(), key = '753217532'.split('').reverse();
+  const sum = body.reduce((t, x, i) => t + Number(x) * Number(key[i]), 0);
+  const c = (sum * 10) % 11;
+  return (c === 10 ? 0 : c) === Number(d.slice(-1));
+}
+// config/company-entities.json: { ticker, cui, name (as in ANAF's register), role, source_url,
+// verified_on }. A code belongs to one ticker; a subsidiary maps to its listed parent.
+export function validateEntities(rows, { tickers } = {}) {
+  const errors = [], err = m => errors.push(m), owner = new Map();
+  if (!Array.isArray(rows)) return { ok: false, errors: ['the list must be an array'] };
+  rows.forEach((r, i) => {
+    const k = 'entity ' + ((r && r.cui) || '#' + i);
+    if (!r || !tickers || !tickers.has(r.ticker)) { err(k + ': ticker ' + (r && r.ticker) + ' is unknown in the BVB catalog'); return; }
+    if (!/^\d{2,10}$/.test(String(r.cui)) || !cuiValid(r.cui)) err(k + ': not a fiscal code with a valid check digit');
+    if (owner.has(r.cui) && owner.get(r.cui) !== r.ticker) err(k + ' is listed at two tickers');
+    owner.set(r.cui, r.ticker);
+    if (!text(r.name, 200)) err(k + ': name is required');
+    if (!['issuer', 'subsidiary'].includes(r.role)) err(k + ': role must be issuer or subsidiary');
+    if (!https(r.source_url)) err(k + ': source_url must be an https link');
+    if (!isDate(r.verified_on)) err(k + ': verified_on is required');
+  });
+  return { ok: !errors.length, errors };
+}
+export const cuiIndex = rows => new Map((rows || []).map(r => [String(r.cui), r.ticker]));
+
 export function validateFinancials(rows, { taxonomy, tickers } = {}) {
   const errors = [], seen = new Set(), sectors = (taxonomy && taxonomy.sectors) || {};
   if (!Array.isArray(rows)) return { ok: false, errors: ['financials must be a list'] };
