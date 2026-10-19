@@ -1,0 +1,20 @@
+# Optional (Phase C): the local model's annotations of policy events (tools/policy-ai-batch.mjs),
+# saved as "generat automat, neverificat" for an admin to check. User unit, not installed by
+# anything; to turn it on:
+#   cp tools/systemd/market-pulse-policy-ai.* ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now market-pulse-policy-ai.timer
+# Uses ~/.config/market-pulse/summarizer.env (as the summary job). AI_WINDOW, AI_MAX_MINUTES
+# and AI_LIMIT can go there too.
+[Unit]
+Description=Market Pulse policy annotations by the local model (LM Studio)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/StockNews
+ExecStart=/usr/bin/env node tools/policy-ai-batch.mjs
+# Lowest priority: the news summaries and the desktop come first.
+Nice=19
+CPUWeight=10
+IOSchedulingClass=idle
+TimeoutStartSec=4h

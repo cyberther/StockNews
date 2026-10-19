@@ -107,6 +107,20 @@ async function forget() {
 }
 const disable = forget;
 
+// This device's "Policy alerts" switch (push_subscriptions.policy_alerts, supabase/impact.sql):
+// read with no argument, set with true/false. null: no subscription here, or no such column yet.
+async function policyAlerts(on) {
+  const sub = await currentSub().catch(() => null);
+  if (!sub || !live()) return null;
+  const q = 'push_subscriptions?endpoint=eq.' + encodeURIComponent(sub.endpoint);
+  if (on === undefined) {
+    const r = await auth().rest(q + '&select=policy_alerts');
+    return r.ok && Array.isArray(r.body) && r.body[0] && typeof r.body[0].policy_alerts === 'boolean' ? r.body[0].policy_alerts : null;
+  }
+  const r = await auth().rest(q, { method: 'PATCH', headers: { Prefer: 'return=minimal' }, body: { policy_alerts: !!on } });
+  return r.ok ? !!on : null;
+}
+
 let lastSync = '';
 async function syncWatchlist(follows, pushMap) {
   if (!live()) return;
@@ -287,5 +301,5 @@ async function saveDrawings(ticker, list) {
   return true;
 }
 
-window.HIFPush = { status, enable, disable, forget, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadReportDates, loadStoriesById, testAlert, loadDrawings, saveDrawings, supported };
+window.HIFPush = { status, enable, disable, forget, policyAlerts, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadReportDates, loadStoriesById, testAlert, loadDrawings, saveDrawings, supported };
 })();
