@@ -114,6 +114,35 @@ export function validateAnalysis(a, { taxonomy, tickers, file } = {}) {
   return errors.length ? { ok: false, errors } : { ok: true };
 }
 
+// The assumption library (config/impact-assumptions.json): what an automatic analysis may
+// assume. 'data' needs an official https source and its date; 'scenario' is a method choice
+// (how much of a measure applies, how late) and says why. Every entry names the measure
+// types it fits (ingest/impact/auto-validate.mjs MEASURE_TYPES).
+export const MEASURE_TYPE_NAMES = ['tax_rate_change', 'budget_program', 'price_cap', 'contract_award'];
+export function validateAssumptionLibrary(list) {
+  const errors = [], err = m => errors.push(m), seen = new Set();
+  if (!Array.isArray(list)) return { ok: false, errors: ['the library must be a list'] };
+  list.forEach((a, i) => {
+    const k = 'assumption ' + ((a && a.key) || '#' + i);
+    if (!a || !KEY.test(a.key || '')) { err(k + ': key is invalid'); return; }
+    if (seen.has(a.key)) err(k + ' is listed twice');
+    seen.add(a.key);
+    if (!text(a.label, 120)) err(k + ': label is required');
+    if (!['data', 'scenario'].includes(a.kind)) err(k + ': kind must be data or scenario');
+    if (!(typeof a.why === 'string' && a.why.trim().length >= 20 && a.why.length <= 600)) err(k + ': why must say the reason (20-600 characters)');
+    if (a.kind === 'data') {
+      if (!https(a.source_url)) err(k + ': source_url must be an https link to the official source');
+      if (!isDate(a.source_date)) err(k + ': source_date is required');
+    }
+    if (!text(a.unit, 20)) err(k + ': unit is required');
+    const r = a.range;
+    if (!Array.isArray(r) || r.length !== 2 || !r.every(v => typeof v === 'number' && Number.isFinite(v)) || r[0] > r[1]) err(k + ': range must be [low, high] numbers');
+    else if (!(typeof a.default === 'number' && a.default >= r[0] && a.default <= r[1])) err(k + ': default is outside its range');
+    if (!Array.isArray(a.applies_to) || !a.applies_to.length || !a.applies_to.every(t => MEASURE_TYPE_NAMES.includes(t))) err(k + ': applies_to must list measure types (' + MEASURE_TYPE_NAMES.join(', ') + ')');
+  });
+  return { ok: !errors.length, errors };
+}
+
 export function validateFinancials(rows, { taxonomy, tickers } = {}) {
   const errors = [], seen = new Set(), sectors = (taxonomy && taxonomy.sectors) || {};
   if (!Array.isArray(rows)) return { ok: false, errors: ['financials must be a list'] };
