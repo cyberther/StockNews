@@ -106,10 +106,12 @@ const foldName = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
 // deps: { cfg: { secret, lmUrl, model }, rpc, postJson, httpGet, allowed(url), log, ua, deadline (ms) }
 export async function runFilings(limit, deps) {
   const { cfg, rpc, postJson, httpGet, allowed, log } = deps;
-  if (!limit) return;
+  // Returns how many filings the queue gave (fewer than limit: it is empty), or undefined when
+  // it could not be read.
+  if (!limit) return 0;
   let rows = [];
   try { rows = await rpc('filings_pending', { p_secret: cfg.secret, p_limit: limit }) || []; }
-  catch (e) { log('filings:', String(e.message || e)); return; }
+  catch (e) { log('filings:', String(e.message || e)); return undefined; }
   for (const f of rows) {
     if (deps.deadline && Date.now() > deps.deadline) { log('filings: time is up for this run'); break; }
     const t0 = Date.now();
@@ -141,4 +143,5 @@ export async function runFilings(limit, deps) {
       log('saved filing', f.id, f.ticker, f.kind, `${Math.round((Date.now() - t0) / 1000)}s`);
     } catch (e) { log('filing failed', f.id, f.ticker, String(e.message || e)); }
   }
+  return rows.length;
 }

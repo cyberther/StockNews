@@ -54,3 +54,12 @@ test('day digests: Bucharest tickers only', async () => {
   assert.deepEqual(rows, ['SNP.RO']);
   assert.deepEqual((await db.query(`select ticker from public.digests_pending('${SECRET}', 'ro', 20, 'AAPL')`)).rows, []);
 });
+
+// 2026-10-19, the owner's call: US and EU stories are summarised again, at the lowest priority.
+// The batch asks for them separately (p_scope 'other') and only when nothing else is waiting.
+test('story summaries for the other markets, only when asked for (p_scope other); the default stays Bucharest', async () => {
+  const q = scope => db.query(`select ticker from public.summaries_pending('${SECRET}', 'ro', 50, 48${scope ? `, '${scope}'` : ''})`).then(r => r.rows.map(x => x.ticker).sort());
+  assert.deepEqual([...new Set(await q())], ['SNP.RO']);
+  assert.deepEqual([...new Set(await q('bvb'))], ['SNP.RO']);
+  assert.deepEqual([...new Set(await q('other'))], ['AAPL', 'BARC.L', 'BMW.DE']);
+});

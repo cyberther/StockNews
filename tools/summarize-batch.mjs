@@ -18,9 +18,10 @@
 //   BATCH_LIMIT     default 10 summaries a run
 //   DIGEST_LIMIT    default 3 digests of the previous day per run and language (0 = none)
 //   MAX_AGE_HOURS   default 24
-//   FILINGS_LIMIT   default 3 filings whose figures are read per run (0 = none); FILINGS_NIGHT_LIMIT
-//                   default 8 per run between 00:00 and 07:00 Bucharest time (tools/filings-extract.mjs).
-//                   Only in runs with no summary to write, and none started after FILINGS_MINUTES (7)
+//   FILINGS_LIMIT   default 6 filings whose figures are read per run (0 = none); FILINGS_NIGHT_LIMIT
+//                   default 15 per run between 00:00 and 07:00 Bucharest time (tools/filings-extract.mjs),
+//                   after the Bucharest summaries; none started after FILINGS_MINUTES (7)
+//   OTHER_LIMIT     default 4 US and EU summaries per run, the lowest priority: only when no filing waits
 //   CALENDAR_LIMIT  default 2 financial calendars whose dates are read per run (6 at night; 0 = none),
 //                   in the same runs, before the filings (tools/calendar-extract.mjs)
 //   READ_ARTICLES   default 1: summarize the whole article; 0 = headline and snippet only
@@ -50,6 +51,12 @@ if (existsSync(ENV_FILE)) {
   }
 }
 const env = process.env;
+// The local model's priorities (2026-10-19, the owner's call): Bucharest summaries first, then
+// the filings' figures, and US/EU summaries last, only when no filing waits.
+export const PRIORITY_DEFAULTS = { filings: 6, filingsNight: 15, other: 4 };
+export const otherSummariesAllowed = ({ filingsRead, filingsLimit }) =>
+  !filingsLimit || (Number.isFinite(filingsRead) && filingsRead < filingsLimit);
+
 const cfg = {
   supabaseUrl: (env.SUPABASE_URL || '').replace(/\/$/, ''),
   anonKey: env.SUPABASE_ANON_KEY || '',
@@ -61,8 +68,10 @@ const cfg = {
   limit: Math.max(1, Math.min(Number(env.BATCH_LIMIT) || 10, 100)),
   digests: Math.max(0, Math.min(env.DIGEST_LIMIT === undefined ? 3 : Number(env.DIGEST_LIMIT) || 0, 20)),
   // Filings whose figures the model reads per run (tools/filings-extract.mjs).
-  filings: Math.max(0, Math.min(env.FILINGS_LIMIT === undefined ? 3 : Number(env.FILINGS_LIMIT) || 0, 20)),
-  filingsNight: Math.max(0, Math.min(Number(env.FILINGS_NIGHT_LIMIT) || 8, 50)),
+  filings: Math.max(0, Math.min(env.FILINGS_LIMIT === undefined ? PRIORITY_DEFAULTS.filings : Number(env.FILINGS_LIMIT) || 0, 20)),
+  filingsNight: Math.max(0, Math.min(Number(env.FILINGS_NIGHT_LIMIT) || PRIORITY_DEFAULTS.filingsNight, 50)),
+  // US and EU summaries per run, the lowest priority (OTHER_LIMIT, 0 = none).
+  other: Math.max(0, Math.min(env.OTHER_LIMIT === undefined ? PRIORITY_DEFAULTS.other : Number(env.OTHER_LIMIT) || 0, 50)),
   filingsMinutes: Math.max(1, Math.min(Number(env.FILINGS_MINUTES) || 7, 120)),
   calendars: Math.max(0, Math.min(env.CALENDAR_LIMIT === undefined ? 2 : Number(env.CALENDAR_LIMIT) || 0, 20)),
   readArticles: env.READ_ARTICLES !== '0',
@@ -687,12 +696,28 @@ async function main() {
   // node tools/summarize-batch.mjs --calendars 3: that many financial calendars, nothing else.
   const ci = process.argv.indexOf('--calendars');
   if (ci > 0) { cfg.calendars = Math.max(1, Math.min(Number(process.argv[ci + 1]) || 1, 20)); cfg.filingsMinutes = 120; return calendarRun(); }
-  // What each language still needs, in the server's priority order; then one queue in which
-  // a story's languages sit together, in the order of its best position in any list.
-  const rank = new Map(), byId = new Map(), rejected = loadRejected();
+  // 1. Bucharest summaries; 2. the day's digests, the calendars and the filings' figures;
+  // 3. US and EU summaries, only when no filing is waiting (otherSummariesAllowed).
+  const rejected = loadRejected();
+  const bvb = await queueFor('bvb', cfg.limit, rejected);
+  if (bvb.length) await writeSummaries(bvb, rejected); else log('no Bucharest stories waiting');
+  await runDigests();
+  await calendarRun();
+  const filingsLimit = cfg.filings && nightHour() ? Math.max(cfg.filings, cfg.filingsNight) : cfg.filings;
+  const filingsRead = await filingsRun();
+  if (!cfg.other || !otherSummariesAllowed({ filingsRead, filingsLimit })) return;
+  const other = await queueFor('other', cfg.other, rejected);
+  if (other.length) await writeSummaries(other, rejected);
+}
+
+// What each language still needs for one scope ('bvb' or 'other'), in the server's priority
+// order; then one queue in which a story's languages sit together, in the order of its best
+// position in any list.
+async function queueFor(scope, limit, rejected) {
+  const rank = new Map(), byId = new Map();
   const extra = Object.keys(rejected).length;
   for (const lang of cfg.langs) {
-    const rows = await rpc('summaries_pending', { p_secret: cfg.secret, p_lang: lang, p_limit: Math.min(cfg.limit + extra, 100), p_hours: cfg.hours }) || [];
+    const rows = await rpc('summaries_pending', { p_secret: cfg.secret, p_lang: lang, p_limit: Math.min(limit + extra, 100), p_hours: cfg.hours, p_scope: scope }) || [];
     rows.filter(r => !rejected[r.id + '|' + lang]).forEach((r, i) => {
       byId.set(r.id, r);
       const e = rank.get(r.id) || { at: i, langs: [] };
@@ -700,13 +725,13 @@ async function main() {
       rank.set(r.id, e);
     });
   }
-  const queue = dedupeQueue([...rank.entries()].sort((a, b) => a[1].at - b[1].at)
+  return dedupeQueue([...rank.entries()].sort((a, b) => a[1].at - b[1].at)
     .flatMap(([id, e]) => cfg.langs.filter(l => e.langs.includes(l)).map(lang => ({ story: byId.get(id), lang }))))
-    .slice(0, cfg.limit);
-  // Filings only in a run that had no summaries to write, so they never hold up the news.
-  if (!queue.length) { log('no stories waiting'); await runDigests(); await calendarRun(); return filingsRun(); }
-  log(`${queue.length} summaries to write (${cfg.langs.join(', ')}) with ${cfg.model}`);
+    .slice(0, limit);
+}
 
+async function writeSummaries(queue, rejected) {
+  log(`${queue.length} summaries to write (${cfg.langs.join(', ')}) with ${cfg.model}`);
   let saved = 0;
   const articles = new Map();
   for (const { story: s, lang } of queue) {
@@ -733,7 +758,6 @@ async function main() {
     }
   }
   log(`done: ${saved} of ${queue.length} saved`);
-  await runDigests();
 }
 
 // The LM Studio SDK keeps a socket open, so the job exits explicitly when it is done.
