@@ -42,8 +42,10 @@ test('the test alert answers the app on Cloudflare Pages (production and branch 
   const line = src.split('\n').find(l => l.includes('const ok = origin &&'));
   const re = new RegExp(line.match(/\/\^(.+?)\$\//)[0].slice(1, -1));
   for (const o of ['https://aa-market-pulse.pages.dev', 'https://staging.aa-market-pulse.pages.dev', 'https://973e7c03.aa-market-pulse.pages.dev',
-    'https://aa-market-pulse.netlify.app', 'https://staging--aa-market-pulse.netlify.app']) assert.ok(re.test(o), o);
-  for (const o of ['https://evil.pages.dev', 'https://aa-market-pulse.pages.dev.evil.com', 'http://aa-market-pulse.pages.dev', 'https://x.y.aa-market-pulse.pages.dev'])
+    'https://aa-market-pulse.netlify.app', 'https://staging--aa-market-pulse.netlify.app',
+    'https://marketpulse.ro', 'https://www.marketpulse.ro', 'https://staging.marketpulse.ro']) assert.ok(re.test(o), o);
+  for (const o of ['https://evil.pages.dev', 'https://aa-market-pulse.pages.dev.evil.com', 'http://aa-market-pulse.pages.dev', 'https://x.y.aa-market-pulse.pages.dev',
+    'http://marketpulse.ro', 'https://marketpulse.ro.evil.com', 'https://evilmarketpulse.ro', 'https://x.staging.marketpulse.ro', 'https://admin.marketpulse.ro'])
     assert.ok(!re.test(o), o);
 });
 
