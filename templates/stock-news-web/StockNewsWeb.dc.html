@@ -21,7 +21,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-flags.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-markets.js"></script><script src="../shared/hif-refresh.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-policy.js"></script><script src="../shared/hif-scenario.js"></script><script src="../shared/hif-impact.js"></script><script src="../shared/hif-impact-client.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>@font-face{font-family:'Archivo';font-style:normal;font-weight:400 800;font-display:swap;src:url('/templates/shared/fonts/archivo-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@font-face{font-family:'Archivo';font-style:normal;font-weight:400 800;font-display:swap;src:url('/templates/shared/fonts/archivo-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}:root{--font-heading:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;--font-body:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{padding:0 18px!important}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}.lp-langs{display:none!important}.lp-head-cta{margin-left:auto!important}}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}.m-chips{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch}.m-chips>*{flex:none;white-space:nowrap}}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-flags.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-markets.js"></script><script src="../shared/hif-refresh.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-policy.js"></script><script src="../shared/hif-scenario.js"></script><script src="../shared/hif-impact.js"></script><script src="../shared/hif-impact-client.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>@font-face{font-family:'Archivo';font-style:normal;font-weight:400 800;font-display:swap;src:url('/templates/shared/fonts/archivo-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@font-face{font-family:'Archivo';font-style:normal;font-weight:400 800;font-display:swap;src:url('/templates/shared/fonts/archivo-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}:root{--font-heading:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;--font-body:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg)}.lp{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{display:none!important}.lp-brand{white-space:nowrap}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}.lp-langs button{min-width:36px!important;padding:0 6px!important}.lp-ctas>button{flex:1 1 100%}.lp-mock-wrap{order:2}.lp-head-cta{margin-left:auto!important}}.lp-faq summary::-webkit-details-marker{display:none}.lp-faq[open] .lp-faq-x{transform:rotate(45deg)}.lp-faq-x{transition:transform .2s}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}.m-chips{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch}.m-chips>*{flex:none;white-space:nowrap}}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -1224,7 +1224,7 @@
 <div style="display:flex;align-items:center;gap:16px;min-width:0">
 <img src="./assets/aa-logo.png" alt="" class="lp-logo" style="width:64px;height:auto;flex:none">
 <div style="min-width:0">
-<div style="font-family:var(--font-heading);font-weight:700;font-size:clamp(22px,2.4vw,32px);letter-spacing:-0.02em;line-height:1">{{ brand }}</div>
+<div class="lp-brand" style="font-family:var(--font-heading);font-weight:700;font-size:clamp(22px,2.4vw,32px);letter-spacing:-0.02em;line-height:1">{{ brand }}</div>
 <div class="lp-tag" style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--s-mute);margin-top:8px">{{ ui.lpTag }}</div>
 </div>
 </div>
@@ -1233,66 +1233,100 @@
 </nav>
 <button onClick="{{ openSignIn }}" class="lp-head-cta" style="flex:none;white-space:nowrap;margin-left:12px;min-height:48px;padding:0 28px;background:var(--color-accent);border:0;color:#121212;font-family:var(--font-heading);font-weight:800;font-size:15px;text-align:left;cursor:pointer" style-hover="background:#E2C35A">{{ ui.lpSignIn }}</button>
 </header>
-<section style="flex:none;position:relative;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:40px;align-items:end;padding:clamp(40px,6vw,80px) clamp(20px,4vw,64px) 48px">
+<section class="lp-hero" style="flex:none;position:relative;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:48px;align-items:center;padding:clamp(40px,6vw,88px) clamp(20px,4vw,64px) clamp(40px,5vw,72px)">
 <div data-m="aurora" style="position:absolute;inset:0"></div>
-<img src="./assets/hero-globe.png" alt="" class="lp-hero-img" style="position:absolute;top:0;right:0;width:62%;height:78%;object-fit:cover;object-position:right top;opacity:0.9;-webkit-mask-image:linear-gradient(to right,transparent,#000 40%),linear-gradient(to bottom,#000 55%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 40%),linear-gradient(to bottom,#000 55%,transparent);mask-composite:intersect;pointer-events:none">
-<div style="position:relative;display:flex;flex-direction:column">
-<h1 data-m="split" style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:clamp(40px,5.2vw,76px);letter-spacing:-0.03em;line-height:1.02;text-wrap:balance">{{ ui.lpH1a }}<br><span data-m="shine" style="color:var(--color-accent)">{{ ui.lpH1b }}</span></h1>
-<p data-m="rise" style="margin:24px 0 0;font-size:clamp(16px,1.4vw,21px);line-height:1.5;color:#C9C9CC;max-width:560px;text-wrap:pretty">{{ ui.lpSub }}</p>
-<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:32px">
-<button data-m="shimmer" onClick="{{ openSignUp }}" style="min-height:58px;padding:0 28px;display:flex;align-items:center;gap:14px;background:var(--color-accent);border:0;color:#121212;font-family:var(--font-heading);font-weight:800;font-size:16px;text-align:left;cursor:pointer" style-hover="background:#E2C35A">{{ ui.lpCta }}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
-<button onClick="{{ openSignIn }}" style="min-height:58px;padding:0 28px;background:transparent;border:1px solid #F5F5F7;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;text-align:left;cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--color-accent)">{{ ui.lpCta2 }}</button>
+<img src="./assets/hero-globe.png" alt="" class="lp-hero-img" style="position:absolute;top:0;right:0;width:62%;height:100%;object-fit:cover;object-position:right top;opacity:0.45;-webkit-mask-image:linear-gradient(to right,transparent,#000 40%),linear-gradient(to bottom,#000 55%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 40%),linear-gradient(to bottom,#000 55%,transparent);mask-composite:intersect;pointer-events:none">
+<div style="position:relative;display:flex;flex-direction:column;min-width:0">
+<h1 data-m="split" style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:clamp(36px,4.8vw,68px);letter-spacing:-0.035em;line-height:1.04;text-wrap:balance">{{ ui.lpH1a }} <span data-m="shine" style="color:var(--color-accent)">{{ ui.lpH1b }}</span></h1>
+<ul data-m="rise" style="margin:28px 0 0;padding:0;list-style:none;display:grid;gap:14px;max-width:560px">
+<sc-for list="{{ lpPoints }}" as="p" hint-placeholder-count="3"><li style="display:flex;gap:14px;font-size:clamp(16px,1.3vw,19px);line-height:1.45;color:#D6D6D9;text-wrap:pretty"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>{{ p.text }}</span></li></sc-for>
+</ul>
+<div class="lp-ctas" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:34px">
+<button data-m="shimmer" onClick="{{ openSignUp }}" style="min-height:56px;padding:0 28px;display:flex;align-items:center;justify-content:center;gap:14px;background:var(--color-accent);border:0;color:#121212;font-family:var(--font-heading);font-weight:800;font-size:16px;cursor:pointer" style-hover="background:#E2C35A">{{ ui.lpCta }}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+<button onClick="{{ openSignIn }}" style="min-height:56px;padding:0 28px;background:transparent;border:1px solid #5A5A5E;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--color-accent)">{{ ui.lpCta2 }}</button>
 </div>
 <p style="margin:14px 0 0;font-size:13px;color:var(--s-mute);max-width:52ch;text-wrap:pretty">{{ ui.lpNote }}</p>
 </div>
-<div style="position:relative;display:flex;justify-content:flex-end">
-<sc-if value="{{ lpFeat.has }}" hint-placeholder-val="{{ true }}">
-<div data-m="beam rise" class="lp-feat" style="width:100%;max-width:640px;background:rgba(14,14,16,0.92);border:1px solid #3A3A3A;padding:26px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px">
-<div class="lp-feat-score" style="width:148px;background:#161616;border:1px solid var(--s-rule);padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:18px">
-<div style="font-family:var(--font-heading);font-weight:800;font-size:22px">{{ lpFeat.tickerLabel }}</div>
-<div><div style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--s-mute)">{{ ui.dayToday }}</div><div data-m-count="in" style="font-family:var(--font-heading);font-weight:800;font-size:44px;line-height:1;color:var(--color-accent);margin-top:4px">{{ lpFeat.score }}</div></div>
-<div style="font-size:13px;color:var(--s-mute)">{{ lpFeat.delta }}</div>
+<div class="lp-mock-wrap" aria-hidden="true" style="position:relative;display:flex;justify-content:center;min-width:0">
+<div data-m="rise" class="lp-mock" style="position:relative;width:min(100%,340px);border:1px solid #3A3A3E;border-radius:34px;background:#0F0F11;padding:14px;box-shadow:0 30px 80px rgba(0,0,0,0.6),0 0 0 6px #18181B">
+<div style="height:22px;display:flex;justify-content:center;align-items:center"><div style="width:90px;height:6px;border-radius:3px;background:#26262A"></div></div>
+<div style="margin-top:8px;padding:12px 14px;border-radius:16px;background:rgba(40,40,44,0.92);border:1px solid #3A3A3E;display:flex;gap:12px;align-items:flex-start">
+<img src="./assets/aa-logo.png" alt="" style="width:30px;height:auto;flex:none;margin-top:2px">
+<div style="min-width:0;flex:1"><div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--s-mute)"><span style="font-weight:700;letter-spacing:0.06em;text-transform:uppercase">Market Pulse</span><span>{{ ui.lpMockNow }}</span></div>
+<div style="font-family:var(--font-heading);font-weight:700;font-size:13px;margin-top:3px">{{ ui.lpMockAlertT }}</div><div style="font-size:12px;color:#B5B5B8;margin-top:2px">{{ ui.lpMockAlertD }}</div></div>
 </div>
-<div style="display:flex;flex-direction:column;min-width:0">
-<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--color-accent)">{{ ui.lpFeatured }}</div>
-<div style="font-family:var(--font-heading);font-weight:700;font-size:clamp(20px,1.8vw,26px);line-height:1.2;margin-top:10px;text-wrap:pretty">{{ lpFeat.headline }}</div>
-<div style="font-size:15px;line-height:1.5;color:#B5B5B8;margin-top:12px;text-wrap:pretty">{{ lpFeat.watch }}</div>
-<div style="display:flex;align-items:center;gap:12px;margin-top:auto;padding-top:18px">
-<span style="font-size:13px;color:var(--s-mute)">{{ lpFeat.source }} · {{ lpFeat.stamp }}</span>
-<button onClick="{{ openAuth }}" aria-label="{{ ui.lpRead }}" title="{{ ui.lpRead }}" style="margin-left:auto;width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid #F5F5F7;color:var(--s-ink);cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--color-accent)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+<div style="margin-top:16px;font-family:var(--font-heading);font-weight:800;font-size:20px;letter-spacing:-0.02em;padding:0 4px">{{ ui.lpMockFeed }}</div>
+<div style="margin-top:10px;padding:14px;border:1px solid #2E2E32;background:#151517">
+<div style="display:flex;gap:8px;align-items:center;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-accent)"><span style="width:6px;height:6px;border-radius:3px;background:var(--color-accent)"></span>{{ ui.lpMockNewsS }}</div>
+<div style="font-family:var(--font-heading);font-weight:700;font-size:15px;margin-top:8px">{{ ui.lpMockNewsT }}</div>
+<div style="font-size:12px;line-height:1.45;color:#A8A8AC;margin-top:6px">{{ ui.lpMockNewsD }}</div>
 </div>
+<div style="margin-top:10px;padding:14px;border:1px solid #2E2E32;background:#151517">
+<div style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--s-mute)">{{ ui.lpMockPolT }}</div>
+<div style="font-family:var(--font-heading);font-weight:700;font-size:14px;margin-top:8px">{{ ui.lpMockPolD }}</div>
+<div style="display:flex;gap:6px;align-items:flex-end;height:38px;margin-top:12px"><div style="flex:1;height:40%;background:#3A3A3E"></div><div style="flex:1;height:70%;background:var(--color-accent)"></div><div style="flex:1;height:100%;background:#6B5A22"></div></div>
+<div style="font-size:12px;color:#A8A8AC;margin-top:8px">{{ ui.lpMockPolI }}</div>
 </div>
+<div style="text-align:center;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:#6E6E72;margin-top:12px">{{ ui.lpMockLabel }}</div>
 </div>
-</sc-if>
 </div>
 </section>
-<sc-if value="{{ lpHasTickers }}" hint-placeholder-val="{{ true }}">
-<div style="flex:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,236px),1fr));background:#101012;border-top:1px solid var(--s-rule);border-bottom:1px solid var(--s-rule)">
-<sc-for list="{{ lpTickers }}" as="t" hint-placeholder-count="5">
-<div data-m="rise spotlight" style="display:flex;align-items:center;gap:14px;min-width:0;padding:20px 24px;border-right:1px solid var(--s-rule);border-bottom:1px solid var(--s-rule);margin-bottom:-1px">
-<div style="flex:none"><div style="font-family:var(--font-heading);font-weight:800;font-size:16px">{{ t.tickerLabel }}</div><div style="display:flex;gap:10px;margin-top:4px;font-size:14px"><span>{{ t.price }}</span><span style="color:{{ t.col }}">{{ t.move }}</span></div></div>
-<svg viewBox="0 0 88 28" width="88" height="28" style="margin-left:auto;flex:none"><polyline data-m="draw" points="{{ t.pts }}" fill="none" stroke="{{ t.col }}" stroke-width="1.6"></polyline></svg>
-</div>
-</sc-for>
-<button onClick="{{ openAuth }}" style="display:flex;align-items:center;gap:10px;padding:20px 24px;background:transparent;border:0;color:var(--s-ink);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;text-align:left;cursor:pointer" style-hover="color:var(--color-accent)">{{ ui.lpAll }}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
-</div>
-</sc-if>
-<section style="flex:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:28px 56px;padding:44px clamp(20px,4vw,64px) 12px">
-<div data-m="rise"><h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:clamp(24px,2.4vw,34px);letter-spacing:-0.02em">{{ ui.lpWhatTitle }}</h2>
-<p style="margin:14px 0 0;font-size:16px;line-height:1.6;color:#C9C9CC;max-width:62ch;text-wrap:pretty">{{ ui.lpWhat }}</p></div>
-<div data-m="rise"><h2 style="margin:0;font-family:var(--font-heading);font-weight:700;font-size:clamp(24px,2.4vw,34px);letter-spacing:-0.02em">{{ ui.lpWhoTitle }}</h2>
-<ul style="margin:14px 0 0;padding:0;list-style:none;display:grid;gap:12px">
-<sc-for list="{{ lpWho }}" as="w" hint-placeholder-count="3"><li style="display:flex;gap:12px;font-size:16px;line-height:1.5;color:#C9C9CC;text-wrap:pretty"><span aria-hidden="true" style="flex:none;width:8px;height:8px;margin-top:9px;background:var(--color-accent)"></span><span>{{ w.text }}</span></li></sc-for>
-</ul></div>
+<section style="flex:none;padding:clamp(40px,5vw,72px) clamp(20px,4vw,64px);background:#101012;border-top:1px solid var(--s-rule);border-bottom:1px solid var(--s-rule)">
+<h2 data-m="rise" style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:clamp(26px,2.6vw,38px);letter-spacing:-0.025em">{{ ui.lpStepsTitle }}</h2>
+<ol style="margin:28px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:20px">
+<sc-for list="{{ lpSteps }}" as="st" hint-placeholder-count="3"><li data-m="rise" style="padding:24px;border:1px solid #2E2E32;background:#141416">
+<div style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid var(--color-accent);color:var(--color-accent);font-family:var(--font-heading);font-weight:800;font-size:18px">{{ st.n }}</div>
+<div style="font-family:var(--font-heading);font-weight:700;font-size:20px;margin-top:16px">{{ st.t }}</div>
+<div style="font-size:15px;line-height:1.5;color:#B5B5B8;margin-top:8px;text-wrap:pretty">{{ st.d }}</div>
+</li></sc-for>
+</ol>
 </section>
-<div style="flex:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));padding:28px clamp(20px,4vw,64px) 40px;gap:8px 0">
-<sc-for list="{{ lpFeatures }}" as="f" hint-placeholder-count="6">
-<div data-m="rise" style="display:flex;align-items:flex-start;gap:18px;padding:14px 24px 14px 0">
-<div style="width:56px;height:56px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid #3A3A3A;background:#141414;color:var(--color-accent)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="{{ f.path }}"></path></svg></div>
-<div style="min-width:0"><div style="font-family:var(--font-heading);font-weight:700;font-size:18px">{{ f.t }}</div><div style="font-size:14px;color:var(--s-mute);margin-top:4px;line-height:1.4">{{ f.d }}</div></div>
+<section style="flex:none;padding:clamp(40px,5vw,72px) clamp(20px,4vw,64px) 24px">
+<h2 data-m="rise" style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:clamp(26px,2.6vw,38px);letter-spacing:-0.025em">{{ ui.lpHiTitle }}</h2>
+<div style="margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px">
+<sc-for list="{{ lpHighlights }}" as="h" hint-placeholder-count="3"><div data-m="rise spotlight" style="padding:28px;border:1px solid #33333A;background:linear-gradient(180deg,#18181B,#111113)">
+<div style="width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:rgba(212,175,55,0.12);color:var(--color-accent)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="{{ h.path }}"></path></svg></div>
+<div style="font-family:var(--font-heading);font-weight:800;font-size:22px;letter-spacing:-0.01em;margin-top:18px">{{ h.t }}</div>
+<div style="font-size:15px;line-height:1.55;color:#B5B5B8;margin-top:10px;text-wrap:pretty">{{ h.d }}</div>
+</div></sc-for>
+</div>
+<h3 data-m="rise" style="margin:44px 0 0;font-family:var(--font-heading);font-weight:700;font-size:13px;letter-spacing:0.18em;text-transform:uppercase;color:var(--s-mute)">{{ ui.lpMoreTitle }}</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:4px 32px;margin-top:12px">
+<sc-for list="{{ lpFeatures }}" as="f" hint-placeholder-count="5">
+<div data-m="rise" style="display:flex;align-items:flex-start;gap:16px;padding:14px 0;border-top:1px solid #26262A">
+<div style="width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid #3A3A3A;background:#141414;color:var(--color-accent)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="{{ f.path }}"></path></svg></div>
+<div style="min-width:0"><div style="font-family:var(--font-heading);font-weight:700;font-size:16px">{{ f.t }}</div><div style="font-size:14px;color:var(--s-mute);margin-top:4px;line-height:1.45">{{ f.d }}</div></div>
 </div>
 </sc-for>
 </div>
+</section>
+<section style="flex:none;padding:clamp(32px,4vw,56px) clamp(20px,4vw,64px)">
+<h2 data-m="rise" style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:clamp(26px,2.6vw,38px);letter-spacing:-0.025em">{{ ui.lpWhoTitle }}</h2>
+<div style="margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:20px">
+<sc-for list="{{ lpWho }}" as="w" hint-placeholder-count="3"><div data-m="rise" style="padding:24px;border-left:3px solid var(--color-accent);background:#141416">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:19px">{{ w.title }}</div>
+<div style="font-size:15px;line-height:1.55;color:#B5B5B8;margin-top:8px;text-wrap:pretty">{{ w.text }}</div>
+</div></sc-for>
+</div>
+<p data-m="rise" style="margin:28px 0 0;font-size:15px;line-height:1.6;color:#A8A8AC;max-width:80ch;text-wrap:pretty">{{ ui.lpWhat }}</p>
+</section>
+<section style="flex:none;padding:clamp(32px,4vw,56px) clamp(20px,4vw,64px);background:#101012;border-top:1px solid var(--s-rule)">
+<h2 data-m="rise" style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:clamp(26px,2.6vw,38px);letter-spacing:-0.025em">{{ ui.lpFaqTitle }}</h2>
+<div style="margin-top:20px;max-width:860px">
+<sc-for list="{{ lpFaq }}" as="q" hint-placeholder-count="5"><details class="lp-faq" style="border-bottom:1px solid #2E2E32">
+<summary style="list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:8px 0;font-family:var(--font-heading);font-weight:700;font-size:17px">{{ q.q }}<span class="lp-faq-x" aria-hidden="true" style="flex:none;color:var(--color-accent);font-size:24px;line-height:1">+</span></summary>
+<div style="padding:0 0 20px;font-size:15px;line-height:1.6;color:#B5B5B8;max-width:72ch;text-wrap:pretty">{{ q.a }}</div>
+</details></sc-for>
+</div>
+</section>
+<section style="flex:none;padding:clamp(48px,6vw,88px) clamp(20px,4vw,64px);text-align:center;background:radial-gradient(ellipse at center,rgba(212,175,55,0.14),transparent 70%)">
+<h2 data-m="rise" style="margin:0 auto;max-width:22ch;font-family:var(--font-heading);font-weight:800;font-size:clamp(28px,3.4vw,48px);letter-spacing:-0.03em;line-height:1.1;text-wrap:balance">{{ ui.lpEndTitle }}</h2>
+<p style="margin:16px auto 0;font-size:16px;color:#B5B5B8">{{ ui.lpEndSub }}</p>
+<div class="lp-ctas" style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:28px">
+<button onClick="{{ openSignUp }}" style="min-height:56px;padding:0 32px;display:flex;align-items:center;justify-content:center;gap:14px;background:var(--color-accent);border:0;color:#121212;font-family:var(--font-heading);font-weight:800;font-size:16px;cursor:pointer" style-hover="background:#E2C35A">{{ ui.lpCta }}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+<button onClick="{{ openSignIn }}" style="min-height:56px;padding:0 28px;background:transparent;border:1px solid #5A5A5E;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:16px;cursor:pointer" style-hover="border-color:var(--color-accent);color:var(--color-accent)">{{ ui.lpCta2 }}</button>
+</div>
+</section>
 <footer style="flex:none;margin-top:auto;display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 22px;padding:22px clamp(20px,4vw,64px) 30px;border-top:1px solid var(--s-rule);font-size:12px;line-height:1.5;color:var(--s-mute)">
 <span style="flex:1 1 320px;max-width:72ch;text-wrap:pretty">{{ ui.legalNoAdvice }}</span>
 <nav aria-label="{{ ui.appLang }}" style="display:flex;gap:2px">
@@ -1817,9 +1851,6 @@ class Component extends DCLogic {
       this.syncDetail(this.state.selected);
       this.state.follows.forEach(t => this.syncSpark(t));
       this.openAlertFromHash();
-      // A visitor: the landing's price strip (public quotes in the gateway).
-      if (!this.state.session && window.HIFLive.quotes) window.HIFLive.quotes((window.HIF && window.HIF.LANDING_TICKERS) || ['NVDA','AAPL','MSFT','TSLA','AMZN'], this.token)
-        .then(q => q && Object.keys(q).length && this.setState(st => ({ quotes: Object.assign({}, st.quotes, q) }))).catch(() => {});
     };
     const ready = () => this.sharedReady() && !!window.HIFLive;
     const go = () => { this.whenRestored(start); this.forceUpdate(); };
@@ -4297,37 +4328,18 @@ class Component extends DCLogic {
       openSignIn: () => this.setState({ authOpen:true, authMode:'in', authErr:'', authBad:null }),
       closeAuth: () => this.setState({ authOpen:false, authErr:'', authBad:null }),
       stopProp: e => e.stopPropagation(),
-      // Admin-edited featured story when one is set (H.FEATURED), else the top demo story.
-      // The featured story: the newest real one loaded, else the one set in the landing
-      // config; with neither, the card is left out.
-      lpFeat: (() => {
-        const loc = v => typeof v === 'string' ? v : ((v && (v[L] || v.EN)) || '');
-        let n = null;
-        Object.keys(LN).forEach(t => (LN[t] || []).forEach(x => { if (x && x.headline && (!n || (x.ts || 0) > (n.ts || 0))) n = Object.assign({ ticker:t, storyId: x.id ? t + ':' + x.id : '' }, x); }));
-        n = n || H.FEATURED;
-        if (!n) return { has:false };
-        const q = Q[n.ticker] || {};
-        return { has:true, ticker:n.ticker, source:n.source || '', stamp:this.storyTime(n.ts, n.stamp || ''), score:q.move || n.delta || '—', delta:q.price || '',
-          headline:this.aiText(n.storyId) || loc(n.headline), watch:this.aiText(n.storyId) ? '' : loc(n.summary || n.watch) };
-      })(),
-      // Live quotes only; the line is the day's real intraday series when it has loaded.
-      lpHasTickers: (H.LANDING_TICKERS || ['NVDA','AAPL','MSFT','TSLA','AMZN']).some(t => Q[t]),
-      lpTickers: (H.LANDING_TICKERS || ['NVDA','AAPL','MSFT','TSLA','AMZN']).filter(t => Q[t]).map(t => {
-        const f = Q[t], ch = (s.charts || {})[t + ':1d'], v = ((ch && ch.points) || []).map(p => p.close).filter(x => Number.isFinite(x));
-        let pts = '';
-        if (v.length > 1) {
-          const lo = Math.min(...v), hi = Math.max(...v), sp = Math.max(hi - lo, 1e-9);
-          pts = v.map((x, i) => (i * 88 / (v.length - 1)).toFixed(1) + ',' + (26 - (x - lo) / sp * 24).toFixed(1)).join(' ');
-        }
-        return { ticker:t, price:f.price, move:f.move, pts, col: f.up ? 'var(--s-ink)' : 'var(--color-accent)' };
-      }),
       // What the app does today (keep in step with the app: nothing it doesn't do).
-      lpFeatures: [['lpF1t','lpF1d','M4 6h16M4 12h16M4 18h10'], ['lpF2t','lpF2d','M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8zM5 19h14'],
-        ['lpF3t','lpF3d','M6 16v-5a6 6 0 1 1 12 0v5l2 2H4zM10 21h4'], ['lpF4t','lpF4d','M7 4v16M17 4v16M5 8h4v7H5zM15 6h4v8h-4z'],
-        ['lpF5t','lpF5d','M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7'], ['lpF6t','lpF6d','M3 8h18v11H3zM9 8V5h6v3'],
-        ['lpF7t','lpF7d','M4 21h16M6 18V10M10 18V10M14 18V10M18 18V10M3 10l9-6 9 6z'], ['lpF8t','lpF8d','M4 20V10M10 20V4M16 20v-7M2 20h20'],
-        ['lpF9t','lpF9d','M6 3h12v18H6zM9 7h6M9 11h2M13 11h2M9 15h2M13 15h2'], ['lpF10t','lpF10d','M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6zM9 12l2 2 4-4']].map(r => ({ t:u[r[0]], d:u[r[1]], path:r[2] })),
-      lpWho: ['lpWho1','lpWho2','lpWho3'].map(k => ({ key:k, text:u[k] })),
+      // What the app does today (keep in step with the app: nothing it doesn't do). Three
+      // highlights, then the rest as a compact list.
+      lpPoints: ['lpPoint1','lpPoint2','lpPoint3'].map(k => ({ key:k, text:u[k] })),
+      lpSteps: [1, 2, 3].map(n => ({ n:String(n), t:u['lpStep' + n + 't'], d:u['lpStep' + n + 'd'] })),
+      lpHighlights: [['lpHi1t','lpHi1d','M4 6h16M4 12h16M4 18h10'], ['lpHi2t','lpHi2d','M4 21h16M6 18V10M10 18V10M14 18V10M18 18V10M3 10l9-6 9 6z'],
+        ['lpHi3t','lpHi3d','M6 16v-5a6 6 0 1 1 12 0v5l2 2H4zM10 21h4']].map(r => ({ t:u[r[0]], d:u[r[1]], path:r[2] })),
+      lpFeatures: [['lpF4t','lpF4d','M7 4v16M17 4v16M5 8h4v7H5zM15 6h4v8h-4z'], ['lpF5t','lpF5d','M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h7'],
+        ['lpF6t','lpF6d','M3 8h18v11H3zM9 8V5h6v3'], ['lpF9t','lpF9d','M6 3h12v18H6zM9 7h6M9 11h2M13 11h2M9 15h2M13 15h2'],
+        ['lpF10t','lpF10d','M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6zM9 12l2 2 4-4']].map(r => ({ t:u[r[0]], d:u[r[1]], path:r[2] })),
+      lpFaq: [1, 2, 3, 4, 5].map(n => ({ q:u['lpQ' + n], a:u['lpA' + n] })),
+      lpWho: ['lpWho1','lpWho2','lpWho3'].map(k => ({ key:k, title:u[k + 't'], text:u[k] })),
       lpLangs: [['RO','setAppRo'],['EN','setAppEn'],['DE','setAppDe']].map(([code, fn]) => ({ code, on: this.appLang === code,
         ink: this.appLang === code ? 'var(--color-accent)' : 'var(--s-mute)', pick: () => this.setLanguage('appLang', code) })),
       obCount: String(s.follows.length),
