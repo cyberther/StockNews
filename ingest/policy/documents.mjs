@@ -24,6 +24,7 @@ export function documentLinks(event, html) {
   const id = String(event && event.id || '');
   if (id.startsWith('gov:')) return [{ kind: 'note', url: event.source_url }];
   if (id.startsWith('mf:')) return [{ kind: 'press', url: event.source_url }];
+  if (id.startsWith('just:')) return [{ kind: 'act', url: event.source_url }];
   if (!id.startsWith('cdep:')) return [];
   const abs = h => h.startsWith('http') ? h : h.startsWith('/') ? 'https://www.cdep.ro' + h : 'https://www.cdep.ro/ords/pls/proiecte/' + h;
   const found = {};

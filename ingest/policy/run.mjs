@@ -2,6 +2,8 @@
 // official sources, classifies each event, and writes to Supabase only what is new or changed,
 // with a history line for every change of status or stage. Nothing is ever deleted: a source
 // that fails or returns no rows is reported and its events stay as they were.
+import { parseGovNotes, GOV_NOTES_URL } from './gov.mjs';
+import { parseJustSearch, loadJust } from './just.mjs';
 import { parseCdepList, cdepUrl } from './cdep.mjs';
 import { parseMfRss, MF_RSS } from './mf.mjs';
 import { classify } from './classify.mjs';
@@ -15,7 +17,9 @@ export function policySources(now) {
     { name: `cdep-initiatives-${y}`, url: cdepUrl('initiatives', y), relay: true, parse: h => parseCdepList(h, { kind: 'initiatives' }) },
     { name: `cdep-laws-${y}`, url: cdepUrl('laws', y), relay: true, parse: h => parseCdepList(h, { kind: 'laws' }) }
   ];
-  return [...cdep(year), ...cdep(year - 1), { name: 'mf-press', url: MF_RSS, parse: parseMfRss }];
+  return [...cdep(year), ...cdep(year - 1), { name: 'mf-press', url: MF_RSS, parse: parseMfRss },
+    { name: 'gov-notes', url: GOV_NOTES_URL, parse: parseGovNotes },
+    { name: 'just-ordinances', load: fetchImpl => loadJust({ now, fetchImpl }), parse: x => parseJustSearch(x, { now }) }];
 }
 
 export async function fetchText(url) {
@@ -52,12 +56,12 @@ const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object'
   ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v ?? null;
 const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
 
-export async function runPolicy({ db, fetchText: get = fetchText, relay = null, now = new Date(), taxonomy, catalog }) {
+export async function runPolicy({ db, fetchText: get = fetchText, fetchImpl = fetch, relay = null, now = new Date(), taxonomy, catalog }) {
   const errors = [], found = new Map();
   // Laws come after initiatives in the list, so an initiative that became law ends up as the law.
   for (const src of policySources(now)) {
     try {
-      const rows = src.parse(await (src.relay && relay ? relay : get)(src.url));
+      const rows = src.parse(src.load ? await src.load(fetchImpl) : await (src.relay && relay ? relay : get)(src.url));
       if (!rows.length) { errors.push(`${src.name}: no rows`); continue; }
       for (const r of rows) {
         const prev = found.get(r.id);
