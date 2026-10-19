@@ -36,6 +36,8 @@ test('an old address is replaced by / in the bar (not in an installed app), and 
 test('the app names its font and serves Archivo itself, with Romanian letters', () => {
   assert.match(app, /--font-heading:'Archivo'/);
   assert.match(app, /--font-body:'Archivo'/);
+  // The start page sits outside .app: the page and .lp name the font too.
+  assert.match(app, /body\{margin:0;background:var\(--s-bg\);font-family:var\(--font-body\)\}\.lp\{font-family:var\(--font-body\);/);
   for (const f of ['archivo-latin.woff2', 'archivo-latin-ext.woff2']) {
     assert.match(app, new RegExp(`url\\('/templates/shared/fonts/${f.replace('.', '\\.')}'\\)`));
     assert.ok(readFileSync(new URL('../templates/shared/fonts/' + f, import.meta.url)).length > 10000, f);
