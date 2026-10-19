@@ -14,7 +14,7 @@
 //   VAPID_PRIVATE_KEY  } the public half also goes on Netlify as VAPID_PUBLIC_KEY
 //   VAPID_SUBJECT      mailto:you@example.com (push services contact this if needed)
 //   SCAN_SECRET        a long random string; the cron job sends it as a bearer token
-//   APP_URL            where a tapped alert opens, e.g. https://aa-market-pulse.pages.dev/
+//   APP_URL            where a tapped alert opens, e.g. https://marketpulse.ro/
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
 //
 // A signed-in user can also send themselves a test alert (the app's Account screen):
@@ -213,8 +213,9 @@ function corsFor(req: Request): Record<string, string> {
   const origin = req.headers.get('origin') || '';
   let app = '';
   try { app = new URL(env('APP_URL')).origin; } catch { /* unset */ }
-  // Netlify (branch deploys: staging--) and Cloudflare Pages (branch and commit previews: staging.).
-  const ok = origin && (origin === app || /^https:\/\/(?:(?:[a-z0-9-]+--)?aa-market-pulse\.netlify\.app|(?:[a-z0-9-]+\.)?aa-market-pulse\.pages\.dev)$/.test(origin));
+  // Netlify (branch deploys: staging--), Cloudflare Pages (branch and commit previews: staging.) and
+  // the app's own domain (marketpulse.ro, www., staging.).
+  const ok = origin && (origin === app || /^https:\/\/(?:(?:[a-z0-9-]+--)?aa-market-pulse\.netlify\.app|(?:[a-z0-9-]+\.)?aa-market-pulse\.pages\.dev|(?:www\.|staging\.)?marketpulse\.ro)$/.test(origin));
   return ok ? { 'access-control-allow-origin': origin, 'access-control-allow-methods': 'POST, OPTIONS',
     'access-control-allow-headers': 'authorization, x-hif-test, content-type, apikey', 'access-control-max-age': '600', vary: 'origin' } : { vary: 'origin' };
 }
