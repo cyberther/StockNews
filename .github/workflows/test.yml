@@ -22,4 +22,6 @@ jobs:
       # The auth race test drives both templates in Chromium.
       - run: npx playwright install --with-deps chromium
       - run: npm run check
+      # pdftotext reads the policy documents (ingest/policy/documents.mjs, its tests).
+      - run: sudo apt-get install -y --no-install-recommends poppler-utils
       - run: npm test

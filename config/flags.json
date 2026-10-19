@@ -13,6 +13,8 @@
   "impact": true,
   "policyAlerts": true,
   "aiAnnotations": false,
-  "autoImpact": false,
-  "whoGains": false
+  "billing": true,
+  "legalReviewed": false,
+  "autoImpact": true,
+  "whoGains": true
 }

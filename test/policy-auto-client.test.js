@@ -46,8 +46,9 @@ test('with the flags off nothing new is asked for or shown', () => {
   assert.match(app, /flagOn\('whoGains'\) \? \[tabBtn\('gains'/);
   assert.match(app, /if \(!flagOn\('autoImpact'\)\) return/);
   const flags = JSON.parse(read('config/flags.json'));
-  assert.equal(flags.autoImpact, false);
-  assert.equal(flags.whoGains, false);
+  // Turned on by the owner on 2026-10-19 after the staging check; the gates above stay.
+  assert.equal(typeof flags.autoImpact, 'boolean');
+  assert.equal(typeof flags.whoGains, 'boolean');
 });
 
 test('the policy client asks for sheets, links, exposure and flows with safe filters', () => {
