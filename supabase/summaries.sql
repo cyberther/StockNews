@@ -88,6 +88,12 @@ $$;
 -- doesn't halve the pace of the Romanian summaries on the summary PC.
 -- The link lets the batch job read the whole article (it keeps only its own short summary).
 -- (Dropped first: Postgres can't change a function's result columns in place.)
+-- Which tickers the local model summarises (stories and day digests, supabase/digests.sql):
+-- Bucharest listings only for now (2026-10-19, the owner's call). Other stories are still
+-- stored and shown, just without a summary. For every market again: return true here.
+create or replace function public.summary_scope(p_ticker text) returns boolean
+language sql immutable as $$ select coalesce(p_ticker, '') ~ '\.RO$' $$;
+
 drop function if exists public.summaries_pending(text, text, integer, integer);
 create or replace function public.summaries_pending(p_secret text, p_lang text default 'ro', p_limit integer default 15, p_hours integer default 24)
 returns table (id text, ticker text, headline text, summary text, source text, url text, published_at timestamptz)
@@ -100,6 +106,7 @@ begin
     select s.id, s.ticker, s.headline, s.summary, s.source, s.url, s.published_at
     from public.stories s
     where s.published_at > now() - make_interval(hours => least(greatest(coalesce(p_hours, 24), 1), 168))
+      and public.summary_scope(s.ticker)
       and not exists (select 1 from public.story_summaries x where x.story_id = s.id and x.lang = p_lang)
       and (p_lang = 'ro' or exists (
         select 1 from auth.users u
