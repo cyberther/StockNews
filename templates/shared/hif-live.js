@@ -181,9 +181,31 @@ function isoDay(off){ return new Date(Date.now() + off * 86400000).toISOString()
 async function quote(symbol, token){
   if (!available(token)) return null;
   const hit = fresh('quote', symbol); if (hit) return hit;
-  if (await useSb()) { try { return (await sbQuotes([symbol]))[symbol] || null; } catch (e) { return null; } }
+  if (await useSb()) {
+    let q = null;
+    try { q = (await sbQuotes([symbol]))[symbol] || null; } catch (e) {}
+    // A ticker nobody follows has no row (the ingestion reads only followed and held ones):
+    // the reader opened it, so ask the gateway, as before Supabase.
+    return q || gatewayQuote(symbol);
+  }
   const j = await get('/quote', { symbol: symbol }, token);
   return put('quote', symbol, shapeQuote(j, symbol));
+}
+// The gateway's /quote, else the price in its day chart (Yahoo's meta): on Cloudflare there is
+// no quote provider for US listings, but their charts work. null when neither answers.
+async function gatewayQuote(symbol){
+  try { const q = shapeQuote(await callProxy('/quote', { symbol: symbol }), symbol); if (q) return put('quote', symbol, q); } catch (e) {}
+  try { const q = quoteFromChart(await callProxy('/chart', { symbol: symbol, range: '1d' }), symbol); if (q) return put('quote', symbol, q); } catch (e) {}
+  return null;
+}
+function quoteFromChart(j, symbol){
+  const m = j && j.chart && j.chart.result && j.chart.result[0] && j.chart.result[0].meta;
+  if (!m || !(Number(m.regularMarketPrice) > 0)) return null;
+  const c = Number(m.regularMarketPrice), pc = Number(m.chartPreviousClose || m.previousClose);
+  const d = pc > 0 ? c - pc : null, dp = pc > 0 ? Math.round((c - pc) / pc * 10000) / 100 : null;
+  const q = shapeQuote({ c: c, d: d, dp: dp }, symbol);
+  if (q && m.regularMarketTime) q.asOf = Number(m.regularMarketTime) * 1000;
+  return q;
 }
 // last/dp keep full precision for position maths; price/move are the display strings.
 function shapeQuote(j, symbol){

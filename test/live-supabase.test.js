@@ -127,3 +127,28 @@ test('Supabase not set up at all (demo): the gateway is used as before', async (
     assert.equal(out.AAPL.price, '5.000');
   } finally { window.HIFAuth = real; }
 });
+
+test('a ticker nobody follows (no row in market_quotes): its quote comes from the gateway, then from its chart', async () => {
+  reset();
+  restReply = () => ({ ok: true, body: [] });
+  // /quote fails (no US quote provider on Cloudflare), /chart answers with Yahoo's meta.
+  fetchReply = url => url.includes('path=%2Fquote&') ? new Response('{"error":"market data is not configured"}', { status: 503 })
+    : url.includes('path=%2Fchart') ? Response.json({ chart: { result: [{ meta: { currency: 'USD', symbol: 'AAPL', regularMarketPrice: 252.3, chartPreviousClose: 250, regularMarketTime: 1792267200 }, timestamp: [1792267200], indicators: { quote: [{ close: [252.3] }] } }] } })
+    : new Response('{}', { status: 404 });
+  const q = await L.quote('AAPL', '');
+  assert.ok(q, 'a quote');
+  assert.equal(q.last, 252.3);
+  assert.equal(q.dp, 0.92);
+  assert.equal(q.price, '252.30');
+  assert.equal(q.up, true);
+  assert.equal(q.asOf, 1792267200 * 1000);
+  // Supabase first, then the gateway: one request each way at most.
+  assert.equal(restCalls.length, 1);
+  assert.ok(fetchCalls.some(u => u.includes('path=%2Fquote&')) && fetchCalls.some(u => u.includes('path=%2Fchart')));
+  // A followed ticker with a row never goes to the gateway.
+  reset();
+  restReply = () => ({ ok: true, body: [{ symbol: 'SNP.RO', price: 1.31, change_pct: 0.4, currency: 'RON', market_time: '2026-10-19T08:00:00Z', fetched_at: '2026-10-19T08:16:00Z' }] });
+  assert.equal((await L.quote('SNP.RO', '')).last, 1.31);
+  assert.equal(fetchCalls.length, 0);
+  fetchReply = () => new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } });
+});
