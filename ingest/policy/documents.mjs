@@ -140,7 +140,8 @@ export async function runDocuments({ db, fetchImpl = fetch, limit = 40 }) {
     sheets.set(ev.id, 'cloud');
   };
   for (const ev of events) {
-    if (have.has(ev.id) || ev.id.startsWith('cdep:') || fetched >= limit) continue;
+    // The Chamber, gov.ro and legislatie.just.ro answer only the owner's PC: it reads those.
+    if (have.has(ev.id) || /^(cdep|gov|just):/.test(ev.id) || fetched >= limit) continue;
     const links = documentLinks(ev, '');
     if (!links.length) continue;
     try {

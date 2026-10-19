@@ -401,3 +401,54 @@ revoke all on function public.state_sources_done(text) from public;
 revoke all on function public.contracts_save(text, text, jsonb) from public;
 grant execute on function public.state_sources_done(text) to anon, service_role;
 grant execute on function public.contracts_save(text, text, jsonb) to anon, service_role;
+
+-- ---------------------------------------------------------------------------------------
+-- Sources only the owner's PC can reach (gov.ro and legislatie.just.ro answer neither GitHub nor
+-- Supabase): the batch classifies their acts as the ingestion does and saves them here. Only its
+-- own ids (gov:, just:); a new act gets its first history line, a changed status or stage another.
+create or replace function public.events_save(p_secret text, p_rows jsonb) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare r jsonb; o policy_events; created integer := 0; changed integer := 0;
+begin
+  if not public.summary_secret_ok(p_secret) then raise exception 'not allowed' using errcode = '42501'; end if;
+  if jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) > 500 then raise exception 'rows must be a list of up to 500'; end if;
+  for r in select * from jsonb_array_elements(p_rows) loop
+    if coalesce(r->>'id', '') !~ '^(gov|just):[A-Za-z0-9._-]{1,60}$' then raise exception 'id not allowed for this source'; end if;
+    if coalesce(r->>'source_url', '') !~ '^https://' then raise exception 'source urls must be https'; end if;
+    select * into o from policy_events where id = r->>'id';
+    if not found then
+      insert into policy_events (id, title, summary, event_date, institution, initiator, doc_number, source_url, status, stage, certainty, sectors, caen, companies, figures)
+      values (r->>'id', left(r->>'title', 500), left(r->>'summary', 600), (r->>'event_date')::date, r->>'institution', r->>'initiator', r->>'doc_number',
+        r->>'source_url', r->>'status', r->>'stage', r->>'certainty', coalesce(array(select jsonb_array_elements_text(r->'sectors')), '{}'),
+        coalesce(array(select jsonb_array_elements_text(r->'caen')), '{}'), coalesce(r->'companies', '[]'), coalesce(r->'figures', '[]'));
+      insert into policy_event_history (event_id, field, old_value, new_value) values (r->>'id', 'status', null, r->>'status');
+      created := created + 1;
+    elsif (o.title, o.status, o.stage, o.sectors, o.companies, o.source_url, o.doc_number)
+          is distinct from (left(r->>'title', 500), r->>'status', r->>'stage', coalesce(array(select jsonb_array_elements_text(r->'sectors')), '{}'),
+                            coalesce(r->'companies', '[]'), r->>'source_url', r->>'doc_number') then
+      update policy_events set title = left(r->>'title', 500), status = r->>'status', stage = r->>'stage', sectors = coalesce(array(select jsonb_array_elements_text(r->'sectors')), '{}'),
+        caen = coalesce(array(select jsonb_array_elements_text(r->'caen')), '{}'), companies = coalesce(r->'companies', '[]'), figures = coalesce(r->'figures', '[]'),
+        source_url = r->>'source_url', doc_number = r->>'doc_number', updated_at = now()
+       where id = r->>'id';
+      if o.status is distinct from r->>'status' then insert into policy_event_history (event_id, field, old_value, new_value) values (r->>'id', 'status', o.status, r->>'status'); end if;
+      if o.stage is distinct from r->>'stage' then insert into policy_event_history (event_id, field, old_value, new_value) values (r->>'id', 'stage', o.stage, r->>'stage'); end if;
+      changed := changed + 1;
+    end if;
+  end loop;
+  return jsonb_build_object('created', created, 'changed', changed);
+end $$;
+revoke all on function public.events_save(text, jsonb) from public;
+grant execute on function public.events_save(text, jsonb) to anon, service_role;
+
+-- The PC reads the documents of every source it alone can reach.
+create or replace function public.docs_missing(p_secret text, p_limit integer default 20)
+returns table (event_id text, source_url text)
+language plpgsql stable security definer set search_path = public as $$
+begin
+  if not public.summary_secret_ok(p_secret) then raise exception 'not allowed' using errcode = '42501'; end if;
+  return query
+    select e.id, e.source_url from policy_events e
+     where (e.id like 'cdep:%' or e.id like 'gov:%' or e.id like 'just:%') and not exists (select 1 from policy_documents d where d.event_id = e.id)
+     order by e.event_date desc nulls last, e.id
+     limit least(greatest(coalesce(p_limit, 20), 1), 100);
+end $$;

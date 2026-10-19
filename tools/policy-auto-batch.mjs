@@ -17,11 +17,14 @@ import { catalogTickers } from '../ingest/impact/schema.mjs';
 import { normText } from '../ingest/impact/quote.mjs';
 import { documentLinks, readDocument, bundle } from '../ingest/policy/documents.mjs';
 import { collectContracts } from '../ingest/state/seap.mjs';
+import { collectEvents, pcPolicySources } from '../ingest/policy/run.mjs';
+import { bvbCatalog } from '../ingest/policy/classify.mjs';
 import { cuiIndex as makeCuiIndex } from '../ingest/impact/schema.mjs';
 
 const UA = 'MarketPulse/1.0 (+https://www.marketpulse.ro)';
 const ROLES = ['amount', 'budget_cost', 'start', 'end', 'rate_old', 'rate_new', 'base', 'cap', 'target', 'exposure', 'shock', 'note'];
-const MAX_PROMPT = 24000;
+// LM Studio loads gpt-oss-20b with an 8k-token context: ~12k characters of text, the prompt and the answer fit.
+const MAX_PROMPT = 12000;
 
 export const PROMPT = [
   'You read a Romanian official document (a bill, an explanatory memorandum, a Fiscal Council opinion, a government note, an act or a ministry release) and return JSON.',
@@ -87,17 +90,37 @@ async function readSeap({ rpc, secret, fetchImpl, cuiIndex, now, wait, tmp, log 
   } catch (e) { log('seap: ' + String(e.message || e).slice(0, 160)); return 0; }
 }
 
+// The acts only this PC reaches (gov.ro, legislatie.just.ro), classified as the ingestion does.
+async function readSources({ rpc, secret, fetchImpl, now, taxonomy, log }) {
+  try {
+    const fetchText = async url => {
+      const r = await fetchImpl(url, { headers: { 'user-agent': UA, accept: 'text/html' }, signal: AbortSignal.timeout(30000) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    };
+    const { rows, errors } = await collectEvents({ sources: pcPolicySources(now), fetchText, fetchImpl, taxonomy, catalog: bvbCatalog() });
+    errors.forEach(e => log('sources: ' + e));
+    let n = 0;
+    for (let i = 0; i < rows.length; i += 200) {
+      const r = await rpc('events_save', { p_secret: secret, p_rows: rows.slice(i, i + 200) });
+      n += (r && (r.created || 0) + (r.changed || 0)) || 0;
+    }
+    return n;
+  } catch (e) { log('sources: ' + String(e.message || e).slice(0, 160)); return 0; }
+}
+
 export async function runPolicyAuto({ lm, rpc, fetchImpl = fetch, now = new Date(), window = '01-06', maxMinutes = 60, limit = 20, secret, assumptions, financials, tickers, taxonomy, cuiIndex, seapWait, tmp, log = () => {} }) {
   if (!inWindow(now, window)) return { status: 'outside_window', read: 0, analyses: 0, sheets: 0, skipped: 0, contracts: 0 };
+  const events = await readSources({ rpc, secret, fetchImpl, now, taxonomy, log });
   const contracts = await readSeap({ rpc, secret, fetchImpl, cuiIndex, now, wait: seapWait, tmp, log });
-  try { await lm.ping(); } catch (e) { log('LM Studio is not answering: postponed'); return { status: 'postponed', read: 0, analyses: 0, sheets: 0, skipped: 0, contracts }; }
+  try { await lm.ping(); } catch (e) { log('LM Studio is not answering: postponed'); return { status: 'postponed', read: 0, analyses: 0, sheets: 0, skipped: 0, contracts, events }; }
   const deadline = Date.now() + maxMinutes * 60000;
   const read = await readChamber({ rpc, secret, fetchImpl, limit, deadline, log });
   const withFigures = [...new Set((financials || []).filter(f => f.verified === true).map(f => f.ticker))];
   const schema = proposalSchema(assumptions, withFigures);
   let analyses = 0, sheets = 0, skipped = 0;
   for (const d of (await rpc('auto_pending', { p_secret: secret, p_limit: limit })) || []) {
-    if (Date.now() > deadline) return { status: 'time_limit', read, analyses, sheets, skipped, contracts };
+    if (Date.now() > deadline) return { status: 'time_limit', read, analyses, sheets, skipped, contracts, events };
     let p;
     try {
       p = await lm.json(PROMPT, `Assumption keys: ${assumptions.map(a => a.key).join(', ')}\nTitle: ${d.title}\n\nDocument:\n${String(d.text).slice(0, MAX_PROMPT)}`, schema);
@@ -117,7 +140,7 @@ export async function runPolicyAuto({ lm, rpc, fetchImpl = fetch, now = new Date
       sheets++;
     }
   }
-  return { status: 'done', read, analyses, sheets, skipped, contracts };
+  return { status: 'done', read, analyses, sheets, skipped, contracts, events };
 }
 
 async function main() {

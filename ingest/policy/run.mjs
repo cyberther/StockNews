@@ -17,8 +17,12 @@ export function policySources(now) {
     { name: `cdep-initiatives-${y}`, url: cdepUrl('initiatives', y), relay: true, parse: h => parseCdepList(h, { kind: 'initiatives' }) },
     { name: `cdep-laws-${y}`, url: cdepUrl('laws', y), relay: true, parse: h => parseCdepList(h, { kind: 'laws' }) }
   ];
-  return [...cdep(year), ...cdep(year - 1), { name: 'mf-press', url: MF_RSS, parse: parseMfRss },
-    { name: 'gov-notes', url: GOV_NOTES_URL, parse: parseGovNotes },
+  return [...cdep(year), ...cdep(year - 1), { name: 'mf-press', url: MF_RSS, parse: parseMfRss }];
+}
+// Sources only the owner's PC reaches (gov.ro and legislatie.just.ro answer neither GitHub nor
+// Supabase): read by tools/policy-auto-batch.mjs, saved through events_save.
+export function pcPolicySources(now) {
+  return [{ name: 'gov-notes', url: GOV_NOTES_URL, parse: parseGovNotes },
     { name: 'just-ordinances', load: fetchImpl => loadJust({ now, fetchImpl }), parse: x => parseJustSearch(x, { now }) }];
 }
 
@@ -56,10 +60,11 @@ const canon = v => Array.isArray(v) ? v.map(canon) : v && typeof v === 'object'
   ? Object.fromEntries(Object.keys(v).sort().map(k => [k, canon(v[k])])) : v ?? null;
 const same = (a, b) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
 
-export async function runPolicy({ db, fetchText: get = fetchText, fetchImpl = fetch, relay = null, now = new Date(), taxonomy, catalog }) {
+// The sources' rows, one per id, each classified (sectors, companies, figures).
+export async function collectEvents({ sources, fetchText: get = fetchText, fetchImpl = fetch, relay = null, taxonomy, catalog }) {
   const errors = [], found = new Map();
   // Laws come after initiatives in the list, so an initiative that became law ends up as the law.
-  for (const src of policySources(now)) {
+  for (const src of sources) {
     try {
       const rows = src.parse(src.load ? await src.load(fetchImpl) : await (src.relay && relay ? relay : get)(src.url));
       if (!rows.length) { errors.push(`${src.name}: no rows`); continue; }
@@ -75,12 +80,18 @@ export async function runPolicy({ db, fetchText: get = fetchText, fetchImpl = fe
     }
   }
 
+  const rows = [...found.values()].map(item => ({ id: item.id, country: 'RO', summary: null, ...Object.fromEntries(KEEP.map(k => [k, item[k] ?? null])),
+    ...classify([item.title, item.summary].filter(Boolean).join('. '), taxonomy, catalog) }));
+  return { rows, errors };
+}
+
+export async function runPolicy({ db, fetchText: get = fetchText, fetchImpl = fetch, relay = null, now = new Date(), taxonomy, catalog, sources = policySources(now) }) {
+  const { rows, errors } = await collectEvents({ sources, fetchText: get, fetchImpl, relay, taxonomy, catalog });
   const existing = new Map((await db.read('policy_events', 'select=' + ['id', ...KEEP].join(','))).map(r => [r.id, r]));
   const at = now.toISOString(), upserts = [], history = [];
   let created = 0, changed = 0;
-  for (const item of found.values()) {
-    const c = classify([item.title, item.summary].filter(Boolean).join('. '), taxonomy, catalog);
-    const row = { id: item.id, country: 'RO', summary: null, ...Object.fromEntries(KEEP.map(k => [k, item[k] ?? null])), ...c };
+  for (const row of rows) {
+    const item = row;
     const old = existing.get(item.id);
     if (!old) {
       created++;
@@ -97,5 +108,5 @@ export async function runPolicy({ db, fetchText: get = fetchText, fetchImpl = fe
   for (const part of [upserts.filter(r => r.first_seen), upserts.filter(r => !r.first_seen)])
     for (let i = 0; i < part.length; i += 500) await db.upsert('policy_events', part.slice(i, i + 500), { onConflict: 'id' });
   if (history.length) await db.insert('policy_event_history', history);
-  return { events: found.size, created, changed, errors };
+  return { events: rows.length, created, changed, errors };
 }
