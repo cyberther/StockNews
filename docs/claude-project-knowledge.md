@@ -1,6 +1,6 @@
 # Market Pulse (StockNews): context pentru proiectul Claude
 
-Actualizat: 2026-10-18. Repo: https://github.com/cyberther/StockNews (public; nu pune niciodată chei aici).
+Actualizat: 2026-10-19. Repo: https://github.com/cyberther/StockNews (public; nu pune niciodată chei aici).
 
 ## Ce este
 Aplicație web (desktop + telefon, instalabilă ca PWA pe iPhone) cu știri și date de piață pentru acțiunile
@@ -22,7 +22,19 @@ Conturile se aprobă manual de administrator; adminul are 2FA.
   - cifre extrase (procente, % din PIB, sume);
   - filtre pe sector și companie; „Te afectează?” legat de Following și Portfolio;
   - în Supabase sunt circa 1.483 de evenimente.
-- **Calculator de scenarii** (`intelligence.html`): venit × marjă × expunere × șoc × atenuare, cu formula afișată.
+- **Analize de impact (Faza C)**, în ecranul Politici (tab-urile Evenimente / Analize / Companii):
+  - fiecare cifră e fapt (cu link oficial), ipoteză (cu motiv și interval) sau rezultat (cu formula);
+  - buget aprobat, finanțare, efect asupra deficitului (% din PIB), scenarii integral / parțial / întârziat;
+  - efectul asupra rezultatului din exploatare al companiilor și efectul ponderat pe pozițiile în lei;
+  - analizele sunt JSON în `analyses/`, imuabile după publicare (`LOCK.json` + trigger SQL); prima:
+    Legea 162/2026 (acciza la motorină, contribuția de solidaritate, OMV Petrom);
+  - pagina companiei: cifre verificate din raportul anual, expunere fiscală ca numărători;
+  - graf de cunoștințe și acuratețe (estimare înghețată vs. rezultat observat), ca view-uri SQL.
+- **Calculator de scenarii** (`intelligence.html`): același motor (`hif-impact.js`), parametri editabili,
+  formule afișate, link partajabil.
+- **Alerte de politici**: cel mult un rezumat pe zi pentru companiile din Following (push) sau Portofoliu.
+- **AI local opțional** (LM Studio, noaptea): adnotări „generat automat, neverificat”, validate de admin;
+  flag-ul `aiAnnotations` e oprit.
 - **Smart refresh**: datele se reîmprospătează doar dacă pagina e vizibilă, a fost folosită în ultimele
   15 minute și bursa relevantă e deschisă (minimum 5 minute între refresh-uri).
 
@@ -51,15 +63,9 @@ Cloudflare Pages (proiect aa-market-pulse): frontend static + o funcție /api/* 
   `commercial_display` / `redistribution`).
 - **Faza B – făcută (PR #88, #89)**: Political Intelligence (ecranul Politici), taxonomia sectoarelor,
   relay-ul pg_net, termenii surselor (`docs/policy-sources.md`).
-- **Faza C – urmează**: Economic Impact & Investment Engine.
-  - Impactul unei măsuri: buget, finanțare, deficit, sectoare, companii expuse, riscuri.
-  - Scenarii: integral / parțial / întârziat.
-  - Fapte, ipoteze și rezultate de model ținute separat; toate calculele prin formule verificabile în cod.
-  - Expunerea companiilor legată de watchlist și portofoliu.
-  - Knowledge graph versionat: eveniment, politică, sector, companie, instrument, scenariu, rezultat observat.
-  - Căutare și filtre, calculator de scenarii cu parametri editabili, alerte pentru Following și Portfolio.
-  - LM Studio local, opțional, doar pentru joburi batch interne; rezultatele sunt marcate
-    „generat automat, neverificat”.
+- **Faza C – făcută (PR #91)**: Economic Impact & Investment Engine: motorul de calcul, analize versionate
+  și imuabile, expunerea companiilor, graful de cunoștințe, calculatorul, alertele de politici, AI local
+  opțional (`docs/impact-model.md`).
 - **Faza D – mai târziu**: pregătirea monetizării: entitlements în Supabase Auth, Lemon Squeezy/Paddle în
   modul test, poarta `COMMERCIAL_MODE`, flag-uri legale.
 
@@ -92,3 +98,5 @@ Cloudflare Pages (proiect aa-market-pulse): frontend static + o funcție /api/* 
   `https://*.aa-market-pulse.pages.dev/**`, plus corectarea Site URL.
 - Verificarea juridică a termenilor de reutilizare a surselor.
 - După verificarea ingestiei din 2026-10-20: oprirea jobului vechi `market-pulse-scan` din pg_cron.
+- Testarea Fazei C pe staging; sursa oficială pentru consumul de motorină (ipoteză nesursată în analiza v1).
+- Opțional: prima rulare reală a AI-ului local, apoi pornirea flag-ului `aiAnnotations`.
