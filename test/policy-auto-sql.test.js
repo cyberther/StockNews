@@ -148,3 +148,39 @@ test('who gains: links with evidence, exposure per company, money per kind of pu
   assert.equal((await user(APPROVED, `select count(*)::int n from public.state_links where link_type = 'tax_payer'`)).rows[0].n, 0);
   assert.equal((await user(WAITING, `select count(*)::int n from public.state_links`)).rows[0].n, 0);
 });
+
+test('alerts: a public contract or state aid at a company the reader follows (push on) or holds; nothing for others; marked once sent', async () => {
+  await svc(`select public.policy_alerts_mark(now())`);   // what earlier tests left waiting
+  await svc(`insert into public.watchlist (user_id, ticker, push) values ('${APPROVED}', 'TLV.RO', true), ('${APPROVED}', 'H2O.RO', false);
+    insert into public.holdings (user_id, ticker, shares) values ('${APPROVED}', 'SNG.RO', 10);
+    insert into public.push_subscriptions (endpoint, user_id, p256dh, auth) values ('https://push/a', '${APPROVED}', 'k', 'a');
+    insert into public.public_contracts (id, cui, ticker, authority, title, cpv, value_ron, signed_on, source_url) values
+      ('seap:a1', '5022670', 'TLV.RO', 'Primăria A', 'Servicii', '66110000-4', 2500000, current_date, 'https://data.gov.ro/a'),
+      ('seap:a2', '13267213', 'H2O.RO', 'Metrorex', 'Energie', '09310000-5', 9000, current_date, 'https://data.gov.ro/b'),
+      ('seap:a3', '14056826', 'SNP.RO', 'Primăria B', 'Lucrări', '45000000-7', 7000, current_date, 'https://data.gov.ro/c');
+    insert into public.state_aid (id, cui, ticker, granter, scheme, amount_ron, granted_on, source_url) values
+      ('aid:1', '14056826', 'SNG.RO', 'Ministerul Energiei', 'Schema X', 1000000, current_date, 'https://ec.europa.eu/a');`);
+  const due = (await svc(`select user_id, items from public.policy_alerts_due(now() - interval '1 day')`)).rows;
+  const mine = (due.find(r => r.user_id === APPROVED) || { items: [] }).items;
+  const kinds = mine.map(i => i.type + ':' + i.ticker).sort();
+  assert.deepEqual(kinds, ['aid:SNG.RO', 'contract:TLV.RO'], 'push off (H2O) and not followed (SNP) give nothing');
+  assert.match(mine.find(i => i.type === 'contract').title, /^Contract public: Primăria A/);
+  assert.equal(due.length, 1);
+  await svc(`select public.policy_alerts_mark(now())`);
+  assert.equal((await svc(`select count(*)::int n from public.policy_alerts_due(now() - interval '1 day')`)).rows[0].n, 0);
+  assert.equal((await svc(`select count(*)::int n from public.public_contracts where alerted_at is null`)).rows[0].n, 0);
+});
+
+test('alerts: the earlier rules still hold after the redefinition (a named company, an adopted act by sector, a new analysis; not a withdrawn one)', async () => {
+  await svc(`select public.policy_alerts_mark(now())`);
+  await svc(`insert into public.policy_events (id, title, event_date, institution, source_url, status, certainty, sectors, companies) values
+    ('cdep:30', 'Numită', '2026-10-05', 'Camera Deputaților', 'https://www.cdep.ro/30', 'draft', 'official_procedure', '{}', '[{"ticker":"TLV.RO","why":"mentioned"}]'),
+    ('cdep:31', 'Sector, proiect', '2026-10-05', 'Camera Deputaților', 'https://www.cdep.ro/31', 'draft', 'official_procedure', '{}', '[{"ticker":"TLV.RO","why":"sector","sector":"banci-financiar"}]'),
+    ('cdep:32', 'Sector, adoptată', '2026-10-05', 'Camera Deputaților', 'https://www.cdep.ro/32', 'adopted', 'official_act', '{}', '[{"ticker":"SNG.RO","why":"sector","sector":"petrol-gaze"}]');
+    insert into public.impact_analyses (id, version, published_at, title, policy, events, sectors, body, content_hash, origin) values
+      ('auto-x', 1, '2026-10-19', 'Analiză', 'auto-x', '{cdep:30}', '{}', '{"companies":[{"ticker":"TLV.RO"}]}', '${'1'.repeat(64)}', 'auto'),
+      ('auto-y', 1, '2026-10-19', 'Retrasă', 'auto-y', '{cdep:30}', '{}', '{"companies":[{"ticker":"TLV.RO"}]}', '${'2'.repeat(64)}', 'auto');`);
+  await user(ADMIN, `select public.admin_withdraw_analysis('auto-y', 1, 'Test retragere.')`);
+  const items = ((await svc(`select items from public.policy_alerts_due(now() - interval '1 day') where user_id = '${APPROVED}'`)).rows[0] || { items: [] }).items;
+  assert.deepEqual(items.map(i => i.type + ':' + i.id).sort(), ['analysis:auto-x', 'event:cdep:30', 'event:cdep:32']);
+});

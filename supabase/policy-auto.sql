@@ -302,3 +302,66 @@ create or replace view public.sector_state_flows with (security_invoker = true) 
 
 grant select on public.state_links, public.company_state_exposure, public.sector_state_flows to authenticated;
 revoke all on public.state_links, public.company_state_exposure, public.sector_state_flows from anon;
+
+-- ---------------------------------------------------------------------------------------
+-- Alerts (impact.sql's rules, kept as they are) plus the state's money: a public contract won
+-- or state aid received by a company the reader follows with push on or holds. Still at most
+-- one push per user per run (the scan Edge Function).
+alter table public.public_contracts add column if not exists alerted_at timestamptz;
+alter table public.state_aid add column if not exists alerted_at timestamptz;
+
+create or replace function public.policy_alerts_due(p_since timestamptz)
+returns table (user_id uuid, items jsonb)
+language sql stable security definer set search_path = public as $$
+  with ev as (
+    select 'event' type, e.id, e.title, e.status, c->>'ticker' ticker, c->>'why' why
+    from policy_events e, jsonb_array_elements(e.companies) c
+    where e.alerted_at is null and e.first_seen >= p_since
+    union
+    select 'event', e.id, e.title, h.new_value, c->>'ticker', c->>'why'
+    from policy_event_history h join policy_events e on e.id = h.event_id, jsonb_array_elements(e.companies) c
+    where h.alerted_at is null and h.field = 'status' and h.changed_at >= p_since and e.alerted_at is not null
+  ), items as (
+    select type, id, title, status, ticker from ev where why = 'mentioned' or status = 'adopted'
+    union
+    select 'analysis', a.id, a.title, null, c->>'ticker'
+    from impact_analyses a, jsonb_array_elements(a.body->'companies') c
+    where a.alerted_at is null and a.synced_at >= p_since and a.withdrawn_at is null
+    union
+    select 'contract', p.id, 'Contract public: ' || p.authority || coalesce(' · ' || to_char(p.value_ron, 'FM999G999G999G990') || ' lei', ''), null, p.ticker
+    from public_contracts p where p.alerted_at is null and p.stored_at >= p_since
+    union
+    select 'aid', s.id, 'Ajutor de stat: ' || s.granter || coalesce(' · ' || to_char(s.amount_ron, 'FM999G999G999G990') || ' lei', ''), null, s.ticker
+    from state_aid s where s.alerted_at is null and s.stored_at >= p_since
+  ), owners as (
+    select w.user_id, w.ticker from watchlist w where w.push
+    union
+    select h.user_id, h.ticker from holdings h
+  )
+  select o.user_id, jsonb_agg(distinct jsonb_build_object('type', i.type, 'id', i.id, 'title', i.title, 'status', i.status, 'ticker', i.ticker))
+  from items i join owners o on o.ticker = i.ticker
+  join account_status s on s.user_id = o.user_id and s.approved and not s.suspended
+  where exists (select 1 from push_subscriptions p where p.user_id = o.user_id and p.policy_alerts)
+  group by o.user_id;
+$$;
+
+create or replace function public.policy_alerts_mark(p_until timestamptz) returns integer
+language plpgsql security definer set search_path = public as $$
+declare n integer; m integer; k integer; c integer; a integer;
+begin
+  update policy_events set alerted_at = now() where alerted_at is null and first_seen <= p_until;
+  get diagnostics n = row_count;
+  update policy_event_history set alerted_at = now() where alerted_at is null and changed_at <= p_until;
+  get diagnostics m = row_count;
+  update impact_analyses set alerted_at = now() where alerted_at is null and synced_at <= p_until;
+  get diagnostics k = row_count;
+  update public_contracts set alerted_at = now() where alerted_at is null and stored_at <= p_until;
+  get diagnostics c = row_count;
+  update state_aid set alerted_at = now() where alerted_at is null and stored_at <= p_until;
+  get diagnostics a = row_count;
+  return n + m + k + c + a;
+end $$;
+revoke all on function public.policy_alerts_due(timestamptz) from public, anon, authenticated;
+revoke all on function public.policy_alerts_mark(timestamptz) from public, anon, authenticated;
+grant execute on function public.policy_alerts_due(timestamptz) to service_role;
+grant execute on function public.policy_alerts_mark(timestamptz) to service_role;
