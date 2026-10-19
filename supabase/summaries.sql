@@ -94,8 +94,11 @@ $$;
 create or replace function public.summary_scope(p_ticker text) returns boolean
 language sql immutable as $$ select coalesce(p_ticker, '') ~ '\.RO$' $$;
 
+-- p_scope: 'bvb' (the default; Bucharest listings, written first) or 'other' (US and EU stories,
+-- lowest priority: the batch asks for them only when nothing else waits, tools/summarize-batch.mjs).
 drop function if exists public.summaries_pending(text, text, integer, integer);
-create or replace function public.summaries_pending(p_secret text, p_lang text default 'ro', p_limit integer default 15, p_hours integer default 24)
+drop function if exists public.summaries_pending(text, text, integer, integer, text);
+create or replace function public.summaries_pending(p_secret text, p_lang text default 'ro', p_limit integer default 15, p_hours integer default 24, p_scope text default 'bvb')
 returns table (id text, ticker text, headline text, summary text, source text, url text, published_at timestamptz)
 language plpgsql stable security definer set search_path = public as $$
 begin
@@ -106,7 +109,7 @@ begin
     select s.id, s.ticker, s.headline, s.summary, s.source, s.url, s.published_at
     from public.stories s
     where s.published_at > now() - make_interval(hours => least(greatest(coalesce(p_hours, 24), 1), 168))
-      and public.summary_scope(s.ticker)
+      and (case when p_scope = 'other' then not public.summary_scope(s.ticker) else public.summary_scope(s.ticker) end)
       and not exists (select 1 from public.story_summaries x where x.story_id = s.id and x.lang = p_lang)
       and (p_lang = 'ro' or exists (
         select 1 from auth.users u
@@ -152,7 +155,7 @@ begin
   return n;
 end $$;
 
-revoke all on function public.summaries_pending(text, text, integer, integer) from public;
+revoke all on function public.summaries_pending(text, text, integer, integer, text) from public;
 revoke all on function public.summaries_save(text, jsonb) from public;
-grant execute on function public.summaries_pending(text, text, integer, integer) to anon, authenticated;
+grant execute on function public.summaries_pending(text, text, integer, integer, text) to anon, authenticated;
 grant execute on function public.summaries_save(text, jsonb) to anon, authenticated;

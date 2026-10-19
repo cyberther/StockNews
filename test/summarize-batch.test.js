@@ -218,3 +218,14 @@ test('a digest the model got wrong is passed over, and the ones behind it get th
   const more = Object.assign({}, rows[0], { stories: [{}, {}, {}] });
   assert.deepEqual(digestsToWrite([more], 'ro', rejected, 3).map(r => r.ticker), ['CBK.DE']);
 });
+
+// 2026-10-19, the owner's priorities for the local model: Bucharest summaries first, then the
+// filings' figures, and US/EU summaries last, only when the filings queue has run dry.
+import { otherSummariesAllowed, PRIORITY_DEFAULTS } from '../tools/summarize-batch.mjs';
+test('US and EU summaries only when the filings queue is empty', () => {
+  assert.equal(otherSummariesAllowed({ filingsRead: 6, filingsLimit: 6 }), false, 'a full batch of filings: more are waiting');
+  assert.equal(otherSummariesAllowed({ filingsRead: 2, filingsLimit: 6 }), true, 'fewer than asked: the queue is empty');
+  assert.equal(otherSummariesAllowed({ filingsRead: 0, filingsLimit: 0 }), true, 'filings switched off');
+  assert.equal(otherSummariesAllowed({ filingsRead: undefined, filingsLimit: 6 }), false, 'the filings queue could not be read');
+  assert.ok(PRIORITY_DEFAULTS.filings >= 6 && PRIORITY_DEFAULTS.filingsNight >= 15 && PRIORITY_DEFAULTS.other >= 1);
+});
