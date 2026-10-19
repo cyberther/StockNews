@@ -10,11 +10,10 @@ name: Ingest market data
 #             and the official policy sources (ingest/policy/).
 # Off until the repository variable INGEST_ENABLED is 'true' (Settings → Secrets and
 # variables → Actions → Variables), so nothing runs before the secrets are in place.
-# Keep the cron in step with CRON in ingest/health.mjs.
+# Started by Supabase pg_cron through GitHub's API (supabase/ingest-cron.sql): GitHub never
+# started this workflow's own schedule. The times there stay in step with CRON in
+# ingest/health.mjs: intraday at :07 :22 :37 :52, 07-21 UTC, weekdays; eod at 21:40 UTC.
 on:
-  schedule:
-    - cron: '7,22,37,52 7-21 * * 1-5'
-    - cron: '40 21 * * 1-5'
   workflow_dispatch:
     inputs:
       job:
@@ -38,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
-      JOB: ${{ github.event.schedule == '40 21 * * 1-5' && 'eod' || inputs.job || 'intraday' }}
+      JOB: ${{ inputs.job || 'intraday' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
