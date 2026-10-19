@@ -1,0 +1,13 @@
+{
+  "measure_type": "budget_program",
+  "title": "HG 781/2026: schema de ajutor de stat pentru industria prelucrătoare",
+  "summary": "Guvernul aprobă o schemă de ajutor de stat de 759 mil. lei pentru investiții în industria prelucrătoare, aplicabilă din 15 octombrie 2026 până la sfârșitul lui 2027.",
+  "facts": [
+    { "key": "amount", "role": "amount", "text": "Bugetul total al schemei: 759 mil. lei, de la bugetul de stat.", "quote": "Bugetul total alocat schemei este de 759 mil. lei", "value": 759000000, "unit": "RON" },
+    { "key": "start", "role": "start", "text": "Schema se aplică de la 15.10.2026.", "quote": "Schema se aplică începând cu data de 15.10.2026", "value": "2026-10-15", "unit": "date" },
+    { "key": "end", "role": "end", "text": "Schema se aplică până la 31.12.2027.", "quote": "începând cu data de 15.10.2026 și până la 31.12.2027", "value": "2027-12-31", "unit": "date" }
+  ],
+  "budget": { "direction": "cost" },
+  "companies": [],
+  "assumptions": []
+}

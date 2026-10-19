@@ -89,34 +89,49 @@ function postJson(url, body, timeout) {
   });
 }
 
-async function main() {
-  const ENV_FILE = join(homedir(), '.config/market-pulse/summarizer.env');
-  if (existsSync(ENV_FILE)) for (const line of readFileSync(ENV_FILE, 'utf8').split(/\r?\n/)) {
+// Shared with tools/policy-auto-batch.mjs: the env file, the local model and the RPC client.
+export function loadEnvFile(file = join(homedir(), '.config/market-pulse/summarizer.env')) {
+  if (existsSync(file)) for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
     const m = /^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*?)\s*$/.exec(line);
     if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2].replace(/^(['"])(.*)\1$/, '$2');
   }
-  const env = process.env, log = (...a) => console.log(new Date().toISOString(), ...a);
-  const sb = (env.SUPABASE_URL || '').replace(/\/$/, ''), anon = env.SUPABASE_ANON_KEY || '', secret = env.SUMMARY_SECRET || '';
-  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(sb) || !anon || secret.length < 32) { log('not configured: SUPABASE_URL, SUPABASE_ANON_KEY, SUMMARY_SECRET'); process.exitCode = 2; return; }
-  const lmUrl = (env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1').replace(/\/$/, ''), model = env.LMSTUDIO_MODEL || 'openai/gpt-oss-20b';
-  const lm = {
+  return process.env;
+}
+export function localModel({ url = 'http://127.0.0.1:1234/v1', model = 'openai/gpt-oss-20b', maxTokens = 800, name = 'policy_annotation' } = {}) {
+  const lmUrl = url.replace(/\/$/, '');
+  return {
+    model,
     ping: async () => { const r = await fetch(lmUrl + '/models', { signal: AbortSignal.timeout(5000) }); if (!r.ok) throw new Error(String(r.status)); },
     json: async (system, user, sch) => {
-      const res = await postJson(lmUrl + '/chat/completions', { model, temperature: 0, max_tokens: 800,
-        response_format: { type: 'json_schema', json_schema: { name: 'policy_annotation', strict: true, schema: sch } },
+      const res = await postJson(lmUrl + '/chat/completions', { model, temperature: 0, max_tokens: maxTokens,
+        response_format: { type: 'json_schema', json_schema: { name, strict: true, schema: sch } },
         messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }, 600_000);
       if (res.status !== 200) throw new Error('model ' + res.status);
       const c = JSON.parse(res.body).choices?.[0]?.message?.content || '';
       return JSON.parse(c);
     }
   };
-  const rpc = async (fn, body) => {
-    const res = await fetch(`${sb}/rest/v1/rpc/${fn}`, { method: 'POST', body: JSON.stringify(body), signal: AbortSignal.timeout(15000),
+}
+export function supabaseRpc({ sb, anon, secret }) {
+  return async (fn, body) => {
+    const res = await fetch(`${sb}/rest/v1/rpc/${fn}`, { method: 'POST', body: JSON.stringify(body), signal: AbortSignal.timeout(30000),
       headers: { apikey: anon, authorization: 'Bearer ' + anon, 'content-type': 'application/json' } });
     const text = await res.text();
     if (!res.ok) throw new Error(`${fn}: ${res.status} ${text.slice(0, 200).split(secret).join('[secret]')}`);
     return text ? JSON.parse(text) : null;
   };
+}
+export function batchConfig(env) {
+  const sb = (env.SUPABASE_URL || '').replace(/\/$/, ''), anon = env.SUPABASE_ANON_KEY || '', secret = env.SUMMARY_SECRET || '';
+  const ok = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(sb) && !!anon && secret.length >= 32;
+  return { ok, sb, anon, secret, lmUrl: env.LMSTUDIO_URL || 'http://127.0.0.1:1234/v1', model: env.LMSTUDIO_MODEL || 'openai/gpt-oss-20b' };
+}
+
+async function main() {
+  const env = loadEnvFile(), log = (...a) => console.log(new Date().toISOString(), ...a);
+  const cfg = batchConfig(env);
+  if (!cfg.ok) { log('not configured: SUPABASE_URL, SUPABASE_ANON_KEY, SUMMARY_SECRET'); process.exitCode = 2; return; }
+  const lm = localModel({ url: cfg.lmUrl, model: cfg.model }), rpc = supabaseRpc(cfg), secret = cfg.secret, model = cfg.model;
   const taxonomy = JSON.parse(readFileSync(new URL('../config/policy-taxonomy.json', import.meta.url), 'utf8'));
   const r = await runPolicyAi({ lm, rpc, taxonomy, secret, model, log, window: env.AI_WINDOW || '01-06',
     maxMinutes: Math.max(1, Math.min(Number(env.AI_MAX_MINUTES) || 30, 240)), limit: Math.max(1, Math.min(Number(env.AI_LIMIT) || 20, 200)) });
