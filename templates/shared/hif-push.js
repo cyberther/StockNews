@@ -322,4 +322,5 @@ async function saveDrawings(ticker, list) {
 }
 
 window.HIFPush = { status, enable, disable, forget, policyAlerts, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadFilingFigures, loadFilingEvidence, loadReportDates, loadStoriesById, testAlert, loadDrawings, saveDrawings, supported };
+if(window.dispatchEvent&&typeof Event==='function')window.dispatchEvent(new Event('hif:account-ready'));
 })();
