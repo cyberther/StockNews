@@ -109,3 +109,17 @@ test('my_plan says whether the reader is a founder', async () => {
     await db.exec(`update public.app_config set value = 'false' where key = 'commercial_mode'`);
   }
 });
+
+test('my_plan gives the interval bought (founder_variants is [monthly, yearly]), for the trial reminder', async () => {
+  await db.exec(`update public.app_config set value = 'true' where key = 'commercial_mode'`);
+  try {
+    await apply(sub('on_trial', Number(FOUNDER_M)));
+    assert.equal((await as(db, 'authenticated', PAYER, 'select public.my_plan() p')).rows[0].p.interval, 'month');
+    await apply(sub('on_trial', Number(FOUNDER_Y)));
+    assert.equal((await as(db, 'authenticated', PAYER, 'select public.my_plan() p')).rows[0].p.interval, 'year');
+    await apply(sub('on_trial', Number(OTHER)));
+    assert.equal((await as(db, 'authenticated', PAYER, 'select public.my_plan() p')).rows[0].p.interval, null);
+  } finally {
+    await db.exec(`update public.app_config set value = 'false' where key = 'commercial_mode'`);
+  }
+});

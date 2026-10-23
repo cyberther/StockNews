@@ -95,7 +95,10 @@ begin
     limit 1;
   return jsonb_build_object('commercial', true, 'plan', p, 'source', e.source, 'status', e.status,
     'period_end', e.current_period_end, 'portal_url', e.portal_url, 'limits', lim->p,
-    'founder', coalesce(e.founder, false) and p = 'pro');
+    'founder', coalesce(e.founder, false) and p = 'pro',
+    -- The interval bought, for the trial reminder's amount: founder_variants is [monthly, yearly].
+    'interval', (select case e.variant_id when c.value->>0 then 'month' when c.value->>1 then 'year' end
+                 from app_config c where c.key = 'founder_variants'));
 end $$;
 revoke all on function public.my_plan() from public, anon;
 grant execute on function public.my_plan() to authenticated;

@@ -111,6 +111,7 @@
 </div>
 </sc-if>
 <div data-m="smooth" class="app-main" style="flex:1;min-width:0;overflow-y:auto">
+<sc-if value="{{ trialSoon }}" hint-placeholder-val="{{ false }}"><div role="status" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:14px var(--gx) 0;padding:12px 14px;border:1px solid var(--color-accent);font-size:13px;line-height:1.45"><span style="flex:1 1 320px">{{ trialSoonText }}</span><span style="display:flex;flex-wrap:wrap;gap:8px"><button onClick="{{ trialManage }}" style="min-height:34px;padding:0 12px;border:0;background:var(--color-accent);color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.planManage }}</button><button onClick="{{ trialOk }}" style="min-height:34px;padding:0 12px;border:1px solid var(--s-rule);background:transparent;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.trialOk }}</button></span></div></sc-if>
 
 <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ true }}">
 <div data-m="fade">
@@ -2320,6 +2321,28 @@ class Component extends DCLogic {
   // What the Policy screen shows: filters, and the events by day, each with its fixed status
   // label, source, certainty, sectors, companies (and why they are linked) and whether it
   // concerns the reader.
+  // What the first payment will be after the trial: "49 lei a month", from the interval bought.
+  renewalPrice(u, b) {
+    const C = (window.HIFBilling && window.HIFBilling.CONFIG) || { prices: {} }, p = b && C.prices[b.interval];
+    if (!p) return '';
+    return String(b.interval === 'year' ? u.trialPriceYear : u.trialPriceMonth).replace('{p}', new Intl.NumberFormat(this.appLocale).format(p));
+  }
+  // The trial's last 3 days: when the first payment is taken, how much, and where to cancel.
+  // Shown on every screen but Account (which says it beside the plan) until "Got it" (per trial
+  // end, on this device); a reminder, not a push.
+  trialVals(u) {
+    const b = this.state.billingPlan, end = b && Date.parse(b.period_end), left = end - Date.now();
+    const key = 'mp.trialSeen';
+    let seen = '';
+    try { seen = localStorage.getItem(key) || ''; } catch (e) {}
+    const on = this.state.screen !== 'account' && !!(b && b.commercial && b.status === 'trialing' && end && left > 0 && left <= 3 * 864e5 && seen !== String(b.period_end) && !this.state.trialOk);
+    if (!on) return { trialSoon: false, trialSoonText: '', trialManage: null, trialOk: null };
+    const d = new Date(end).toLocaleDateString(this.appLocale, { day:'numeric', month:'long', year:'numeric' });
+    const price = this.renewalPrice(u, b) || u.trialPriceAny || '';
+    return { trialSoon: true, trialSoonText: String(u.trialEnds || '').replace('{d}', d).replace('{p}', price),
+      trialManage: () => b.portal_url ? window.open(b.portal_url, '_blank', 'noopener') : this.go('account'),
+      trialOk: () => { try { localStorage.setItem(key, String(b.period_end)); } catch (e) {} this.setState({ trialOk: true }); } };
+  }
   policyUpsellHidden() {
     if (this.state.policyUpsellOff) return true;
     try { const at = Number(localStorage.getItem('mp.policyUpsell')); return at > 0 && Date.now() - at < 14 * 864e5; } catch (e) { return false; }
@@ -4902,12 +4925,14 @@ class Component extends DCLogic {
       accountPlanLabel: isFree ? u.upgradeBtn : (s.billingPlan && s.billingPlan.portal_url ? u.planManage : u.managePro),
       accountPlanAction: isFree ? () => this.go('paywall')
         : s.billingPlan && s.billingPlan.portal_url ? () => window.open(s.billingPlan.portal_url, '_blank', 'noopener') : () => this.flash(u.manageSub.toUpperCase()),
+      ...this.trialVals(u),
       planPeriod: (() => { const b = s.billingPlan; if (!b || !b.commercial) return '';
         if (b.source === 'manual' && !b.period_end) return u.planSourceManual;
         if (!b.period_end) return '';
         const d = new Date(b.period_end).toLocaleDateString(this.appLocale, { day:'numeric', month:'long', year:'numeric' });
         const when = (b.status === 'cancelled' || b.status === 'past_due' ? u.planEndsOn : b.status === 'trialing' ? u.planTrialUntil : u.planRenews).replace('{d}', d);
-        return b.founder ? (u.planFounder || 'Founder') + ' · ' + when : when; })(),
+        const then = b.status === 'trialing' && this.renewalPrice(u, b) ? ' · ' + (u.trialThen || 'then') + ' ' + this.renewalPrice(u, b) : '';
+        return (b.founder ? (u.planFounder || 'Founder') + ' · ' + when : when) + then; })(),
       hasPlanPeriod: !!(s.billingPlan && s.billingPlan.commercial && (s.billingPlan.period_end || s.billingPlan.source === 'manual')),
       pushRow: (() => {
         const dp = s.devicePush || 'unavailable';

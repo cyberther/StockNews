@@ -33,6 +33,7 @@ Cât timp sunt oprite, orice cont aprobat are acces complet, ca înainte.
    Variantele de fondator se declară și în baza de date, ca serverul să numere locurile (200, din
    `config/billing.json`):
    `update public.app_config set value = '["<id lunar>", "<id anual>"]' where key = 'founder_variants';`.
+   Ordinea contează: întâi varianta lunară, apoi cea anuală (amintirea de la sfârșitul probei afișează suma după ea).
    Fără ele, checkout-ul răspunde „billing is not configured”.
 3. **Settings → API → New key**. Cheia de test se afișează o singură dată.
 4. **Settings → Webhooks → New webhook**:
@@ -56,6 +57,10 @@ pentru încercare; după test se opresc la loc.
    `select public.current_plan('<id-ul tău>')` dă `pro`.
 3. Contul arată „Perioadă de probă până la …” și butonul „Gestionează abonamentul”.
 4. Anularea din portal duce la „Activ până la …”, apoi la planul Gratuit la data respectivă.
+5. **Amintirea de la sfârșitul probei.** Lemon Squeezy trimite singur un e-mail înainte de sfârșitul perioadei de
+   probă. De verificat în test: cu câte zile înainte vine, în ce limbă e și ce spune (data, suma, cum anulezi); dacă
+   nu spune suma și data, o trecem la e-mail propriu. Aplicația arată oricum, în ultimele 3 zile, data și suma
+   primei plăți și butonul „Gestionează abonamentul”.
 
 ## Ce rămâne înainte de lansarea comercială
 - Verificarea juridică a secțiunii „Abonamente și plăți”, marcată acum „ciornă”, și a surselor.
