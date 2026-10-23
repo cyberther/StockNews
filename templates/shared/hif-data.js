@@ -4,6 +4,7 @@
 // FOLLOWS on purpose — it is the searchable market. Tickers present in UNIVERSE but not in FOLLOWS
 // carry no demo data and are surfaced as "live data required" until a Finnhub token is connected.
 (function(){
+if(window.HIF) return;
 const NEWS = [
   { ticker:'NVDA', source:'Reuters', stamp:'09:29:14', score:'+72', delta:'+2.4%', up:true, vol:'1.8x',
     headline:{ EN:'Data-centre guidance raised for the third straight quarter', RO:'Estimările pentru centrele de date, majorate al treilea trimestru consecutiv', DE:'Data-Center-Prognose zum dritten Quartal in Folge erhöht' },

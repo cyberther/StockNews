@@ -11,7 +11,8 @@ function sym(t){ if (!SYMBOL.test(String(t))) throw new Error('bad ticker'); ret
 
 var query = {
   // With auto (Politici 2.0, after supabase/policy-auto.sql): where each came from and any withdrawal.
-  analyses: function(auto){ return 'impact_analyses?select=id,version,published_at,title,policy,events,sectors,body' + (auto ? ',origin,withdrawn_at,withdrawn_reason' : '') + '&order=published_at.desc,id.asc,version.desc&limit=200'; },
+  analyses: function(auto){ return 'impact_analyses?select=id,version,published_at,title,policy,events,sectors,companies:body->companies,budgetApproved:body->budget->approved' + (auto ? ',origin,withdrawn_at,withdrawn_reason' : '') + '&order=published_at.desc,id.asc,version.desc&limit=200'; },
+  analysis: function(a,v){return 'impact_analyses?select=id,version,body&id=eq.'+id(a)+'&version=eq.'+ver(v)+'&limit=1';},
   results: function(a, v){ return 'impact_results?select=scenario,subject,engine_version,vals,formula,computed_at&analysis_id=eq.' + id(a) + '&version=eq.' + ver(v) + '&order=computed_at.asc'; },
   accuracy: function(a, v){ return 'analysis_accuracy?select=*&analysis_id=eq.' + id(a) + '&version=eq.' + ver(v); },
   financials: function(t){ return 'company_financials?select=*&ticker=eq.' + sym(t) + '&order=fiscal_year.desc,provenance.asc&limit=6'; },
@@ -25,7 +26,7 @@ function load(q){
   if (!A || !A.rest) return Promise.resolve(null);
   return A.rest(q).then(function(r){
     if (!r || !r.ok || !Array.isArray(r.body)) throw new Error('impact ' + ((r && r.status) || 0));
-    return r.body;
+    return q.startsWith('impact_analyses?') ? r.body.map(a=>a.body ? {...a,bodyLoaded:true} : {...a,body:{companies:a.companies||[],budget:{approved:a.budgetApproved}},bodyLoaded:false}) : r.body;
   });
 }
 

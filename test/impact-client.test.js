@@ -10,7 +10,7 @@ const C = window.HIFImpactClient;
 const sample = JSON.parse(readFileSync(new URL('./fixtures/impact/sample-v1.json', import.meta.url), 'utf8'));
 
 test('one request per list, exact PostgREST queries', () => {
-  assert.equal(C.query.analyses(), 'impact_analyses?select=id,version,published_at,title,policy,events,sectors,body&order=published_at.desc,id.asc,version.desc&limit=200');
+  assert.equal(C.query.analyses(), 'impact_analyses?select=id,version,published_at,title,policy,events,sectors,companies:body->companies,budgetApproved:body->budget->approved&order=published_at.desc,id.asc,version.desc&limit=200');
   assert.equal(C.query.results('sample-measure', 1), 'impact_results?select=scenario,subject,engine_version,vals,formula,computed_at&analysis_id=eq.sample-measure&version=eq.1&order=computed_at.asc');
   assert.equal(C.query.accuracy('sample-measure', 1), 'analysis_accuracy?select=*&analysis_id=eq.sample-measure&version=eq.1');
   assert.equal(C.query.financials('SNP.RO'), 'company_financials?select=*&ticker=eq.SNP.RO&order=fiscal_year.desc,provenance.asc&limit=6');

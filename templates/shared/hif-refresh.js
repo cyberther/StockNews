@@ -24,7 +24,7 @@ function shouldRefresh(o){
   var now = o.now || Date.now();
   if (now - (o.lastActivity || 0) > IDLE_MS) return false;
   if (!o.lastRefresh) return true;
-  if (now - o.lastRefresh < MIN_INTERVAL_MS) return false;
+  if (now - o.lastRefresh < (Number.isFinite(o.minIntervalMs) ? Math.max(1000,o.minIntervalMs) : MIN_INTERVAL_MS)) return false;
   var mk = marketsOf(o.symbols), at = new Date(now);
   if (mk.some(function(m){ return M().isOpen(m, at); })) return true;
   // Closed: refresh only if the last look came before the latest close's prices were in.

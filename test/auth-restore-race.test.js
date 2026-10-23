@@ -12,12 +12,16 @@ import test, { describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { execFileSync } from 'node:child_process';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const TEMPLATES = {
   web: { path: 'templates/stock-news-web/StockNewsWeb.dc.html', key: 'hif.web.v2' },
+  published: { path: 'published/templates/stock-news-web/StockNewsWeb.dc.html', key: 'hif.web.v2' },
   dark: { path: 'templates/stock-news-dark/StockNewsDark.dc.html', key: 'hif.dark.v2' },
 };
 // Guards against a hang, not a wait: every step below waits for an event, not a duration.
@@ -37,7 +41,8 @@ function serveRepo() {
     const rel = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).replace(/^([/\\])+/, '');
     if (rel.startsWith('..')) { res.writeHead(403).end(); return; }
     try {
-      const body = await readFile(join(ROOT, rel));
+      const published = rel.startsWith('published/');
+      const body = await readFile(join(published ? publishedRoot : ROOT, published ? rel.slice(10) : rel));
       res.writeHead(200, { 'content-type': TYPES[extname(rel)] || 'application/octet-stream' }).end(body);
     } catch (e) { res.writeHead(404).end(); }
   });
@@ -112,15 +117,18 @@ if (chromium) { try { browser = await chromium.launch(); } catch (e) { launchErr
 if (!browser && process.env.CI) throw launchError;
 const skip = browser ? false : 'Playwright with Chromium is not available';
 
-let server, base;
+let server, base, publishedRoot;
 test.before(async () => {
   if (skip) return;
+  publishedRoot = mkdtempSync(join(tmpdir(), 'marketpulse-published-test-'));
+  execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: ROOT, env: { ...process.env, BUILD_OUT: publishedRoot, CF_PAGES: '0' }, stdio: 'pipe' });
   server = await serveRepo();
   base = 'http://127.0.0.1:' + server.address().port;
 });
 test.after(async () => {
   if (browser) await browser.close();
   if (server) server.close();
+  if (publishedRoot) rmSync(publishedRoot, {recursive:true,force:true});
 });
 
 // Each case has its own browser context, so they can run side by side.

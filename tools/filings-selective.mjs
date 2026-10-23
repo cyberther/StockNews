@@ -14,9 +14,9 @@ export async function consumerReady(config,fetcher=fetch){
  try{
   if(!/^[a-f0-9]{64}$/.test(config.consumerSha256||''))return false;
   const checks=await Promise.all([consumerUrl,'https://www.marketpulse.ro/'].map(async url=>{
-   const r=await fetcher(url,{signal:AbortSignal.timeout(5000),headers:{'Cache-Control':'no-cache'}});
+   const r=await fetcher(url,{method:'HEAD',signal:AbortSignal.timeout(5000),headers:{'Cache-Control':'no-cache'}});
    if(!r.ok)return false;
-   const text=await r.text();return Buffer.byteLength(text)<=1024*1024 && hash(text)===config.consumerSha256;
+   return r.headers?.get('x-mp-consumer-sha256')===config.consumerSha256;
   }));return checks.every(Boolean);
  }catch{return false;}
 }
@@ -57,7 +57,8 @@ export function createSelectiveExtractor({root=SELECTIVE_ROOT,log=()=>{},execute
   let dir;
   try {
    let config=JSON.parse(readFileSync(join(root,'config.json'),'utf8'));
-   if(config.enabled&&(config.typedRevenue||config.multiYear))config=await compatible(config);
+   if(!config.enabled || !['dividend','results'].includes(filing.kind) || !config.issuers?.[filing.kind]?.includes(filing.ticker))return null;
+   if(config.typedRevenue||config.multiYear)config=await compatible(config);
    if(!config.enabled || !['dividend','results'].includes(filing.kind) || !config.issuers?.[filing.kind]?.includes(filing.ticker) || (filing.kind==='results'&&!config.typedRevenue))return null;
    if(!Buffer.isBuffer(pdf)||pdf.length>15*1024*1024||pdf.subarray(0,5).toString()!=='%PDF-'||Buffer.byteLength(text)>8*1024*1024)return null;
    const timeout=Math.min(30000,deadline?deadline-Date.now()-1500:30000);if(timeout<1000)return null;
