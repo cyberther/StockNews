@@ -84,3 +84,18 @@ export async function ensureModel({ model, threads, wsUrl, sdkPath }) {
     try { if (client && client[Symbol.asyncDispose]) await client[Symbol.asyncDispose](); } catch {}
   }
 }
+
+// Counts the actual model-template tokens. Does not load/unload models or alter threads.
+export async function measureModelInput({ model, wsUrl, messages, sdkPath }) {
+  const path = sdkPath || SDK_PATHS.find(p => existsSync(p));
+  if (!path) throw new Error('LM Studio SDK unavailable; cannot safely size the full document');
+  let client;
+  try {
+    const { LMStudioClient } = createRequire(import.meta.url)(path);
+    client = new LMStudioClient({ baseUrl: wsUrl, verboseErrorMessages: false });
+    const loaded = (await client.llm.listLoaded()).find(m => m.modelKey === model || m.identifier === model);
+    if (!loaded) throw new Error('Model is not loaded for input sizing');
+    const prompt = await loaded.applyPromptTemplate(messages);
+    return { tokens: await loaded.countTokens(prompt), contextLength: await loaded.getContextLength() };
+  } finally { if (client) await client[Symbol.asyncDispose](); }
+}

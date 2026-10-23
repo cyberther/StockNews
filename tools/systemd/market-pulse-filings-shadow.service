@@ -1,0 +1,22 @@
+[Unit]
+Description=Market Pulse filings observer (separate local results only)
+ConditionPathExists=%h/Documents/Codex/2026-10-22/inst/outputs/filings-shadow/config.json
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/StockNews
+ExecCondition=/usr/bin/env node tools/filings-shadow-worker.mjs --idle-check
+ExecStart=/usr/bin/env node tools/filings-shadow-worker.mjs
+Nice=19
+CPUWeight=10
+IOSchedulingClass=idle
+UMask=0077
+Environment=OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1
+TimeoutStartSec=45s
+MemoryMax=768M
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/Documents/Codex/2026-10-22/inst/outputs/filings-shadow
+PrivateTmp=true
+RestrictAddressFamilies=AF_UNIX

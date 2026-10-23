@@ -1,26 +1,70 @@
+import { failurePolicy } from './filings-retry.mjs';
 // The figures in the Bucharest listings' filings (supabase/filings.sql), read by the local
 // model in the summary job (tools/summarize-batch.mjs runs runFilings() after the digests).
 //
 // For each document of a kind that carries figures, newest first: its text (pdftotext for a
 // PDF, the page's text otherwise), then one request for JSON in a fixed shape per kind,
-// checked before it is saved. A scanned PDF without text, or a reply that fails the checks,
-// is marked so it isn't read again.
+// checked before it is saved. Scanned PDFs use local Docling OCR before model analysis.
+// OCR errors remain pending for a later run; genuinely empty documents are marked none.
 import { execFile } from 'node:child_process';
-import { writeFileSync, unlinkSync, mkdtempSync } from 'node:fs';
+import { writeFileSync, readFileSync, rmSync, mkdtempSync, existsSync } from 'node:fs';
+import { promisify } from 'node:util';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { offLimits } from './filings-lib.mjs';
+import { EVIDENCE_RULES, evidenceSchema, checkEvidence, publicFigures } from './filings-evidence.mjs';
 
 const MAX_DOC = 15 * 1024 * 1024;
-const MAX_CHARS = 7000;   // a filing's key figures are on its first pages; at CPU speed
-export const pdfText = (buf, pages = 8) => new Promise(resolve => {
+export const EXTRACTION_VERSION = 'page-ocr-v2';
+const MAX_CHARS_WITHOUT_TOKEN_COUNTER = 7000;
+const exec = promisify(execFile);
+const DOCLING_DIR = '/home/yoda/Documents/Codex/2026-10-22/inst/outputs/docling';
+// Inspect every page, including mixed PDFs and defective embedded OCR layers.
+// OCR failures propagate instead of returning a partial document.
+export async function pdfText(buf, pages = 8, { log = () => {}, timeout = 240_000, run = exec, doclingDir = DOCLING_DIR } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'mp-filing-')), f = join(dir, 'doc.pdf');
-  writeFileSync(f, buf);
-  execFile('pdftotext', ['-layout', '-f', '1', '-l', String(pages), '-enc', 'UTF-8', f, '-'], { timeout: 60000, maxBuffer: 8 * 1024 * 1024 }, (err, out) => {
-    try { unlinkSync(f); } catch {}
-    resolve(err ? '' : String(out || ''));
-  });
-});
+  try {
+    writeFileSync(f, buf);
+    let text = '';
+    try {
+      const out = await run('pdftotext', ['-layout', '-f', '1', '-l', String(pages), '-enc', 'UTF-8', f, '-'], { timeout: 60000, maxBuffer: 8 * 1024 * 1024 });
+      text = String(out.stdout || '');
+    } catch { /* Docling can still recover a PDF that pdftotext cannot read. */ }
+    const nativePages = text.split('\f');
+    if (nativePages.at(-1)?.trim() === '') nativePages.pop();
+    if (nativePages.length && nativePages.every(page => (page.match(/[\p{L}\p{N}]/gu) || []).length >= 80 && (page.match(/\uFFFD/g) || []).length < 3)) return compactDocument(text);
+    const python = join(doclingDir, 'runtime/bin/python');
+    const adapter = join(doclingDir, 'market-pulse-ocr.py');
+    if (!existsSync(python) || !existsSync(adapter)) throw new Error('Docling OCR installation unavailable');
+    if (timeout < 1000) throw new Error('No time remaining for OCR; retry next run');
+    log('filings: scanned or damaged page text; running oriented page OCR/cache');
+    const out = await run(python, [adapter, f, String(pages), '--json'], {
+      timeout, killSignal: 'SIGKILL', maxBuffer: 8 * 1024 * 1024,
+      env: { ...process.env, OMP_NUM_THREADS: '2', MKL_NUM_THREADS: '2' }
+    });
+    let result;
+    try { result = JSON.parse(out.stdout); } catch { throw Object.assign(new Error('Invalid page OCR JSON'), { code: 'OCR_INVALID_RESPONSE' }); }
+    if (typeof result.text !== 'string' || !Array.isArray(result.pages) || result.pipeline !== EXTRACTION_VERSION) throw Object.assign(new Error('Invalid page OCR output'), { code: 'OCR_INVALID_RESPONSE' });
+    log('filings OCR:', result.cache_hit ? 'cache hit' : 'converted', JSON.stringify(result.pages));
+    return compactDocument(result.text);
+  } catch (error) {
+    if (/OrientationUncertain/.test(String(error.stderr || error.message || ''))) error.code = 'OCR_UNCERTAIN';
+    if (/DocumentTextTooLarge/.test(String(error.stderr || error.message || '')) || error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') error.code = 'DOCUMENT_CONTEXT_LIMIT';
+    throw error;
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+export function compactDocument(text) {
+  return squeeze(String(text || '').split('\n').filter(line => !/^\s*\|(?:\s*:?-{3,}:?\s*\|)+\s*$/.test(line) && line.trim() !== '<!-- image -->')
+    .map(line => line.trim().startsWith('|') ? line.split('|').map(cell => cell.trim()).join(' | ') : line).join('\n'));
+}
+export function answerBudget(kind, { tokens, contextLength }) {
+  const available = Math.floor(contextLength - tokens - 512);
+  const minimum = kind === 'insider' ? 1800 : kind === 'agm' ? 1600 : 1200;
+  if (!Number.isFinite(available) || available < minimum) throw Object.assign(new Error('Full document exceeds safe model context; retained for review without truncation'), { code: 'DOCUMENT_CONTEXT_LIMIT' });
+  return Math.min(2500, available);
+}
 export const htmlText = h => String(h || '').replace(/<(script|style|noscript|nav|header|footer|form)[\s\S]*?<\/\1>/gi, ' ')
   .replace(/<br\s*\/?>|<\/(p|div|li|tr|h[1-6])>/gi, '\n').replace(/<[^>]+>/g, ' ')
   .replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#(\d+);/g, (m, n) => String.fromCodePoint(+n))
@@ -110,38 +154,74 @@ export async function runFilings(limit, deps) {
   // it could not be read.
   if (!limit) return 0;
   let rows = [];
-  try { rows = await rpc('filings_pending', { p_secret: cfg.secret, p_limit: limit }) || []; }
+  try { rows = await rpc('filings_pending', { p_secret: cfg.secret, p_limit: deps.retry ? 50 : limit }) || []; }
   catch (e) { log('filings:', String(e.message || e)); return undefined; }
+  rows = rows.filter(f => !deps.retry || deps.retry.ready(f.id)).slice(0, limit);
   for (const f of rows) {
     if (deps.deadline && Date.now() > deps.deadline) { log('filings: time is up for this run'); break; }
     const t0 = Date.now();
-    const save = (status, data) => rpc('filings_save', { p_secret: cfg.secret, p_id: f.id, p_status: status, p_data: data || null, p_model: cfg.model });
+    // The observer is optional and fail-open; its output never enters filings_save.
+    const observe = async (method, value) => { try { await deps.observe?.[method]?.(value); } catch { try { log('shadow observer failed', f.id, method); } catch {} } };
+    const save = async (status, data) => {
+      const result = await rpc('filings_save', { p_secret: cfg.secret, p_id: f.id, p_status: status, p_data: data || null, p_model: data?.extraction?.version || cfg.model });
+      await observe('complete', { id: f.id, status, data: data || null }); return result;
+    };
+    const failed = async error => {
+      const policy = deps.retry ? deps.retry.fail(f.id, error) : failurePolicy(error, 1);
+      deps.onFailure?.(error);
+      if (!policy.retryable || !deps.retry) await save('failed');
+      else await observe('complete', { id: f.id, status: 'deferred', reason: error.code || 'retryable_error' });
+      log('filing failure policy', f.id, JSON.stringify(policy));
+    };
     try {
       if (f.kind === 'agm' && !AGM_READ.test(foldName(f.title))) { await save('skipped'); continue; }
       if (offLimits(f.url) || !(await allowed(f.url))) { await save('skipped'); log('filing', f.id, f.ticker, 'not readable (robots.txt)'); continue; }
       let r;
       try { r = await httpGet(f.url, { timeout: 30000, accept: 'application/pdf, text/html', binary: true, maxBytes: MAX_DOC, ua: deps.ua }); }
-      catch (e) { await save('failed'); log('filing', f.id, f.ticker, 'download failed', String(e.message || e)); continue; }
-      if (r.status !== 200) { await save('failed'); log('filing', f.id, f.ticker, 'HTTP', r.status); continue; }
+      catch (e) { await failed(e); log('filing', f.id, f.ticker, 'download failed', String(e.message || e)); continue; }
+      if (r.status !== 200) { await failed(Object.assign(new Error(`Source HTTP ${r.status}`), {status:r.status})); log('filing', f.id, f.ticker, 'HTTP', r.status); continue; }
       const isPdf = /pdf/i.test(r.type) || r.body.slice(0, 5).toString('latin1') === '%PDF-';
-      const text = squeeze(isPdf ? await pdfText(r.body) : htmlText(r.body.toString('utf8'))).slice(0, MAX_CHARS);
-      if (text.replace(/\s/g, '').length < 200) { await save('none'); log('filing', f.id, f.ticker, 'no text (scanned?)'); continue; }
-      const input = `Company: ${f.ticker}\nDocument title: ${f.title}\nPublished: ${f.published_at ? String(f.published_at).slice(0, 10) : 'unknown'}\n\n${ASK[f.kind]}\n\nDocument text:\n${text}`;
-      let data = null, why = 'no reply';
+      if (isPdf) await observe('source', { filing: f, pdf: r.body, origin: deps.observationOrigin || 'pending' });
+      const text = compactDocument(isPdf ? await (deps.pdfText || pdfText)(r.body, 8, { log, timeout: Math.min(240_000, deps.deadline ? deps.deadline - Date.now() : 240_000) }) : htmlText(r.body.toString('utf8')));
+      if (isPdf) await observe('text', { id: f.id, text });
+      if (text.replace(/\s/g, '').length < 200) { await save('none'); log('filing', f.id, f.ticker, 'no usable text after extraction/OCR'); continue; }
+      if (isPdf && deps.selective && ['dividend', 'results'].includes(f.kind)) {
+        let selected = null;
+        try { selected = await deps.selective({ filing: f, pdf: r.body, text, deadline: deps.deadline }); }
+        catch { log('selective fallback', f.id, 'extractor unavailable'); }
+        if (selected && !checkFigures(f.kind, selected)) {
+          await save('ok', selected);
+          try { deps.retry?.clear(f.id); } catch {}
+          log('saved selective filing', f.id, f.ticker, f.kind);
+          continue;
+        }
+      }
+      const input = `Company: ${f.ticker}\nDocument title: ${f.title}\nPublished: ${f.published_at ? String(f.published_at).slice(0, 10) : 'unknown'}\n\n${ASK[f.kind]}\n\n${EVIDENCE_RULES[f.kind] || ''}\n\nDocument text:\n${text}`;
+      let data = null, why = 'no reply', evidenceError = '';
       for (const temperature of [0, 0.3]) {
-        const res = await postJson(`${cfg.lmUrl}/chat/completions`, { model: cfg.model, temperature, max_tokens: 2500,
-          response_format: { type: 'json_schema', json_schema: { name: f.kind, strict: true, schema: SCHEMAS[f.kind] } },
-          messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: input }] }, 900_000);
-        if (res.status !== 200) throw new Error(`model: ${res.status} ${res.body.slice(0, 200)}`);
+        const messages = [{ role: 'system', content: SYSTEM }, { role: 'user', content: input + (temperature ? `\n\nPrevious extraction was rejected: ${why}. Re-read the source and correct it. Evidence must be a single short verbatim phrase, no ellipses, no added quotation marks, no omitted words. For a proposal prefer its literal proposal heading. Use null when the financial basis is unknown.` : '') }];
+        if (!deps.measureInput && text.length > MAX_CHARS_WITHOUT_TOKEN_COUNTER) throw Object.assign(new Error('Full document needs token-budget verification; no silent truncation'), { code: 'DOCUMENT_CONTEXT_LIMIT' });
+        const maxTokens = deps.measureInput ? answerBudget(f.kind, await deps.measureInput(messages)) : 2500;
+        const res = await postJson(`${cfg.lmUrl}/chat/completions`, { model: cfg.model, temperature, max_tokens: maxTokens,
+          response_format: { type: 'json_schema', json_schema: { name: f.kind, strict: true, schema: evidenceSchema(f.kind, SCHEMAS[f.kind]) } },
+          messages }, 900_000);
+        if (res.status !== 200) throw Object.assign(new Error(`model: ${res.status} ${res.body.slice(0, 200)}`), {status:res.status});
         const d = JSON.parse(res.body);
+        if (d.choices?.[0]?.finish_reason === 'length') throw Object.assign(new Error('Model response truncated; full extraction not saved'), { code: 'MODEL_TRUNCATED' });
         data = parseJson(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content);
-        why = checkFigures(f.kind, data);
+        const figuresError = checkFigures(f.kind, data);
+        evidenceError = figuresError ? '' : checkEvidence(f.kind, data, text);
+        why = figuresError || evidenceError;
         if (!why) break;
       }
-      if (why) { await save('none'); log('filing', f.id, f.ticker, f.kind, 'no figures -', why); continue; }
-      await save('ok', data);
+      if (why) { if (evidenceError) await failed(Object.assign(new Error(why), {code:'EVIDENCE_INVALID'})); else await save('none'); log('filing', f.id, f.ticker, f.kind, evidenceError ? 'evidence validation failed -' : 'no figures -', why); continue; }
+      await save('ok', publicFigures(data));
+      try { deps.retry?.clear(f.id); } catch (error) { log('retry registry cleanup failed', f.id, error.message); }
       log('saved filing', f.id, f.ticker, f.kind, `${Math.round((Date.now() - t0) / 1000)}s`);
-    } catch (e) { log('filing failed', f.id, f.ticker, String(e.message || e)); }
+    } catch (e) {
+      await failed(e);
+      log('filing failed', f.id, f.ticker, String(e.message || e));
+    }
   }
   return rows.length;
 }

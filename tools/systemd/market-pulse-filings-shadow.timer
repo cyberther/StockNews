@@ -1,0 +1,10 @@
+[Unit]
+Description=Check for idle time to observe one captured filing
+
+[Timer]
+OnBootSec=2min
+OnUnitInactiveSec=1min
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target
