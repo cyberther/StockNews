@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 
 const data = readFileSync(new URL('../templates/shared/hif-data.js', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../templates/stock-news-web/StockNewsWeb.dc.html', import.meta.url), 'utf8');
-const KEYS = ['polUpsell', 'upsellSee', 'upsellLater', 'impLocked', 'trialEnds', 'trialPriceMonth', 'trialPriceYear', 'trialPriceAny', 'trialThen', 'trialOk'];
+const KEYS = ['polUpsell', 'upsellSee', 'upsellLater', 'impLocked', 'trialEnds', 'trialPriceMonth', 'trialPriceYear', 'trialPriceAny', 'trialThen', 'trialOk', 'gainsLocked'];
 const values = key => [...data.matchAll(new RegExp('\\b' + key + ":'((?:[^'\\\\]|\\\\.)*)'", 'g'))].map(m => m[1]);
 
 test('every offer has its text in English, Romanian and German', () => {
@@ -35,4 +35,9 @@ test('the trial reminder: the last 3 days of a trial, the date, the amount and w
   for (const v of values('trialEnds')) assert.ok(v.includes('{d}') && v.includes('{p}'), v);
   assert.match(app, /b\.status === 'trialing' && end && left > 0 && left <= 3 \* 864e5/);
   assert.match(app, /localStorage\.setItem\(key, String\(b\.period_end\)\)/);
+});
+
+test('Who gains: the Companies view is Pro on Free, with the offer in its place', () => {
+  assert.match(app, /gainsCompaniesShow: view === 'companies' && this\.plan !== 'free', gainsCompaniesLocked: view === 'companies' && this\.plan === 'free'/);
+  assert.match(app, /<sc-if value="\{\{ gainsCompaniesLocked \}\}"/);
 });

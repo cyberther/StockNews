@@ -294,15 +294,17 @@ create or replace view public.company_state_exposure with (security_invoker = tr
     from t left join rev on rev.ticker = t.ticker;
 
 -- Where the state's money goes, by month: contracts won by listed companies by kind of purchase
--- (CPV division), and adopted acts per policy sector.
-create or replace view public.sector_state_flows with (security_invoker = true) as
+-- (CPV division), and adopted acts per policy sector. Sums only, for every approved reader: it
+-- reads the contracts as the view's owner (the contracts themselves are Pro, billing.sql).
+drop view if exists public.sector_state_flows;
+create view public.sector_state_flows with (security_invoker = false) as
   select 'cpv'::text as dimension, left(p.cpv, 2) as key, date_trunc('month', p.signed_on)::date as month,
          sum(p.value_ron) as inflow_ron, count(*)::int as contracts, 0 as measures
-    from public.public_contracts p where p.cpv ~ '^\d{2}' and p.signed_on is not null group by 2, 3
+    from public.public_contracts p where p.cpv ~ '^\d{2}' and p.signed_on is not null and public.is_approved() group by 2, 3
   union all
   select 'sector', s, date_trunc('month', e.event_date)::date, null, 0, count(*)::int
     from public.policy_events e, unnest(e.sectors) s
-   where e.status in ('adopted', 'in_force', 'implemented') and e.event_date is not null group by 2, 3;
+   where e.status in ('adopted', 'in_force', 'implemented') and e.event_date is not null and public.is_approved() group by 2, 3;
 
 grant select on public.state_links, public.company_state_exposure, public.sector_state_flows to authenticated;
 revoke all on public.state_links, public.company_state_exposure, public.sector_state_flows from anon;

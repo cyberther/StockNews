@@ -11,6 +11,9 @@ var CONFIG = {
     "month": 49,
     "year": 490
   },
+  "founder": {
+    "seats": 200
+  },
   "limits": {
     "free": {
       "tickers": 5,
@@ -63,6 +66,11 @@ var CONFIG = {
       "pro": "✓"
     },
     {
+      "key": "bilRowGains",
+      "free": "bilGainsFree",
+      "pro": "bilFull"
+    },
+    {
       "key": "bilRowChart",
       "free": "6M",
       "pro": "5Y"
@@ -71,9 +79,6 @@ var CONFIG = {
   "variants": {
     "month": null,
     "year": null
-  },
-  "founder": {
-    "seats": 200
   }
 };
 var root = typeof window !== 'undefined' ? window : globalThis;
