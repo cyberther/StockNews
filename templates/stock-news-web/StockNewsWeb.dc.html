@@ -26,7 +26,7 @@
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
 <div class="app-head" style="display:flex;align-items:center;gap:20px;padding:8px 20px;height:56px;border-bottom:1px solid var(--s-rule);flex:none">
-<div style="flex:none;display:flex;align-items:center;gap:10px"><img src="./assets/aa-logo.png" alt="" style="width:34px;height:auto"><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.02em">{{ brand }}</span></div>
+<div style="flex:none;display:flex;align-items:center;gap:10px"><picture style="display:contents"><source type="image/webp" srcset="./assets/aa-logo-64.webp 1x, ./assets/aa-logo-128.webp 2x"><img src="./assets/aa-logo.png" alt="" style="width:34px;height:auto"></picture><span style="white-space:nowrap;font-family:var(--font-heading);font-weight:800;font-size:17px;letter-spacing:-0.02em">{{ brand }}</span></div>
 <div class="app-term" style="flex:none;white-space:nowrap;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.terminal }}</div>
 <div data-m="marquee" style="flex:1 1 auto;min-width:0;display:flex;background:transparent;margin-left:12px;overflow:hidden">
 <div>
@@ -1283,7 +1283,7 @@
 <div data-m="smooth" data-screen-label="Landing" class="lp" style="position:fixed;inset:0;z-index:40;background:#0B0B0C;color:var(--s-ink);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column">
 <header class="lp-head" style="flex:none;display:flex;align-items:center;gap:24px;flex-wrap:wrap;padding:20px clamp(20px,4vw,64px);background:#0E0E10;border-bottom:1px solid var(--s-rule)">
 <div style="display:flex;align-items:center;gap:16px;min-width:0">
-<img src="./assets/aa-logo.png" alt="" class="lp-logo" style="width:64px;height:auto;flex:none">
+<picture style="display:contents"><source type="image/webp" srcset="./assets/aa-logo-64.webp 1x, ./assets/aa-logo-128.webp 2x"><img src="./assets/aa-logo.png" alt="" class="lp-logo" style="width:64px;height:auto;flex:none"></picture>
 <div style="min-width:0">
 <div class="lp-brand" style="font-family:var(--font-heading);font-weight:700;font-size:clamp(22px,2.4vw,32px);letter-spacing:-0.02em;line-height:1">{{ brand }}</div>
 <div class="lp-tag" style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--s-mute);margin-top:8px">{{ ui.lpTag }}</div>
@@ -1296,7 +1296,7 @@
 </header>
 <section class="lp-hero" style="flex:none;position:relative;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:48px;align-items:center;padding:clamp(40px,6vw,88px) clamp(20px,4vw,64px) clamp(40px,5vw,72px)">
 <div data-m="aurora" style="position:absolute;inset:0"></div>
-<img src="./assets/hero-globe.png" alt="" class="lp-hero-img" style="position:absolute;top:0;right:0;width:62%;height:100%;object-fit:cover;object-position:right top;opacity:0.45;-webkit-mask-image:linear-gradient(to right,transparent,#000 40%),linear-gradient(to bottom,#000 55%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 40%),linear-gradient(to bottom,#000 55%,transparent);mask-composite:intersect;pointer-events:none">
+<picture style="display:contents"><source type="image/webp" srcset="./assets/hero-globe.webp"><img src="./assets/hero-globe.png" alt="" class="lp-hero-img" style="position:absolute;top:0;right:0;width:62%;height:100%;object-fit:cover;object-position:right top;opacity:0.45;-webkit-mask-image:linear-gradient(to right,transparent,#000 40%),linear-gradient(to bottom,#000 55%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 40%),linear-gradient(to bottom,#000 55%,transparent);mask-composite:intersect;pointer-events:none"></picture>
 <div style="position:relative;display:flex;flex-direction:column;min-width:0">
 <h1 data-m="split" style="margin:0;font-family:var(--font-heading);font-weight:800;font-size:clamp(36px,4.8vw,68px);letter-spacing:-0.035em;line-height:1.04;text-wrap:balance">{{ ui.lpH1a }} <span data-m="shine" style="color:var(--color-accent)">{{ ui.lpH1b }}</span></h1>
 <ul data-m="rise" style="margin:28px 0 0;padding:0;list-style:none;display:grid;gap:14px;max-width:560px">
@@ -1312,7 +1312,7 @@
 <div data-m="rise" class="lp-mock" style="position:relative;width:min(100%,340px);border:1px solid #3A3A3E;border-radius:34px;background:#0F0F11;padding:14px;box-shadow:0 30px 80px rgba(0,0,0,0.6),0 0 0 6px #18181B">
 <div style="height:22px;display:flex;justify-content:center;align-items:center"><div style="width:90px;height:6px;border-radius:3px;background:#26262A"></div></div>
 <div data-m="reveal" style="margin-top:8px;padding:12px 14px;border-radius:16px;background:rgba(40,40,44,0.92);border:1px solid #3A3A3E;display:flex;gap:12px;align-items:flex-start">
-<img src="./assets/aa-logo.png" alt="" style="width:30px;height:auto;flex:none;margin-top:2px">
+<picture style="display:contents"><source type="image/webp" srcset="./assets/aa-logo-64.webp 1x, ./assets/aa-logo-128.webp 2x"><img src="./assets/aa-logo.png" alt="" style="width:30px;height:auto;flex:none;margin-top:2px"></picture>
 <div style="min-width:0;flex:1"><div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--s-mute)"><span style="font-weight:700;letter-spacing:0.06em;text-transform:uppercase">Market Pulse</span><span>{{ ui.lpMockNow }}</span></div>
 <div style="font-family:var(--font-heading);font-weight:700;font-size:13px;margin-top:3px">{{ ui.lpMockAlertT }}</div><div style="font-size:12px;color:#B5B5B8;margin-top:2px">{{ ui.lpMockAlertD }}</div></div>
 </div>
@@ -1401,7 +1401,7 @@
 <div data-m="fade" onClick="{{ closeAuth }}" style="position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.6);display:flex;justify-content:flex-end">
 <div data-m="slide" onClick="{{ stopProp }}" role="dialog" aria-modal="true" aria-label="{{ ui.authKicker }}" class="auth-panel" style="width:min(100%,460px);height:100%;overflow-y:auto;box-sizing:border-box;background:var(--s-bg);border-left:1px solid var(--s-rule);padding:36px">
 <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
-<img src="./assets/aa-logo.png" alt="" style="width:44px;height:auto">
+<picture style="display:contents"><source type="image/webp" srcset="./assets/aa-logo-64.webp 1x, ./assets/aa-logo-128.webp 2x"><img src="./assets/aa-logo.png" alt="" style="width:44px;height:auto"></picture>
 <span style="font-family:var(--font-heading);font-weight:700;font-size:18px">{{ brand }}</span>
 <button onClick="{{ closeAuth }}" style="margin-left:auto;min-height:44px;padding:0 4px;background:transparent;border:0;color:var(--s-mute);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer" style-hover="color:var(--color-accent)">{{ ui.lpClose }}</button>
 </div>
@@ -1732,10 +1732,12 @@ class Component extends DCLogic {
     q.forEach(f => f());
     if (pendingAuth) { const p = pendingAuth; pendingAuth = null; this.applyAuthSession(p.sess); }
   }
-  persist() {
+  persist(force = false) {
     // A deleted account leaves nothing behind on the device (accountDeleted).
     if (this._gone || !this.restoreLate()) return;
     const S = window.HIFStore;
+    if (!force && this._persistRefs && PERSIST.every(k => this._persistRefs[k] === this.state[k])) return;
+    this._persistRefs = Object.fromEntries(PERSIST.map(k => [k, this.state[k]]));
     const out = {};
     PERSIST.forEach(k => { if (this.state[k] !== undefined) out[k] = this.state[k]; });
     S.write(STORE_KEY, out);
@@ -1758,6 +1760,8 @@ class Component extends DCLogic {
     this.watchScheme();
     this.touch();
     this._onAct = () => this.touch();
+    this._persistHide = () => this.persist(true);
+    window.addEventListener('pagehide', this._persistHide);
     this._events = ['pointerdown','keydown','wheel','touchstart'];
     this._events.forEach(e => window.addEventListener(e, this._onAct, true));
     this._idle = setInterval(() => {
@@ -1770,6 +1774,7 @@ class Component extends DCLogic {
   }
   stopIdleWatch() {
     clearInterval(this._idle);
+    if(this._persistHide) window.removeEventListener('pagehide',this._persistHide);
     (this._events || []).forEach(e => window.removeEventListener(e, this._onAct, true));
   }
   // Syntax per RFC 5321 limits (dot-atom local part, LDH domain labels, alphabetic
@@ -2161,7 +2166,7 @@ class Component extends DCLogic {
       if (this.state.feedTab === 'bvb' && !this._bvbAsked) { this._bvbAsked = true; this.syncBvb(); }
       if (this.state.feedTab === 'eu' && !this._euAsked) { this._euAsked = true; this.syncEu(); }
     }
-    if (this.state.screen === 'policy' && this.state.session) { this.syncPolicy(); this.syncImpact(); }
+    if (this.state.screen === 'policy' && this.state.session) { if(window.HIFPolicy&&window.HIFImpactClient){this.syncPolicy();this.syncImpact();}else this.loadPolicyModules(); }
     const pfSig = this.state.screen === 'portfolio' ? (this.state.pfRange || '1mo') + '|' + held : '';
     if (pfSig && pfSig !== this._pfSig) this.syncPortfolioCharts();
     this._pfSig = pfSig;
@@ -2293,7 +2298,7 @@ class Component extends DCLogic {
   // concerns the reader.
   policyView(u, screen) {
     const s = this.state, P = window.HIFPolicy, lang = String(this.appLang || 'EN').toLowerCase();
-    if (screen !== 'policy' || !P) return { isPolicy: screen === 'policy' };
+    if (screen !== 'policy' || !P) return { isPolicy: screen === 'policy',polLoading:screen==='policy'&&!s.policyErr,polHasError:!!s.policyErr,polError:s.policyErr||'' };
     const rows = s.policyRows || [], follows = s.follows || [], positions = s.positions || {};
     const mine = !!s.policyMine;
     const set = patch => this.setState(Object.assign({ policyRows: null }, patch));
@@ -2563,6 +2568,12 @@ class Component extends DCLogic {
   }
   // Phase C data: the analyses (once), one analysis' results, accuracy and figures when it is
   // opened, the exposure counts when the Companies tab opens, one company's figures.
+  loadPolicyModules(){
+    if(this._policyModules)return;
+    this._policyModules=Promise.all([this.loadScriptOnce('../shared/hif-policy.js'),this.loadScriptOnce('../shared/hif-scenario.js')])
+      .then(()=>this.loadScriptOnce('../shared/hif-impact.js')).then(()=>this.loadScriptOnce('../shared/hif-impact-client.js'))
+      .then(()=>this.forceUpdate()).catch(()=>this.setState({policyErr:this.copy.impError||'Could not load'}));
+  }
   syncImpact() {
     const C = window.HIFImpactClient, s = this.state;
     if (!flagOn('impact') || !C || !s.session) return;
@@ -2573,6 +2584,13 @@ class Component extends DCLogic {
         .catch(() => { this._impAsk = false; this.setState({ impRows: [], impErr: err() }); });
     }
     const sel = s.impSel, row = sel && s.impRows && s.impRows.find(a => a.id === sel.id && a.version === sel.version);
+    if(row && row.bodyLoaded===false){
+      const key=row.id+':'+row.version;this._bodyAsked=this._bodyAsked||{};
+      if(!this._bodyAsked[key]){this._bodyAsked[key]=true;C.load(C.query.analysis(row.id,row.version)).then(rows=>{
+        if(!rows?.[0])throw Error('Missing analysis');
+        this.setState(st=>({impRows:st.impRows.map(a=>a.id===row.id&&a.version===row.version?{...a,...rows[0],bodyLoaded:true}:a)}));
+      }).catch(()=>this.setState({impErr:err()}));}return;
+    }
     if (row) {
       const key = row.id + ':' + row.version;
       if (!(s.impRes || {})[key] && this._impResKey !== key) {
@@ -2690,7 +2708,7 @@ class Component extends DCLogic {
     // Bucharest listings: the filings kept in Supabase (years of them, with figures).
     const P = window.HIFPush;
     if (/\.RO$/.test(symbol) && P && P.loadFilings) {
-      P.loadFilings(symbol).then(rows => this.setState(st => ({ roFilings: Object.assign({}, st.roFilings, { [symbol]: rows || false }) })))
+      Promise.all([P.loadFilings(symbol),P.loadFilingFigures(symbol)]).then(([page,figures]) => this.setState(st => ({ roFilings: Object.assign({},st.roFilings,{[symbol]:figures||[]}),roFilingDocs:Object.assign({},st.roFilingDocs,{[symbol]:page.rows}),roFilingMore:Object.assign({},st.roFilingMore,{[symbol]:page.hasMore}) })))
         .catch(() => this.setState(st => ({ roFilings: Object.assign({}, st.roFilings, { [symbol]: false }) })));
       if (P.loadReportDates) P.loadReportDates(symbol).then(rows => this.setState(st => ({ roDates: Object.assign({}, st.roDates, { [symbol]: rows || [] }) }))).catch(() => {});
     }
@@ -2698,6 +2716,12 @@ class Component extends DCLogic {
     if (!L || !L.filings) return;
     L.filings(symbol).then(f => this.setState(st => ({ liveFilings: Object.assign({}, st.liveFilings, { [symbol]: f || false }) })))
       .catch(() => this.setState(st => ({ liveFilings: Object.assign({}, st.liveFilings, { [symbol]: false }) })));
+  }
+  async moreFilings(symbol){
+    if(this._moreFilings)return;this._moreFilings=true;
+    try{const docs=(this.state.roFilingDocs||{})[symbol]||[];const page=await window.HIFPush.loadFilings(symbol,{offset:docs.length,limit:120});
+      this.setState(st=>({roFilingDocs:{...st.roFilingDocs,[symbol]:[...new Map([...docs,...page.rows].map(r=>[r.id,r])).values()]},roFilingMore:{...st.roFilingMore,[symbol]:page.hasMore}}));
+    }catch{this.flash(this.copy.impError||'Could not load');}finally{this._moreFilings=false;}
   }
   liveSearch(q) {
     clearTimeout(this._search);
@@ -3669,6 +3693,9 @@ class Component extends DCLogic {
       if (this._lcKey !== key || !this._lc) return;
       // A hidden tab waits; it catches up when it is shown again.
       if (document.hidden) return this.pollLiveChart(key);
+      const R = window.HIFRefresh;
+      if (R && !R.shouldRefresh({ hidden:document.hidden, lastActivity:this._lastAct || 0, lastRefresh:this._lcLastFetch || this.state.lcLast || 0, now:Date.now(), symbols:[this.state.selected], minIntervalMs:every })) return this.pollLiveChart(key);
+      this._lcLastFetch=Date.now();
       const s = this.state, iv = s.lcIv || '5m', intraday = !/^1(d|wk|mo)$/.test(iv);
       window.HIFLive.candles(s.selected, iv, intraday).then(data => {
         if (this._lcKey !== key || !this._lc || !data) return;
@@ -4104,7 +4131,7 @@ class Component extends DCLogic {
           accent:'var(--s-mute)' });
     // --- Bucharest filings: tables by kind, years of history ---------------------
     const RF = (s.roFilings || {})[stock.ticker];
-    const roF = Array.isArray(RF) && RF.length > 0;
+    const roF = Array.isArray(RF) && (RF.length > 0 || ((s.roFilingDocs||{})[stock.ticker]||[]).length > 0);
     const fx = (() => {
       if (!roF) return null;
       const loc = this.appLocale;
@@ -4117,7 +4144,8 @@ class Component extends DCLogic {
       const link = (text, url) => cell(text, { url: webUrl(url), hasUrl: !!webUrl(url), noUrl: !webUrl(url), accent:'var(--s-ink)' });
       const docCell = r => link(u.fDocOpen || 'PDF', r.url);
       const kindName = k => (u['fk_' + k] || k);
-      const all = RF.slice();
+      const all = RF.slice(), docs=(s.roFilingDocs||{})[stock.ticker]||all;
+      const hasMoreDocs=!!(s.roFilingMore||{})[stock.ticker];
       // Management dealings: one row per transaction.
       const ins = [];
       all.filter(r => r.kind === 'insider' && r.data && Array.isArray(r.data.transactions)).forEach(r => r.data.transactions.forEach(t => ins.push({ r, t, d: t.date || dayOf(r) })));
@@ -4161,23 +4189,22 @@ class Component extends DCLogic {
           return { cells: [cell(dfmt(d.date || dayOf(r))), cell(d.holder, { weight:'600' }), cell(d.before_pct == null ? '—' : n0(d.before_pct, 2) + '%', { right:true }),
             cell(n0(d.after_pct, 2) + '%', { right:true, weight:'600', accent: up || d.before_pct == null ? 'var(--s-ink)' : 'var(--color-accent)' }), docCell(r)] }; }) };
       // Every document, newest first.
-      const shown = 60 + (s.filingsMore || 0);
       const docT = { title: u.fView_all, gridCols:'104px 150px minmax(240px,1fr) 150px', min:'640px',
         cols: [u.fDate, u.fKind, u.fTitle, u.fSource].map(l => ({ label:l, align:'left' })),
-        rows: all.slice(0, shown).map(r => ({ cells: [cell(dayOf(r) ? dfmt(dayOf(r)) : (u.fNoDate || '—')), cell(kindName(r.kind), { accent: r.kind === 'insider' || r.kind === 'holding' ? 'var(--color-accent)' : 'var(--s-mute)' }),
+        rows: docs.map(r => ({ cells: [cell(dayOf(r) ? dfmt(dayOf(r)) : (u.fNoDate || '—')), cell(kindName(r.kind), { accent: r.kind === 'insider' || r.kind === 'holding' ? 'var(--color-accent)' : 'var(--s-mute)' }),
           link(r.title, r.url), cell(r.source + (r.official === false ? ' · ' + (u.sigPress || 'press') : ''), { accent:'var(--s-mute)' })] })) };
       const views = { all:[docT], insider:[insT], results:[resT], dividend:[divT, agmT], holding:[holdT] };
-      const counts = { all: all.length, insider: ins.length, results: res.length, dividend: divs.length + agms.length, holding: hold.length };
+      const counts = { all: docs.length, insider: ins.length, results: res.length, dividend: divs.length + agms.length, holding: hold.length };
       const view = views[s.filingsView] ? s.filingsView : 'all';
-      const years = all.map(dayOf).filter(Boolean).sort();
-      const pending = all.filter(r => ['insider', 'results', 'dividend', 'agm', 'holding'].includes(r.kind) && !r.extract_status).length;
+      const years = docs.map(dayOf).filter(Boolean).sort();
+      const pending = docs.filter(r => ['insider', 'results', 'dividend', 'agm', 'holding'].includes(r.kind) && !r.extract_status).length;
       const tables = views[view].map(t => Object.assign({}, t, { hasRows: t.rows.length > 0, noRows: !t.rows.length }));
       return {
         tabs: ['all', 'insider', 'results', 'dividend', 'holding'].map(k => ({ label: (u['fView_' + k] || k) + ' · ' + counts[k], on: view === k,
           bg: view === k ? 'var(--color-accent)' : 'transparent', ink: view === k ? 'var(--s-on-accent)' : 'var(--s-mute)', edge: view === k ? 'var(--color-accent)' : 'var(--s-rule)',
           pick: () => this.setState({ filingsView:k, filingsMore:0 }) })),
-        tables, more: view === 'all' && all.length > shown, moreLabel: u.fMore || 'Show more', showMore: () => this.setState({ filingsMore: (s.filingsMore || 0) + 120 }),
-        meta: (u.fCount || '{n} documents since {y}').replace('{n}', nfmt(all.length)).replace('{y}', years.length ? years[0].slice(0, 4) : '—'),
+        tables, more: view === 'all' && hasMoreDocs, moreLabel: u.fMore || 'Show more', showMore: () => this.moreFilings(stock.ticker),
+        meta: (u.fCount || '{n} documents since {y}').replace('{n}', nfmt(docs.length) + (hasMoreDocs ? '+' : '')).replace('{y}', years.length ? years[0].slice(0, 4) : '—'),
         pendingNote: pending ? (u.fPending || '{n} documents still being read for figures').replace('{n}', nfmt(pending)) : '', hasPending: pending > 0
       };
     })();

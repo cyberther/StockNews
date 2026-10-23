@@ -8,6 +8,7 @@
 // output repeats an environment value, and it serves paths in any case anyway.
 import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { greenBuild } from './green-build.mjs';
 import { publicConfig } from '../netlify/functions/_shared/public-config.js';
 
 const output = process.env.BUILD_OUT || 'dist';
@@ -92,4 +93,5 @@ if (cloudflare) {
     '<a href="StockNewsWeb.dc.html">Market Pulse</a>\n');
 }
 
+greenBuild(output);
 console.log(`Built ${cloudflare ? 'Cloudflare Pages' : 'Netlify'} bundle in ${output}`);

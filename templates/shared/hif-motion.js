@@ -37,6 +37,8 @@ let gsap = null, Lenis = null, started = false;
 
 // ---- styles for the CSS-only effects -------------------------------------------------
 const CSS = `
+[data-m-paused],[data-m-paused]::before,[data-m-paused]::after{animation-play-state:paused!important}
+
 @property --m-a{syntax:'<angle>';inherits:false;initial-value:0deg}
 [data-m~="spotlight"]{isolation:isolate}
 [data-m~="spotlight"]:not([style*="position"]){position:relative}
@@ -266,6 +268,7 @@ function marquee(el) {
 function tickMarquees(dt) {
   marquees.forEach(m => {
     if (!m.el.isConnected) { marquees.delete(m); return; }
+    if (m.el._mVisible === false || document.hidden || reduced()) return;
     const track = m.el.firstElementChild; if (!track) return;
     const copy = track.firstElementChild, dup = track.children[1];
     const half = copy ? copy.offsetWidth : 0, fits = half <= m.el.clientWidth;
@@ -307,6 +310,7 @@ function onPointer(e) {
 const SEL = '[data-m],[data-m-count],[data-m-flash]';
 function mount(el) {
   if (el._mSeen) return; el._mSeen = true;
+  if (/(?:aurora|marquee|smooth|shine|shimmer|beam)/.test(el.getAttribute('data-m') || '')) { trackedMotion.add(el); if(motionIO) motionIO.observe(el); }
   if (has(el, 'aurora')) aurora(el);
   if (has(el, 'marquee')) marquee(el);
   if (has(el, 'smooth')) smooth(el);
@@ -333,6 +337,7 @@ function mountAll(roots) {
     const g = groups.get(e.parentNode) || {}; (g[k] = g[k] || []).push(e); groups.set(e.parentNode, g);
   });
   groups.forEach(g => Object.keys(g).forEach(k => entrance(g[k], k)));
+  updateMotion();
 }
 
 let resizeQueued = false;
@@ -351,9 +356,32 @@ function onMutations(records) {
     });
   }
   if (added.length) mountAll(added);
+  else updateMotion();
   if (!resizeQueued && smoothers.size) { resizeQueued = true; requestAnimationFrame(() => { resizeQueued = false; resizeSmoothers(); }); }
 }
 
+// Decorative work is active only while its element is useful to the visible page.
+const trackedMotion=new Set();let motionIO=null,ticking=false;
+function onTick(time,deltaMs){
+ const dt=Math.min(.1,deltaMs/1000);
+ smoothers.forEach((l,el)=>{if(el._mVisible!==false&&!document.hidden&&!reduced())l.raf(time*1000);});
+ tickMarquees(dt);
+}
+function updateMotion(){
+ if(!gsap)return;
+ smoothers.forEach((l,el)=>{if(!el.isConnected||reduced()){l.destroy();smoothers.delete(el);}});
+ trackedMotion.forEach(el=>{
+  if(!el.isConnected){(el._mAurora||[]).forEach(t=>t.kill());if(motionIO)motionIO.unobserve(el);trackedMotion.delete(el);return;}
+  if(has(el,'smooth')&&!reduced())smooth(el);
+  const active=!document.hidden&&!reduced()&&el._mVisible!==false;
+  if(active&&el.hasAttribute('data-m-paused'))el.removeAttribute('data-m-paused');
+  else if(!active&&!el.hasAttribute('data-m-paused'))el.setAttribute('data-m-paused','');
+  (el._mAurora||[]).forEach(t=>t.paused(!active));
+ });
+ const wanted=!document.hidden&&!reduced()&&([...smoothers.keys()].some(el=>el.isConnected&&el._mVisible!==false)||[...marquees].some(m=>m.el.isConnected&&m.el._mVisible!==false&&m.el.firstElementChild?.firstElementChild?.offsetWidth>m.el.clientWidth));
+ if(wanted&&!ticking){gsap.ticker.add(onTick);ticking=true;}
+ if(!wanted&&ticking){gsap.ticker.remove(onTick);ticking=false;}
+}
 function start() {
   if (started) return true;
   gsap = window.gsap; Lenis = window.Lenis;
@@ -365,14 +393,13 @@ function start() {
     document.documentElement.classList.add('m-rv');
   }
   gsap.ticker.lagSmoothing(0);
-  gsap.ticker.add((time, deltaMs) => {
-    const dt = Math.min(0.1, deltaMs / 1000);
-    smoothers.forEach(l => l.raf(time * 1000));
-    tickMarquees(dt);
-  });
+  if ('IntersectionObserver' in window) motionIO = new IntersectionObserver(entries => { entries.forEach(e => { e.target._mVisible=e.isIntersecting; }); updateMotion(); });
+  document.addEventListener('visibilitychange',updateMotion);
+  if(reduceQ.addEventListener) reduceQ.addEventListener('change',updateMotion);
+  window.addEventListener('resize',updateMotion,{passive:true});
   document.addEventListener('pointermove', onPointer, { passive: true });
   new MutationObserver(onMutations).observe(document.body, { childList: true, subtree: true, characterData: true,
-    attributes: true, attributeFilter: ['data-m-key'], attributeOldValue: true });
+    attributes: true, attributeFilter: ['data-m-key','data-m-paused'], attributeOldValue: true });
   mountAll([document.body]);
   return true;
 }

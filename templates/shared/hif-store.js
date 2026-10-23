@@ -3,6 +3,7 @@
 // change invalidates old records instead of half-restoring them.
 (function(){
 const VERSION = 2;
+const serialized = new Map();
 function read(key) {
   try {
     const raw = localStorage.getItem(key);
@@ -23,7 +24,7 @@ function migrate(d) {
   return d;
 }
 function write(key, data) {
-  try { localStorage.setItem(key, JSON.stringify({ v:VERSION, d:data })); } catch (e) {}
+  try { const text = JSON.stringify({ v:VERSION, d:data }); if(serialized.get(key) === text && localStorage.getItem(key) === text) return; localStorage.setItem(key,text); serialized.set(key,text); } catch (e) {}
 }
 // Small, illustrative breach list — a prototype stand-in for a k-anonymity API call.
 const BREACHED = ['password','password1','passw0rd','123456','12345678','123456789','qwerty','qwerty123',

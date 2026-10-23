@@ -246,11 +246,31 @@ async function loadDigest(ticker, lang) {
 
 // A Bucharest listing's filings, kept for years (supabase/filings.sql), newest first, with
 // the figures the local model read from them (data) when it has.
-async function loadFilings(ticker) {
+const FILING_COLUMNS='id,url,title,published_at,first_seen,kind,source,official,extract_status';
+const FIGURE_KEYS=['transactions','period','period_end','consolidated','currency','revenue','revenue_prev','net_profit','net_profit_prev','ebitda','eps','revenue_metric','revenue_prev_metric','fiscal_year','fiscal_years','gross_dps','status','record_date','ex_date','payment_date','meeting_date','meeting_type','decisions','dividend_dps','holder','before_pct','after_pct','date'];
+async function loadFilings(ticker, options = {}) {
   if (!live() || !ticker) return null;
-  const r = await auth().rest('filings?select=id,url,title,published_at,first_seen,kind,source,official,data,extract_status&ticker=eq.' +
-    encodeURIComponent(ticker) + '&order=published_at.desc.nullslast,first_seen.desc&limit=1000');
-  return r.ok && Array.isArray(r.body) ? r.body : null;
+  const limit=Math.min(120,Math.max(1,Number(options.limit)||60)),offset=Math.max(0,Math.floor(Number(options.offset)||0));
+  const r=await auth().rest('filings?select='+FILING_COLUMNS+'&ticker=eq.'+encodeURIComponent(ticker)+'&order=published_at.desc.nullslast,first_seen.desc,id.desc&limit='+(limit+1)+'&offset='+offset);
+  if(!r.ok||!Array.isArray(r.body))throw Error('filings unavailable');
+  return {rows:r.body.slice(0,limit),hasMore:r.body.length>limit};
+}
+async function loadFilingFigures(ticker) {
+  if(!live()||!ticker)return null;
+  const rows=[];
+  // Keyset pagination preserves the complete financial history without repeating large evidence blobs.
+  let last=0;
+  for(;;){
+    const q='filings?select='+FILING_COLUMNS+','+FIGURE_KEYS.map(k=>k+':data->'+k).join(',')+'&ticker=eq.'+encodeURIComponent(ticker)+'&kind=in.(insider,results,dividend,agm,holding)&data=not.is.null&id=gt.'+last+'&order=id.asc&limit=500';
+    const r=await auth().rest(q);if(!r.ok||!Array.isArray(r.body))throw Error('filing figures unavailable');
+    for(const row of r.body){const data={};FIGURE_KEYS.forEach(k=>{if(row[k]!=null)data[k]=row[k];delete row[k];});rows.push({...row,data});}
+    if(r.body.length<500)return rows;
+    const next=Number(r.body.at(-1).id);if(!Number.isSafeInteger(next)||next<=last)throw Error('Non advancing filings cursor');last=next;
+  }
+}
+async function loadFilingEvidence(id){
+ if(!live()||!Number.isSafeInteger(Number(id))||Number(id)<1)return null;
+ const r=await auth().rest('filings?select=id,data&id=eq.'+Number(id)+'&limit=1');if(!r.ok)throw Error('filing evidence unavailable');return r.body?.[0]||null;
 }
 
 // A test alert to every device of the signed-in account (the scan function's test path):
@@ -301,5 +321,5 @@ async function saveDrawings(ticker, list) {
   return true;
 }
 
-window.HIFPush = { status, enable, disable, forget, policyAlerts, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadReportDates, loadStoriesById, testAlert, loadDrawings, saveDrawings, supported };
+window.HIFPush = { status, enable, disable, forget, policyAlerts, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadFilingFigures, loadFilingEvidence, loadReportDates, loadStoriesById, testAlert, loadDrawings, saveDrawings, supported };
 })();
