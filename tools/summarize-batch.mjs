@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { createSelectiveExtractor } from './filings-selective.mjs';
+import { retryRegistry } from './filings-retry.mjs';
 // AI news summaries, in batches, from a local model (LM Studio's OpenAI-compatible server).
 //
 // Each run asks Supabase for the stories without a summary in each chosen language (stories
@@ -39,8 +41,10 @@ import http from 'node:http';
 import zlib from 'node:zlib';
 import dns from 'node:dns';
 import net from 'node:net';
-import { ensureModel, pickThreads } from './lmstudio-model.mjs';
-import { runFilings } from './filings-extract.mjs';
+import { ensureModel, pickThreads, measureModelInput } from './lmstudio-model.mjs';
+import { runFilings, EXTRACTION_VERSION } from './filings-extract.mjs';
+import { runHistoricalAudit } from './filings-audit.mjs';
+import { createShadowObserver } from './filings-shadow.mjs';
 import { runCalendars } from './calendar-extract.mjs';
 
 const ENV_FILE = join(homedir(), '.config/market-pulse/summarizer.env');
@@ -586,9 +590,18 @@ const FILINGS_UA = 'Mozilla/5.0 (compatible; MarketPulseFilings/1.0; +https://gi
 // At night (00-07 in Bucharest) there is little news to summarize: more filings per run.
 const nightHour = () => Number(new Date().toLocaleString('en-GB', { hour: '2-digit', hour12: false, timeZone: 'Europe/Bucharest' })) < 7;
 // A run stops starting new filings after FILINGS_MINUTES, so the next run's summaries wait little.
-const filingsRun = () => runFilings(cfg.filings && nightHour() ? Math.max(cfg.filings, cfg.filingsNight) : cfg.filings, { cfg, rpc, postJson, httpGet, log, ua: FILINGS_UA,
-  deadline: Date.now() + cfg.filingsMinutes * 60_000,
-  allowed: url => allowedByRobots(url, 'marketpulsefilings') });
+const filingsRun = async () => {
+  const limit = cfg.filings && nightHour() ? Math.max(cfg.filings, cfg.filingsNight) : cfg.filings;
+  const deps = { cfg, rpc, postJson, httpGet, log, observe: createShadowObserver({ log }), selective: createSelectiveExtractor({ log }), ua: FILINGS_UA, extractionVersion: EXTRACTION_VERSION, pageAwareOcr: true,
+    measureInput: messages => measureModelInput({ model: cfg.model, messages, wsUrl: cfg.lmUrl.replace(/^http/, 'ws').replace(/\/v1$/, '') }),
+    deadline: Date.now() + cfg.filingsMinutes * 60_000,
+    allowed: url => allowedByRobots(url, 'marketpulsefilings') };
+  const audit = await runHistoricalAudit(limit, deps);
+  // While the finite historical audit waits, keep the existing priorities: Romanian
+  // news/digests/calendars first, historical filings next, other summaries afterwards.
+  if (audit.pending) return limit;
+  return runFilings(limit, { ...deps, retry: retryRegistry('/home/yoda/Documents/Codex/2026-10-22/inst/outputs/filings-retries.json') });
+};
 // Up to CALENDAR_LIMIT financial calendars' dates this run (more at night), within the same
 // FILINGS_MINUTES budget.
 const calendarRun = () => runCalendars(cfg.calendars && nightHour() ? Math.max(cfg.calendars, 6) : cfg.calendars, { cfg, rpc, postJson, httpGet, log, ua: FILINGS_UA,
