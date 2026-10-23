@@ -8,8 +8,8 @@ var CONFIG = {
   "currency": "RON",
   "trialDays": 14,
   "prices": {
-    "month": 29,
-    "year": 290
+    "month": 49,
+    "year": 490
   },
   "limits": {
     "free": {
@@ -71,6 +71,9 @@ var CONFIG = {
   "variants": {
     "month": null,
     "year": null
+  },
+  "founder": {
+    "seats": 200
   }
 };
 var root = typeof window !== 'undefined' ? window : globalThis;
@@ -82,6 +85,15 @@ function load(){
   if (!A || !A.rest) return Promise.resolve(null);
   return A.rest('rpc/my_plan', { method: 'POST', body: {} }).then(function(r){
     return r && r.ok && r.body && typeof r.body === 'object' ? r.body : null;
+  }).catch(function(){ return null; });
+}
+// The founder price: { seats, left } (counts only, supabase/billing.sql founder_offer), or null.
+function offer(){
+  var A = root.HIFAuth;
+  if (!A || !A.rest) return Promise.resolve(null);
+  return A.rest('rpc/founder_offer', { method: 'POST', body: {} }).then(function(r){
+    var b = r && r.ok && r.body;
+    return b && typeof b.seats === 'number' && typeof b.left === 'number' ? { seats: b.seats, left: b.left } : null;
   }).catch(function(){ return null; });
 }
 // A checkout link for the signed-in reader (supabase/functions/billing): only the interval is
@@ -100,5 +112,5 @@ function checkout(interval){
       }); });
   }).catch(function(){ return { error: 'checkout failed' }; });
 }
-root.HIFBilling = Object.assign(root.HIFBilling || {}, { CONFIG: CONFIG, limits: limits, load: load, checkout: checkout });
+root.HIFBilling = Object.assign(root.HIFBilling || {}, { CONFIG: CONFIG, limits: limits, load: load, offer: offer, checkout: checkout });
 })();

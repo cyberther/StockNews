@@ -927,11 +927,18 @@
 <div style="text-align:right;font-family:var(--font-heading);font-weight:800;font-size:14px">{{ p.pro }}</div>
 </div>
 </sc-for>
+<sc-if value="{{ payFounder }}" hint-placeholder-val="{{ true }}"><div style="margin-top:24px;border-left:3px solid var(--color-accent);padding:4px 0 4px 14px">
+<div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--color-accent);font-weight:800">{{ payFounderTitle }}</div>
+<div style="font-size:13px;margin-top:6px;max-width:60ch;line-height:1.5">{{ payFounderNote }}</div>
+<sc-if value="{{ payFounderLeft }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--s-mute);margin-top:4px">{{ payFounderLeft }}</div></sc-if>
+<sc-if value="{{ payFounderFull }}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size:13px;margin-top:6px;max-width:60ch;line-height:1.5">{{ ui.payFounderFull }}</div></sc-if>
+</div></sc-if>
 <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 28px;margin-top:24px">
 <div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:40px;letter-spacing:-0.04em;line-height:1">{{ payMonthPrice }}</div><div style="font-size:13px;color:var(--s-mute)">{{ payMonthUnit }}</div></div>
 <div style="display:flex;align-items:baseline;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:28px;letter-spacing:-0.03em;line-height:1">{{ payYearPrice }}</div><div style="font-size:13px;color:var(--s-mute)">{{ payYearUnit }}</div></div>
 </div>
 <div style="font-size:13px;color:var(--s-mute);margin-top:8px;max-width:60ch">{{ payTrialNote }}</div>
+<div style="font-size:13px;color:var(--s-mute);margin-top:4px;max-width:60ch">{{ payRenewNote }} {{ payVatNote }}</div>
 <sc-if value="{{ payTestOn }}" hint-placeholder-val="{{ false }}"><div role="note" style="margin-top:14px;border:1px dashed var(--color-accent);padding:8px 12px;font-size:12px;color:var(--color-accent)">{{ ui.payTest }}</div></sc-if>
 <sc-if value="{{ payOpen }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:18px">
 <button onClick="{{ payStartMonth }}" disabled="{{ payBusy }}" style="min-height:48px;padding:0 20px;background:var(--color-accent);border:0;color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:14px;cursor:pointer">{{ ui.payStartMonth }}</button>
@@ -2107,6 +2114,8 @@ class Component extends DCLogic {
       this.setState({ serverPlan:p.plan, pending: p.approved === false, pendingBusy:false, isAdmin: !!p.admin });
       // The plan as the server decides it (supabase/billing.sql), with its limits and renewal.
       if (window.HIFBilling && window.HIFBilling.load) window.HIFBilling.load().then(b => this.setState({ billingPlan: b })).catch(() => {});
+      // The founder price's seats left, for the paywall (counts only).
+      if (window.HIFBilling && window.HIFBilling.offer) window.HIFBilling.offer().then(o => this.setState({ founderOffer: o })).catch(() => {});
       if (p.admin) {
         this.loadAdmin();
         // A tapped "new account" alert opens …#admin.
@@ -2957,11 +2966,19 @@ class Component extends DCLogic {
       this.setState({ payBusy: true, payErr: '' });
       B.checkout(interval).then(r => {
         if (r.url) { window.location.href = r.url; return; }
-        this.setState({ payBusy: false, payErr: r.error === 'sales are not open yet' ? u.payClosed : (u.payFailed || 'Could not start the checkout.') });
+        const known = { 'sales are not open yet': u.payClosed, 'founder seats taken': u.payFounderFull, 'already subscribed': u.payAlready };
+        this.setState({ payBusy: false, payErr: known[r.error] || u.payFailed || 'Could not start the checkout.' });
+        if (r.error === 'founder seats taken' && B.offer) B.offer().then(o => this.setState({ founderOffer: o })).catch(() => {});
       });
     };
+    // The founder price (config/billing.json founder): the seats and what is left, as the server counts them.
+    const F = C.founder || null, o = s.founderOffer, full = !!(F && o && o.left <= 0);
+    const fill = t => String(t || '').replace('{n}', F ? F.seats : '').replace('{m}', nf(C.prices.month || 0)).replace('{y}', nf(C.prices.year || 0));
     return { payMonthPrice: nf(C.prices.month || 0), payMonthUnit: u.payMonthUnit, payYearPrice: nf(C.prices.year || 0), payYearUnit: u.payYearUnit,
-      payTrialNote: (u.payTrial || '').replace('{n}', C.trialDays || 0), payTestOn: !!C.testMode, payOpen: open, payClosed: !open,
+      payTrialNote: (u.payTrial || '').replace('{n}', C.trialDays || 0), payTestOn: !!C.testMode, payOpen: open && !full, payClosed: !open,
+      payFounder: !!F, payFounderTitle: fill(u.payFounderTitle), payFounderNote: fill(u.payFounderNote),
+      payFounderLeft: F && o && !full ? String(u.payFounderLeft || '').replace('{k}', nf(o.left)).replace('{n}', nf(o.seats)) : '',
+      payFounderFull: full, payRenewNote: fill(u.payRenew), payVatNote: u.payVat || '',
       payBusy: !!s.payBusy, payErr: s.payErr || '', payStartMonth: go('month'), payStartYear: go('year') };
   }
   alertVals(u) {
@@ -4857,7 +4874,8 @@ class Component extends DCLogic {
         if (b.source === 'manual' && !b.period_end) return u.planSourceManual;
         if (!b.period_end) return '';
         const d = new Date(b.period_end).toLocaleDateString(this.appLocale, { day:'numeric', month:'long', year:'numeric' });
-        return (b.status === 'cancelled' || b.status === 'past_due' ? u.planEndsOn : b.status === 'trialing' ? u.planTrialUntil : u.planRenews).replace('{d}', d); })(),
+        const when = (b.status === 'cancelled' || b.status === 'past_due' ? u.planEndsOn : b.status === 'trialing' ? u.planTrialUntil : u.planRenews).replace('{d}', d);
+        return b.founder ? (u.planFounder || 'Founder') + ' · ' + when : when; })(),
       hasPlanPeriod: !!(s.billingPlan && s.billingPlan.commercial && (s.billingPlan.period_end || s.billingPlan.source === 'manual')),
       pushRow: (() => {
         const dp = s.devicePush || 'unavailable';

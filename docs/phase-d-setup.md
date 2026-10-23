@@ -22,10 +22,18 @@ Cât timp sunt oprite, orice cont aprobat are acces complet, ca înainte.
 ## Lemon Squeezy, în Test mode (fără costuri)
 1. Cont pe [lemonsqueezy.com](https://www.lemonsqueezy.com), magazin nou. Comutatorul **Test mode** rămâne pornit.
 2. **Products → New product** „Market Pulse Pro”, abonament, cu două variante:
-   - **Lunar:** 29 RON (sau 6 €, dacă magazinul nu are RON), cu perioadă de probă de 14 zile;
-   - **Anual:** 290 RON (sau 60 €), cu aceeași perioadă de probă.
+   - **Lunar, fondator:** 49 RON, cu perioadă de probă de 14 zile;
+   - **Anual, fondator:** 490 RON, cu aceeași perioadă de probă.
+
+   Prețul trebuie să fie **final, cu TVA inclus** (Settings → Taxes: prețuri cu taxa inclusă), pentru că aplicația
+   afișează „Prețuri finale, cu TVA inclus”. Prețul unei variante de fondator nu se schimbă niciodată: e prețul
+   garantat. Un preț nou pentru abonații de după fondatori va fi o variantă nouă.
 
    Notează **ID-ul magazinului** și **ID-urile celor două variante** (Settings → Stores; în pagina variantei).
+   Variantele de fondator se declară și în baza de date, ca serverul să numere locurile (200, din
+   `config/billing.json`):
+   `update public.app_config set value = '["<id lunar>", "<id anual>"]' where key = 'founder_variants';`.
+   Fără ele, checkout-ul răspunde „billing is not configured”.
 3. **Settings → API → New key**. Cheia de test se afișează o singură dată.
 4. **Settings → Webhooks → New webhook**:
    - URL: `https://vadfmyqdpkddsobbmgsr.supabase.co/functions/v1/billing?action=webhook`;

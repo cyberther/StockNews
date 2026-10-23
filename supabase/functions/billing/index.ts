@@ -10,7 +10,8 @@
 //   supabase functions deploy billing --no-verify-jwt
 // Secrets (`supabase secrets set`, never in the repo or the browser):
 //   LEMONSQUEEZY_API_KEY, LEMONSQUEEZY_WEBHOOK_SECRET, LEMONSQUEEZY_STORE_ID,
-//   LEMONSQUEEZY_VARIANT_MONTH, LEMONSQUEEZY_VARIANT_YEAR, LEMONSQUEEZY_TEST_MODE ('true' while testing),
+//   LEMONSQUEEZY_VARIANT_MONTH, LEMONSQUEEZY_VARIANT_YEAR (the founder prices, also listed in
+//   app_config.founder_variants), LEMONSQUEEZY_TEST_MODE ('true' while testing),
 //   LEGAL_REVIEWED ('true' only after the legal check), APP_URL (where the reader returns).
 import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
 import { verifySignature, bodyHash, checkoutRequest, checkoutUrl } from './lemon.js';
@@ -57,6 +58,17 @@ Deno.serve(async (req: Request) => {
     if (authErr || !who || !who.user) return answer(req, { error: 'sign in required' }, 401);
     const { data: st } = await db.from('account_status').select('approved,suspended').eq('user_id', who.user.id).maybeSingle();
     if (!st || !st.approved || st.suspended) return answer(req, { error: 'account not approved' }, 403);
+    // One subscription per account: an active one is managed from the Account screen.
+    const { data: subs } = await db.from('entitlements').select('status,current_period_end')
+      .eq('user_id', who.user.id).eq('source', 'payment');
+    if ((subs || []).some((e: { status: string; current_period_end: string | null }) =>
+      ['trialing', 'active', 'past_due'].includes(e.status) && e.current_period_end && Date.parse(e.current_period_end) > Date.now()))
+      return answer(req, { error: 'already subscribed' }, 409);
+    // The founder price: a seat is held (two hours) before the provider is asked for a checkout.
+    const { data: seat, error: seatErr } = await db.rpc('founder_claim', { p_user: who.user.id, p_variant: variantId });
+    if (seatErr) return answer(req, { error: 'checkout failed' }, 502);
+    if (seat === 'full') return answer(req, { error: 'founder seats taken' }, 409);
+    if (seat !== 'ok') return answer(req, { error: 'billing is not configured' }, 503);
     const appUrl = (env('APP_URL') || 'https://www.marketpulse.ro/').replace(/#.*$/, '');
     const { url, init } = checkoutRequest({ apiKey, storeId, variantId, userId: who.user.id, email: who.user.email,
       testMode: env('LEMONSQUEEZY_TEST_MODE') !== 'false', redirectUrl: appUrl + '#account' });

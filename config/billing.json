@@ -3,7 +3,8 @@
   "testMode": true,
   "currency": "RON",
   "trialDays": 14,
-  "prices": { "month": 29, "year": 290 },
+  "prices": { "month": 49, "year": 490 },
+  "founder": { "seats": 200 },
   "limits": {
     "free": { "tickers": 5, "positions": 5 },
     "pro": { "tickers": 100, "positions": 100 }
