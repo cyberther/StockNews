@@ -549,6 +549,7 @@
 <sc-if value="{{ e.hasSectors }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-ink)">{{ e.sectors }}</div></sc-if>
 <sc-if value="{{ e.hasCompanies }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute)">{{ e.companies }}</div></sc-if>
 <sc-if value="{{ e.hasConcerns }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;border-left:2px solid var(--color-accent);padding-left:8px"><span style="font-family:var(--font-heading);font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-accent)">{{ ui.polConcerns }}:</span> {{ e.concerns }}</div></sc-if>
+<sc-if value="{{ e.showUpsell }}" hint-placeholder-val="{{ false }}"><div role="note" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:13px;background:var(--s-panel);padding:10px 12px;max-width:80ch"><span style="flex:1 1 280px;line-height:1.45">{{ e.upsellText }}</span><span style="display:flex;gap:8px"><button onClick="{{ e.upsellSee }}" style="min-height:32px;padding:0 12px;border:0;background:var(--color-accent);color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.upsellSee }}</button><button onClick="{{ e.upsellLater }}" style="min-height:32px;padding:0 12px;border:1px solid var(--s-rule);background:transparent;color:var(--s-mute);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.upsellLater }}</button></span></div></sc-if>
 <sc-if value="{{ e.hasAi }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;max-width:80ch;border-left:2px dashed var(--s-rule);padding-left:8px">{{ e.aiSummary }} <span style="font-size:11px;color:var(--s-mute)">({{ e.aiLabel }})</span></div></sc-if>
 <sc-if value="{{ e.hasSheetSummary }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;max-width:80ch;border-left:2px dashed var(--s-rule);padding-left:8px"><span style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--s-mute)">{{ ui.polSheetSummary }}:</span> {{ e.sheetSummary }}</div></sc-if>
 <sc-if value="{{ e.hasSheetDocs }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px"><span style="color:var(--s-mute)">{{ ui.polDocs }}:</span><sc-for list="{{ e.sheetDocs }}" as="d" hint-placeholder-count="1"><a href="{{ d.url }}" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent)">{{ d.label }}</a></sc-for></div></sc-if>
@@ -604,12 +605,15 @@
 <sc-for list="{{ impDAssumptions }}" as="a" hint-placeholder-count="2"><div style="font-size:13px;line-height:1.45;border-left:2px dashed var(--s-rule);padding-left:10px"><b>{{ a.label }}: {{ a.value }}</b> <span style="color:var(--s-mute);font-size:12px">({{ a.range }})</span><div style="color:var(--s-mute);font-size:12px">{{ a.why }}</div></div></sc-for>
 </section>
 <section style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase">3 · {{ ui.impResults }}</div><div style="font-size:12px;color:var(--s-mute)">{{ ui.impResultsNote }}</div>
+<sc-if value="{{ impDLocked }}" hint-placeholder-val="{{ false }}"><div role="note" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:13px;background:var(--s-panel);padding:12px;max-width:80ch"><span style="flex:1 1 280px;line-height:1.45">{{ ui.impLocked }}</span><button onClick="{{ impSeePro }}" style="min-height:32px;padding:0 12px;border:0;background:var(--color-accent);color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.upsellSee }}</button></div></sc-if>
+<sc-if value="{{ impDUnlocked }}" hint-placeholder-val="{{ true }}">
 <div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;min-width:480px;font-size:13px">
 <thead><tr><th style="text-align:left;padding:6px 8px;border-bottom:1px solid var(--s-rule);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)"></th><sc-for list="{{ impDScen }}" as="h" hint-placeholder-count="3"><th style="text-align:right;padding:6px 8px;border-bottom:1px solid var(--s-rule);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ h.label }}</th></sc-for></tr></thead>
 <tbody><sc-for list="{{ impDResults }}" as="r" hint-placeholder-count="3"><tr><td style="padding:6px 8px;border-bottom:1px solid var(--s-rule)">{{ r.label }}</td><sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="3"><td style="padding:6px 8px;border-bottom:1px solid var(--s-rule);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap">{{ c.v }}</td></sc-for></tr></sc-for></tbody>
 </table></div>
 <div><button onClick="{{ impToggleFormula }}" aria-expanded="{{ impDFormulaOpen }}" style="min-height:30px;padding:0 10px;border:1px solid var(--s-rule);background:transparent;color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.impFormula }}</button></div>
 <sc-if value="{{ impDFormulaOpen }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ impDFormulas }}" as="f" hint-placeholder-count="3"><div style="font-size:12px"><div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ f.label }}</div><div style="white-space:pre-wrap;font-family:ui-monospace,monospace;background:var(--s-panel);padding:8px 10px;overflow-x:auto">{{ f.text }}</div></div></sc-for></sc-if>
+</sc-if>
 </section>
 <section style="padding:16px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:8px"><div style="font-family:var(--font-heading);font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase">4 · {{ ui.impRisks }}</div>
 <sc-for list="{{ impDRisks }}" as="r" hint-placeholder-count="2"><div style="font-size:13px"><span style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ r.kind }}:</span> {{ r.text }}</div></sc-for>
@@ -2316,6 +2320,10 @@ class Component extends DCLogic {
   // What the Policy screen shows: filters, and the events by day, each with its fixed status
   // label, source, certainty, sectors, companies (and why they are linked) and whether it
   // concerns the reader.
+  policyUpsellHidden() {
+    if (this.state.policyUpsellOff) return true;
+    try { const at = Number(localStorage.getItem('mp.policyUpsell')); return at > 0 && Date.now() - at < 14 * 864e5; } catch (e) { return false; }
+  }
   policyView(u, screen) {
     const s = this.state, P = window.HIFPolicy, lang = String(this.appLang || 'EN').toLowerCase();
     if (screen !== 'policy' || !P) return { isPolicy: screen === 'policy',polLoading:screen==='policy'&&!s.policyErr,polHasError:!!s.policyErr,polError:s.policyErr||'' };
@@ -2348,6 +2356,17 @@ class Component extends DCLogic {
         ...this.sheetFields(u, (s.policySheets || {})[e.id], !!byEvent[e.id]),
         hasAnalysis: !!byEvent[e.id], openAnalysis: () => byEvent[e.id] && this.setState({ polTab: 'analyses', impSel: { id: byEvent[e.id].id, version: byEvent[e.id].version } }) };
     }).filter(c => !mine || c.hasConcerns);
+    // On the Free plan, the first event that concerns the reader says once what Pro adds for it
+    // (alerts, the full analysis): at the moment it is useful, never as a pop-up; "Not now"
+    // hides it on this device for 14 days.
+    const up = this.plan === 'free' && !this.policyUpsellHidden() ? cards.find(c => c.hasConcerns) : null;
+    cards.forEach(c => { c.showUpsell = c === up; c.upsellText = ''; });
+    if (up) {
+      const names = [...new Set(up.hits.map(h => h.ticker.replace(/\.RO$/, '')))];
+      up.upsellText = String(u.polUpsell || '').replace('{t}', names.slice(0, 3).join(', ') + (names.length > 3 ? '…' : ''));
+      up.upsellSee = () => this.go('paywall');
+      up.upsellLater = () => { try { localStorage.setItem('mp.policyUpsell', String(Date.now())); } catch (e) {} this.setState({ policyUpsellOff: true }); };
+    }
     const days = [];
     cards.forEach(c => { const d = days[days.length - 1]; if (d && d.day === c.day) d.items.push(c); else days.push({ day: c.day, items: [c] }); });
     const fmtDay = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString(this.appLocale, { weekday:'short', day:'numeric', month:'long', year:'numeric', timeZone:'UTC' });
@@ -2470,6 +2489,8 @@ class Component extends DCLogic {
         impDSustain: ((A.budget || {}).recurring ? u.impRecurring : u.impTemporary) + '. ' + ((A.budget || {}).sustainability_note || ''),
         impDAssumptions: (A.assumptions || []).map(a => ({ key: a.key, label: a.label, value: show(a, a.value), why: a.why, range: u.impRange + ': ' + show(a, a.range[0]) + ' – ' + show(a, a.range[1]) })),
         impDScen: sc.map(k => ({ key: k, label: scLabel[k] })),
+        // Free plan: the model's results (and the calculator) are Pro; the facts and assumptions stay.
+        impDLocked: this.plan === 'free' && !fz, impDUnlocked: !(this.plan === 'free' && !fz), impSeePro: () => this.go('paywall'),
         impDResults: !fz ? [] : [
           { key: 'bal', label: u.impBalance + ' (' + u.impPerYear + ')', cells: cell(r => r.budget ? lei(r.budget.annual) : '—') },
           { key: 'gdp', label: '% ' + u.impOfGdp, cells: cell(r => r.budget ? pct(r.budget.annualPctGdp, 2) : '—') },
@@ -2483,7 +2504,7 @@ class Component extends DCLogic {
         impDFormulas: !fz ? [] : sc.map(k => ({ key: k, label: scLabel[k],
           text: C.localizeFormula([fz[k] && fz[k].budget ? fz[k].budget.formula : ''].concat(comps.map(t => fz[k] && fz[k][t] ? short(t) + '\n' + fz[k][t].formula : '')).filter(Boolean).join('\n\n'), lang) })),
         impDRisks: (A.risks || []).map((r, i) => ({ key: String(i), kind: u['impRisk_' + r.kind] || r.kind, text: r.text })),
-        impDCalc: comps.map(t => ({ key: t, label: u.impCalc + ': ' + short(t), url: '/calculator' + C.encodeHash(C.calcParams(A, t, fin)) })),
+        impDCalc: this.plan === 'free' ? [] : comps.map(t => ({ key: t, label: u.impCalc + ': ' + short(t), url: '/calculator' + C.encodeHash(C.calcParams(A, t, fin)) })),
         impDAccuracy: ((s.impAcc || {})[key] || []).map(r => ({ key: [r.scenario, r.subject, r.period].join(':'),
           text: (r.subject === 'budget' ? u.impBalance : short(r.subject)) + ' ' + r.period + ' (' + scLabel[r.scenario] + '): ' + u.impEstimated + ' ' + lei(Number(r.estimated)) + ', ' + u.impObserved + ' ' + lei(Number(r.observed))
             + (r.rel_error != null ? ' (' + pct(Number(r.rel_error) * 100) + ')' : '') + ' · ' + (r.direction ? u.impDirOk : u.impDirBad), url: r.source_url })),
