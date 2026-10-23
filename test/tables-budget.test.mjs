@@ -1,10 +1,21 @@
-import test from 'node:test';
+import test, { after } from 'node:test';
+import {mkdtempSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
 import assert from 'node:assert/strict';
 import {pdfText,compactDocument,answerBudget,runFilings} from '../tools/filings-extract.mjs';
 
+
+// The runner is mocked; supply only the installation paths checked before invoking it.
+const doclingDir = mkdtempSync(join(tmpdir(), 'test-docling-'));
+mkdirSync(join(doclingDir, 'runtime/bin'), { recursive: true });
+writeFileSync(join(doclingDir, 'runtime/bin/python'), 'fixture, never executed');
+writeFileSync(join(doclingDir, 'market-pulse-ocr.py'), '# fixture, never executed');
+after(() => rmSync(doclingDir, { recursive: true, force: true }));
+
 test('mixed PDF invokes OCR even when a different page has enough text',async()=>{
  let calls=0;
- const out=await pdfText(Buffer.from('fake'),8,{run:async(_,args)=>{
+ const out=await pdfText(Buffer.from('fake'),8,{doclingDir,run:async(_,args)=>{
   if(++calls===1)return {stdout:'Text financiar nativ. '.repeat(30)+'\f\f'};
   assert.ok(args.includes('--json'));
   return {stdout:JSON.stringify({text:'Pagina 2: 160,800 actiuni',pages:[{page:2,ocr:true,rotation:90}],pipeline:'page-ocr-v2',cache_hit:true})};
@@ -46,7 +57,7 @@ test('oversized documents are failed for review rather than silently sliced',asy
 
 test('damaged embedded OCR is replaced rather than trusted as native text',async()=>{
  let calls=0;
- const text=await pdfText(Buffer.from('fake'),8,{run:async()=>{
+ const text=await pdfText(Buffer.from('fake'),8,{doclingDir,run:async()=>{
   if(++calls===1)return {stdout:'Native text '.repeat(50)+'\ufffd\ufffd\ufffd'};
   return {stdout:JSON.stringify({text:'Repaired 321,600',pages:[],pipeline:'page-ocr-v2',cache_hit:false})};
  }});
@@ -54,8 +65,8 @@ test('damaged embedded OCR is replaced rather than trusted as native text',async
 });
 
 test('invalid OCR output and uncertain orientation do not return partial native text',async()=>{
- await assert.rejects(pdfText(Buffer.from('fake'),8,{run:async cmd=>cmd==='pdftotext'?{stdout:''}:{stdout:'not JSON'}}),{code:'OCR_INVALID_RESPONSE'});
- await assert.rejects(pdfText(Buffer.from('fake'),8,{run:async cmd=>{
+ await assert.rejects(pdfText(Buffer.from('fake'),8,{doclingDir,run:async cmd=>cmd==='pdftotext'?{stdout:''}:{stdout:'not JSON'}}),{code:'OCR_INVALID_RESPONSE'});
+ await assert.rejects(pdfText(Buffer.from('fake'),8,{doclingDir,run:async cmd=>{
   if(cmd==='pdftotext')return {stdout:''};
   throw Object.assign(new Error('conversion failed'),{stderr:'OrientationUncertain: text directions disagree'});
  }}),{code:'OCR_UNCERTAIN'});
