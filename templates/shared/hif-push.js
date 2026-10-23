@@ -264,7 +264,7 @@ async function loadFilingFigures(ticker) {
     const q='filings?select='+FILING_COLUMNS+','+FIGURE_KEYS.map(k=>k+':data->'+k).join(',')+'&ticker=eq.'+encodeURIComponent(ticker)+'&kind=in.(insider,results,dividend,agm,holding)&data=not.is.null&id=gt.'+last+'&order=id.asc&limit=500';
     const r=await auth().rest(q);if(!r.ok||!Array.isArray(r.body))throw Error('filing figures unavailable');
     for(const row of r.body){const data={};FIGURE_KEYS.forEach(k=>{if(row[k]!=null)data[k]=row[k];delete row[k];});rows.push({...row,data});}
-    if(r.body.length<500)return rows;
+    if(r.body.length<500)return rows.sort((a,b)=>String(b.published_at||'').localeCompare(String(a.published_at||''))||String(b.first_seen||'').localeCompare(String(a.first_seen||''))||Number(b.id)-Number(a.id));
     const next=Number(r.body.at(-1).id);if(!Number.isSafeInteger(next)||next<=last)throw Error('Non advancing filings cursor');last=next;
   }
 }
