@@ -29,6 +29,8 @@ test('a Cloudflare Pages build writes headers, redirects, routes and a static pu
     '/ /templates/stock-news-web/StockNewsWeb.dc 200',
     '/login /templates/stock-news-web/StockNewsWeb.dc 200',
     '/legal /templates/stock-news-web/legal 200',
+    '/metodologie /templates/stock-news-web/methodology 200',
+    '/methodology /templates/stock-news-web/methodology 200',
     '/calculator /templates/stock-news-web/intelligence 200',
     '/shared/* /templates/shared/:splat 200',
     '/assets/* /templates/stock-news-web/assets/:splat 200',

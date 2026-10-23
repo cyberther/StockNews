@@ -62,7 +62,8 @@ writeFileSync(join(output, '_headers'), [
 ].join('\n'));
 
 // Clean addresses (the same as netlify.toml's, which Netlify applies first): the app at / and
-// /login, the legal page at /legal, the scenario calculator at /calculator, all served in place
+// /login, the legal page at /legal, the methodology and accuracy page at /metodologie (and
+// /methodology), the scenario calculator at /calculator, all served in place
 // (200). The pages' relative files (./assets, ./support.js, ../shared/...) then resolve from the
 // site root, so those paths are served too. Cloudflare drops .html from page paths (and
 // redirects to the short form), so its targets are written without it.
@@ -71,6 +72,8 @@ writeFileSync(join(output, '_redirects'), [
   `/ ${page('StockNewsWeb.dc')} 200`,
   `/login ${page('StockNewsWeb.dc')} 200`,
   `/legal ${page('legal')} 200`,
+  `/metodologie ${page('methodology')} 200`,
+  `/methodology ${page('methodology')} 200`,
   `/calculator ${page('intelligence')} 200`,
   '/shared/* /templates/shared/:splat 200',
   '/assets/* /templates/stock-news-web/assets/:splat 200',

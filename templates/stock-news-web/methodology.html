@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Pulse · Metodologie și acuratețe</title>
+<meta name="description" content="Cum lucrează Market Pulse: surse oficiale, rezumate, analize de impact, ce nu facem, și unde ne-am înșelat.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#121212">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png">
+<!--
+  Market Pulse: how the data is gathered and checked, and the public record of accuracy
+  (supabase/transparency.sql), at /metodologie. Romanian (prevails) and English; German
+  readers get the English text, as on the legal page. The facts come from the code:
+  docs/impact-model.md, ingest/impact/auto-validate.mjs, LEGAL-SOURCES.md.
+-->
+<style>
+:root {
+  --bg:#121212; --panel:#1A1A1A; --rule:#333333; --ink:#F5F5F7; --mute:#A0A0A0; --accent:#D4AF37; --todo-bg:rgba(212,175,55,0.14);
+  --font: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root { --bg:#F7F6F4; --panel:#EDEBE7; --rule:#C9C5BE; --ink:#1A1A1A; --mute:#5F5A54; --accent:#8A6A12; --todo-bg:rgba(138,106,18,0.12); color-scheme: light; }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); font-size:16px; line-height:1.6; -webkit-text-size-adjust:100%; }
+a { color:var(--ink); text-decoration:underline; text-decoration-color:var(--rule); text-underline-offset:3px; }
+a:hover { color:var(--accent); text-decoration-color:currentColor; }
+a:focus-visible, button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.top { position:sticky; top:0; z-index:2; background:var(--bg); border-bottom:1px solid var(--rule); }
+.top-in { max-width:880px; margin:0 auto; padding:12px 16px; display:flex; align-items:center; gap:12px; }
+.brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:17px; letter-spacing:-0.02em; text-decoration:none; color:var(--ink); }
+.brand img { width:30px; height:auto; }
+.langs { margin-left:auto; display:flex; border:1px solid var(--rule); }
+.langs a { min-width:44px; min-height:36px; display:flex; align-items:center; justify-content:center; padding:0 10px; font-size:12px; font-weight:800; letter-spacing:0.08em; text-decoration:none; color:var(--mute); }
+.langs a[aria-current="true"] { background:var(--accent); color:var(--bg); }
+main { max-width:880px; margin:0 auto; padding:28px 16px 64px; }
+h1 { font-size:clamp(28px,5vw,40px); line-height:1.1; letter-spacing:-0.03em; margin:0; }
+.meta { color:var(--mute); font-size:13px; margin-top:10px; }
+.toc { display:flex; flex-wrap:wrap; gap:6px 18px; margin:20px 0 8px; padding:12px 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); }
+.toc a { display:inline-flex; align-items:center; min-height:36px; font-size:14px; font-weight:700; }
+section { padding-top:28px; }
+h2 { font-size:24px; letter-spacing:-0.02em; line-height:1.2; margin:12px 0 4px; }
+h3 { font-size:16px; margin:22px 0 4px; }
+p, li { max-width:70ch; text-wrap:pretty; }
+ul { padding-left:20px; }
+li { margin:4px 0; }
+.note { background:var(--panel); border-left:3px solid var(--accent); padding:12px 14px; margin:16px 0; max-width:70ch; }
+.todo { background:var(--todo-bg); color:var(--accent); padding:0 4px; font-style:normal; font-weight:700; }
+table { border-collapse:collapse; width:100%; font-size:14px; margin:12px 0; }
+th, td { text-align:left; vertical-align:top; padding:8px 10px 8px 0; border-bottom:1px solid var(--rule); }
+th { font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--mute); font-weight:700; }
+.wrap { overflow-x:auto; }
+form.contact { display:grid; gap:14px; max-width:560px; margin-top:12px; }
+form.contact label span { display:block; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--mute); margin-bottom:6px; }
+form.contact input, form.contact select, form.contact textarea { width:100%; min-height:46px; padding:10px 12px; background:var(--panel); border:1px solid var(--rule); color:var(--ink); font:inherit; font-size:16px; border-radius:0; }
+form.contact textarea { resize:vertical; min-height:140px; }
+form.contact input:focus, form.contact select:focus, form.contact textarea:focus { outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+form.contact button { justify-self:start; min-height:48px; padding:0 26px; background:var(--accent); color:var(--bg); border:0; font:inherit; font-weight:800; cursor:pointer; }
+form.contact button[disabled] { opacity:0.6; cursor:default; }
+form.contact .small { font-size:13px; color:var(--mute); margin:0; }
+form.contact .status { margin:0; font-size:14px; min-height:1.4em; }
+form.contact .status.err { color:var(--accent); }
+.hp { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
+footer { max-width:880px; margin:0 auto; padding:20px 16px 40px; border-top:1px solid var(--rule); color:var(--mute); font-size:13px; }
+@media (max-width:560px) { .brand span { display:none; } th, td { padding-right:8px; } }
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); border-top:1px solid var(--rule); border-left:1px solid var(--rule); margin:14px 0; }
+.stats div { border-right:1px solid var(--rule); border-bottom:1px solid var(--rule); padding:12px 14px; }
+.stats b { display:block; font-size:28px; letter-spacing:-0.02em; line-height:1.1; }
+.stats span { font-size:12px; color:var(--mute); }
+.ok { color:var(--accent); font-weight:700; }
+.bad { font-weight:700; }
+.live-wait { color:var(--mute); font-size:14px; }
+pre.f { white-space:pre-wrap; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; background:var(--panel); padding:10px 12px; overflow-x:auto; max-width:70ch; }
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+<a class="brand" href="/"><img src="./assets/aa-logo.png" alt=""><span>Market Pulse</span></a>
+<nav class="langs" aria-label="Limba / Language">
+<a href="?lang=ro" data-lang="ro" hreflang="ro">RO</a><a href="?lang=en" data-lang="en" hreflang="en">EN</a>
+</nav>
+</div></header>
+
+<main id="doc">
+<!-- Romanian: shown without JavaScript too (the live figures need it). -->
+<h1>Metodologie și acuratețe</h1>
+<p class="meta">Cum adunăm datele, cum facem rezumatele și analizele, ce nu facem, și unde ne-am înșelat. Ultima actualizare a textului: 23 octombrie 2026; cifrele de la „Acuratețe” vin direct din baza de date.</p>
+<nav class="toc" aria-label="Cuprins">
+<a href="#principles">Pe scurt</a><a href="#sources">Surse</a><a href="#summaries">Rezumate</a><a href="#policy">Politici</a><a href="#impact">Analize de impact</a><a href="#gains">Cine câștigă</a><a href="#accuracy">Acuratețe</a><a href="#limits">Limite</a>
+</nav>
+
+<section id="principles">
+<h2>Pe scurt</h2>
+<ul>
+<li><strong>Doar surse oficiale</strong> pentru legi, contracte și cifrele companiilor. Fiecare fapt are linkul spre documentul din care vine.</li>
+<li><strong>Ce e generat sau calculat automat e marcat</strong> ca atare: rezumatele făcute de modelul AI și analizele automate au fiecare eticheta lor și linkul spre sursă.</li>
+<li><strong>Nu facem recomandări</strong>: nici „cumpără” sau „vinde”, nici prețuri țintă, nici predicții de preț. Calculăm efectul contabil direct al unei măsuri, nu ce va face acțiunea.</li>
+<li><strong>Greșelile rămân publice</strong>: o analiză nu se modifică după publicare; o corectură e o versiune nouă, iar o analiză retrasă rămâne listată mai jos, cu motivul.</li>
+</ul>
+</section>
+
+<section id="sources">
+<h2>De unde vin datele</h2>
+<ul>
+<li><strong>Acte și proiecte</strong>: Camera Deputaților, Ministerul Finanțelor, notele de fundamentare ale Guvernului și ordonanțele publicate în Monitorul Oficial (prin legislatie.just.ro).</li>
+<li><strong>Bani publici</strong>: contractele din datele deschise SEAP (data.gov.ro, licență CC BY 4.0).</li>
+<li><strong>Companiile listate la BVB</strong>: raportările și calendarele de pe site-urile companiilor; cifrele financiare din ultimul raport anual auditat.</li>
+<li><strong>Știri</strong>: fluxurile RSS publice ale editorilor, cu numele sursei și link spre articol.</li>
+</ul>
+<p>Lista completă și drepturile fiecărei surse: <a href="/legal?lang=ro#sources">Surse și drepturi</a>.</p>
+</section>
+
+<section id="summaries">
+<h2>Rezumatele știrilor și ale raportărilor</h2>
+<ul>
+<li>Le face un model AI care rulează pe calculatorul nostru. Textele nu sunt trimise la servicii AI externe.</li>
+<li>Modelul citește un articol doar unde site-ul editorului permite (robots.txt) și nu are paywall. Păstrăm rezumatul scurt, nu articolul.</li>
+<li>Din raportările companiilor (tranzacții ale conducerii, dividende, rezultate) extragem cifrele în tabele, cu link spre document.</li>
+<li>Un rezumat poate greși. Linkul spre original e mereu lângă el.</li>
+</ul>
+</section>
+
+<section id="policy">
+<h2>Evenimentele de politici</h2>
+<ul>
+<li>Fiecare eveniment are un <strong>statut fix</strong> (declarație, proiect, adoptat, în vigoare, aplicat, oprit), luat din sursă. O declarație nu e niciodată prezentată ca lege.</li>
+<li>Sectoarele și companiile sunt legate prin reguli fixe, nu de un model AI: o companie e „menționată” când apare în document, sau legată „prin sector”.</li>
+<li>„Te afectează” înseamnă doar că evenimentul privește o companie pe care o urmărești sau o deții.</li>
+</ul>
+</section>
+
+<section id="impact">
+<h2>Analizele de impact</h2>
+<p>O analiză estimează efectul contabil direct al unei măsuri asupra bugetului de stat și asupra rezultatului din exploatare al companiilor vizate. Are trei feluri de cifre, ținute separat:</p>
+<div class="wrap"><table>
+<thead><tr><th>Fel</th><th>Ce are obligatoriu</th></tr></thead>
+<tbody>
+<tr><td>Fapt</td><td>textul, linkul spre sursa oficială și data ei</td></tr>
+<tr><td>Ipoteză</td><td>motivul și un interval plauzibil; o poți schimba în calculator</td></tr>
+<tr><td>Rezultat</td><td>formula scrisă cu cifrele introduse; înghețat la publicare</td></tr>
+</tbody></table></div>
+<p>Formulele de bază:</p>
+<pre class="f">efect asupra soldului bugetar = −cost × (1 − finanțat%) × implementare%
+variația rezultatului companiei = venituri × expunere% × șoc% × (1 − compensare%) × contribuție%
+pondere în rezultat            = variația rezultatului × implementare% / |rezultat din exploatare|</pre>
+<p>Fiecare analiză are trei scenarii: <strong>integral</strong>, <strong>parțial</strong> și <strong>întârziat</strong>.</p>
+<h3>Analizele automate</h3>
+<p>Pentru documentele noi, un model AI local propune o analiză, iar un program de verificare fără AI decide dacă se publică. Se publică doar dacă:</p>
+<ul>
+<li>fiecare citat apare exact în documentul oficial și conține cifra folosită;</li>
+<li>fiecare ipoteză vine dintr-o bibliotecă de ipoteze cu sursă și e în intervalul ei;</li>
+<li>companiile au cifre dintr-un raport anual auditat, iar tipul măsurii e unul pe care modelul îl știe calcula.</li>
+</ul>
+<p>Altfel, evenimentul primește o <strong>fișă scurtă</strong> care spune de ce nu există analiză: fără cifre în document, document necitibil, tip de măsură nemodelat, lipsesc datele companiei, un citat nu a fost găsit. Analizele automate poartă eticheta „Generată automat, verificată pe textul sursă”.</p>
+</section>
+
+<section id="gains">
+<h2>Cine câștigă</h2>
+<ul>
+<li>Arată doar legături cu dovadă: companie numită într-un act, sector vizat, contract public, ajutor de stat, cost dintr-o analiză.</li>
+<li>Contractele sunt legate de o companie listată numai după codul fiscal, confirmat în registrul public ANAF; nu după nume.</li>
+<li>Fără scor, fără clasament și fără recomandări: sunt informații despre deciziile statului, nu sfaturi de investiții.</li>
+</ul>
+</section>
+
+<section id="accuracy">
+<h2>Acuratețe: unde am avut dreptate și unde nu</h2>
+<p>Când o companie raportează anul pe care o analiză l-a estimat, punem alături estimarea publicată atunci și cifra raportată, cu linkul spre raport. Arătăm aici direcția (aceeași sau nu) și eroarea relativă; cifrele în lei sunt în analize.</p>
+<div id="live"><p class="live-wait">Se încarcă cifrele din baza de date…</p></div>
+</section>
+
+<section id="limits">
+<h2>Limite cunoscute</h2>
+<ul>
+<li>PDF-urile scanate nu pot fi citite (nu folosim recunoaștere optică a textului); evenimentul rămâne cu fișa „document necitibil”.</li>
+<li>Unele surse oficiale răspund greu sau deloc; evenimentele lor pot apărea cu întârziere.</li>
+<li>Modelul AI local poate greși un rezumat; programul de verificare prinde cifrele care nu sunt în document, dar nu și o cifră corectă pusă într-un context greșit.</li>
+<li>Prețurile pot fi întârziate și nu sunt potrivite pentru tranzacționare în timp real.</li>
+</ul>
+<div class="note"><p style="margin:0">Informații generale, nu consultanță de investiții. Detalii: <a href="/legal?lang=ro#disclaimer">Nu e consultanță de investiții</a>.</p></div>
+</section>
+</main>
+
+<template id="doc-en">
+<h1>Methodology and accuracy</h1>
+<p class="meta">How we gather the data, how the summaries and analyses are made, what we don't do, and where we were wrong. Text last updated: 23 October 2026; the figures under "Accuracy" come straight from the database. If the versions differ, the Romanian version prevails.</p>
+<nav class="toc" aria-label="Contents">
+<a href="#principles">In short</a><a href="#sources">Sources</a><a href="#summaries">Summaries</a><a href="#policy">Policy</a><a href="#impact">Impact analyses</a><a href="#gains">Who gains</a><a href="#accuracy">Accuracy</a><a href="#limits">Limits</a>
+</nav>
+
+<section id="principles">
+<h2>In short</h2>
+<ul>
+<li><strong>Official sources only</strong> for laws, contracts and company figures. Every fact links to the document it comes from.</li>
+<li><strong>What is generated or computed automatically is labelled</strong> as such: the AI model's summaries and the automatic analyses each carry their label and a link to the source.</li>
+<li><strong>We make no recommendations</strong>: no "buy" or "sell", no price targets, no price predictions. We compute a measure's direct accounting effect, not what the share will do.</li>
+<li><strong>Mistakes stay public</strong>: an analysis never changes once published; a correction is a new version, and a withdrawn analysis stays listed below with its reason.</li>
+</ul>
+</section>
+
+<section id="sources">
+<h2>Where the data comes from</h2>
+<ul>
+<li><strong>Acts and bills</strong>: the Chamber of Deputies, the Ministry of Finance, the Government's explanatory notes and the ordinances published in the Official Gazette (via legislatie.just.ro).</li>
+<li><strong>Public money</strong>: contracts from the SEAP open data (data.gov.ro, CC BY 4.0 licence).</li>
+<li><strong>Bucharest-listed companies</strong>: filings and calendars from the companies' websites; financial figures from the latest audited annual report.</li>
+<li><strong>News</strong>: publishers' public RSS feeds, with the source's name and a link to the article.</li>
+</ul>
+<p>The full list and each source's rights: <a href="/legal?lang=en#sources">Sources and rights</a>.</p>
+</section>
+
+<section id="summaries">
+<h2>News and filing summaries</h2>
+<ul>
+<li>They are made by an AI model running on our own computer. No text is sent to outside AI services.</li>
+<li>The model reads an article only where the publisher's site allows it (robots.txt) and there is no paywall. We keep the short summary, not the article.</li>
+<li>From company filings (management dealings, dividends, results) we extract the figures into tables, with a link to the document.</li>
+<li>A summary can be wrong. The link to the original is always next to it.</li>
+</ul>
+</section>
+
+<section id="policy">
+<h2>Policy events</h2>
+<ul>
+<li>Each event has a <strong>fixed status</strong> (statement, bill, adopted, in force, implemented, stopped), taken from the source. A statement is never shown as a law.</li>
+<li>Sectors and companies are linked by fixed rules, not by an AI model: a company is "named" when it appears in the document, or linked "via sector".</li>
+<li>"Concerns you" only means the event is about a company you follow or hold.</li>
+</ul>
+</section>
+
+<section id="impact">
+<h2>Impact analyses</h2>
+<p>An analysis estimates a measure's direct accounting effect on the state budget and on the operating profit of the companies it reaches. It has three kinds of figures, kept apart:</p>
+<div class="wrap"><table>
+<thead><tr><th>Kind</th><th>What it must have</th></tr></thead>
+<tbody>
+<tr><td>Fact</td><td>the text, a link to the official source and its date</td></tr>
+<tr><td>Assumption</td><td>its reason and a plausible range; you can change it in the calculator</td></tr>
+<tr><td>Result</td><td>the formula written out with the figures used; frozen when published</td></tr>
+</tbody></table></div>
+<p>The basic formulas:</p>
+<pre class="f">effect on the budget balance = −cost × (1 − funded%) × implementation%
+change in company profit     = revenue × exposure% × shock% × (1 − mitigation%) × contribution%
+share of profit              = change in profit × implementation% / |operating profit|</pre>
+<p>Every analysis has three scenarios: <strong>full</strong>, <strong>partial</strong> and <strong>delayed</strong>.</p>
+<h3>Automatic analyses</h3>
+<p>For new documents, a local AI model proposes an analysis, and a checking program with no AI decides whether it is published. It is published only if:</p>
+<ul>
+<li>every quote appears word for word in the official document and contains the figure used;</li>
+<li>every assumption comes from a library of sourced assumptions and is within its range;</li>
+<li>the companies have figures from an audited annual report, and the measure is of a type the model can compute.</li>
+</ul>
+<p>Otherwise the event gets a <strong>short fact sheet</strong> saying why there is no analysis: no figures in the document, an unreadable document, a measure type not modelled, missing company data, a quote not found. Automatic analyses carry the label "Generated automatically, checked against the source text".</p>
+</section>
+
+<section id="gains">
+<h2>Who gains</h2>
+<ul>
+<li>It shows only links with evidence: a company named in an act, a sector concerned, a public contract, state aid, a cost from an analysis.</li>
+<li>Contracts are linked to a listed company only by tax ID, confirmed in the public ANAF register; never by name.</li>
+<li>No score, no ranking and no recommendations: it is information about the state's decisions, not investment advice.</li>
+</ul>
+</section>
+
+<section id="accuracy">
+<h2>Accuracy: where we were right and where not</h2>
+<p>When a company reports the year an analysis estimated, we set the estimate published then beside the reported figure, with a link to the report. Here we show the direction (same or not) and the relative error; the lei figures are in the analyses.</p>
+<div id="live"><p class="live-wait">Loading the figures from the database…</p></div>
+</section>
+
+<section id="limits">
+<h2>Known limits</h2>
+<ul>
+<li>Scanned PDFs cannot be read (we use no optical character recognition); the event keeps the "unreadable document" sheet.</li>
+<li>Some official sources answer slowly or not at all; their events can appear late.</li>
+<li>The local AI model can get a summary wrong; the checking program catches figures that are not in the document, but not a correct figure put in the wrong context.</li>
+<li>Prices may be delayed and are not suitable for real-time trading.</li>
+</ul>
+<div class="note"><p style="margin:0">General information, not investment advice. Details: <a href="/legal?lang=en#disclaimer">Not investment advice</a>.</p></div>
+</section>
+</template>
+
+<footer><span>© 2026 Market Pulse · <a href="/legal">Informații legale / Legal</a></span></footer>
+
+<script>
+// The live part (#accuracy): one public call, supabase/transparency.sql public_transparency(),
+// with the site's public address and key (/config.json on Cloudflare, /api/config elsewhere).
+// Everything is written with textContent: nothing from the database is read as HTML.
+(function () {
+  const q = new URLSearchParams(location.search), asked = (q.get('lang') || '').toLowerCase();
+  const lang = asked === 'en' || asked === 'de' ? 'en' : 'ro';
+  if (lang === 'en') {
+    document.getElementById('doc').replaceChildren(document.getElementById('doc-en').content.cloneNode(true));
+    document.documentElement.lang = asked === 'de' ? 'de' : 'en';
+    document.title = 'Market Pulse · Methodology and accuracy';
+  }
+  document.querySelectorAll('.langs a').forEach(a => { a.setAttribute('aria-current', String(a.dataset.lang === lang)); a.href = '?lang=' + a.dataset.lang + location.hash; });
+  const T = {
+    ro: { events: 'evenimente oficiale urmărite', documents: 'documente citite', unreadable: 'documente necitibile (scanate)', sheets: 'fișe scurte',
+      analyses: 'analize de impact publicate', auto: 'dintre ele automate', compared: 'estimări comparate cu raportarea', dirOk: 'cu direcția corectă',
+      median: 'eroarea relativă mediană', none: 'Încă nicio estimare nu poate fi comparată: companiile n-au raportat anii estimați.',
+      cmpTitle: 'Estimări comparate', cols: ['Analiza', 'Compania', 'Anul', 'Direcția', 'Eroare relativă', 'Raportul'], right: 'corectă', wrong: 'greșită', report: 'raport ↗',
+      wTitle: 'Analize retrase', wNone: 'Nicio analiză retrasă până acum.', wcols: ['Analiza', 'Publicată', 'Retrasă', 'Motivul'], v: 'versiunea',
+      failed: 'Cifrele nu s-au putut încărca acum. Încearcă din nou mai târziu.', at: 'Cifre la ' },
+    en: { events: 'official events tracked', documents: 'documents read', unreadable: 'unreadable documents (scanned)', sheets: 'short fact sheets',
+      analyses: 'impact analyses published', auto: 'of them automatic', compared: 'estimates compared with filings', dirOk: 'with the right direction',
+      median: 'median relative error', none: 'No estimate can be compared yet: the companies have not reported the years estimated.',
+      cmpTitle: 'Estimates compared', cols: ['Analysis', 'Company', 'Year', 'Direction', 'Relative error', 'Report'], right: 'right', wrong: 'wrong', report: 'report ↗',
+      wTitle: 'Withdrawn analyses', wNone: 'No analysis withdrawn so far.', wcols: ['Analysis', 'Published', 'Withdrawn', 'Reason'], v: 'version',
+      failed: 'The figures could not be loaded now. Please try again later.', at: 'Figures as of ' }
+  }[lang];
+  const live = document.getElementById('live');
+  const el = (tag, text, cls) => { const e = document.createElement(tag); if (text != null) e.textContent = String(text); if (cls) e.className = cls; return e; };
+  const nf = n => new Intl.NumberFormat(lang === 'ro' ? 'ro-RO' : 'en-GB').format(n);
+  const pct = x => (x == null ? '—' : new Intl.NumberFormat(lang === 'ro' ? 'ro-RO' : 'en-GB', { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(Number(x))));
+  const safe = u => (/^https:\/\/[^\s"'<>]+$/.test(String(u || '')) ? u : null);
+  const table = (cols, rows) => { const w = el('div', null, 'wrap'), t = el('table'), h = el('tr');
+    cols.forEach(c => h.appendChild(el('th', c))); const th = el('thead'); th.appendChild(h); t.appendChild(th);
+    const b = el('tbody'); rows.forEach(r => { const tr = el('tr'); r.forEach(c => { const td = el('td'); if (c instanceof Node) td.appendChild(c); else td.textContent = c; tr.appendChild(td); }); b.appendChild(tr); });
+    t.appendChild(b); w.appendChild(t); return w; };
+  function render(d) {
+    const out = [];
+    const stats = el('div', null, 'stats');
+    [[d.events, T.events], [d.documents, T.documents], [d.unreadable, T.unreadable], [d.sheets, T.sheets], [d.analyses, T.analyses], [d.analyses_auto, T.auto],
+     [d.compared, T.compared], [d.direction_ok, T.dirOk]].forEach(([n, l]) => { const c = el('div'); c.appendChild(el('b', nf(n || 0))); c.appendChild(el('span', l)); stats.appendChild(c); });
+    if (d.compared) { const c = el('div'); c.appendChild(el('b', pct(d.median_abs_error))); c.appendChild(el('span', T.median)); stats.appendChild(c); }
+    out.push(stats);
+    out.push(el('h3', T.cmpTitle));
+    if (!d.compared) out.push(el('p', T.none));
+    else out.push(table(T.cols, (d.comparisons || []).map(c => {
+      const u = safe(c.source_url), a = u ? el('a', T.report) : el('span', '—'); if (u) { a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+      return [c.title, String(c.subject || '').replace(/\.RO$/, ''), c.period, el('span', c.direction ? T.right : T.wrong, c.direction ? 'ok' : 'bad'), pct(c.rel_error), a]; })));
+    out.push(el('h3', T.wTitle));
+    if (!(d.withdrawn || []).length) out.push(el('p', T.wNone));
+    else out.push(table(T.wcols, d.withdrawn.map(w => [w.title + ' (' + T.v + ' ' + w.version + ')', w.published || '', w.withdrawn || '', w.reason || ''])));
+    out.push(el('p', T.at + new Date(d.updated_at).toLocaleString(lang === 'ro' ? 'ro-RO' : 'en-GB'), 'meta'));
+    live.replaceChildren(...out);
+  }
+  async function config() {
+    for (const url of ['/config.json', '/api/config']) {
+      try { const r = await fetch(url, { headers: { accept: 'application/json' } }); if (!r.ok) continue;
+        const j = await r.json(); if (j && /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(j.supabaseUrl || '') && j.supabaseAnonKey) return j; } catch (e) {}
+    }
+    return null;
+  }
+  (async () => {
+    try {
+      const c = await config(); if (!c) throw new Error('no config');
+      const r = await fetch(c.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/public_transparency', { method: 'POST',
+        headers: { apikey: c.supabaseAnonKey, authorization: 'Bearer ' + c.supabaseAnonKey, 'content-type': 'application/json' }, body: '{}' });
+      if (!r.ok) throw new Error(String(r.status));
+      render(await r.json());
+    } catch (e) { live.replaceChildren(el('p', T.failed, 'live-wait')); }
+  })();
+  const jump = () => { const x = location.hash && document.getElementById(location.hash.slice(1)); if (x) x.scrollIntoView({ behavior: 'instant' }); };
+  if (lang === 'en') { if (document.readyState === 'complete') jump(); else addEventListener('load', () => setTimeout(jump, 0)); }
+})();
+</script>
+</body>
+</html>
