@@ -1921,6 +1921,8 @@ class Component extends DCLogic {
     const ready = () => this.sharedReady() && !!window.HIFLive;
     const go = () => { this.whenRestored(start); this.forceUpdate(); };
     if (ready()) go(); else this._poll = setInterval(() => { if (ready()) { clearInterval(this._poll); go(); } }, 60);
+    this._onAccountReady=()=>{this.ensureAccountData();this.refreshPush();};
+    window.addEventListener('hif:account-ready',this._onAccountReady);
     window.__hifAuthApp = this;
     if (window.HIFAuth) this.bootAuth();
     else this._authPoll = setInterval(() => { if (window.HIFAuth) { clearInterval(this._authPoll); this.bootAuth(); } }, 60);
@@ -1961,8 +1963,16 @@ class Component extends DCLogic {
     const p = sess.prefs || {}, A = window.HIFAuth;
     const up = { contentLang: !p.contentLang && this.state.lang, appLang: !p.appLang && this.state.appLang };
     if (A && A.updatePrefs && (up.contentLang || up.appLang)) A.updatePrefs(up).catch(() => {});
-    if (this._wlUser !== sess.userId) { this._wlUser = sess.userId; this.loadServerWatchlist(); this.loadServerHoldings(); }
+    this.ensureAccountData();
     this.refreshPush();
+  }
+  // Auth and the account-data adapter load independently. Mark a user as loaded only
+  // once the adapter exists; its late arrival must still retrieve the server portfolio.
+  ensureAccountData(){
+    const uid=this.state.session&&this.state.session.userId;
+    const actual=window.HIFAuth&&window.HIFAuth.session();
+    if(!uid||!actual||actual.userId!==uid||!this.state.authLive||!window.HIFPush||this._wlUser===uid)return;
+    this._wlUser=uid;this.loadServerWatchlist();this.loadServerHoldings();
   }
   // The language choices saved with the account win over this browser's, so they hold on
   // every device and after the browser's storage is cleared.
@@ -2148,6 +2158,7 @@ class Component extends DCLogic {
   }
   componentDidUpdate(prevProps) {
     if (prevProps && prevProps.finnhubToken !== this.props.finnhubToken) this.syncLive();
+    this.ensureAccountData();
     this.autoBio();
     this.maybeDeviceSetup();
     if (this.state.screen === 'detail') this.ensureQuote(this.state.selected);
@@ -2184,7 +2195,7 @@ class Component extends DCLogic {
     this.measureChart();
     this.persist();
   }
-  componentWillUnmount() { window.removeEventListener('hashchange', this._onHash); if (navigator.serviceWorker) navigator.serviceWorker.removeEventListener('message', this._onSwMsg); this.stopAutoRefresh(); clearInterval(this._authPoll); if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); window.removeEventListener('keydown', this._onKey); window.removeEventListener('hif:content', this._onContent); clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); this.stopIdleWatch(); }
+  componentWillUnmount() { window.removeEventListener('hashchange', this._onHash); if (navigator.serviceWorker) navigator.serviceWorker.removeEventListener('message', this._onSwMsg); this.stopAutoRefresh(); clearInterval(this._authPoll); window.removeEventListener('hif:account-ready',this._onAccountReady); if (this._ro) this._ro.disconnect(); window.removeEventListener('resize', this._onResize); window.removeEventListener('keydown', this._onKey); window.removeEventListener('hif:content', this._onContent); clearInterval(this._poll); clearTimeout(this._t); clearTimeout(this._search); this.stopIdleWatch(); }
   get token() { return (this.props.finnhubToken || '').trim(); }
   // Manual / on-open only: the adapter caches (quotes 60s, news 5m, analysts 15m),
   // so an extra call on screen open is usually free.

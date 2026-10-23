@@ -51,7 +51,7 @@ function serveRepo() {
 
 // One page load plus a reload; returns the persisted record after each, and every
 // watchlist/holdings DELETE the app sent to the stub.
-async function run(browser, base, tpl, { savedAccount, sessUser, late }) {
+async function run(browser, base, tpl, { savedAccount, sessUser, late, latePush = tpl === 'published' }) {
   const { path, key } = TEMPLATES[tpl];
   const ctx = await browser.newContext();
   const deletes = [], errors = [];
@@ -84,6 +84,11 @@ async function run(browser, base, tpl, { savedAccount, sessUser, late }) {
   await ctx.route(/\/hif-store\.js(?:\?.*)?$/,  async r => {
     const res = await r.fetch(), src = await res.text();
     r.fulfill({ response: res, body: late ? `(function wait(){ if (!window.__hifAuthSub) return setTimeout(wait, 10);\n${src}\n})();` : src });
+  });
+  // Published boot must survive the account adapter arriving after the session.
+  if(latePush)await ctx.route(/\/hif-push\.js(?:\?.*)?$/,async r=>{
+    const res=await r.fetch(),src=await res.text();
+    await r.fulfill({response:res,body:`(function wait(){if(!window.__hifAuthSub)return setTimeout(wait,10);\n${src}\n})();`});
   });
   const record = savedAccount === undefined ? null : { accountId: savedAccount, onboarded: true, follows: ['MSFT', 'AMD'], selected: 'AMD',
     positions: { AMD: { shares: 5, cost: '100' } }, screen: 'feed' };
