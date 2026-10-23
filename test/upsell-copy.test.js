@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 
 const data = readFileSync(new URL('../templates/shared/hif-data.js', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../templates/stock-news-web/StockNewsWeb.dc.html', import.meta.url), 'utf8');
-const KEYS = ['polUpsell', 'upsellSee', 'upsellLater', 'impLocked'];
+const KEYS = ['polUpsell', 'upsellSee', 'upsellLater', 'impLocked', 'trialEnds', 'trialPriceMonth', 'trialPriceYear', 'trialPriceAny', 'trialThen', 'trialOk'];
 const values = key => [...data.matchAll(new RegExp('\\b' + key + ":'((?:[^'\\\\]|\\\\.)*)'", 'g'))].map(m => m[1]);
 
 test('every offer has its text in English, Romanian and German', () => {
@@ -29,4 +29,10 @@ test('the Policy offer: Free plan only, on one event, and "Not now" hides it for
 test('impact results: locked only on Free when the server sent none; calculator links hidden on Free', () => {
   assert.match(app, /impDLocked: this\.plan === 'free' && !fz/);
   assert.match(app, /impDCalc: this\.plan === 'free' \? \[\] :/);
+});
+
+test('the trial reminder: the last 3 days of a trial, the date, the amount and where to cancel', () => {
+  for (const v of values('trialEnds')) assert.ok(v.includes('{d}') && v.includes('{p}'), v);
+  assert.match(app, /b\.status === 'trialing' && end && left > 0 && left <= 3 \* 864e5/);
+  assert.match(app, /localStorage\.setItem\(key, String\(b\.period_end\)\)/);
 });
