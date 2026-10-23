@@ -362,7 +362,10 @@ function onMutations(records) {
 
 // Decorative work is active only while its element is useful to the visible page.
 const trackedMotion=new Set();let motionIO=null,ticking=false;
+// Also re-check at the frame boundary: emulated/media changes can update matches
+// before a MediaQueryList change event is delivered. Release wheel interception immediately.
 function onTick(time,deltaMs){
+ if(reduced()){updateMotion();return;}
  const dt=Math.min(.1,deltaMs/1000);
  smoothers.forEach((l,el)=>{if(el._mVisible!==false&&!document.hidden&&!reduced())l.raf(time*1000);});
  tickMarquees(dt);
