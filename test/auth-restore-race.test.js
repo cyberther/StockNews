@@ -81,7 +81,7 @@ async function run(browser, base, tpl, { savedAccount, sessUser, late }) {
   // Define window.HIFStore only once bootAuth has offered the session to the app (it sets
   // __hifAuthSub right after applyAuthSession), so the session wins the race on every run.
   // A fixed delay could expire before HIFAuth.ready under load and test nothing.
-  await ctx.route('**/hif-store.js', async r => {
+  await ctx.route(/\/hif-store\.js(?:\?.*)?$/,  async r => {
     const res = await r.fetch(), src = await res.text();
     r.fulfill({ response: res, body: late ? `(function wait(){ if (!window.__hifAuthSub) return setTimeout(wait, 10);\n${src}\n})();` : src });
   });
