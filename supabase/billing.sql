@@ -46,6 +46,9 @@ create table if not exists public.entitlements (
   constraint entitlements_status check (status in ('active', 'trialing', 'past_due', 'cancelled', 'expired')),
   constraint entitlements_portal check (portal_url is null or portal_url ~ '^https://')
 );
+-- The provider's variant (the price bought) and whether it is the founder price.
+alter table public.entitlements add column if not exists variant_id text;
+alter table public.entitlements add column if not exists founder boolean not null default false;
 create index if not exists entitlements_subscription on public.entitlements (subscription_id);
 alter table public.entitlements enable row level security;
 alter table public.entitlements force row level security;
@@ -91,7 +94,8 @@ begin
              x.current_period_end desc nulls first
     limit 1;
   return jsonb_build_object('commercial', true, 'plan', p, 'source', e.source, 'status', e.status,
-    'period_end', e.current_period_end, 'portal_url', e.portal_url, 'limits', lim->p);
+    'period_end', e.current_period_end, 'portal_url', e.portal_url, 'limits', lim->p,
+    'founder', coalesce(e.founder, false) and p = 'pro');
 end $$;
 revoke all on function public.my_plan() from public, anon;
 grant execute on function public.my_plan() to authenticated;
@@ -134,6 +138,82 @@ revoke all on function public.admin_grant_pro(uuid, timestamptz) from public, an
 revoke all on function public.admin_revoke_pro(uuid) from public, anon;
 grant execute on function public.admin_grant_pro(uuid, timestamptz) to authenticated;
 grant execute on function public.admin_revoke_pro(uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------------------
+-- The founder price (2026-10-23, the owner's call): 49 lei a month or 490 a year for the first
+-- 200 subscribers, kept for as long as the subscription stays active (the provider keeps the
+-- price of a subscription; one cancelled and started again later pays the price of then).
+-- A seat is held by a founder subscription that still gives access (trial included), and for
+-- two hours by a checkout started from the app, so that the count shown is never above what
+-- is left. 'founder_seats' follows config/billing.json (test); 'founder_variants' is set once
+-- by the owner, with the ids of the two founder prices at the provider (docs/phase-d-setup.md).
+insert into public.app_config (key, value) values ('founder_seats', '200')
+  on conflict (key) do update set value = excluded.value, updated_at = now();
+insert into public.app_config (key, value) values ('founder_variants', '[]') on conflict (key) do nothing;
+
+create table if not exists public.founder_claims (
+  user_id    uuid        primary key references auth.users on delete cascade,
+  created_at timestamptz not null default now()
+);
+alter table public.founder_claims enable row level security;
+alter table public.founder_claims force row level security;
+revoke all on public.founder_claims from anon, authenticated;
+
+create or replace function public.founder_variant(p_variant text) returns boolean
+language sql stable security definer set search_path = public as $$
+  select coalesce(p_variant is not null and exists (
+    select 1 from app_config c, jsonb_array_elements_text(c.value) v
+    where c.key = 'founder_variants' and v = p_variant), false);
+$$;
+revoke all on function public.founder_variant(text) from public, anon, authenticated;
+
+-- Seats taken: founder subscriptions that still give access, and recent checkouts of others.
+create or replace function public.founder_taken() returns integer
+language sql stable security definer set search_path = public as $$
+  with subs as (
+    select distinct user_id from entitlements
+    where source = 'payment' and founder and current_period_end > now()
+      and status in ('trialing', 'active', 'past_due', 'cancelled')
+  )
+  select ((select count(*) from subs)
+        + (select count(*) from founder_claims c where c.created_at > now() - interval '2 hours'
+           and c.user_id not in (select user_id from subs)))::int;
+$$;
+revoke all on function public.founder_taken() from public, anon, authenticated;
+
+-- What the paywall shows: how many seats there are and how many are left (counts only).
+create or replace function public.founder_offer() returns jsonb
+language sql stable security definer set search_path = public as $$
+  select jsonb_build_object('seats', s, 'left', greatest(s - public.founder_taken(), 0))
+  from (select coalesce((select (value #>> '{}')::int from app_config where key = 'founder_seats'), 0) s) x;
+$$;
+revoke all on function public.founder_offer() from public;
+grant execute on function public.founder_offer() to anon, authenticated;
+
+-- The billing Edge Function, before it asks the provider for a founder checkout: 'ok' (a seat
+-- is held for this account), 'full', or 'not_configured' (the variant is not a founder price).
+-- One at a time (advisory lock), so two readers can't take the last seat together.
+create or replace function public.founder_claim(p_user uuid, p_variant text) returns text
+language plpgsql security definer set search_path = public as $$
+declare seats integer;
+begin
+  if p_user is null then raise exception 'a user is required'; end if;
+  if not public.founder_variant(p_variant) then return 'not_configured'; end if;
+  perform pg_advisory_xact_lock(hashtext('market-pulse-founder-seats'));
+  if exists (select 1 from entitlements where user_id = p_user and source = 'payment' and founder
+             and current_period_end > now() and status in ('trialing', 'active', 'past_due', 'cancelled'))
+     or exists (select 1 from founder_claims where user_id = p_user and created_at > now() - interval '2 hours') then
+    update founder_claims set created_at = now() where user_id = p_user;
+    return 'ok';
+  end if;
+  seats := coalesce((select (value #>> '{}')::int from app_config where key = 'founder_seats'), 0);
+  if public.founder_taken() >= seats then return 'full'; end if;
+  insert into founder_claims (user_id, created_at) values (p_user, now())
+    on conflict (user_id) do update set created_at = now();
+  return 'ok';
+end $$;
+revoke all on function public.founder_claim(uuid, text) from public, anon, authenticated;
+grant execute on function public.founder_claim(uuid, text) to service_role;
 
 -- ---------------------------------------------------------------------------------------
 -- Webhooks from the payment provider (Lemon Squeezy), after the billing Edge Function has
@@ -195,11 +275,15 @@ begin
     else least(coalesce((a->>'ends_at')::timestamptz, now()), now()) end;
   portal := a->'urls'->>'customer_portal';
   if portal !~ '^https://[^\s"''<>]+$' then portal := null; end if;
-  insert into entitlements (user_id, source, status, current_period_end, provider, customer_id, subscription_id, portal_url, provider_updated_at, updated_at)
-  values (uid, 'payment', st, ends, 'lemonsqueezy', left(a->>'customer_id', 80), left(d->>'id', 80), portal, upd, now())
+  insert into entitlements (user_id, source, status, current_period_end, provider, customer_id, subscription_id, portal_url, provider_updated_at, updated_at, variant_id, founder)
+  values (uid, 'payment', st, ends, 'lemonsqueezy', left(a->>'customer_id', 80), left(d->>'id', 80), portal, upd, now(),
+    left(a->>'variant_id', 80), public.founder_variant(a->>'variant_id'))
   on conflict (user_id, source) do update set status = excluded.status, current_period_end = excluded.current_period_end,
     provider = excluded.provider, customer_id = excluded.customer_id, subscription_id = excluded.subscription_id,
-    portal_url = excluded.portal_url, provider_updated_at = excluded.provider_updated_at, updated_at = now();
+    portal_url = excluded.portal_url, provider_updated_at = excluded.provider_updated_at, updated_at = now(),
+    variant_id = coalesce(excluded.variant_id, entitlements.variant_id),
+    founder = case when excluded.variant_id is null then entitlements.founder else excluded.founder end;
+  delete from founder_claims where user_id = uid;
   return jsonb_build_object('applied', true, 'note', st);
 end $$;
 revoke all on function public.billing_apply(text, jsonb) from public, anon, authenticated;
