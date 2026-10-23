@@ -704,7 +704,7 @@ const LANDING = {
 };
 // The legal pages (templates/stock-news-web/legal.html) and deleting an account.
 const LEGAL = {
-  EN: { legalTitle:'Legal', legalTerms:'Terms of use', legalPrivacy:'Privacy policy', legalDisclaimer:'Not investment advice', legalSources:'Sources', legalContact:'Contact',
+  EN: { legalTitle:'Legal', legalTerms:'Terms of use', legalPrivacy:'Privacy policy', legalDisclaimer:'Not investment advice', legalSources:'Sources', legalMethod:'Methodology', legalContact:'Contact',
     legalNoAdvice:'Market Pulse shows information, not investment advice. Prices can be delayed or wrong; check them before you trade.',
     upLegalA:'By creating an account you accept the', upLegalB:'and confirm you have read the', upLegalC:'.',
     delTitle:'Delete account', delNote:'Removes the account and everything saved with it: watchlist, positions, drawings, alert devices and settings. It can\'t be undone.',
@@ -712,7 +712,7 @@ const LEGAL = {
     delAdmin:'An administrator account can\'t delete itself here. Another administrator, or the project owner in Supabase, removes it.',
     delErrPw:'That password isn\'t right.', delErrWord:'Type the word exactly as shown.', delErr:'The account couldn\'t be deleted. Try again.',
     delErr2fa:'Sign out and in again with your two-factor code, then try again.', delDone:'Your account has been deleted' },
-  RO: { legalTitle:'Informații legale', legalTerms:'Termeni de utilizare', legalPrivacy:'Politica de confidențialitate', legalDisclaimer:'Nu e consultanță de investiții', legalSources:'Surse', legalContact:'Contact',
+  RO: { legalTitle:'Informații legale', legalTerms:'Termeni de utilizare', legalPrivacy:'Politica de confidențialitate', legalDisclaimer:'Nu e consultanță de investiții', legalSources:'Surse', legalMethod:'Metodologie', legalContact:'Contact',
     legalNoAdvice:'Market Pulse afișează informații, nu consultanță de investiții. Prețurile pot fi întârziate sau greșite; verifică-le înainte să tranzacționezi.',
     upLegalA:'Prin crearea contului accepți', upLegalB:'și confirmi că ai citit', upLegalC:'.',
     delTitle:'Șterge contul', delNote:'Șterge contul și tot ce e salvat în el: watchlist, poziții, desene, dispozitive pentru alerte și setări. Nu se poate anula.',
@@ -720,7 +720,7 @@ const LEGAL = {
     delAdmin:'Un cont de administrator nu se poate șterge singur de aici. Îl șterge alt administrator sau proprietarul proiectului, din Supabase.',
     delErrPw:'Parola nu e corectă.', delErrWord:'Scrie cuvântul exact cum apare.', delErr:'Contul nu a putut fi șters. Încearcă din nou.',
     delErr2fa:'Deconectează-te și autentifică-te din nou cu codul 2FA, apoi încearcă iar.', delDone:'Contul tău a fost șters' },
-  DE: { legalTitle:'Rechtliches', legalTerms:'Nutzungsbedingungen', legalPrivacy:'Datenschutzerklärung', legalDisclaimer:'Keine Anlageberatung', legalSources:'Quellen', legalContact:'Kontakt',
+  DE: { legalTitle:'Rechtliches', legalTerms:'Nutzungsbedingungen', legalPrivacy:'Datenschutzerklärung', legalDisclaimer:'Keine Anlageberatung', legalSources:'Quellen', legalMethod:'Methodik', legalContact:'Kontakt',
     legalNoAdvice:'Market Pulse zeigt Informationen, keine Anlageberatung. Kurse können verzögert oder falsch sein; prüfen Sie sie vor einem Handel.',
     upLegalA:'Mit der Registrierung akzeptieren Sie die', upLegalB:'und bestätigen, die', upLegalC:' gelesen zu haben.',
     delTitle:'Konto löschen', delNote:'Entfernt das Konto und alles, was darin gespeichert ist: Watchlist, Positionen, Zeichnungen, Geräte für Alerts und Einstellungen. Das lässt sich nicht rückgängig machen.',

@@ -4874,6 +4874,8 @@ class Component extends DCLogic {
         const legalHref = { terms: q + 'terms', privacy: q + 'privacy', disclaimer: q + 'disclaimer', sources: q + 'sources', contact: q + 'contact' };
         const legalLinks = [['terms', u.legalTerms], ['privacy', u.legalPrivacy], ['disclaimer', u.legalDisclaimer], ['sources', u.legalSources], ['contact', u.legalContact]]
           .map(([k, label]) => ({ label, href: legalHref[k] }));
+        // How the data is checked, and where the analyses were wrong (public, at /metodologie).
+        legalLinks.splice(4, 0, { label: u.legalMethod || 'Methodology', href: '/metodologie?lang=' + (A === 'RO' ? 'ro' : A === 'DE' ? 'de' : 'en') });
         // Delete account: the password again (a Google or Apple account types a word instead).
         const sess = s.session || {}, viaProvider = !!sess.provider && sess.provider !== 'Email';
         const plain = v => String(v || '').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');

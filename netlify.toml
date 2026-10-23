@@ -24,6 +24,17 @@
   to = "/templates/stock-news-web/legal.html"
   status = 200
 
+# How the data is gathered and checked, and the public accuracy record (methodology.html).
+[[redirects]]
+  from = "/metodologie"
+  to = "/templates/stock-news-web/methodology.html"
+  status = 200
+
+[[redirects]]
+  from = "/methodology"
+  to = "/templates/stock-news-web/methodology.html"
+  status = 200
+
 [[redirects]]
   from = "/calculator"
   to = "/templates/stock-news-web/intelligence.html"
