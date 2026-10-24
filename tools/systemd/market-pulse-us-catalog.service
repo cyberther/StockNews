@@ -1,0 +1,16 @@
+# The US ticker list the apps search (tools/refresh-us-catalog.sh): refreshed from the SEC once a
+# month; a pull request when a listing changed (merge and deploy stay with the owner).
+# User unit, not installed by anything; to turn it on:
+#   cp tools/systemd/market-pulse-us-catalog.* ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now market-pulse-us-catalog.timer
+# The SEC contact: ~/.config/market-pulse/sec-contact (an email address, one line).
+[Unit]
+Description=Market Pulse US ticker list from the SEC (monthly pull request)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/StockNews
+ExecStart=/usr/bin/env bash tools/refresh-us-catalog.sh
+Nice=19
+TimeoutStartSec=15min

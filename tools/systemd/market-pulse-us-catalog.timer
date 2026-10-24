@@ -1,0 +1,11 @@
+# The first day of every month, in the morning; a missed run (PC off) runs at the next start.
+[Unit]
+Description=Refresh the Market Pulse US ticker list once a month
+
+[Timer]
+OnCalendar=*-*-01 09:30:00
+Persistent=true
+RandomizedDelaySec=20min
+
+[Install]
+WantedBy=timers.target
