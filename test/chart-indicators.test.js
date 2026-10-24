@@ -73,3 +73,62 @@ test('auto levels: a run of equal prices counts as one swing', () => {
   assert.ok(s, 'support at 47');
   assert.equal(s.touches, 1);
 });
+
+// More indicators (2026-10-24: the chart tab gets the usual TradingView set).
+const bar = (high, low, close, volume = 0, open = close) => ({ open, high, low, close, volume });
+
+test('Bollinger bands: k standard deviations around the average', () => {
+  const b = C.bollingerOf([1, 2, 3, 4, 5], 5, 2);
+  assert.equal(b.mid[3], null);
+  near(b.mid[4], 3); near(b.up[4], 3 + 2 * Math.sqrt(2)); near(b.lo[4], 3 - 2 * Math.sqrt(2));
+});
+
+test('Stochastic, Williams %R and CCI at the top and bottom of a range', () => {
+  const up = Array.from({ length: 30 }, (_, i) => bar(10 + i + 0.5, 10 + i - 0.5, 10 + i + 0.5));
+  const s = C.stochOf(up, 14, 3, 3);
+  near(s.k[29], 100); near(s.d[29], 100); assert.equal(s.k[14], null);
+  near(C.willrOf(up, 14)[29], 0);
+  const down = up.map(b => bar(-b.low, -b.high, -b.high));
+  near(C.willrOf(down, 14)[29], -100);
+  assert.ok(C.cciOf(up, 20)[29] > 100, 'a steady rise sits above +100');
+  assert.equal(C.cciOf(Array.from({ length: 25 }, () => bar(2, 1, 1.5)), 20)[24], 0);
+});
+
+test('ATR on bars of a constant range; OBV adds up and takes away', () => {
+  near(C.atrOf(Array.from({ length: 30 }, (_, i) => bar(11 + i, 9 + i, 10 + i)), 14)[29], 2);
+  assert.deepEqual([...C.obvOf([bar(1, 1, 10, 100), bar(1, 1, 11, 50), bar(1, 1, 9, 20), bar(1, 1, 9, 70)])], [0, 50, 30, 30]);
+});
+
+test('VWAP starts again each session', () => {
+  const bars = [bar(11, 9, 10, 100), bar(13, 11, 12, 300), bar(21, 19, 20, 10), bar(23, 21, 22, 10)];
+  const v = C.vwapOf(bars, i => i < 2 ? 'd1' : 'd2');
+  near(v[1], (10 * 100 + 12 * 300) / 400); near(v[2], 20); near(v[3], 21);
+});
+
+test('Ichimoku lines are mid-points of their ranges; spans shift 26 bars', () => {
+  const bars = Array.from({ length: 60 }, (_, i) => bar(10 + i + 1, 10 + i - 1, 10 + i));
+  const k = C.ichimokuOf(bars, 9, 26, 52);
+  near(k.tenkan[59], ((10 + 59 + 1) + (10 + 51 - 1)) / 2);
+  near(k.kijun[59], ((10 + 59 + 1) + (10 + 34 - 1)) / 2);
+  near(k.spanA[59], (k.tenkan[59] + k.kijun[59]) / 2);
+  assert.equal(k.spanB[50], null); assert.equal(k.shift, 26);
+});
+
+test('Heikin Ashi bars', () => {
+  const h = C.heikinAshi([bar(12, 8, 11, 0, 9), bar(14, 10, 13, 0, 11)]);
+  near(h[0].open, 10); near(h[0].close, 10);
+  near(h[1].open, 10); near(h[1].close, 12); near(h[1].high, 14); near(h[1].low, 10);
+});
+
+test('Volume profile: the busiest price row is the point of control', () => {
+  const p = C.volumeProfile([bar(10, 0, 5, 100), bar(10, 9.5, 9.8, 900)], 10);
+  near(p.lo, 0); near(p.hi, 10); assert.equal(p.vol.length, 10);
+  near(p.vol.reduce((a, b) => a + b, 0), 1000);
+  assert.equal(p.poc, 9);
+  assert.equal(C.volumeProfile([bar(5, 5, 5, 1)], 10), null);
+});
+
+test('every drawing tool says how many clicks it takes', () => {
+  for (const t of ['hline', 'hray', 'vline', 'text', 'trend', 'ext', 'arrow', 'zone', 'rect', 'fib', 'measure', 'channel', 'fibext', 'pitchfork'])
+    assert.ok(C.POINTS[t] >= 1 && C.POINTS[t] <= 3, t);
+});

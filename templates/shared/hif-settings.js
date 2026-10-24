@@ -1,7 +1,7 @@
 // The reader's settings that follow the account (supabase/settings.sql), so they hold on every
 // device and after the browser's storage is cleared: the theme, the lock timeout, the feed and
 // portfolio views, and the chart's set-up, overall and per ticker (bar size, averages,
-// indicators, automatic levels). Drawings are kept per ticker on their own
+// indicators, automatic levels; chart type and log scale overall). Drawings are kept per ticker on their own
 // (supabase/drawings.sql). Languages are kept with the account's profile (hif-auth.js prefs).
 //
 //   HIFSettings.pick(state)        -> the settings to save, from the app's state
@@ -39,7 +39,8 @@ const CHECK = {
   feedTab: word, screenFilter: word, chartRange: word, pfRange: word, filingsView: word,
   pfCur: v => typeof v === 'string' && /^[A-Z]{3}$/.test(v),
   overlays: flags, showOpinion: bool,
-  lcIv: iv, lcAvg: flags, lcInd: flags, lcAuto: bool,
+  lcIv: iv, lcAvg: flags, lcInd: flags, lcAuto: bool, lcLog: bool,
+  lcType: v => ['candles', 'bars', 'line', 'area', 'heikin'].indexOf(v) >= 0,
   lcPen: v => typeof v === 'string' && /^[a-z]{2,10}$/.test(v),
 };
 const KEYS = Object.keys(CHECK).concat('lcView');
