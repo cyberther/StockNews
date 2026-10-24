@@ -4060,7 +4060,7 @@ class Component extends DCLogic {
     const cols = [...byEnd.values()].sort((a, b) => a.period_end.localeCompare(b.period_end)).slice(view === 'A' ? -5 : -20);
     if (!cols.length) {
       const ro = /\.RO$/.test(sym || ''), followed = (s.follows || []).indexOf(sym) >= 0 || !!(s.positions || {})[sym];
-      return Object.assign(base, { empty: true, emptyText: ro ? (u.finEmptyRo || 'No statements for this company yet.')
+      return Object.assign(base, { empty: true, emptyText: ro ? (view === 'Q' && all.some(r => r.period === 'A') ? (u.finEmptyRoQ || 'Quarterly figures for Bucharest companies are on their way, from the companies\u2019 own reports.') : (u.finEmptyRo || 'No statements for this company yet.'))
         : followed ? (u.finEmptySoon || 'The statements come within a few hours of adding a company.') : (u.finEmptyFollow || 'Statements come for the companies in your list or portfolio.') });
     }
     const cur = cols[cols.length - 1].currency || '';
@@ -4107,7 +4107,8 @@ class Component extends DCLogic {
     return Object.assign(base, { hasRows: true, cols: cols.map(c => ({ label: c.label, end: new Date(c.period_end).toLocaleDateString(loc, { day: 'numeric', month: 'short', year: 'numeric' }) })),
       groups, ratios, hasRatios: ratios.length > 0, locked: free, colsCss: 'minmax(150px,1.4fr) repeat(' + cols.length + ', minmax(84px,1fr))',
       minWidth: (162 + cols.length * 96) + 'px', currency: (u.finUnits || 'Amounts in {c}').replace('{c}', cur),
-      source: (u.finSource || 'Source: {s}.').replace('{s}', source) + (srcs.includes('sec') && view === 'Q' ? ' ' + (u.finQ4Note || 'The fourth quarter is the year less the first nine months.') : '') });
+      source: (u.finSource || 'Source: {s}.').replace('{s}', source) + (srcs.includes('sec') && view === 'Q' ? ' ' + (u.finQ4Note || 'The fourth quarter is the year less the first nine months.') : '')
+        + (srcs.includes('mf') ? ' ' + (u.finMfNote || 'Individual statements (the company alone, not its group), at 31 December; total assets are fixed plus current assets and prepayments.') : '') });
   }
   liveChartVals(u) {
     const s = this.state, sym = s.selected || '', m = s.lcMeta || {}, loc = this.appLocale;

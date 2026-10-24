@@ -1,0 +1,12 @@
+# Once a month: the ministry publishes each year's statements once, and updates them now and then
+# (only new files are downloaded).
+[Unit]
+Description=Read the Finance Ministry's yearly statements once a month
+
+[Timer]
+OnCalendar=*-*-03 05:10:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

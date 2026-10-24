@@ -1,0 +1,25 @@
+CUI;CUI
+CAEN;CAEN
+Numerar si solduri de numerar la banci centrale;i1
+Active financiare detinute in vederea tranzactionarii;i2
+Active financiare nedesemnate tranzactionarii evaluate obligatoriu la valoarea justã prin profit sau pierdere;i3
+Active financiare desemnate ca fiind evaluate la valoarea justã prin profit sau pierdere;i4
+Active financiare desemnate ca fiind evaluate la valoarea justã prin alte elemente ale rezultatului global;i5
+Active financiare evaluate la cost amortizat;i6
+Investitii in filiale, asocieri in participatie si entitati asociate;i7
+Imobilizari corporale;i8
+Imobilizari necorporale;i9
+Datorii financiare detinute in vederea tranzactionarii;i10
+Datorii financiare desemnate ca fiind evaluate la valoarea justa prin profit sau pierdere;i11
+Datorii financiare evaluate la cost amortizat;i12
+Provizioane;i13
+Capital social;i14
+Rezultatul reportat;i15
+Alte Rezerve;i16
+Profit sau (-) pierdere aferent(a) exercitiului;i17
+Venituri totale din exploatare, net;18
+Profit sau pierdere din operatiuni continue inainte de impozitare;i19
+Profit sau pierdere din operatiuni continue dupa impozitare;i20
+Profit sau pierdere din activitati intrerupte dupa impozitare;i21
+Profit sau pierdere aferent/a exercitiului;i22
+Cifra de afaceri neta;i23

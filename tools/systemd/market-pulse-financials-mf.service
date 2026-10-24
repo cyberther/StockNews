@@ -1,0 +1,15 @@
+# Bucharest listings' yearly statements from the Finance Ministry's open data on data.gov.ro
+# (tools/financials-mf.mjs; data.gov.ro answers only the PC). User unit:
+#   cp tools/systemd/market-pulse-financials-mf.* ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now market-pulse-financials-mf.timer
+[Unit]
+Description=Market Pulse yearly statements of Bucharest listings (Finance Ministry)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/StockNews
+ExecStart=/usr/bin/env node tools/financials-mf.mjs
+Nice=15
+IOSchedulingClass=idle
+TimeoutStartSec=2h
