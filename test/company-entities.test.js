@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { validateEntities, cuiIndex, cuiValid, catalogTickers } from '../ingest/impact/schema.mjs';
-import { extractCuis, sameCompany } from '../tools/update-company-entities.mjs';
+import { extractCuis, sameCompany, registryMatch } from '../tools/update-company-entities.mjs';
 
 const tickers = catalogTickers();
 const tlv = { ticker: 'TLV.RO', cui: '5022670', name: 'BANCA TRANSILVANIA SA', role: 'issuer', source_url: 'https://www.bancatransilvania.ro/', verified_on: '2026-10-19' };
@@ -53,4 +53,18 @@ test('the ANAF name must be the issuer: legal forms and diacritics aside, not a 
   assert.ok(sameCompany('MED LIFE SA', 'MedLife'));
   assert.ok(!sameCompany('PETROM CONSTRUCT SRL', 'OMV Petrom'));
   assert.ok(!sameCompany('TRANSILVANIA CONSULT SRL', 'Banca Transilvania'));
+});
+
+test('a code from the trade register only for the one S.A. with the issuer\'s name (and town)', () => {
+  const sa = (cui, name, town) => ({ cui, words: name.split(' '), town: town.split(' ') });
+  const reg = [sa('2469306', 'TRANSCOM', 'SIBIU MUNICIPIUL SIBIU'), sa('1574478', 'TRANSCOM', 'BUCURESTI SECTORUL 5'),
+    sa('2157789', 'MACOFIL', 'GORJ MUNICIPIUL TARGU JIU'), sa('1606030', 'SEVERNAV', 'MEHEDINTI MUNICIPIUL DROBETA TURNU SEVERIN'),
+    sa('29136800', 'GLISSANDO GARDEN CENTER', 'ILFOV'), sa('1', 'GLISSANDO', 'CLUJ')];
+  assert.equal(registryMatch('Transcom Bucuresti', reg), '1574478');       // the town tells the two apart
+  assert.equal(registryMatch('Macofil Tg. Jiu', reg), '2157789');          // Tg. = Târgu
+  assert.equal(registryMatch('Severnav Dr. Tr. Severin', reg), '1606030');
+  assert.equal(registryMatch('Glissando Garden Center', reg), '29136800');
+  assert.equal(registryMatch('Transcom', reg), null);                      // two of them: none
+  assert.equal(registryMatch('Transcom Iasi', reg), null);                 // not registered there
+  assert.equal(registryMatch('Glissando Garden', reg), null);              // a word short is not the name
 });

@@ -9,9 +9,17 @@
 // the first two pages of a few PDF reports linked from those pages (a current report to the
 // market regulator names the issuer's fiscal code). A code is kept only when ANAF's register
 // gives it the issuer's name, and only when exactly one such code is found.
+// With --registry, the companies still without a code (no site, or no code on it) are looked up
+// in the Trade Register's open data (ONRC, "Firme înregistrate la Registrul Comerțului",
+// data.gov.ro, CC BY 4.0; od_firme.csv downloaded by hand): a code is kept only when exactly one
+// joint-stock company (S.A.) ever registered bears the issuer's name (or its name without the
+// town the catalog appends, and then registered in that town), and ANAF's register gives that
+// code the same name, still registered.
 //
 //   node tools/update-company-entities.mjs [--only=TLV.RO,SNP.RO]
-import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
+//   node tools/update-company-entities.mjs --registry=<od_firme.csv> --dataset=<its data.gov.ro page>
+import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync, createReadStream } from 'node:fs';
+import { createInterface } from 'node:readline';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
@@ -42,6 +50,30 @@ export function sameCompany(anafName, issuerName) {
   if (a.join('') === b.join('')) return true;   // MED LIFE / MedLife
   if (b.every(w => a.includes(w))) return true;
   return a.every(w => b.includes(w)) && a.length >= b.length - 1 && a.some(w => w.length >= 4);
+}
+
+// A town word in the catalog's name, as in the register's address: the word itself, or its
+// abbreviation (Tg. = Târgu, Dr. Tr. = Drobeta Turnu).
+const townWord = (t, x) => t === x || (t.length <= 3 && x[0] === t[0] && new RegExp('^' + [...t].join('.*')).test(x));
+// The register's S.A. that is the issuer: the issuer's name as it stands, or followed only by the
+// words of the town (county) it is registered in. Each code once; exactly one, or none.
+export function registryMatch(issuer, companies) {
+  const b = words(issuer), hits = new Set();
+  for (const a of companies) {
+    if (!a.words.length) continue;
+    const same = a.words.join('') === b.join('');
+    const town = a.words.length < b.length && a.words.every((w, i) => w === b[i]) && b.slice(a.words.length).every(t => a.town.some(x => townWord(t, x)));
+    if (same || town) hits.add(a.cui);
+  }
+  return hits.size === 1 ? [...hits][0] : null;
+}
+async function registryCompanies(path) {
+  const out = [];
+  for await (const line of createInterface({ input: createReadStream(path) })) {
+    const c = line.split('^');   // DENUMIRE^CUI^...^FORMA_JURIDICA^ADR_TARA^ADR_JUDET^ADR_LOCALITATE^...
+    if (c[5] === 'SA' && /^[1-9]\d*$/.test(c[1])) out.push({ cui: c[1], words: words(c[0]), town: words(c[7] + ' ' + c[8]) });
+  }
+  return out;
 }
 
 async function get(url) {
@@ -87,7 +119,36 @@ async function anaf(cuis, day) {
   return new Map(((j && j.found) || []).map(f => [String(f.date_generale.cui), f.date_generale.denumire]));
 }
 
+async function fromRegistry(path, dataset) {
+  if (!/^https:\/\/data\.gov\.ro\/dataset\//.test(dataset || '')) { console.error('--dataset=<https://data.gov.ro/dataset/...> is required'); process.exit(1); }
+  const file = new URL('../config/company-entities.json', import.meta.url);
+  const rows = JSON.parse(readFileSync(file, 'utf8'));
+  const day = new Date().toISOString().slice(0, 10);
+  const companies = await registryCompanies(path);
+  console.log('S.A. in the register:', companies.length);
+  const found = BVB_SHARES.filter(([t]) => !rows.some(r => r.ticker === t && r.role === 'issuer'))
+    .map(([ticker, issuer]) => ({ ticker, issuer, cui: registryMatch(issuer, companies) }));
+  const cuis = found.filter(f => f.cui).map(f => f.cui), names = new Map();
+  for (let i = 0; i < cuis.length; i += 100) { (await anaf(cuis.slice(i, i + 100), day)).forEach((v, k) => names.set(k, v)); await new Promise(r => setTimeout(r, 1500)); }
+  for (const f of found) {
+    const name = f.cui && names.get(f.cui);
+    if (!name || !sameCompany(name, f.issuer.replace(/\b(S\.?\s?A)\.?$/i, '')) && !registryMatch(f.issuer, [{ cui: f.cui, words: words(name), town: words(f.issuer) }]) || rows.some(r => r.cui === f.cui)) {
+      console.log('skip', f.ticker, f.issuer, '|', f.cui ? f.cui + '=' + (name || 'not in ANAF') : 'no single match');
+      continue;
+    }
+    rows.push({ ticker: f.ticker, cui: f.cui, name, role: 'issuer', source_url: dataset, verified_on: day });
+    console.log('kept', f.ticker, f.cui, name);
+  }
+  rows.sort((a, b) => a.ticker.localeCompare(b.ticker) || a.role.localeCompare(b.role));
+  const v = validateEntities(rows, { tickers: catalogTickers() });
+  if (!v.ok) { console.error(v.errors.join('\n')); process.exit(1); }
+  writeFileSync(file, JSON.stringify(rows, null, 1) + '\n');
+  console.log(rows.length + ' companies');
+}
+
 async function main() {
+  const arg = k => (process.argv.find(a => a.startsWith('--' + k + '=')) || '').slice(k.length + 3);
+  if (arg('registry')) return fromRegistry(arg('registry'), arg('dataset'));
   const only = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7).split(',').filter(Boolean);
   const sites = JSON.parse(readFileSync(new URL('./data/bvb-sites.json', import.meta.url), 'utf8'));
   const file = new URL('../config/company-entities.json', import.meta.url);
