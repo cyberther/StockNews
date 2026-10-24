@@ -1,0 +1,15 @@
+# Financial statements for the Financials tab (tools/financials-batch.mjs): the US shares people
+# follow or hold, from the SEC. User unit:
+#   cp tools/systemd/market-pulse-financials.* ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now market-pulse-financials.timer
+# The SEC contact: ~/.config/market-pulse/sec-contact (an email address, one line).
+[Unit]
+Description=Market Pulse financial statements (SEC)
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/StockNews
+ExecStart=/usr/bin/env node tools/financials-batch.mjs
+Nice=15
+TimeoutStartSec=1h
