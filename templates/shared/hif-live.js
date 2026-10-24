@@ -442,15 +442,44 @@ async function recommendation(symbol, token){
   return put('recs', symbol, { buyPct: Math.round(buy / total * 100) + '%', detail: buy + ' / ' + hold + ' / ' + sell, period: r.period || '' });
 }
 
+// US listings: the SEC's public list of Nasdaq, NYSE and Cboe tickers (us-tickers.json, written by
+// tools/update-us-catalog.mjs), read once, on the first search. The Cloudflare gateway has no US
+// search (Finnhub is not used there), so without it US shares could not be found (2026-10-24).
+let usList = null;
+function usCatalog(){
+  if (!usList) usList = fetch(new URL('../shared/us-tickers.json', location.href).toString())
+    .then(r => r.ok ? r.json() : null).then(j => (j && Array.isArray(j.rows) ? j.rows : []))
+    .catch(() => { usList = null; return []; });
+  return usList;
+}
+// The same ranking as the European catalog: exact symbol or name, symbol start, name start, a
+// word of the name, then (3+ letters) anywhere in the name.
+function usSearch(rows, q, limit){
+  const f = String(q || '').toUpperCase().trim();
+  if (!f) return [];
+  const hits = [];
+  for (const r of rows) {
+    const sym = r[0], name = String(r[1]).toUpperCase();
+    const rank = sym === f || name === f ? 0 : sym.startsWith(f) ? 1 : name.startsWith(f) ? 2 : name.indexOf(' ' + f) >= 0 ? 3 : f.length >= 3 && name.indexOf(f) >= 0 ? 4 : -1;
+    if (rank >= 0) hits.push([rank, r]);
+  }
+  return hits.sort((a, b) => a[0] - b[0] || a[1][0].localeCompare(b[1][0])).slice(0, limit || 8)
+    .map(h => ({ ticker: h[1][0], name: h[1][1], exchange: h[1][2] }));
+}
+
 // Bucharest, XETRA and London listings come from the local catalogs (hif-bvb.js, hif-eu.js),
-// US ones from Finnhub; the catalogs' matches go first.
+// US ones from the SEC list above (and Finnhub, where a gateway still has it); the catalogs'
+// matches go first.
 async function search(q, token){
   // "NVDA.US" is how the apps show US listings; the providers know it as "NVDA".
   q = String(q || '').replace(/\.us$/i, '');
   if (!q) return null;
+  const us = /\.(ro|de|l)$/i.test(q) ? [] : usSearch(await usCatalog(), q, 8);
   const local = (window.HIFBVB ? window.HIFBVB.search(q, 6) : []).concat(window.HIFEU ? window.HIFEU.search(q, 6) : [])
-    .map(r => ({ ticker: r.ticker, name: r.name, exchange: r.exchange }));
+    .map(r => ({ ticker: r.ticker, name: r.name, exchange: r.exchange })).concat(us);
   if (!available(token)) return local.length ? local : null;
+  // The SEC list answered: no gateway call (it would spend quota, or fail on Cloudflare).
+  if (us.length) return local;
   // An exact Bucharest, London or Frankfurt symbol outside the catalog (PZC.L): offered when
   // the market data knows it, under its own name.
   const exact = /^[A-Za-z0-9][A-Za-z0-9-]{0,9}\.(l|de|ro)$/i.exec(q);
@@ -540,7 +569,7 @@ function translatedUrl(url, lang){
   return 'https://translate.google.com/translate?sl=auto&tl=' + tl + '&hl=' + tl + '&u=' + encodeURIComponent(url);
 }
 
-window.HIFLive = { usesSupabase: useSb, candles, filings, quote, quotes, roNews, euNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
+window.HIFLive = { usesSupabase: useSb, usSearch, candles, filings, quote, quotes, roNews, euNews, translatedUrl, profile, news, dayHead, recommendation, search, chart, earnings, earningsDates, earningsText, load,
   get mode(){ return sbMode() ? 'supabase' : proxyState === 'yes' ? 'proxy' : (proxyState === 'no' ? 'direct-or-off' : 'unknown'); },
   clearCache(){ cache.clear(); } };
 })();
