@@ -70,11 +70,14 @@ export async function ensureModel({ model, threads, wsUrl, sdkPath }) {
   try {
     const { LMStudioClient } = createRequire(import.meta.url)(path);
     client = new LMStudioClient({ baseUrl: wsUrl, verboseErrorMessages: false });
-    const loaded = (await client.llm.listLoaded()).filter(m => m.modelKey === model || m.identifier === model);
+    const all = await client.llm.listLoaded();
+    const loaded = all.filter(m => m.modelKey === model || m.identifier === model);
     for (const m of loaded) {
       if (configMatches(await m.getLoadConfig(), threads)) return `model ready (${threads} threads)`;
     }
-    for (const m of loaded) await m.unload();
+    // Every model in memory goes first, not only this one: LM Studio checks the memory before
+    // it loads, so another large model left loaded (a 27B tried on 2026-10-24) blocks the load.
+    for (const m of all) await m.unload();
     const t0 = Date.now();
     await client.llm.load(model, { verbose: false, config: wantedConfig(threads) });
     return `model reloaded with ${threads} threads in ${Math.round((Date.now() - t0) / 1000)} s`;
