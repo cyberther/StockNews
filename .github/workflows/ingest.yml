@@ -48,7 +48,7 @@ jobs:
       - run: npm ci --omit=dev --ignore-scripts
       # pdftotext reads the policy documents (ingest/policy/documents.mjs): nightly jobs only.
       - if: env.JOB == 'eod' || env.JOB == 'policy'
-        run: sudo apt-get install -y --no-install-recommends poppler-utils
+        run: sudo apt-get install -y --no-install-recommends poppler-utils || (sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends poppler-utils)
       - name: Run
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
