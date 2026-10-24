@@ -212,6 +212,7 @@
 </sc-if>
 <sc-if value="{{ hasData }}" hint-placeholder-val="{{ true }}">
 <div data-m-count="1" data-m-flash="1" style="font-family:var(--font-heading);font-weight:800;font-size:32px;line-height:1">{{ stock.price }}</div>
+<sc-if value="{{ stock.tradedOld }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:var(--s-mute);margin-top:4px">{{ stock.tradedNote }}</div></sc-if>
 <div style="font-size:14px;font-weight:600;margin-top:2px"><sc-if value="{{ stock.down }}" hint-placeholder-val="{{ false }}"><span style="color:var(--color-accent)">{{ stock.move }}</span></sc-if><sc-if value="{{ stock.up }}" hint-placeholder-val="{{ true }}"><span>{{ stock.move }}</span></sc-if></div>
 </sc-if>
 </div>
@@ -3944,7 +3945,12 @@ class Component extends DCLogic {
       const d = ev ? this.daysUntil(ev.date) : null;
       const withEv = ev ? Object.assign({}, base, { earnDate: ev.date, earnDays: d == null ? base.earnDays : (d === 0 ? 'today' : d + 'd') }) : base;
       const q = Q[t];
-      return q ? Object.assign({}, withEv, { price:q.price, move:q.move, up:q.up }) : withEv;
+      // A share nobody traded since before its market's last session (thin AeRO listings): the
+      // price is that day's, so the page says when it was (the freshness band is for all tickers).
+      const M = window.HIFMarkets, close = q && q.asOf && M && M.lastClose ? M.lastClose(M.marketOf(t), new Date()) : null;
+      const old = !!(close && q.asOf < close.getTime() - 20 * 3600000);
+      const tradedNote = old ? String(u.lastTrade || 'Last trade: {d}').replace('{d}', new Date(q.asOf).toLocaleDateString(this.appLocale, { day:'numeric', month:'short', year:'numeric' })) : '';
+      return q ? Object.assign({}, withEv, { price:q.price, move:q.move, up:q.up, tradedOld: old, tradedNote }) : withEv;
     };
     const storyCount = t => (LN[t] && LN[t].length) || 0;
     let baseFeed;
