@@ -2402,14 +2402,14 @@ class Component extends DCLogic {
     return String(b.interval === 'year' ? u.trialPriceYear : u.trialPriceMonth).replace('{p}', new Intl.NumberFormat(this.appLocale).format(p));
   }
   // The trial's last 3 days: when the first payment is taken, how much, and where to cancel.
-  // Shown on every screen but Account (which says it beside the plan) until "Got it" (per trial
-  // end, on this device); a reminder, not a push.
+  // Shown on every screen, Account included, until "Got it" (per trial end, on this device); a
+  // reminder, not a push.
   trialVals(u) {
     const b = this.state.billingPlan, end = b && Date.parse(b.period_end), left = end - Date.now();
     const key = 'mp.trialSeen';
     let seen = '';
     try { seen = localStorage.getItem(key) || ''; } catch (e) {}
-    const on = this.state.screen !== 'account' && !!(b && b.commercial && b.status === 'trialing' && end && left > 0 && left <= 3 * 864e5 && seen !== String(b.period_end) && !this.state.trialOk);
+    const on = !!(b && b.commercial && b.status === 'trialing' && end && left > 0 && left <= 3 * 864e5 && seen !== String(b.period_end) && !this.state.trialOk);
     if (!on) return { trialSoon: false, trialSoonText: '', trialManage: null, trialOk: null };
     const d = new Date(end).toLocaleDateString(this.appLocale, { day:'numeric', month:'long', year:'numeric' });
     const price = this.renewalPrice(u, b) || u.trialPriceAny || '';
