@@ -27,19 +27,36 @@ export const SEC_CONCEPTS = {
   debt: ['LongTermDebt', 'LongTermDebtNoncurrent', 'LongTermDebtAndCapitalLeaseObligations'],
   shares: ['WeightedAverageNumberOfDilutedSharesOutstanding', 'WeightedAverageNumberOfSharesOutstandingBasic'],
 };
+// Foreign companies filing a 20-F or 40-F tag their figures in IFRS terms, once a year, in their
+// own currency (Taiwan dollars for TSMC).
+export const IFRS_CONCEPTS = {
+  revenue: ['Revenue', 'RevenueFromContractsWithCustomers'],
+  gross_profit: ['GrossProfit'],
+  operating_income: ['ProfitLossFromOperatingActivities'],
+  net_income: ['ProfitLossAttributableToOwnersOfParent', 'ProfitLoss'],
+  eps: ['DilutedEarningsLossPerShare', 'BasicEarningsLossPerShare'],
+  ocf: ['CashFlowsFromUsedInOperatingActivities'],
+  capex: ['PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities', 'PurchaseOfPropertyPlantAndEquipment'],
+  assets: ['Assets'],
+  liabilities: ['Liabilities'],
+  equity: ['EquityAttributableToOwnersOfParent', 'Equity'],
+  cash: ['CashAndCashEquivalents'],
+  debt: ['NoncurrentPortionOfNoncurrentBorrowings', 'LongtermBorrowings'],
+};
 const INSTANT = new Set(['assets', 'liabilities', 'equity', 'cash', 'debt']);
-const FORMS = /^(10-K|10-Q|10-KT|10-QT)(\/A)?$/;
+const FORMS = /^(10-K|10-Q|10-KT|10-QT|20-F|40-F)(\/A)?$/;
 const DAY = 86400000;
 const days = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / DAY);
 const isYear = (s, e) => { const d = days(s, e); return d >= 350 && d <= 380; };
 const isQuarter = (s, e) => { const d = days(s, e); return d >= 80 && d <= 100; };
 const near = (a, b, tol = 10) => Math.abs(days(a, b)) <= tol;
 
-// One concept's facts in a unit, one value per (start, end): the latest filing wins.
-function facts(gaap, concept) {
+// One concept's facts in the statements' currency (or per share in it, or in shares), one value
+// per (start, end): the latest filing wins.
+function facts(gaap, concept, cur) {
   const c = gaap[concept];
   if (!c || !c.units) return [];
-  const unit = c.units.USD || c.units['USD/shares'] || c.units.shares;
+  const u = [cur, cur + '/shares', 'shares'].find(x => Array.isArray(c.units[x])), unit = u && c.units[u];
   if (!Array.isArray(unit)) return [];
   const by = new Map();
   for (const f of unit) {
@@ -109,10 +126,21 @@ function labels(yearEnds) {
 }
 
 export function secRows(companyfacts, { years = 5, quarters = 20 } = {}) {
-  const gaap = (companyfacts && companyfacts.facts && companyfacts.facts['us-gaap']) || {};
+  const all = (companyfacts && companyfacts.facts) || {};
+  // US GAAP when the company files with it, IFRS (a foreign filer) otherwise.
+  const usable = (tax, map) => tax && map.revenue.concat(map.net_income).some(c => tax[c]);
+  const ifrs = !usable(all['us-gaap'], SEC_CONCEPTS) && usable(all['ifrs-full'], IFRS_CONCEPTS);
+  const gaap = (ifrs ? all['ifrs-full'] : all['us-gaap']) || {}, MAP = ifrs ? IFRS_CONCEPTS : SEC_CONCEPTS;
+  // The statements' currency: the one revenue and net income have the longest record in (a
+  // foreign filer may add a "convenience translation" into dollars for its latest years; those
+  // are not its statements).
+  const counts = {};
+  for (const c of MAP.revenue.concat(MAP.net_income)) for (const [u, xs] of Object.entries((gaap[c] && gaap[c].units) || {}))
+    if (/^[A-Z]{3}$/.test(u)) counts[u] = (counts[u] || 0) + xs.length;
+  const currency = Object.keys(counts).sort((a, b) => counts[b] - counts[a] || (a === 'USD' ? -1 : 1))[0] || 'USD';
   const series = {};
-  for (const [key, concepts] of Object.entries(SEC_CONCEPTS)) {
-    series[key] = concepts.map(c => INSTANT.has(key) ? instants(facts(gaap, c)) : durations(facts(gaap, c)));
+  for (const [key, concepts] of Object.entries(MAP)) {
+    series[key] = concepts.map(c => INSTANT.has(key) ? instants(facts(gaap, c, currency)) : durations(facts(gaap, c, currency)));
   }
   const pick = (key, kind, end) => {
     for (const s of series[key]) {
@@ -131,9 +159,9 @@ export function secRows(companyfacts, { years = 5, quarters = 20 } = {}) {
   const L = labels(dedupe(ends.A));
   const row = (period, end) => {
     const data = {};
-    for (const key of Object.keys(SEC_CONCEPTS)) { const v = pick(key, period, end); if (v !== null) data[key] = v; }
+    for (const key of Object.keys(MAP)) { const v = pick(key, period, end); if (v !== null) data[key] = v; }
     if (data.ocf != null && data.capex != null) data.fcf = data.ocf - data.capex;
-    return { period, period_end: end, label: period === 'A' ? L.year(end) : L.quarter(end), currency: 'USD', data };
+    return { period, period_end: end, label: period === 'A' ? L.year(end) : L.quarter(end), currency, data };
   };
   return dedupe(ends.A).slice(0, years).map(e => row('A', e))
     .concat(dedupe(ends.Q).slice(0, quarters).map(e => row('Q', e)))
@@ -146,13 +174,14 @@ export const secTicker = t => String(t || '').toUpperCase().replace('.', '-');
 // ------------------------------------------------------------------ Finance Ministry (data.gov.ro)
 // The yearly "Situațiile financiare" datasets (Ministerul Finanțelor, CC BY 4.0): one file of
 // figures per kind of filer (WEB_IR: companies filing IFRS; WEB_BL_BS_SL and WEB_UU: the others;
-// institutions de credit: banks; SIF, VS, ASIG: funds, market firms, insurers), each with a .csv
+// institutions de credit: banks; SIF, VS, ASIG, BROK, IFN: funds, market firms, insurers,
+// insurance brokers, non-bank lenders), each with a .csv
 // that names its columns ("Cifra de afaceri neta;i13"). The columns differ by kind and year, so
 // they are found by name. Individual statements (not consolidated), in lei, at 31 December.
 export const MF_KINDS = [
   // [key, the file's name, preference when a company is in two of them]
   ['ir', /web_ir_/i], ['bank', /inst(it)?_de_credit/i], ['sif', /web_sif/i], ['vs', /web_vs_/i], ['asig', /webasig/i],
-  ['bl', /web_bl_bs_sl/i], ['uu', /web_uu_/i],
+  ['brok', /webbrok/i], ['ifn', /web_ifn/i], ['bl', /web_bl_bs_sl/i], ['uu', /web_uu_/i],
 ];
 const plain = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[şș]/gi, 's').replace(/[ţț]/gi, 't')
   .toLowerCase().replace(/\s+/g, ' ').replace(/[\s:,]+$/, '').trim();

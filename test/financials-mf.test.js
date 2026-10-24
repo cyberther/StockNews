@@ -38,6 +38,6 @@ test('a market firm (BVB, BRK): debts due within and after a year added up, a lo
 });
 
 test('every kind of file the ministry publishes for companies has a reader', () => {
-  for (const name of ['web_ir_an2024.txt', 'web_ir_2024.csv', 'web_instit_de_credit_an2024.txt', 'web_inst_de_credit_2024.csv', 'web_sif2024.txt', 'web_vs_2024.txt', 'WEBASIG2024.txt', 'web_bl_bs_sl_an2024.txt', 'web_uu_an2024.txt'])
+  for (const name of ['web_ir_an2024.txt', 'web_ir_2024.csv', 'web_instit_de_credit_an2024.txt', 'web_inst_de_credit_2024.csv', 'web_sif2024.txt', 'web_vs_2024.txt', 'WEBASIG2024.txt', 'webbrok2024.txt', 'web_ifn2024.txt', 'web_bl_bs_sl_an2024.txt', 'web_uu_an2024.txt'])
     assert.ok(MF_KINDS.some(([, re]) => re.test(name)), name);
 });

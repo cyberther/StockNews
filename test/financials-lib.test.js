@@ -47,3 +47,15 @@ test('no figures, no rows', () => {
   assert.deepEqual(secRows({}), []);
   assert.deepEqual(secRows({ facts: { 'ifrs-full': { Revenue: {} } } }), []);
 });
+
+// A foreign filer (TSMC, 20-F): IFRS figures, yearly, in the statements' own currency; the
+// "convenience translation" into dollars it adds for recent years is not taken.
+test('a 20-F filer: five years in its own currency, not the dollar translation', () => {
+  const tsm = secRows(JSON.parse(readFileSync(new URL('./fixtures/sec/tsm-companyfacts.json', import.meta.url), 'utf8')));
+  assert.ok(tsm.length >= 5 && tsm.every(r => r.period === 'A' && r.currency === 'TWD'));
+  const y = tsm.find(r => r.label === '2024');
+  // TSMC's 2024 annual report: revenue NT$2,894.31 bn, net income attributable NT$1,158.38 bn, EPS NT$44.67.
+  assert.equal(y.data.revenue, 2894307700000);
+  assert.equal(y.data.net_income, 1158380200000);
+  assert.equal(y.data.eps, 44.67);
+});
