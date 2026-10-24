@@ -348,6 +348,22 @@ begin
   end if;
 end $$;
 
+-- The figures read from the filings (management dealings, results, dividends, meetings,
+-- holdings): Pro (2026-10-24, the owner's call). filings.sql grants every column but data; this
+-- view gives data to Pro readers (and to every approved one while the commercial rules are off).
+do $$
+begin
+  if to_regclass('public.filings') is not null then
+    execute $v$
+      create or replace view public.filing_figures with (security_invoker = false) as
+        select id, ticker, url, title, published_at, first_seen, kind, source, official, extract_status, data
+        from public.filings where data is not null and public.is_pro()
+    $v$;
+    execute 'revoke all on public.filing_figures from public, anon';
+    execute 'grant select on public.filing_figures to authenticated';
+  end if;
+end $$;
+
 -- Who of these accounts gets push alerts (news and policy, supabase/functions/scan): all of
 -- them while the commercial rules are off, else the Pro ones.
 create or replace function public.pro_users(p_ids uuid[]) returns setof uuid

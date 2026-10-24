@@ -411,6 +411,7 @@
 </div>
 </sc-if>
 <sc-if value="{{ tb.noRows }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--s-mute);margin-top:8px">{{ ui.fEmptyView }}</div></sc-if>
+<sc-if value="{{ tb.locked }}" hint-placeholder-val="{{ false }}"><div role="note" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:8px;font-size:13px;background:var(--s-panel);padding:12px;max-width:80ch"><span style="flex:1 1 260px;line-height:1.45">{{ ui.fLocked }}</span><button onClick="{{ fxSeePro }}" style="min-height:32px;padding:0 12px;border:0;background:var(--color-accent);color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.upsellSee }}</button></div></sc-if>
 </div>
 </sc-for>
 <sc-if value="{{ fx.more }}" hint-placeholder-val="{{ false }}"><button onClick="{{ fx.showMore }}" style-hover="border-color:var(--color-accent)" style="margin-top:12px;min-height:36px;padding:0 14px;background:transparent;border:1px solid var(--s-rule);color:var(--s-ink);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ fx.moreLabel }}</button></sc-if>
@@ -4274,9 +4275,11 @@ class Component extends DCLogic {
       const view = views[s.filingsView] ? s.filingsView : 'all';
       const years = docs.map(dayOf).filter(Boolean).sort();
       const pending = docs.filter(r => ['insider', 'results', 'dividend', 'agm', 'holding'].includes(r.kind) && !r.extract_status).length;
-      const tables = views[view].map(t => Object.assign({}, t, { hasRows: t.rows.length > 0, noRows: !t.rows.length }));
+      // The figures' tables are Pro (the server sends no figures to Free); the documents stay.
+      const locked = view !== 'all' && this.plan === 'free';
+      const tables = views[view].map(t => Object.assign({}, t, { hasRows: !locked && t.rows.length > 0, noRows: !locked && !t.rows.length, locked }));
       return {
-        tabs: ['all', 'insider', 'results', 'dividend', 'holding'].map(k => ({ label: (u['fView_' + k] || k) + ' · ' + counts[k], on: view === k,
+        tabs: ['all', 'insider', 'results', 'dividend', 'holding'].map(k => ({ label: (u['fView_' + k] || k) + (k !== 'all' && this.plan === 'free' ? ' · Pro' : ' · ' + counts[k]), on: view === k,
           bg: view === k ? 'var(--color-accent)' : 'transparent', ink: view === k ? 'var(--s-on-accent)' : 'var(--s-mute)', edge: view === k ? 'var(--color-accent)' : 'var(--s-rule)',
           pick: () => this.setState({ filingsView:k, filingsMore:0 }) })),
         tables, more: view === 'all' && hasMoreDocs, moreLabel: u.fMore || 'Show more', showMore: () => this.moreFilings(stock.ticker),
@@ -4498,7 +4501,7 @@ class Component extends DCLogic {
       bookValue: book.valueLabel || '', bookDay: book.dayLabel || '', bookDayUp: book.dayUp, bookHas: !book.empty,
       ui: u,
       calRows, noCal: !calRows.length && !dataless(stock.ticker),
-      sigRows, noSig: !roF && !sigRows.length && !dataless(stock.ticker) && !!sigEmpty, sigEmpty, roF, notRoF: !roF, fx: fx || { tabs:[], tables:[] },
+      sigRows, noSig: !roF && !sigRows.length && !dataless(stock.ticker) && !!sigEmpty, sigEmpty, roF, notRoF: !roF, fx: fx || { tabs:[], tables:[] }, fxSeePro: () => this.go('paywall'),
       brand: this.props.brand || 'Market Pulse',
       planLabel: H_ALL ? (u.earlyAccess || 'Early access') : (isFree ? u.free : u.pro),
       allAccess: H_ALL, notAllAccess: !H_ALL,

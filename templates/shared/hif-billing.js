@@ -71,6 +71,11 @@ var CONFIG = {
       "pro": "bilFull"
     },
     {
+      "key": "bilRowFilings",
+      "free": "—",
+      "pro": "✓"
+    },
+    {
       "key": "bilRowChart",
       "free": "6M",
       "pro": "5Y"

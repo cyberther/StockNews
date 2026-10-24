@@ -19,6 +19,7 @@
     { "key": "bilRowCalc", "free": "—", "pro": "✓" },
     { "key": "bilRowDigest", "free": "—", "pro": "✓" },
     { "key": "bilRowGains", "free": "bilGainsFree", "pro": "bilFull" },
+    { "key": "bilRowFilings", "free": "—", "pro": "✓" },
     { "key": "bilRowChart", "free": "6M", "pro": "5Y" }
   ],
   "variants": { "month": null, "year": null }

@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 
 const data = readFileSync(new URL('../templates/shared/hif-data.js', import.meta.url), 'utf8');
 const app = readFileSync(new URL('../templates/stock-news-web/StockNewsWeb.dc.html', import.meta.url), 'utf8');
-const KEYS = ['polUpsell', 'upsellSee', 'upsellLater', 'impLocked', 'trialEnds', 'trialPriceMonth', 'trialPriceYear', 'trialPriceAny', 'trialThen', 'trialOk', 'gainsLocked'];
+const KEYS = ['polUpsell', 'upsellSee', 'upsellLater', 'impLocked', 'trialEnds', 'trialPriceMonth', 'trialPriceYear', 'trialPriceAny', 'trialThen', 'trialOk', 'gainsLocked', 'fLocked'];
 const values = key => [...data.matchAll(new RegExp('\\b' + key + ":'((?:[^'\\\\]|\\\\.)*)'", 'g'))].map(m => m[1]);
 
 test('every offer has its text in English, Romanian and German', () => {
@@ -40,4 +40,13 @@ test('the trial reminder: the last 3 days of a trial, the date, the amount and w
 test('Who gains: the Companies view is Pro on Free, with the offer in its place', () => {
   assert.match(app, /gainsCompaniesShow: view === 'companies' && this\.plan !== 'free', gainsCompaniesLocked: view === 'companies' && this\.plan === 'free'/);
   assert.match(app, /<sc-if value="\{\{ gainsCompaniesLocked \}\}"/);
+});
+
+test('Filings: the figures tables are Pro on Free, the list of documents stays; figures come from the Pro view', () => {
+  assert.match(app, /const locked = view !== 'all' && this\.plan === 'free';/);
+  assert.match(app, /<sc-if value="\{\{ tb\.locked \}\}"/);
+  const push = readFileSync(new URL('../templates/shared/hif-push.js', import.meta.url), 'utf8');
+  assert.match(push, /'filing_figures\?select='\+FILING_COLUMNS/);
+  assert.match(push, /rest\('filing_figures\?select=id,data&id=eq\./);
+  assert.doesNotMatch(push, /'filings\?select=[^']*data/);
 });
