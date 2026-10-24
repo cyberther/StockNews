@@ -35,7 +35,11 @@ create index if not exists filings_todo on public.filings (extract_status, kind)
 alter table public.filings enable row level security;
 alter table public.filings force row level security;
 revoke all on public.filings from anon;
-grant select on public.filings to authenticated;
+-- Every column but the figures read from the documents (data): those are Pro, through the view
+-- filing_figures (billing.sql). The list of documents stays for every approved reader.
+revoke select on public.filings from authenticated;
+grant select (id, ticker, url, title, published_at, kind, source, official, first_seen, extract_status, extracted_at, model)
+  on public.filings to authenticated;
 drop policy if exists "read filings" on public.filings;
 create policy "read filings" on public.filings for select to authenticated using (true);
 
