@@ -24,7 +24,7 @@ Gateway-ul (`netlify/functions/_shared/market/gateway.js`) alege furnizorul dup�
 | **Twelve Data** (`providers/twelvedata.js`) | rezervă pentru preț și grafic | Planul gratuit nu se folosește comercial. Afișarea externă cere „Redistribution Rights Add-On” sau un acord separat. | 🟡 | 🔴 |
 | **Financial Modeling Prep** (`providers/fmp.js`) | rezervă pentru preț, profil, istoric câștiguri | Licență personală. Afișarea pe site-uri sau aplicații pentru mai multe persoane, gratuite sau plătite, cere acord specific. | 🟡 | 🔴 |
 | **Alpha Vantage** (`providers/alphavantage.js`) | ultima rezervă (25 apeluri/zi) | Uz personal, necomercial. Comercial înseamnă inclusiv să lași alte persoane să acceseze informația. Pentru comercial: premium@alphavantage.co. | 🟡 | 🔴 |
-| **SEC EDGAR** (link-uri în `gateway.js`) | link-uri către rapoartele companiilor americane | Date publice ale guvernului SUA; trebuie respectate politica de acces corect și limita de cereri. | 🟢 | 🟢 |
+| **SEC EDGAR** (link-uri în `gateway.js`; lista `company_tickers_exchange.json` în `templates/shared/us-tickers.json`, scrisă de `tools/update-us-catalog.mjs`) | link-uri către rapoartele companiilor americane; lista simbolurilor Nasdaq, NYSE și Cboe pentru căutare (de la 2026-10-24, în locul căutării Finnhub, nefolosită pe Cloudflare) | Date publice ale guvernului SUA; trebuie respectate politica de acces corect și limita de cereri. | 🟢 | 🟢 |
 
 **Prețurile bursei în sine.** Dincolo de furnizor, bursele (BVB, LSE, Deutsche Börse, NYSE/Nasdaq)
 își licențiază datele. Afișarea către clienți plătitori cere de obicei un contract de vendor sau
