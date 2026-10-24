@@ -248,8 +248,8 @@
 </div>
 </div>
 <div style="display:grid;grid-template-columns:{{ detailCols }}">
-<div style="border-right:1px solid var(--s-rule)">
-<div style="display:flex;gap:8px;padding:14px var(--gx) 0">
+<div style="border-right:1px solid var(--s-rule);min-width:0">
+<div class="m-chips" style="display:flex;gap:8px;padding:14px var(--gx) 0;overflow-x:auto">
 <sc-for list="{{ detailTabs }}" as="t" hint-placeholder-count="3">
 <button onClick="{{ t.pick }}" style-hover="border-color:var(--color-accent)" style="min-height:36px;padding:0 14px;background:{{ t.bg }};border:1px solid {{ t.edge }};color:{{ t.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer">{{ t.label }}</button>
 </sc-for>
@@ -426,6 +426,50 @@
 </div>
 </sc-if>
 <div style="padding:10px var(--gx) 14px;font-size:12px;color:var(--s-mute);display:flex;flex-wrap:wrap;gap:4px 14px"><span>{{ lc.note }}</span><span>{{ ui.lcAttrib }} <a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer" style="color:inherit">TradingView</a></span></div>
+</div>
+</sc-if>
+<sc-if value="{{ tabFin }}" hint-placeholder-val="{{ false }}">
+<div style="border-top:1px solid var(--s-rule);margin-top:14px;padding:14px var(--gx) 16px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px">
+<div role="tablist" aria-label="{{ ui.finTab }}" style="display:flex;gap:4px">
+<sc-for list="{{ fin.tabs }}" as="t" hint-placeholder-count="2">
+<button role="tab" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" style-hover="border-color:var(--color-accent)" style="min-height:32px;padding:0 12px;background:{{ t.bg }};border:1px solid {{ t.edge }};color:{{ t.ink }};font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.06em;cursor:pointer">{{ t.label }}</button>
+</sc-for>
+</div>
+<sc-if value="{{ fin.hasRows }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;font-size:12px;color:var(--s-mute)">{{ fin.currency }}</span></sc-if>
+</div>
+<sc-if value="{{ fin.loading }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--s-mute);margin-top:14px;max-width:70ch;line-height:1.5">{{ ui.finLoading }}</div></sc-if>
+<sc-if value="{{ fin.failed }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size:13px;color:var(--s-mute);margin-top:14px;max-width:70ch;line-height:1.5">{{ ui.finFailed }}</div></sc-if>
+<sc-if value="{{ fin.empty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px;color:var(--s-mute);margin-top:14px;max-width:70ch;line-height:1.5">{{ fin.emptyText }}</div></sc-if>
+<sc-if value="{{ fin.hasRows }}" hint-placeholder-val="{{ false }}">
+<div id="fin-scroll" style="overflow-x:auto;margin-top:12px;-webkit-overflow-scrolling:touch">
+<div role="table" aria-label="{{ ui.finTab }}" style="min-width:{{ fin.minWidth }};font-variant-numeric:tabular-nums">
+<div role="row" style="display:grid;grid-template-columns:{{ fin.colsCss }};gap:0 12px;padding:6px 0;border-bottom:1px solid var(--s-rule)">
+<span role="columnheader" style="position:sticky;left:0;background:var(--s-bg)"></span>
+<sc-for list="{{ fin.cols }}" as="c" hint-placeholder-count="5"><span role="columnheader" style="text-align:right"><span style="display:block;font-family:var(--font-heading);font-weight:800;font-size:13px">{{ c.label }}</span><span style="display:block;font-size:11px;color:var(--s-mute)">{{ c.end }}</span></span></sc-for>
+</div>
+<sc-for list="{{ fin.groups }}" as="g" hint-placeholder-count="3">
+<div style="padding:14px 0 4px"><span style="display:inline-block;position:sticky;left:0;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ g.title }}</span></div>
+<sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="4">
+<div role="row" style="display:grid;grid-template-columns:{{ fin.colsCss }};gap:0 12px;padding:7px 0;border-bottom:1px solid var(--s-rule);align-items:baseline">
+<span role="rowheader" style="position:sticky;left:0;background:var(--s-bg);font-size:{{ r.size }};font-weight:{{ r.weight }};color:{{ r.ink }}">{{ r.label }}</span>
+<sc-for list="{{ r.cells }}" as="x" hint-placeholder-count="5"><span role="cell" style="text-align:right;font-size:{{ r.size }};color:{{ r.ink }}">{{ x.v }}</span></sc-for>
+</div>
+</sc-for>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{ fin.locked }}" hint-placeholder-val="{{ false }}"><div role="note" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:14px;font-size:13px;background:var(--s-panel);padding:12px;max-width:80ch"><span style="flex:1 1 280px;line-height:1.45">{{ ui.finLocked }}</span><button onClick="{{ fin.seePro }}" style="min-height:32px;padding:0 12px;border:0;background:var(--color-accent);color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.upsellSee }}</button></div></sc-if>
+<sc-if value="{{ fin.hasRatios }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:18px">
+<div style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--s-mute)">{{ ui.finRatios }}</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));border-top:1px solid var(--s-rule);border-left:1px solid var(--s-rule);margin-top:8px">
+<sc-for list="{{ fin.ratios }}" as="k" hint-placeholder-count="6"><div style="padding:10px 12px;border-right:1px solid var(--s-rule);border-bottom:1px solid var(--s-rule)"><div style="font-size:12px;color:var(--s-mute)">{{ k.label }}</div><div style="font-family:var(--font-heading);font-weight:800;font-size:18px;margin-top:3px;font-variant-numeric:tabular-nums">{{ k.v }}</div></div></sc-for>
+</div>
+</div>
+</sc-if>
+<div style="font-size:12px;color:var(--s-mute);margin-top:14px;max-width:80ch;line-height:1.5">{{ fin.source }} {{ ui.finNoAdvice }}</div>
+</sc-if>
 </div>
 </sc-if>
 <sc-if value="{{ tabResearch }}" hint-placeholder-val="{{ false }}">
@@ -2046,7 +2090,7 @@ class Component extends DCLogic {
     }, this.langsFrom(sess), fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, events:[], selected:'', screen:'portfolio', lcDrawings:{}, lcView:{} } : {}));
     // Without a watchlist on this device, the account's is on its way: no ticker picker until
     // it is in (loadAccountData).
-    if (fresh || (signingIn && !this.state.onboarded)) this.holdForAccount();
+    if (fresh || (signingIn && !this.state.onboarded)) this.holdForAccount(30000);
     this.loadPlan();
     // A choice made in this browser before the account had one is saved to the account.
     const p = sess.prefs || {}, A = window.HIFAuth;
@@ -2131,16 +2175,18 @@ class Component extends DCLogic {
   // The three are read together and applied at once: until they are in, a reader without a
   // watchlist on this device sees a short "loading" screen, not the ticker picker, and the
   // portfolio does not fill in piece by piece (2026-10-24).
-  // A server (or script) that does not answer must not hold the reader on the loading screen.
-  holdForAccount() {
+  // A server (or script) that does not answer must not hold the reader on the loading screen:
+  // 10 s from the request, and 30 s from signing in for the scripts to arrive and ask (a slow
+  // phone, or a busy machine running the tests, can take more than 10 s for those alone).
+  holdForAccount(ms) {
     clearTimeout(this._acctT);
     if (!this.state.acctLoading) this.setState({ acctLoading: true });
-    this._acctT = setTimeout(() => { if (this.state.acctLoading) this.setState({ acctLoading: false }); }, 10000);
+    this._acctT = setTimeout(() => { if (this.state.acctLoading) this.setState({ acctLoading: false }); }, ms);
   }
   loadAccountData(uid) {
     const P = window.HIFPush; if (!P) return;
     this._wlReady = false; this._hdReady = false; this._stReady = false;
-    this.holdForAccount();
+    this.holdForAccount(10000);
     const ask = f => f ? f().catch(() => undefined) : Promise.resolve(undefined);
     Promise.all([ask(P.loadWatchlist), ask(P.loadHoldings), ask(P.loadSettings)]).then(([rows, held, saved]) => {
       clearTimeout(this._acctT);
@@ -2279,6 +2325,11 @@ class Component extends DCLogic {
     this.autoBio();
     this.maybeDeviceSetup();
     if (this.state.screen === 'detail') this.ensureQuote(this.state.selected);
+    if (this.state.screen === 'detail' && this.state.detailTab === 'fin') this.ensureFinancials(this.state.selected);
+    // The statements open on the latest periods (the right end) when they don't all fit.
+    const finEl = typeof document !== 'undefined' ? document.getElementById('fin-scroll') : null;
+    const finKey = finEl ? this.state.selected + '|' + (this.state.finView || 'A') + '|' + finEl.scrollWidth : '';
+    if (finEl && finKey !== this._finKey) { this._finKey = finKey; finEl.scrollLeft = finEl.scrollWidth; }
     this.applyChartView();
     this.syncLiveChart();
     this.queueWatchlistSync();
@@ -3982,6 +4033,82 @@ class Component extends DCLogic {
     ['lcAvg', 'lcInd', 'lcPen'].forEach(key => { try { const v = JSON.parse(localStorage.getItem('mp.' + key) || 'null'); if (v != null) out[key] = v; } catch (e) {} });
     return out;
   }
+  // Financial statements (supabase/financials.sql), read once per ticker and visit.
+  ensureFinancials(sym) {
+    const P = window.HIFPush;
+    if (!sym || !P || !P.loadFinancials || (this._finAsk = this._finAsk || {})[sym]) return;
+    this._finAsk[sym] = true;
+    P.loadFinancials(sym).then(rows => this.setState(st => ({ finRows: Object.assign({}, st.finRows, { [sym]: rows }) })))
+      .catch(() => this.setState(st => ({ finRows: Object.assign({}, st.finRows, { [sym]: null }) })));
+  }
+  // The Financials tab: years or quarters, oldest on the left; the figures, the change on a year
+  // before, and (Pro) ratios. Free readers see the latest year and quarter (the server's rule).
+  finVals(u) {
+    const s = this.state, sym = s.selected, loc = this.appLocale, all = (s.finRows || {})[sym];
+    const view = s.finView === 'Q' ? 'Q' : 'A', free = this.plan === 'free';
+    const tabs = [['A', u.finAnnual || 'Annual'], ['Q', u.finQuarterly || 'Quarterly']].map(([k, label]) => ({ label, on: view === k,
+      bg: view === k ? 'var(--color-accent)' : 'transparent', ink: view === k ? 'var(--s-on-accent)' : 'var(--s-mute)', edge: view === k ? 'var(--color-accent)' : 'var(--s-rule)',
+      pick: () => this.setState({ finView: k }) }));
+    const base = { tabs, loading: all === undefined, failed: all === null, cols: [], groups: [], ratios: [], hasRows: false, locked: false,
+      empty: false, emptyText: '', source: '', seePro: () => this.go('paywall') };
+    if (!Array.isArray(all)) return base;
+    // One source per ticker: the SEC for US shares; for Bucharest, the companies' reports for
+    // quarters and the Finance Ministry's data for years when there's no report for that year.
+    const rows = all.filter(r => r.period === view);
+    const byEnd = new Map();
+    rows.forEach(r => { const k = r.period_end; if (!byEnd.has(k) || (byEnd.get(k).source === 'mf' && r.source !== 'mf')) byEnd.set(k, r); });
+    const cols = [...byEnd.values()].sort((a, b) => a.period_end.localeCompare(b.period_end)).slice(view === 'A' ? -5 : -20);
+    if (!cols.length) {
+      const ro = /\.RO$/.test(sym || ''), followed = (s.follows || []).indexOf(sym) >= 0 || !!(s.positions || {})[sym];
+      return Object.assign(base, { empty: true, emptyText: ro ? (u.finEmptyRo || 'No statements for this company yet.')
+        : followed ? (u.finEmptySoon || 'The statements come within a few hours of adding a company.') : (u.finEmptyFollow || 'Statements come for the companies in your list or portfolio.') });
+    }
+    const cur = cols[cols.length - 1].currency || '';
+    const big = v => v == null ? '\u2014' : new Intl.NumberFormat(loc, { notation: 'compact', maximumFractionDigits: Math.abs(v) >= 1e9 ? 2 : 1 }).format(v);
+    const per = v => v == null ? '\u2014' : new Intl.NumberFormat(loc, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+    const pct = v => v == null || !isFinite(v) ? '\u2014' : (v > 0 ? '+' : v < 0 ? '\u2212' : '') + Math.abs(v).toLocaleString(loc, { maximumFractionDigits: 1 }) + '%';
+    const d = c => c.data || {};
+    // The same period a year before: the previous year, or the quarter four back.
+    const prevOf = (c, i) => { const p = view === 'A' ? cols[i - 1] : cols[i - 4]; return p && Math.abs(Date.parse(c.period_end) - Date.parse(p.period_end) - 365.25 * 864e5) < 20 * 864e5 ? p : null; };
+    const growth = key => cols.map((c, i) => { const p = prevOf(c, i), a = d(c)[key], b = p && d(p)[key]; return { v: a != null && b ? pct((a - b) / Math.abs(b) * 100) : '\u2014', sub: true }; });
+    const line = (key, label, fmt) => ({ label, cells: cols.map(c => ({ v: (fmt || big)(d(c)[key]), sub: false })), has: cols.some(c => d(c)[key] != null) });
+    const groups = [
+      { title: u.finIncome || 'Income statement', rows: [
+        line('revenue', u.finRevenue || 'Revenue'), { label: u.finGrowth || 'Change on a year before', cells: growth('revenue'), has: true, sub: true },
+        line('gross_profit', u.finGross || 'Gross profit'), line('operating_income', u.finOperating || 'Operating income'), line('ebitda', 'EBITDA'),
+        line('net_income', u.finNet || 'Net income'), { label: u.finGrowth || 'Change on a year before', cells: growth('net_income'), has: true, sub: true },
+        line('eps', u.finEps || 'Earnings per share', per), line('employees', u.finEmployees || 'Employees', v => v == null ? '\u2014' : Number(v).toLocaleString(loc))] },
+      { title: u.finBalance || 'Balance sheet', rows: [line('assets', u.finAssets || 'Total assets'), line('liabilities', u.finLiabilities || 'Total liabilities'),
+        line('equity', u.finEquity || 'Equity'), line('cash', u.finCash || 'Cash'), line('debt', u.finDebt || 'Long-term debt')] },
+      { title: u.finCashflow || 'Cash flow', rows: [line('ocf', u.finOcf || 'Operating cash flow'), line('capex', u.finCapex || 'Capital spending'),
+        line('fcf', u.finFcf || 'Free cash flow')] },
+    ].map(g => Object.assign(g, { rows: g.rows.filter(r => r.has && !(r.sub && !g.rows.some(x => !x.sub && x.has)))
+      .map(r => Object.assign(r, { ink: r.sub ? 'var(--s-mute)' : 'var(--s-ink)', weight: r.sub ? 400 : 600, size: r.sub ? '12px' : '13px' })) }))
+      .filter(g => g.rows.some(r => !r.sub));
+    // Ratios on the latest period (Pro): margins, return on equity, leverage, and the price to the
+    // last four quarters' earnings.
+    const last = d(cols[cols.length - 1]), ratio = (a, b) => a != null && b ? a / b * 100 : null;
+    const q4 = all.filter(r => r.period === 'Q').sort((a, b) => b.period_end.localeCompare(a.period_end)).slice(0, 4);
+    const ttmEps = q4.length === 4 && q4.every(r => d(r).eps != null) ? q4.reduce((t, r) => t + d(r).eps, 0) : null;
+    // The live price, when it is in the statements' currency (a US share in dollars, a Bucharest one in lei).
+    const qt = (s.quotes || {})[sym], sameCur = (cur === 'USD' && !/\./.test(sym)) || (cur === 'RON' && /\.RO$/.test(sym));
+    const price = sameCur && qt && Number.isFinite(qt.last) ? qt.last : null;
+    const ratios = free ? [] : [
+      [u.finGrossMargin || 'Gross margin', pct(ratio(last.gross_profit, last.revenue)).replace('+', '')],
+      [u.finOpMargin || 'Operating margin', pct(ratio(last.operating_income, last.revenue)).replace('+', '')],
+      [u.finNetMargin || 'Net margin', pct(ratio(last.net_income, last.revenue)).replace('+', '')],
+      [u.finFcfMargin || 'Free cash flow margin', pct(ratio(last.fcf, last.revenue)).replace('+', '')],
+      [u.finRoe || 'Return on equity', view === 'A' ? pct(ratio(last.net_income, last.equity)).replace('+', '') : '\u2014'],
+      [u.finDe || 'Liabilities to equity', last.liabilities != null && last.equity ? per(last.liabilities / last.equity) : '\u2014'],
+      [u.finPe || 'Price to earnings (last 4 quarters)', price && ttmEps > 0 ? per(price / ttmEps) : '\u2014'],
+    ].filter(x => x[1] !== '\u2014').map(([label, v]) => ({ label, v }));
+    const srcs = [...new Set(cols.map(c => c.source))];
+    const source = srcs.map(x => x === 'sec' ? (u.finSrcSec || 'SEC EDGAR, public XBRL data') : x === 'mf' ? (u.finSrcMf || 'Finance Ministry open data (data.gov.ro)') : (u.finSrcReport || 'the company\u2019s reports, read by our model')).join(' \u00b7 ');
+    return Object.assign(base, { hasRows: true, cols: cols.map(c => ({ label: c.label, end: new Date(c.period_end).toLocaleDateString(loc, { day: 'numeric', month: 'short', year: 'numeric' }) })),
+      groups, ratios, hasRatios: ratios.length > 0, locked: free, colsCss: 'minmax(150px,1.4fr) repeat(' + cols.length + ', minmax(84px,1fr))',
+      minWidth: (162 + cols.length * 96) + 'px', currency: (u.finUnits || 'Amounts in {c}').replace('{c}', cur),
+      source: (u.finSource || 'Source: {s}.').replace('{s}', source) + (srcs.includes('sec') && view === 'Q' ? ' ' + (u.finQ4Note || 'The fourth quarter is the year less the first nine months.') : '') });
+  }
   liveChartVals(u) {
     const s = this.state, sym = s.selected || '', m = s.lcMeta || {}, loc = this.appLocale;
     const H = this.data || {}, U = H.UNIVERSE || [];
@@ -4611,14 +4738,14 @@ class Component extends DCLogic {
       ledgerEmpty: led.empty, ledgerHas: !led.empty,
       ledgerAccuracy: led.accuracyLabel, ledgerMissedN: String(led.missed), ledgerDodgedN: String(led.dodged),
       clearLedger: () => this.clearLedger(),
-      detailTabs: [['overview', u.whyTitle], ['news', u.tape], ['research', u.signalsTitle], ['chart', u.chartTab || 'Chart analysis']].map(t => ({
+      detailTabs: [['overview', u.whyTitle], ['news', u.tape], ['research', u.signalsTitle], ['chart', u.chartTab || 'Chart analysis'], ['fin', u.finTab || 'Financials']].map(t => ({
         key:t[0], label:t[1], on: dTab === t[0],
         bg: dTab === t[0] ? 'var(--color-accent)' : 'transparent',
         ink: dTab === t[0] ? 'var(--s-on-accent)' : 'var(--s-mute)',
         edge: dTab === t[0] ? 'var(--color-accent)' : 'var(--s-rule)',
         pick: () => this.setState({ detailTab:t[0] })
       })),
-      tabOverview: dTab === 'overview', tabNews: dTab === 'news', tabResearch: dTab === 'research', tabChart: dTab === 'chart',
+      tabOverview: dTab === 'overview', tabNews: dTab === 'news', tabResearch: dTab === 'research', tabChart: dTab === 'chart', tabFin: dTab === 'fin',
       // Left out when it would repeat the "why it moved" card word for word.
       hasCall: !!callText && callText !== (why && why.detail),
       why, hasWhy: !!why, whyLabel: why ? why.label : '', whyDetail: why ? why.detail : '',
@@ -4726,6 +4853,7 @@ class Component extends DCLogic {
       isAlertScreen: screen === 'alert',
       ...this.alertVals(u),
       lc: this.liveChartVals(u),
+      fin: dTab === 'fin' ? this.finVals(u) : { cols: [], groups: [] },
       ...this.adminVals(u),
       isAuth: !signedIn, isOnboard: signedIn && !s.onboarded && !s.pending && !s.acctLoading,
       isAcctLoading: signedIn && !s.onboarded && !s.pending && !s.locked && !!s.acctLoading, isLocked: signedIn && !!s.locked,

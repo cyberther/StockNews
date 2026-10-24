@@ -1,0 +1,12 @@
+# Every 3 hours: a share someone has just added gets its statements the same day; each one is
+# read again after a week.
+[Unit]
+Description=Read financial statements every 3 hours
+
+[Timer]
+OnCalendar=*-*-* 01/3:20:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

@@ -306,6 +306,14 @@ async function loadReportDates(ticker) {
   return r.ok && Array.isArray(r.body) ? r.body : null;
 }
 
+// One company's financial statements (supabase/financials.sql), newest first: every year and
+// quarter for Pro readers, the latest of each for the others. null when they could not be read.
+async function loadFinancials(ticker) {
+  if (!live() || !ticker) return null;
+  const r = await auth().rest('financials?select=source,period,period_end,label,currency,consolidated,data&ticker=eq.' + encodeURIComponent(ticker) + '&order=period_end.desc&limit=200');
+  return r.ok && Array.isArray(r.body) ? r.body : null;
+}
+
 // The user's drawings on one ticker's chart (supabase/drawings.sql), [] when none, null when
 // they could not be read (the app must not save over drawings it never got).
 async function loadDrawings(ticker) {
@@ -344,6 +352,6 @@ async function saveSettings(data) {
   return true;
 }
 
-window.HIFPush = { status, enable, disable, forget, policyAlerts, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadFilingFigures, loadFilingEvidence, loadReportDates, loadStoriesById, testAlert, loadDrawings, saveDrawings, loadSettings, saveSettings, supported };
+window.HIFPush = { status, enable, disable, forget, policyAlerts, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadFilingFigures, loadFilingEvidence, loadReportDates, loadStoriesById, testAlert, loadDrawings, saveDrawings, loadSettings, saveSettings, loadFinancials, supported };
 if(window.dispatchEvent&&typeof Event==='function')window.dispatchEvent(new Event('hif:account-ready'));
 })();
