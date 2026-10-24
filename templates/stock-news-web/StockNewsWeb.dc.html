@@ -645,6 +645,7 @@
 </article>
 </sc-for>
 </sc-if>
+<sc-if value="{{ gainsCompaniesLocked }}" hint-placeholder-val="{{ false }}"><div role="note" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:14px var(--gx);font-size:13px;background:var(--s-panel);padding:12px;max-width:80ch"><span style="flex:1 1 280px;line-height:1.45">{{ ui.gainsLocked }}</span><button onClick="{{ gainsSeePro }}" style="min-height:32px;padding:0 12px;border:0;background:var(--color-accent);color:var(--s-on-accent);font-family:var(--font-heading);font-weight:800;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer">{{ ui.upsellSee }}</button></div></sc-if>
 <sc-if value="{{ gainsCompaniesShow }}" hint-placeholder-val="{{ false }}">
 <sc-for list="{{ gainsCompanyRows }}" as="c" hint-placeholder-count="2">
 <article style="padding:14px var(--gx);border-bottom:1px solid var(--s-rule);display:grid;gap:6px">
@@ -2589,7 +2590,10 @@ class Component extends DCLogic {
       gainsMineOn: mine, toggleGainsMine: () => this.setState({ gainsMine: !mine }),
       gainsMineBg: mine ? 'var(--color-accent)' : 'transparent', gainsMineFg: mine ? 'var(--s-on-accent)' : 'var(--s-ink)',
       gainsLoading: !g, gainsHasError: !!s.gainsErr, gainsError: s.gainsErr || '',
-      gainsMeasuresShow: view === 'measures', gainsCompaniesShow: view === 'companies', gainsSectorsShow: view === 'sectors' };
+      gainsMeasuresShow: view === 'measures', gainsSectorsShow: view === 'sectors',
+      // The contracts and state aid company by company are Pro (the server sends none to Free).
+      gainsCompaniesShow: view === 'companies' && this.plan !== 'free', gainsCompaniesLocked: view === 'companies' && this.plan === 'free',
+      gainsSeePro: () => this.go('paywall') };
     if (!g) return Object.assign(out, { gainsMeasureRows: [], gainsCompanyRows: [], gainsCpvRows: [], gainsActRows: [], gainsEmpty: false });
     const links = g.links.filter(l => !mine || mineSet.has(l.subject_ticker));
     // By measure: an act or an analysis, the companies it touches and how.
@@ -2619,7 +2623,7 @@ class Component extends DCLogic {
       .map(([k, v]) => ({ key: k, label: P.cpvLabel(k, lang), value: lei(v) }));
     out.gainsActRows = sum(g.flows.filter(f => f.dimension === 'sector'), f => f.key, f => Number(f.measures) || 0).sort((a, b) => b[1] - a[1]).slice(0, 15)
       .map(([k, v]) => ({ key: k, label: k === 'fiscal-general' ? u.polGeneral : P.sectorLabel(k, lang), value: String(v) }));
-    out.gainsEmpty = view === 'measures' ? !out.gainsMeasureRows.length : view === 'companies' ? !out.gainsCompanyRows.length : !out.gainsCpvRows.length && !out.gainsActRows.length;
+    out.gainsEmpty = view === 'measures' ? !out.gainsMeasureRows.length : view === 'companies' ? out.gainsCompaniesShow && !out.gainsCompanyRows.length : !out.gainsCpvRows.length && !out.gainsActRows.length;
     return out;
   }
   // Politici 2.0: an admin hides a wrong automatic analysis; the reason is shown to readers.

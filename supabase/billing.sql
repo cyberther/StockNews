@@ -322,13 +322,25 @@ begin
   return new;
 end $$;
 
--- Impact results (and the accuracy view over them) and the day digests: Pro. The analyses
+-- Impact results (and the accuracy view over them), the day digests, and the contracts and state
+-- aid of "Cine câștigă": Pro. The analyses
 -- themselves (facts, assumptions, risks) stay readable by every approved account.
 do $$
 begin
   if to_regclass('public.impact_results') is not null then
     execute 'drop policy if exists "read results" on public.impact_results';
     execute 'create policy "read results" on public.impact_results for select to authenticated using (public.is_pro())';
+  end if;
+  -- "Cine câștigă" in full: the contracts and the state aid, company by company (2026-10-24, the
+  -- owner's call). The sums by kind of purchase (sector_state_flows) and the measures stay for
+  -- every approved reader. (policy-auto.sql recreates these two policies: run this file after it.)
+  if to_regclass('public.public_contracts') is not null then
+    execute 'drop policy if exists "read contracts" on public.public_contracts';
+    execute 'create policy "read contracts" on public.public_contracts for select to authenticated using (public.is_pro())';
+  end if;
+  if to_regclass('public.state_aid') is not null then
+    execute 'drop policy if exists "read aid" on public.state_aid';
+    execute 'create policy "read aid" on public.state_aid for select to authenticated using (public.is_pro())';
   end if;
   if to_regclass('public.ticker_digests') is not null then
     execute 'drop policy if exists "read digests" on public.ticker_digests';
