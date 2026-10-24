@@ -145,3 +145,22 @@ for (const [theme, scheme] of [['dark', 'dark'], ['light', 'light'], ['system', 
     } finally { await r.ctx.close(); }
   });
 }
+
+// 2026-10-24: on a phone the Account screen was cut off at the bottom and did not scroll
+// (it sat outside .app-main: test/screens-in-scroller.test.js).
+test('on a phone the Account screen scrolls down to its last button', { skip, timeout: TIMEOUT }, async () => {
+  const r = await open(browser, base, { server: { watchlist: [{ ticker: 'AMD', push: true }] },
+    record: { accountId: UID, onboarded: true, follows: ['AMD'], selected: 'AMD', positions: {},
+      session: { provider: 'email', email: 'u@example.com', userId: UID, since: Date.now() } } });
+  try {
+    await r.page.locator('.app-tabbar button').last().click();
+    await r.page.locator('.app-more [role=menuitem]', { hasText: /^(Cont|Account|Konto)/i }).first().click();
+    const main = r.page.locator('.app-main');
+    await r.page.waitForFunction(() => /#account$/.test(location.hash) || document.querySelector('.app-main').scrollHeight > 0);
+    const last = r.page.locator('.app-main button').last();
+    await last.scrollIntoViewIfNeeded();
+    const [m, b, bar] = await Promise.all([main.boundingBox(), last.boundingBox(), r.page.locator('.app-tabbar').boundingBox()]);
+    assert.ok(await main.evaluate(el => el.scrollTop > 0), 'the screen scrolled');
+    assert.ok(b.y >= m.y && b.y + b.height <= bar.y, `the last button (${b.y}..${b.y + b.height}) is on view above the tab bar (${bar.y})`);
+  } finally { await r.ctx.close(); }
+});
