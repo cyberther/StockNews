@@ -15,6 +15,7 @@
 //   HIFPush.loadWatchlist()     -> Promise<[{ ticker, push }] | null>
 //   HIFPush.syncHoldings(positions) -> mirror the positions ({ TICKER: { shares, cost } })
 //   HIFPush.loadHoldings()      -> Promise<[{ ticker, shares, avg_price }] | null>
+//   HIFPush.loadSettings()      -> Promise<{ ...settings } | null>   (saveSettings(data) writes them)
 //   HIFPush.loadSummaries(ids, lang) -> Promise<{ storyId: summary }> (AI summaries)
 (function(){
 if (window.HIFPush) return;
@@ -305,11 +306,13 @@ async function loadReportDates(ticker) {
   return r.ok && Array.isArray(r.body) ? r.body : null;
 }
 
-// The user's drawings on one ticker's chart (supabase/drawings.sql), [] when none.
+// The user's drawings on one ticker's chart (supabase/drawings.sql), [] when none, null when
+// they could not be read (the app must not save over drawings it never got).
 async function loadDrawings(ticker) {
   if (!live() || !ticker) return [];
   const r = await auth().rest('chart_drawings?select=drawings&ticker=eq.' + encodeURIComponent(ticker) + '&limit=1');
-  return r.ok && Array.isArray(r.body) && r.body[0] && Array.isArray(r.body[0].drawings) ? r.body[0].drawings : [];
+  if (!r.ok || !Array.isArray(r.body)) return null;
+  return r.body[0] && Array.isArray(r.body[0].drawings) ? r.body[0].drawings : [];
 }
 async function saveDrawings(ticker, list) {
   if (!live() || !ticker) return false;
@@ -322,6 +325,25 @@ async function saveDrawings(ticker, list) {
   return true;
 }
 
-window.HIFPush = { status, enable, disable, forget, policyAlerts, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadFilingFigures, loadFilingEvidence, loadReportDates, loadStoriesById, testAlert, loadDrawings, saveDrawings, supported };
+// The account's settings (supabase/settings.sql; which ones: hif-settings.js): {} when none
+// are saved yet, null when they could not be read.
+async function loadSettings() {
+  if (!live()) return null;
+  const r = await auth().rest('user_settings?select=data&limit=1');
+  if (!r.ok || !Array.isArray(r.body)) return null;
+  return r.body[0] && r.body[0].data && typeof r.body[0].data === 'object' ? r.body[0].data : {};
+}
+async function saveSettings(data) {
+  if (!live()) return false;
+  const s = auth().session();
+  if (!s) return false;
+  const r = await auth().rest('user_settings?on_conflict=user_id', { method: 'POST',
+    headers: { prefer: 'resolution=merge-duplicates,return=minimal', 'content-type': 'application/json' },
+    body: [{ user_id: s.userId, data: data || {}, updated_at: new Date().toISOString() }] });
+  if (!r.ok) throw new Error('save ' + r.status);
+  return true;
+}
+
+window.HIFPush = { status, enable, disable, forget, policyAlerts, syncWatchlist, loadWatchlist, syncHoldings, loadHoldings, loadSummaries, loadStories, loadDigest, loadFilings, loadFilingFigures, loadFilingEvidence, loadReportDates, loadStoriesById, testAlert, loadDrawings, saveDrawings, loadSettings, saveSettings, supported };
 if(window.dispatchEvent&&typeof Event==='function')window.dispatchEvent(new Event('hif:account-ready'));
 })();
