@@ -11,6 +11,33 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#121212">
+<!-- The published build this page is (scripts/build.mjs fills it in and writes /version.json). -->
+<meta name="mp-build" content="dev">
+<script>
+// A home-screen app on iPhone is brought back, not reloaded: a page opened before a deploy kept
+// running the old version for days (2026-10-24). Back on screen, the app asks which build is
+// live (at most every 5 minutes) and reloads when it is another one, unless the reader is typing
+// or a dialog is open. What the reader has (lists, positions, sign-in) is kept on the device.
+(function () {
+  var mine = (document.querySelector('meta[name="mp-build"]') || {}).content || 'dev';
+  if (mine === 'dev' || !window.fetch) return;
+  var asked = 0;
+  function busy() {
+    var a = document.activeElement;
+    return !!(a && (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable)) || !!document.querySelector('[role="dialog"], dialog[open]');
+  }
+  function check() {
+    if (document.visibilityState !== 'visible' || Date.now() - asked < 5 * 60000) return;
+    asked = Date.now();
+    fetch('/version.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (v) {
+      if (v && typeof v.build === 'string' && v.build && v.build !== mine && !busy()) location.reload();
+    }).catch(function () {});
+  }
+  document.addEventListener('visibilitychange', check);
+  window.addEventListener('pageshow', function (e) { if (e.persisted) { asked = 0; check(); } });
+  window.addEventListener('focus', check);
+})();
+</script>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png">

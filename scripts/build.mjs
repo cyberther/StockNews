@@ -6,9 +6,10 @@
 // Supabase settings, so no function runs per visitor to serve them) and a lower-case
 // forwarding page for old links. Netlify builds don't: its secret scan fails a build whose
 // output repeats an environment value, and it serves paths in any case anyway.
-import { cpSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { greenBuild } from './green-build.mjs';
+import { randomBytes } from 'node:crypto';
 import { publicConfig } from '../netlify/functions/_shared/public-config.js';
 
 const output = process.env.BUILD_OUT || 'dist';
@@ -96,5 +97,17 @@ if (cloudflare) {
     '<a href="StockNewsWeb.dc.html">Market Pulse</a>\n');
 }
 
+// The build id: the page carries it (meta mp-build) and /version.json says which one is live, so
+// a page left open (a home-screen app on iPhone) reloads after a deploy. The commit when known,
+// so a rebuild of the same commit asks for no reload.
+const build = (process.env.CF_PAGES_COMMIT_SHA || process.env.COMMIT_REF || process.env.GITHUB_SHA || randomBytes(8).toString('hex')).slice(0, 16);
+{
+  const app = join(output, 'templates/stock-news-web/StockNewsWeb.dc.html');
+  const html = readFileSync(app, 'utf8');
+  if (!html.includes('<meta name="mp-build" content="dev">')) throw new Error('the app page has no mp-build meta');
+  writeFileSync(app, html.replace('<meta name="mp-build" content="dev">', `<meta name="mp-build" content="${build}">`));
+  writeFileSync(join(output, 'version.json'), JSON.stringify({ build }) + '\n');
+  writeFileSync(join(output, '_headers'), readFileSync(join(output, '_headers'), 'utf8') + '\n/version.json\n  Cache-Control: no-store\n');
+}
 greenBuild(output);
 console.log(`Built ${cloudflare ? 'Cloudflare Pages' : 'Netlify'} bundle in ${output}`);
