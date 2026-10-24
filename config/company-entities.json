@@ -8,12 +8,76 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "4RT.RO",
+  "cui": "34836770",
+  "name": "FORT S.A.",
+  "role": "issuer",
+  "source_url": "https://fortcyber.com/privacy-policy/",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "AAB.RO",
   "cui": "37478862",
   "name": "AGROLAND AGRIBUSINESS S.A.",
   "role": "issuer",
   "source_url": "https://agribusiness.agroland.ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "AAG.RO",
+  "cui": "1196550",
+  "name": "AAGES S.A.",
+  "role": "issuer",
+  "source_url": "https://www.aages.ro/privacy-policy/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ABN.RO",
+  "cui": "14988404",
+  "name": "ABN SYSTEMS INTERNATIONAL S.A.",
+  "role": "issuer",
+  "source_url": "https://abnsystems.ro/investors",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ADISS.RO",
+  "cui": "3359107",
+  "name": "ADISS SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ADMY.RO",
+  "cui": "1628551",
+  "name": "ADMET S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "AG.RO",
+  "cui": "25165241",
+  "name": "AGROLAND BUSINESS SYSTEM S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ALB.RO",
+  "cui": "1761654",
+  "name": "ALBAPAM SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ALCQ.RO",
+  "cui": "1801848",
+  "name": "ALCOM SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "ALDANI.RO",
@@ -41,12 +105,84 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "ALT.RO",
+  "cui": "1520249",
+  "name": "ALTUR SA",
+  "role": "issuer",
+  "source_url": "https://altursa.ro/en/privacy-and-data-protection-policy/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ALU.RO",
+  "cui": "10042631",
+  "name": "ALUMIL ROM INDUSTRY SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ALW.RO",
+  "cui": "14724950",
+  "name": "VISUAL FAN S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "AMAL.RO",
+  "cui": "2141715",
+  "name": "INTERNATIONAL CAVIAR CORPORATION SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ANIM.RO",
+  "cui": "338819",
+  "name": "SOCIETATEA COMERCIALA STUDIOUL CINEMATOGRAFIC ANIMAFILM S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "APP.RO",
+  "cui": "26760786",
+  "name": "APPRAISAL & VALUATION S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ARAX.RO",
+  "cui": "803727",
+  "name": "ARMAX GAZ SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ARCU.RO",
+  "cui": "199060",
+  "name": "SIFI CLUJ RETAIL S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "ARCV.RO",
   "cui": "1680630",
   "name": "IMOTRUST SA",
   "role": "issuer",
   "source_url": "https://imotrustarad.ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "ARJI.RO",
+  "cui": "480871",
+  "name": "ARTECA JILAVA SA",
+  "role": "issuer",
+  "source_url": "https://www.arteca.ro/media/2025/informare.pdf",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "ARM.RO",
@@ -63,6 +199,14 @@
   "role": "issuer",
   "source_url": "https://caromet.ro/despre-noi/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "ARO.RO",
+  "cui": "1102041",
+  "name": "ARO-PALACE SA",
+  "role": "issuer",
+  "source_url": "https://aro-palace.ro/wp-content/uploads/2026/08/RAPORT-SEMESTRIAL-30.06.2026-1.pdf",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "AROBS.RO",
@@ -90,12 +234,28 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "ASC.RO",
+  "cui": "21482859",
+  "name": "ASCENDIA S.A.",
+  "role": "issuer",
+  "source_url": "https://www.ascendia.ro/_assets/374/ASC_20260819155814_ASC7694_1908026___Ziua_investitorului.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "ASP.RO",
   "cui": "1346828",
   "name": "RAFINARIA ASTRA ROMANA SA",
   "role": "issuer",
   "source_url": "https://astrarom.ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "AST.RO",
+  "cui": "38114908",
+  "name": "ARCTIC STREAM S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "ATB.RO",
@@ -105,6 +265,30 @@
   "source_url": "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva",
   "verified_on": "2026-10-19",
   "evidence": "anaf"
+ },
+ {
+  "ticker": "ATRD.RO",
+  "cui": "1555026",
+  "name": "ATELIERELE CFR GRIVITA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "AUXI.RO",
+  "cui": "1352528",
+  "name": "ATM - CONSTRUCT SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "AVIO.RO",
+  "cui": "2326144",
+  "name": "AVIOANE CRAIOVA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "AVSL.RO",
@@ -123,12 +307,60 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "BCM.RO",
+  "cui": "10376500",
+  "name": "CASA DE BUCOVINA - CLUB DE MUNTE SA",
+  "role": "issuer",
+  "source_url": "https://www.casadebucovina.ro/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "BENTO.RO",
+  "cui": "16558004",
+  "name": "2B INTELLIGENT SOFT S.A.",
+  "role": "issuer",
+  "source_url": "https://www.bento.ro/wp-content/uploads/2026/05/Hotarare-AGOA-Bento-nr.1_30.04.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "BIOW.RO",
+  "cui": "10684445",
+  "name": "VIFRANA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "BLEA.RO",
+  "cui": "14662555",
+  "name": "BALEA ESTIVAL 2002 SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "BNET.RO",
   "cui": "21181848",
   "name": "BITTNET SYSTEMS SA",
   "role": "issuer",
   "source_url": "https://www.bittnet.ro/despre-noi/contact/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "BONA.RO",
+  "cui": "228824",
+  "name": "BONAS IMPORT EXPORT S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "BRCR.RO",
+  "cui": "2266085",
+  "name": "BRAICONF SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "BRD.RO",
@@ -149,6 +381,14 @@
   "evidence": "anaf"
  },
  {
+  "ticker": "BRM.RO",
+  "cui": "723636",
+  "name": "BERMAS SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "BRNA.RO",
   "cui": "2251084",
   "name": "ROMNAV SA",
@@ -157,12 +397,28 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "BUCS.RO",
+  "cui": "717030",
+  "name": "BUCOVINA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "BUCU.RO",
   "cui": "19",
   "name": "BUCUR OBOR SA",
   "role": "issuer",
   "source_url": "https://bucurobor.ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "BUCV.RO",
+  "cui": "1584234",
+  "name": "BUCUR SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "BVB.RO",
@@ -174,6 +430,22 @@
   "evidence": "anaf"
  },
  {
+  "ticker": "CACU.RO",
+  "cui": "201624",
+  "name": "SIFI CJ LOGISTIC S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CAIN.RO",
+  "cui": "23058338",
+  "name": "CASA ALBĂ-INDEPENDENŢA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "CAOR.RO",
   "cui": "56150",
   "name": "SIF HOTELURI S.A.",
@@ -182,12 +454,60 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "CBC.RO",
+  "cui": "201535",
+  "name": "CARBOCHIM SA",
+  "role": "issuer",
+  "source_url": "https://www.carbochim.ro/fileadmin/user_upload/Actionari/2026/AGA_28.04.2026/Convocator_AGOA_AGEA-_28.04.2026.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CBOT.RO",
+  "cui": "8278020",
+  "name": "COMCEREAL SA",
+  "role": "issuer",
+  "source_url": "https://www.comcerealbt.ro/contact.php",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CC.RO",
+  "cui": "17753763",
+  "name": "CONNECTIONS CONSULT S.A.",
+  "role": "issuer",
+  "source_url": "https://connectionsconsult.ro/wp-content/uploads/2025/03/Memorandum-Connections_08.09.2021.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "CCOM.RO",
   "cui": "9625020",
   "name": "CEREALCOM SA",
   "role": "issuer",
   "source_url": "https://www.cerealcomteleorman.ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "CEPO.RO",
+  "cui": "449620",
+  "name": "CEPROCIM SA",
+  "role": "issuer",
+  "source_url": "https://www.ceprocim.ro/despre-noi/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CFED.RO",
+  "cui": "2292068",
+  "name": "CONSTRUCTII FEROVIARE CRAIOVA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CFH.RO",
+  "cui": "13533870",
+  "name": "CRIS-TIM FAMILY HOLDING S.A.",
+  "role": "issuer",
+  "source_url": "https://cristim.ro/politica-de-confidentialitate/",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "CHIA.RO",
@@ -206,12 +526,92 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "CICE.RO",
+  "cui": "1605868",
+  "name": "CICERO SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CICO.RO",
+  "cui": "167",
+  "name": "CI-CO SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CLAIM.RO",
+  "cui": "39395976",
+  "name": "AIR CLAIM S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CLUB.RO",
+  "cui": "14662369",
+  "name": "HOTEL CLUB ESTIVAL 2002 SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CMBU.RO",
+  "cui": "2788305",
+  "name": "COMMIXT SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CMCM.RO",
+  "cui": "1868287",
+  "name": "COMCM SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CMF.RO",
+  "cui": "568656",
+  "name": "COMELF SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CMIL.RO",
+  "cui": "8208989",
+  "name": "COMCEREAL SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "CMVX.RO",
   "cui": "1909360",
   "name": "COMVEX SA",
   "role": "issuer",
   "source_url": "https://www.comvex.ro/ro/contact/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "CNTE.RO",
+  "cui": "622445",
+  "name": "CONTED SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "COBU.RO",
+  "cui": "1152635",
+  "name": "RENEWABLE HOLDING MANAGEMENT S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "COCB.RO",
@@ -230,12 +630,84 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "CODE.RO",
+  "cui": "38043696",
+  "name": "SOFTBINATOR TECHNOLOGIES S.A.",
+  "role": "issuer",
+  "source_url": "https://softbinator.com/privacy-policy/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "COEC.RO",
+  "cui": "116",
+  "name": "CONECT BUSINESS PARK SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "COET.RO",
+  "cui": "2622360",
+  "name": "COMPLEX COMET SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "COKG.RO",
   "cui": "1384767",
   "name": "COMALEX SA",
   "role": "issuer",
   "source_url": "https://www.comalexsa.ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "COKJ.RO",
+  "cui": "2252764",
+  "name": "CONCIVIA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "COLK.RO",
+  "cui": "1343686",
+  "name": "CONEX PRAHOVA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "COMI.RO",
+  "cui": "1100008",
+  "name": "CONDMAG SA",
+  "role": "issuer",
+  "source_url": "https://www.condmag.ro/images/Raport%20anual%2031.12.2020.html",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "COMY.RO",
+  "cui": "1291838",
+  "name": "COMAT SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CONK.RO",
+  "cui": "1153932",
+  "name": "CONCAS  SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "CORO.RO",
+  "cui": "1641933",
+  "name": "CONSTRUCTII FEROVIARE CFB S.A.",
+  "role": "issuer",
+  "source_url": "https://www.sccfgalati.ro/documents/SitFin/2026_S1.pdf",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "COTE.RO",
@@ -247,12 +719,28 @@
   "evidence": "anaf"
  },
  {
+  "ticker": "COTN.RO",
+  "cui": "1345008",
+  "name": "COMREP SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "COUT.RO",
   "cui": "1579530",
   "name": "COMTURIST SA",
   "role": "issuer",
   "source_url": "https://comturist.ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "COVB.RO",
+  "cui": "826992",
+  "name": "CONFECTII VASLUI SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "CPHA.RO",
@@ -263,12 +751,92 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "CPLB.RO",
+  "cui": "12714933",
+  "name": "CONSTRUCTII COMPLEXE BUZAU SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "CRC.RO",
   "cui": "960322",
   "name": "CHIMCOMPLEX SA BORZESTI",
   "role": "issuer",
   "source_url": "https://chimcomplex.com/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "CRMC.RO",
+  "cui": "1861319",
+  "name": "CARMECO SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "DENT.RO",
+  "cui": "32652380",
+  "name": "DR FISCHER DENTAL S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "DIAS.RO",
+  "cui": "132",
+  "name": "DIASFIN SA",
+  "role": "issuer",
+  "source_url": "https://www.diasfin.ro/contact.php",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "DN.RO",
+  "cui": "24020501",
+  "name": "DN AGRAR GROUP S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "DOIS.RO",
+  "cui": "742395",
+  "name": "DORNA TURISM SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "EAI.RO",
+  "cui": "7348194",
+  "name": "ELECTRO-ALFA INTERNATIONAL S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ECT.RO",
+  "cui": "607321",
+  "name": "GRUPUL INDUSTRIAL ELECTROCONTACT SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "EEAI.RO",
+  "cui": "3276087",
+  "name": "ELECTROCONSTRUCTIA ELCO ALBA IULIA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "EFO.RO",
+  "cui": "2980547",
+  "name": "TURISM,HOTELURI,RESTAURANTE MAREA NEAGRĂ SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "EL.RO",
@@ -280,12 +848,124 @@
   "evidence": "anaf"
  },
  {
+  "ticker": "ELCT.RO",
+  "cui": "557274",
+  "name": "EL-CO SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ELEL.RO",
+  "cui": "2691247",
+  "name": "ELECTROCONSTRUCTIA ELCO SUCEAVA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ELER.RO",
+  "cui": "3426320",
+  "name": "ELEROM SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ELGS.RO",
+  "cui": "156027",
+  "name": "AETA S.A.",
+  "role": "issuer",
+  "source_url": "https://electroarges.ro/en/01-politica-confidentialitate/politica-confidentialitate/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ELJ.RO",
+  "cui": "51",
+  "name": "ELECTROAPARATAJ SA",
+  "role": "issuer",
+  "source_url": "https://www.electroaparataj.ro/contact.html",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ELJA.RO",
+  "cui": "790600",
+  "name": "ELECTROMONTAJ CARPATI SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "ELMA.RO",
   "cui": "414118",
   "name": "ELECTROMAGNETICA SA",
   "role": "issuer",
   "source_url": "https://electromagnetica.ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "ELRD.RO",
+  "cui": "458807",
+  "name": "ELECTRECORD SA",
+  "role": "issuer",
+  "source_url": "https://electrecord.ro/termeni-si-conditii/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ELV.RO",
+  "cui": "11273421",
+  "name": "ELVILA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ELZY.RO",
+  "cui": "1128645",
+  "name": "ELECTROPRECIZIA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "EM.RO",
+  "cui": "45474934",
+  "name": "GRUP EM S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "EMAI.RO",
+  "cui": "803115",
+  "name": "EMAILUL SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "EMTL.RO",
+  "cui": "1830894",
+  "name": "ELECTROMETAL SA",
+  "role": "issuer",
+  "source_url": "https://www.electrometal.ro/contact/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ENP.RO",
+  "cui": "1323700",
+  "name": "COMPANIA ENERGOPETROL SA",
+  "role": "issuer",
+  "source_url": "https://www.energo.ro/desprenoi.html",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "EPN.RO",
+  "cui": "2048307",
+  "name": "EMA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "EVER.RO",
@@ -305,6 +985,46 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "FEP.RO",
+  "cui": "752",
+  "name": "FEPER SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "FERO.RO",
+  "cui": "1709257",
+  "name": "IAMBA ARAD S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "FIMA.RO",
+  "cui": "199133",
+  "name": "FIMARO SA",
+  "role": "issuer",
+  "source_url": "https://www.fimaro.ro/content/documente/raport_trimestrul_I_2026.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "FOJE.RO",
+  "cui": "1397872",
+  "name": "FORAJ SONDE SA",
+  "role": "issuer",
+  "source_url": "https://fsv.ro/wp-content/uploads/2026/10/FOJE_20261016115143_FOJE-Raport-Curent-Hotarari-AGEA-RO.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "FOSB.RO",
+  "cui": "3730778",
+  "name": "FORAJ SONDE SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "FP.RO",
   "cui": "18253260",
   "name": "FONDUL PROPRIETATEA SA",
@@ -312,6 +1032,62 @@
   "source_url": "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva",
   "verified_on": "2026-10-19",
   "evidence": "anaf"
+ },
+ {
+  "ticker": "GALF.RO",
+  "cui": "1633663",
+  "name": "GALFINBAND SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "GGC.RO",
+  "cui": "29136800",
+  "name": "GLISSANDO GARDEN CENTER S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "GHIM.RO",
+  "cui": "1133390",
+  "name": "A.T.C. - AGRO TOTAL CONSTRUCT SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "GREEN.RO",
+  "cui": "29647812",
+  "name": "GREEN TECH INTERNATIONAL S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "GRF.RO",
+  "cui": "24980530",
+  "name": "GRAFFITI PLUS S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "GRIU.RO",
+  "cui": "426",
+  "name": "GRIUL SA",
+  "role": "issuer",
+  "source_url": "https://griulsa.ro/buget%20venituri%20cheltuieli%20griul%200001.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "GSH.RO",
+  "cui": "40006886",
+  "name": "GRUP ŞERBAN HOLDING S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "H2O.RO",
@@ -331,12 +1107,172 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "HLEB.RO",
+  "cui": "2265292",
+  "name": "HERCULES SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "HUNT.RO",
   "cui": "34184455",
   "name": "IHUNT TECHNOLOGY IMPORT-EXPORT S.A.",
   "role": "issuer",
   "source_url": "https://www.ihunt.ro/contact",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "IANY.RO",
+  "cui": "1343490",
+  "name": "24 IANUARIE SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "IARV.RO",
+  "cui": "1132930",
+  "name": "IAR SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "IASX.RO",
+  "cui": "1957058",
+  "name": "IASITEX SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ICEV.RO",
+  "cui": "341644",
+  "name": "INSTITUTUL DE CERCETARI PENTRU ACOPERIRI AVANSATE ICAA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ICMA.RO",
+  "cui": "324929",
+  "name": "ICMA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "IMMO.RO",
+  "cui": "31706228",
+  "name": "IMMO GURU S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "IMP.RO",
+  "cui": "1553483",
+  "name": "IMPACT DEVELOPER & CONTRACTOR S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "INFINITY.RO",
+  "cui": "4175676",
+  "name": "INFINITY CAPITAL INVESTMENTS S.A.",
+  "role": "issuer",
+  "source_url": "https://infinitycapital.ro/wp-content/uploads/Reglementari-interne_Infinity-Capital-Investments_s.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "INMA.RO",
+  "cui": "1356635",
+  "name": "INDUSTRIE MICA PRAHOVA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "INTA.RO",
+  "cui": "2577677",
+  "name": "INDEPENDENTA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "IORB.RO",
+  "cui": "340312",
+  "name": "IOR SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "IPHI.RO",
+  "cui": "457747",
+  "name": "IPROCHIM SA",
+  "role": "issuer",
+  "source_url": "https://iprochim.ro/politica-de-confidentialitate/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "IPRO.RO",
+  "cui": "329",
+  "name": "IPROLAM SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "IPRU.RO",
+  "cui": "566930",
+  "name": "IPROEB SA",
+  "role": "issuer",
+  "source_url": "https://iproeb.ro/date-contact-iproeb-bistrita/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ITG.RO",
+  "cui": "21310535",
+  "name": "IT GENETICS S.A.",
+  "role": "issuer",
+  "source_url": "https://www.it-genetics.com/privacy-policy",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "IUBR.RO",
+  "cui": "1109309",
+  "name": "IUS SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "JTG.RO",
+  "cui": "14162177",
+  "name": "J.T. GRUP OIL S.A.",
+  "role": "issuer",
+  "source_url": "https://jtgroup.ro/termeni-si-conditii/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "LCSI.RO",
+  "cui": "19143125",
+  "name": "LCS IMOBILIAR SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "LIH.RO",
+  "cui": "16336490",
+  "name": "LIFE IS HARD S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "LION.RO",
@@ -364,12 +1300,44 @@
   "evidence": "anaf"
  },
  {
+  "ticker": "MACO.RO",
+  "cui": "2157789",
+  "name": "MACOFIL SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MALI.RO",
+  "cui": "1681776",
+  "name": "COMALIM SA",
+  "role": "issuer",
+  "source_url": "https://www.comalim.ro/",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "MAM.RO",
   "cui": "27933834",
   "name": "MAMBRICOLAJ S.A.",
   "role": "issuer",
   "source_url": "https://www.mam-bricolaj.ro/contact",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "MAMA.RO",
+  "cui": "6076555",
+  "name": "MAGAZIN UNIVERSAL MARAMURES SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MEBY.RO",
+  "cui": "952656",
+  "name": "LUCEAFARUL SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "MECF.RO",
@@ -380,12 +1348,180 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "MECP.RO",
+  "cui": "1113237",
+  "name": "MECON SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MELE.RO",
+  "cui": "2319619",
+  "name": "METAL-LEMN SA",
+  "role": "issuer",
+  "source_url": "https://www.metallemn.ro/termeni-si-conditii/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MEOR.RO",
+  "cui": "51179",
+  "name": "METALICA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MEOY.RO",
+  "cui": "1122928",
+  "name": "MECANICA CODLEA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MESA.RO",
+  "cui": "94595",
+  "name": "METALUL-MESA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "METT.RO",
+  "cui": "1879766",
+  "name": "METTEXIN S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "METY.RO",
+  "cui": "911737",
+  "name": "MECANICA ROTES SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MFC.RO",
+  "cui": "655",
+  "name": "MF CAPITAL S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MIB.RO",
+  "cui": "9557790",
+  "name": "MILLENIUM INSURANCE BROKER (MIB) BROKER DE ASIGURARE-REASIGURARE S.A.",
+  "role": "issuer",
+  "source_url": "https://www.myinsurance.ro/terms-conditions",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MILK.RO",
+  "cui": "6363609",
+  "name": "AGROSERV MĂRIUŢA S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MOBE.RO",
+  "cui": "345",
+  "name": "MOBEST SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MODY.RO",
+  "cui": "824550",
+  "name": "MOLDOVA SA",
+  "role": "issuer",
+  "source_url": "https://moldovasa.ro/wp-content/uploads/2026/04/AGOA.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MOIB.RO",
+  "cui": "785205",
+  "name": "MOARA CIBIN SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "MORA.RO",
+  "cui": "2053818",
+  "name": "MORARIT PANIFICATIE ROMAN SA",
+  "role": "issuer",
+  "source_url": "https://www.panificatieroman.ro/wp-content/uploads/2026/04/PROIECT-DE-HOTARARE-AGEA.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "NAPO.RO",
+  "cui": "199117",
+  "name": "SOCIETATEA DE CONSTRUCTII NAPOCA S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "NAXY.RO",
+  "cui": "1628640",
+  "name": "NAVEXIM SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "NC.RO",
+  "cui": "43859039",
+  "name": "NOVERE CAPITAL S.A.",
+  "role": "issuer",
+  "source_url": "https://noverecapital.com/politica-de-confidentialitate",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "NCHI.RO",
+  "cui": "34312520",
+  "name": "SCALA DEVELOPMENT S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "NEOL.RO",
+  "cui": "2423562",
+  "name": "NEPTUN-OLIMP SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "NORD.RO",
+  "cui": "1558154",
+  "name": "NORD SA",
+  "role": "issuer",
+  "source_url": "https://nordsa.ro/wp-content/uploads/2025/03/R.I.-NORD-R.1-02.12.2024.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "NRF.RO",
   "cui": "12972762",
   "name": "NOROFERT S.A.",
   "role": "issuer",
   "source_url": "https://norofert.ro/contact/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "NUIA.RO",
+  "cui": "646126",
+  "name": "ABO MIX SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "OIL.RO",
@@ -395,6 +1531,22 @@
   "source_url": "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva",
   "verified_on": "2026-10-19",
   "evidence": "anaf"
+ },
+ {
+  "ticker": "OMAL.RO",
+  "cui": "1056760",
+  "name": "COMALIMENT RESITA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "OMSE.RO",
+  "cui": "1060620",
+  "name": "COMAT CARAS SEVERIN SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "ONE.RO",
@@ -414,12 +1566,36 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "PCTM.RO",
+  "cui": "1812987",
+  "name": "PRIMA CONSTRUCT S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "PE.RO",
+  "cui": "51081808",
+  "name": "PREMIER ENERGY S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "PETY.RO",
   "cui": "841186",
   "name": "PETAL SA",
   "role": "issuer",
   "source_url": "https://www.petal.ro/contact/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "POTI.RO",
+  "cui": "26195097",
+  "name": "POTIS CAPITAL SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "PPL.RO",
@@ -430,12 +1606,36 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "PRAE.RO",
+  "cui": "1112568",
+  "name": "PRODLACTA SA",
+  "role": "issuer",
+  "source_url": "https://prodlacta.ro/wp-content/uploads/2021/06/Nota-informare-actionari-PROTECTIA-DATELOR-CU-CARACTER-PERSONAL.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "PRBU.RO",
   "cui": "2774512",
   "name": "PRACTIC SA",
   "role": "issuer",
   "source_url": "https://practicsa.ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "PRDI.RO",
+  "cui": "5828528",
+  "name": "PRODHART SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "PREB.RO",
+  "cui": "1763841",
+  "name": "PREBET AIUD SA",
+  "role": "issuer",
+  "source_url": "https://www.prebet.ro/relatia-cu-investitorii/",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "PREH.RO",
@@ -447,6 +1647,22 @@
   "evidence": "anaf"
  },
  {
+  "ticker": "PRIB.RO",
+  "cui": "1584200",
+  "name": "PRIMCOM SA",
+  "role": "issuer",
+  "source_url": "https://www.primcom.ro/content/contact",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "PRSN.RO",
+  "cui": "1552801",
+  "name": "PROSPECTIUNI SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "PTR.RO",
   "cui": "1346607",
   "name": "ROMPETROL WELL SERVICES SA",
@@ -454,6 +1670,14 @@
   "source_url": "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva",
   "verified_on": "2026-10-19",
   "evidence": "anaf"
+ },
+ {
+  "ticker": "PVBS.RO",
+  "cui": "23126076",
+  "name": "PERSEUS FINTECH S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "RANT.RO",
@@ -464,12 +1688,100 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "RCHI.RO",
+  "cui": "9019856",
+  "name": "GRAND HOTEL BUCHAREST S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "REFE.RO",
+  "cui": "201373",
+  "name": "REMARUL 16 FEBRUARIE SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "REIT.RO",
+  "cui": "43151040",
+  "name": "STAR INVEST IMOBILIARE S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "RELE.RO",
+  "cui": "807150",
+  "name": "RELEE SA",
+  "role": "issuer",
+  "source_url": "https://relee.ro/files/aga/Comunicat%20diponibilitate%20raport%20semestrul%20I%202026.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "REMM.RO",
+  "cui": "2204775",
+  "name": "REMAT MARAMURES SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "REVA.RO",
+  "cui": "2150217",
+  "name": "REVA S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "RMAH.RO",
+  "cui": "2115198",
+  "name": "FARMACEUTICA REMEDIA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "ROC1.RO",
   "cui": "44987869",
   "name": "ROCA INDUSTRY HOLDINGROCK1 S.A.",
   "role": "issuer",
   "source_url": "https://rocaindustry.ro/contact/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "ROCE.RO",
+  "cui": "1158050",
+  "name": "ROMCARBON SA",
+  "role": "issuer",
+  "source_url": "https://www.romcarbon.com/politica-de-confidentialitate/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "ROOF.RO",
+  "cui": "816263",
+  "name": "ROMÂNOFIR SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "RORX.RO",
+  "cui": "1576401",
+  "name": "ROMAERO SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "RPH.RO",
+  "cui": "1962437",
+  "name": "ROPHARMA SA",
+  "role": "issuer",
+  "source_url": "https://ropharma.ro/termeni-si-conditii-de-utilizare",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "RRC.RO",
@@ -481,12 +1793,60 @@
   "evidence": "anaf"
  },
  {
+  "ticker": "RRD.RO",
+  "cui": "1108834",
+  "name": "ROMRADIATOARE SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SAFE.RO",
+  "cui": "28239696",
+  "name": "SAFETECH INNOVATIONS S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SATU.RO",
+  "cui": "1750957",
+  "name": "SATURN SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SCBC.RO",
+  "cui": "955342",
+  "name": "SCUT SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "SCDM.RO",
   "cui": "328521",
   "name": "UNIREA SHOPPING CENTER SA",
   "role": "issuer",
   "source_url": "https://www.unireashop.ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "SECE.RO",
+  "cui": "14686600",
+  "name": "SERVICE NEPTUN 2002 SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SEOL.RO",
+  "cui": "10610146",
+  "name": "SEMROM OLTENIA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "SEOM.RO",
@@ -497,12 +1857,76 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "SERC.RO",
+  "cui": "906",
+  "name": "SERICO SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SEVE.RO",
+  "cui": "1606030",
+  "name": "SEVERNAV SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SFG.RO",
+  "cui": "37586457",
+  "name": "SPHERA FRANCHISE GROUP S.A.",
+  "role": "issuer",
+  "source_url": "https://spheragroup.com/wp-content/uploads/2020/11/politica_de_prelucrare_date_Sphera_Francise_Group_S.A..pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SIDG.RO",
+  "cui": "2126855",
+  "name": "ARCELORMITTAL HUNEDOARA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SIEP.RO",
+  "cui": "1315333",
+  "name": "SINTER REF SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SIGS.RO",
+  "cui": "2954386",
+  "name": "SIGSTRAT SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "SINT.RO",
   "cui": "647",
   "name": "SINTOFARM SA",
   "role": "issuer",
   "source_url": "https://sintofarm.ro/contact/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "SLBB.RO",
+  "cui": "4019375",
+  "name": "SUPORT LOGISTIC BUCURESTI SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SMTL.RO",
+  "cui": "26414626",
+  "name": "SIMTEL TEAM S.A.",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "SNG.RO",
@@ -540,12 +1964,60 @@
   "evidence": "anaf"
  },
  {
+  "ticker": "SOCP.RO",
+  "cui": "1870767",
+  "name": "SOCEP SA",
+  "role": "issuer",
+  "source_url": "https://www.socep.ro/storage/BVB/Raport%20curent%20convocator%20AGOA%20%20si%20AGEA%2028.04.2020.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SOPL.RO",
+  "cui": "575688",
+  "name": "SOMPLAST SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "SOTA.RO",
   "cui": "643898",
   "name": "SOMETA SA",
   "role": "issuer",
   "source_url": "https://www.someta.ro/contact",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "SPTU.RO",
+  "cui": "728129",
+  "name": "SPIT BUCOVINA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "SPX.RO",
+  "cui": "9813422",
+  "name": "SIPEX COMPANY S.A.",
+  "role": "issuer",
+  "source_url": "https://www.sipex.ro/wp-content/uploads/2026/10/Convocator_Sipex-Company_AGEA_09.11.2026.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "STKP.RO",
+  "cui": "22570355",
+  "name": "STK PROPERTIES SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "STNM.RO",
+  "cui": "2413593",
+  "name": "SANTIERUL NAVAL 2 MAI SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "STOF.RO",
@@ -556,12 +2028,36 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "STOZ.RO",
+  "cui": "1336115",
+  "name": "STICLOVAL SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "STZ.RO",
+  "cui": "67329",
+  "name": "SINTEZA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "TBK.RO",
   "cui": "19044296",
   "name": "TRANSILVANIA BROKER DE ASIGURARE  S.A.",
   "role": "issuer",
   "source_url": "https://www.transilvaniabroker.ro/despre-noi",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "TBM.RO",
+  "cui": "3156315",
+  "name": "TURBOMECANICA SA",
+  "role": "issuer",
+  "source_url": "https://turbomecanica.ro/wp-content/uploads/2026/09/TBM_20260430105450_RO-Raport-curent-AGOA-aprilie-2026.pdf",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "TEL.RO",
@@ -591,6 +2087,30 @@
   "evidence": "anaf"
  },
  {
+  "ticker": "TRANSI.RO",
+  "cui": "3047687",
+  "name": "TRANSILVANIA INVESTMENTS ALLIANCE S.A.",
+  "role": "issuer",
+  "source_url": "https://transilvaniainvestments.ro/wp-content/uploads/2022/08/Politica-de-cookie-RO.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "TRGI.RO",
+  "cui": "455673",
+  "name": "TRANSPORTURI AUTO GIULESTI SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "TRIP.RO",
+  "cui": "9617078",
+  "name": "CHRISTIAN76 TOUR S.A.",
+  "role": "issuer",
+  "source_url": "https://christiantour.ro/termeni-si-conditii",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "TRNG.RO",
   "cui": "202255",
   "name": "TRANSGEX SA",
@@ -608,12 +2128,116 @@
   "evidence": "anaf"
  },
  {
+  "ticker": "TRSK.RO",
+  "cui": "1132417",
+  "name": "TRANSILANA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "TRVM.RO",
+  "cui": "1574478",
+  "name": "TRANSCOM SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "TSND.RO",
+  "cui": "4241753",
+  "name": "TUSNAD SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "TTS.RO",
+  "cui": "9089452",
+  "name": "TTS  ( TRANSPORT  TRADE  SERVICES ) SA",
+  "role": "issuer",
+  "source_url": "https://www.tts-group.ro/uploads/5/3/6/7/53674493/s1.2021_report_-_23.08.2021_rev.1.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "TUAA.RO",
+  "cui": "559747",
+  "name": "TURISM COVASNA SA",
+  "role": "issuer",
+  "source_url": "https://turismcovasna.ro/pdf/reguli%20de%20utilizare%20CVZ.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "UAM.RO",
+  "cui": "54620",
+  "name": "UAMT SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "UARG.RO",
   "cui": "1872644",
   "name": "ARGUS SA",
   "role": "issuer",
   "source_url": "https://www.argus-oil.ro/ro/",
   "verified_on": "2026-10-19"
+ },
+ {
+  "ticker": "UCET.RO",
+  "cui": "14686562",
+  "name": "CLĂBUCET ESTIVAL 2002 SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "UNIR.RO",
+  "cui": "199940",
+  "name": "UNIREA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "UNISEM.RO",
+  "cui": "302",
+  "name": "UNISEM SA",
+  "role": "issuer",
+  "source_url": "https://www.unisemromania.ro/sites/default/files/Anunt%20inchiriere%20spatiu_Mun.%20Brasov_str.%20N.%20Balcescu%2018.pdf",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "UPRR.RO",
+  "cui": "12527609",
+  "name": "UPRUC CTR SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "URBA.RO",
+  "cui": "563934",
+  "name": "URBANA SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "URCB.RO",
+  "cui": "2400615",
+  "name": "URC SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "UTGR.RO",
+  "cui": "2410198",
+  "name": "UTILAJ GREU S.A.",
+  "role": "issuer",
+  "source_url": "https://www.utilaj-greu.ro/contact.html",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "UZC.RO",
@@ -624,6 +2248,14 @@
   "verified_on": "2026-10-19"
  },
  {
+  "ticker": "UZIN.RO",
+  "cui": "324821",
+  "name": "UZINEXPORT SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
+ },
+ {
   "ticker": "UZT.RO",
   "cui": "1352846",
   "name": "UZTEL SA",
@@ -631,6 +2263,22 @@
   "source_url": "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva",
   "verified_on": "2026-10-19",
   "evidence": "anaf"
+ },
+ {
+  "ticker": "VAC.RO",
+  "cui": "199222",
+  "name": "PRODVINALCO SA",
+  "role": "issuer",
+  "source_url": "https://www.prodvinalco.ro/politica-de-confidentialitate/",
+  "verified_on": "2026-10-24"
+ },
+ {
+  "ticker": "VIAG.RO",
+  "cui": "128620",
+  "name": "VINALCOOL ARGES SA",
+  "role": "issuer",
+  "source_url": "https://data.gov.ro/dataset/firme-19-10-2026",
+  "verified_on": "2026-10-24"
  },
  {
   "ticker": "VITK.RO",
