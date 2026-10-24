@@ -142,3 +142,69 @@ export function secRows(companyfacts, { years = 5, quarters = 20 } = {}) {
 
 // A share as the apps write it (BRK.B) -> as the SEC does (BRK-B).
 export const secTicker = t => String(t || '').toUpperCase().replace('.', '-');
+
+// ------------------------------------------------------------------ Finance Ministry (data.gov.ro)
+// The yearly "Situațiile financiare" datasets (Ministerul Finanțelor, CC BY 4.0): one file of
+// figures per kind of filer (WEB_IR: companies filing IFRS; WEB_BL_BS_SL and WEB_UU: the others;
+// institutions de credit: banks; SIF, VS, ASIG: funds, market firms, insurers), each with a .csv
+// that names its columns ("Cifra de afaceri neta;i13"). The columns differ by kind and year, so
+// they are found by name. Individual statements (not consolidated), in lei, at 31 December.
+export const MF_KINDS = [
+  // [key, the file's name, preference when a company is in two of them]
+  ['ir', /web_ir_/i], ['bank', /inst(it)?_de_credit/i], ['sif', /web_sif/i], ['vs', /web_vs_/i], ['asig', /webasig/i],
+  ['bl', /web_bl_bs_sl/i], ['uu', /web_uu_/i],
+];
+const plain = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[şș]/gi, 's').replace(/[ţț]/gi, 't')
+  .toLowerCase().replace(/\s+/g, ' ').replace(/[\s:,]+$/, '').trim();
+// A .csv of column names -> { I13: 'cifra de afaceri neta', ... } (a code written "12" is I12).
+export function mfColumns(specText) {
+  const out = {};
+  for (const line of String(specText || '').split(/\r?\n/)) {
+    const m = /^(.*);\s*i?(\d+)\s*$/i.exec(line.trim());
+    if (m) out['I' + m[2]] = plain(m[1]);
+  }
+  return out;
+}
+const FIELD = [
+  // [field, label pattern, how several matches combine]
+  ['revenue', /^cifra de afaceri neta/],
+  ['income_total', /^venituri ?- ?total|^venituri totale(?! din exploatare)/],
+  ['bank_income', /^venituri totale din exploatare, net/],
+  ['profit', /^profit(ul)? net$|^rezultatul net profit$/],
+  ['loss', /^pierdere(a)? neta$|^rezultatul net pierdere$/],
+  ['bank_result', /^profit sau pierdere aferent\/?a? exercitiului$/],
+  ['fixed', /^active imobilizate - total/],
+  ['current', /^active circulante - total/],
+  ['prepaid', /^cheltuieli in avans$/],
+  ['debts', /^datorii$/],
+  ['debts_short', /^datorii ce trebuiesc platite intr-o perioada de un an$/],
+  ['debts_long', /^datorii ce trebuiesc platite intr-o perioada mai mare de un an$/],
+  ['equity_total', /^capitaluri - total/],
+  ['equity_own', /^capitaluri proprii$/],
+  ['cash', /^casa si conturi la banci|^numerar si solduri de numerar/],
+  ['employees', /^numar mediu de salariati/],
+];
+// One company's line of a file -> the figures the Financials tab shows (absent when not given).
+export function mfFigures(columns, header, cells) {
+  const raw = {};
+  header.forEach((h, i) => {
+    const label = columns[String(h).trim().toUpperCase()];
+    if (!label) return;
+    const f = FIELD.find(([, re]) => re.test(label));
+    const v = String(cells[i] == null ? '' : cells[i]).trim();
+    if (f && v !== '' && isFinite(+v) && raw[f[0]] === undefined) raw[f[0]] = +v;
+  });
+  const d = {};
+  const rev = raw.revenue || raw.bank_income || raw.income_total;
+  if (rev != null) d.revenue = rev;
+  if (raw.bank_result != null) d.net_income = raw.bank_result;
+  else if (raw.profit != null || raw.loss != null) d.net_income = (raw.profit || 0) - (raw.loss || 0);
+  if (raw.fixed != null || raw.current != null) d.assets = (raw.fixed || 0) + (raw.current || 0) + (raw.prepaid || 0);
+  if (raw.debts != null) d.liabilities = raw.debts;
+  else if (raw.debts_short != null || raw.debts_long != null) d.liabilities = (raw.debts_short || 0) + (raw.debts_long || 0);
+  const eq = raw.equity_own != null ? raw.equity_own : raw.equity_total;
+  if (eq != null) d.equity = eq;
+  if (raw.cash != null) d.cash = raw.cash;
+  if (raw.employees != null && raw.employees > 0) d.employees = raw.employees;
+  return d;
+}
