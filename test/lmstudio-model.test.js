@@ -40,3 +40,35 @@ test('auto threads: 4 alone, 3 with a remote desktop; a number wins; 0 leaves it
   assert.equal(pickThreads('0', () => false), 0);
   assert.equal(pickThreads('nonsense', () => true), 3);
 });
+
+// A stand-in for the LM Studio SDK: the loaded models, and what the job unloads and loads.
+import { writeFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+function fakeSdk(loaded) {
+  const dir = mkdtempSync(join(tmpdir(), 'lms-sdk-')), file = join(dir, 'sdk.cjs');
+  globalThis.__lms = { loaded, events: [] };
+  writeFileSync(file, `
+    const S = globalThis.__lms;
+    class LMStudioClient {
+      constructor() { this.llm = {
+        listLoaded: async () => S.loaded.map(m => ({ modelKey: m.key, identifier: m.key, getLoadConfig: async () => m.config,
+          unload: async () => { S.events.push('unload ' + m.key); S.loaded = S.loaded.filter(x => x !== m); } })),
+        load: async (key) => { if (S.loaded.length) throw new Error('insufficient system resources'); S.events.push('load ' + key); S.loaded.push({ key, config: null }); } }; }
+      async [Symbol.asyncDispose]() {}
+    }
+    module.exports = { LMStudioClient };`);
+  return file;
+}
+
+test('another model in memory is unloaded first, so the wanted one can load (2026-10-24: a 27B model left loaded blocked the swap)', async () => {
+  const sdkPath = fakeSdk([{ key: 'qwen3.8-27b', config: null }]);
+  assert.match(await ensureModel({ model: 'openai/gpt-oss-20b', threads: 4, wsUrl: 'ws://x', sdkPath }), /model reloaded with 4 threads/);
+  assert.deepEqual(globalThis.__lms.events, ['unload qwen3.8-27b', 'load openai/gpt-oss-20b']);
+});
+
+test('the wanted model already loaded with the right settings: nothing else is touched', async () => {
+  const sdkPath = fakeSdk([{ key: 'openai/gpt-oss-20b', config: wantedConfig(4) }]);
+  assert.equal(await ensureModel({ model: 'openai/gpt-oss-20b', threads: 4, wsUrl: 'ws://x', sdkPath }), 'model ready (4 threads)');
+  assert.deepEqual(globalThis.__lms.events, []);
+});
