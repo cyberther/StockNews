@@ -141,14 +141,17 @@ const priceL = v => v == null ? NONE : fmt(v, v < 10 ? 4 : 2);
 const penceL = v => v == null ? NONE : fmt(v, v < 1 ? 4 : 2) + 'p';
 const qtyL = v => v.toLocaleString(LOC() || 'en-US', { maximumFractionDigits:4 });
 
+const listingCurrency = t => ({ RO:'RON', DE:'EUR' })[(/\.(RO|DE)$/.exec(String(t || '')) || [])[1]] || null;
 function holdings(positions, quoteOf) {
   const rows = [];
   Object.keys(positions || {}).forEach(t => {
     const p = positions[t] || {}, shares = num(p.shares), avg = num(p.cost);
     if (!shares || shares <= 0) return;
     const q = quoteOf(t) || {}, pence = inPence(t), k = pence ? 0.01 : 1;
-    // A London position's amounts are in pounds; its prices stay in pence.
-    const cur = pence ? 'GBP' : q.currency || 'USD';
+    // A London position's amounts are in pounds; its prices stay in pence. Until the
+    // listing's currency is known, its exchange tells it (a Bucharest share is not counted in
+    // dollars while its profile loads, which showed part of the total first).
+    const cur = pence ? 'GBP' : q.currency || listingCurrency(t) || 'USD';
     const price = num(q.price), move = pctNum(q.move);
     const value = price == null ? null : price * shares * k;
     const cost = avg == null ? null : avg * shares * k;
@@ -159,10 +162,11 @@ function holdings(positions, quoteOf) {
   });
   const groups = {};
   rows.forEach(r => {
-    const g = groups[r.currency] || (groups[r.currency] = { currency:r.currency, value:0, cost:0, pl:0, dayPL:0, n:0 });
+    const g = groups[r.currency] || (groups[r.currency] = { currency:r.currency, value:0, cost:0, pl:0, dayPL:0, n:0, missing:0 });
     if (r.value != null) g.value += r.value;
     if (r.pl != null) { g.pl += r.pl; g.cost += r.cost; }
     if (r.dayPL != null) g.dayPL += r.dayPL;
+    if (r.value == null) g.missing++;
     g.n++;
   });
   rows.sort((a, b) => (b.value || 0) - (a.value || 0) || a.ticker.localeCompare(b.ticker));
@@ -185,7 +189,7 @@ function holdings(positions, quoteOf) {
   });
   const totals = Object.keys(groups).sort().map(k => {
     const g = groups[k], plPct = g.cost ? g.pl / g.cost * 100 : null;
-    return { currency:k, count:g.n,
+    return { currency:k, count:g.n, missing:g.missing,
       valueLabel: amt(g.value, k), costLabel: g.cost ? amt(g.cost, k) : NONE,
       plLabel: g.cost ? signedAmt(g.pl, k) : NONE, plPctLabel: pctL(plPct), plDown: g.pl < 0,
       dayLabel: signedAmt(g.dayPL, k), dayDown: g.dayPL < 0,

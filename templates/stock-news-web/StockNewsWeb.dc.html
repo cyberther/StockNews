@@ -48,7 +48,7 @@
 <body>
 <x-dc>
 <!-- @template name="Stock news web app — dark terminal" description="Desktop/web build of the stock news product: persistent rail nav, feed + detail + screener + watchlist, dark terminal surfaces. Shares its content with the mobile template via ../shared/hif-data.js." -->
-<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-flags.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-markets.js"></script><script src="../shared/hif-refresh.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-policy.js"></script><script src="../shared/hif-scenario.js"></script><script src="../shared/hif-filings.js?v=20261023"></script><script src="../shared/hif-impact.js"></script><script src="../shared/hif-impact-client.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/hif-billing.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>@font-face{font-family:'Archivo';font-style:normal;font-weight:400 800;font-display:swap;src:url('/templates/shared/fonts/archivo-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@font-face{font-family:'Archivo';font-style:normal;font-weight:400 800;font-display:swap;src:url('/templates/shared/fonts/archivo-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}:root{--font-heading:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;--font-body:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg);font-family:var(--font-body)}.lp{font-family:var(--font-body);--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:960px){.lp-tag{display:none}.lp-head{flex-wrap:nowrap!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{display:none!important}.lp-brand{white-space:nowrap}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}.lp-langs button{min-width:36px!important;padding:0 6px!important}.lp-ctas>button{flex:1 1 100%}.lp-mock-wrap{order:2}.lp-head-cta{margin-left:auto!important}}.lp-faq summary::-webkit-details-marker{display:none}.lp-faq[open] .lp-faq-x{transform:rotate(45deg)}.lp-faq-x{transition:transform .2s}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}.m-chips{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch}.m-chips>*{flex:none;white-space:nowrap.m-paygrid{grid-template-columns:minmax(0,1fr) 56px 76px!important;gap:10px!important}}}</style></helmet>
+<helmet><meta name="referrer" content="strict-origin-when-cross-origin"><script src="./ds-base.js"></script><script src="../shared/hif-flags.js"></script><script src="../shared/hif-data.js"></script><script src="../shared/hif-bvb.js"></script><script src="../shared/hif-eu.js"></script><script src="../shared/hif-chart.js"></script><script src="../shared/hif-insight.js"></script><script src="../shared/hif-markets.js"></script><script src="../shared/hif-refresh.js"></script><script src="../shared/hif-live.js"></script><script src="../shared/hif-policy.js"></script><script src="../shared/hif-scenario.js"></script><script src="../shared/hif-filings.js?v=20261023"></script><script src="../shared/hif-impact.js"></script><script src="../shared/hif-impact-client.js"></script><script src="../shared/hif-store.js"></script><script src="../shared/hif-auth.js"></script><script src="../shared/hif-push.js"></script><script src="../shared/hif-settings.js"></script><script src="../shared/hif-unlock.js"></script><script src="../shared/hif-billing.js"></script><script src="../shared/vendor/gsap.min.js"></script><script src="../shared/vendor/lenis.min.js"></script><script src="../shared/hif-motion.js"></script><style>@font-face{font-family:'Archivo';font-style:normal;font-weight:400 800;font-display:swap;src:url('/templates/shared/fonts/archivo-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@font-face{font-family:'Archivo';font-style:normal;font-weight:400 800;font-display:swap;src:url('/templates/shared/fonts/archivo-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}:root{--font-heading:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;--font-body:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme]{--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;--lc-blue:#5AA9FF;--lc-orange:#FF9F43;--lc-green:#3DDC84;--lc-red:#FF5C6C;--lc-purple:#C08CFF;--lc-teal:#2ED1C1;--lc-pink:#FF7AB6;--lc-yellow:#FFD54A}div[data-theme="light"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}@media (prefers-color-scheme:light){div[data-theme="system"]{--s-bg:#F7F6F4;--s-panel:#EDEBE7;--s-rule:#C9C5BE;--s-ink:#1A1A1A;--s-mute:#5F5A54;--s-faint:#6E6861;--s-on-accent:#FFFFFF;--color-accent:#8A6A12;--lc-blue:#1764C0;--lc-orange:#C25E00;--lc-green:#13863D;--lc-red:#C62837;--lc-purple:#7440C9;--lc-teal:#0B7F74;--lc-pink:#B8226A;--lc-yellow:#8A6A00}}@keyframes hfin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}body{margin:0;background:var(--s-bg);font-family:var(--font-body)}.lp{font-family:var(--font-body);--s-bg:#121212;--s-panel:#1A1A1A;--s-rule:#333333;--s-ink:#F5F5F7;--s-mute:#A0A0A0;--s-faint:#858585;--s-on-accent:#121212;--color-accent:#D4AF37;color-scheme:dark}@media (max-width:720px){.lp-hero-img{width:100%!important;height:62%!important;opacity:0.32!important}}@media (max-width:960px){.lp-tag{display:none}.lp-head{flex-wrap:nowrap!important}}@media (max-width:560px){.lp-head{flex-wrap:nowrap!important;gap:12px!important}.lp-logo{width:40px!important}.lp-tag{display:none}.lp-head-cta{display:none!important}.lp-brand{white-space:nowrap}.auth-panel{padding:24px!important}.lp-feat{grid-template-columns:1fr!important;padding:20px!important}.lp-feat-score{width:auto!important;flex-direction:row!important;align-items:flex-end!important}.lp-langs button{min-width:36px!important;padding:0 6px!important}.lp-ctas>button{flex:1 1 100%}.lp-mock-wrap{order:2}.lp-head-cta{margin-left:auto!important}}.lp-faq summary::-webkit-details-marker{display:none}.lp-faq[open] .lp-faq-x{transform:rotate(45deg)}.lp-faq-x{transition:transform .2s}*{box-sizing:border-box}[data-compact="true"] .hc-opt{display:none}.app{--gx:28px}@media (max-width:760px){.app{--gx:16px}.app-rail,.app-term,.app-hide-s{display:none!important}.app-head{gap:10px!important;padding:8px 12px!important}.app-tabbar{display:flex!important}.app-main{padding-bottom:calc(64px + env(safe-area-inset-bottom))}.m-feed{grid-template-columns:minmax(0,1fr)!important;gap:10px!important}.m-feed-meta{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.m-feed-meta>*{margin-top:0!important}.m-feed-side{grid-template-columns:repeat(3,minmax(0,1fr))!important}.m-feed-side>*{grid-column:auto!important;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.m-g2{grid-template-columns:repeat(2,minmax(0,1fr))!important}.m-g1{grid-template-columns:minmax(0,1fr)!important}.m-dhead{flex-wrap:wrap!important;gap:12px!important}.m-dhead>:nth-child(2){margin-left:auto}.m-dhead>button{flex:1 1 auto!important;justify-content:center}.m-ledger{grid-template-columns:4px minmax(0,1fr)!important;gap:6px 12px!important}.m-ledger>:nth-child(n+3){grid-column:2}.m-ev{grid-template-columns:3px minmax(0,1fr)!important}.m-ev>:nth-child(3){grid-column:2;text-align:left!important}.m-search{grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important}.m-search>:nth-child(2){display:none}.m-wl{grid-template-columns:minmax(0,1fr) auto auto!important;gap:4px 12px!important}.m-wl>:nth-child(4){display:none}.m-wl>:nth-child(5){grid-column:1/-1;flex-direction:row!important;align-items:center!important;justify-content:space-between}.m-wl-head>:nth-child(5){display:none}.m-chips{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch}.m-chips>*{flex:none;white-space:nowrap.m-paygrid{grid-template-columns:minmax(0,1fr) 56px 76px!important;gap:10px!important}}}</style></helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121212"/><rect x="30" y="46" width="40" height="3" fill="#D4AF37"/><text x="50" y="42" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-weight="700" font-size="17" fill="#F5F5F7">HIF</text><text x="50" y="65" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="7" letter-spacing="1.5" fill="#A0A0A0">WEB</text></svg></template>
 <div data-theme="{{ theme }}" class="app" style="height:100vh;height:100dvh;display:flex;flex-direction:column;background:var(--s-bg);color:var(--s-ink);font-family:var(--font-body);font-variant-numeric:tabular-nums;overflow:hidden;min-width:0">
 
@@ -1318,6 +1318,8 @@
 
 
 </div>
+<!-- Screens shown over the app (sign-in, onboarding, lock, two-factor, approval, toasts) sit outside .app: they take its theme and text colour here, or their text is black on the dark background. -->
+<div data-theme="{{ theme }}" style="color:var(--s-ink);font-family:var(--font-body)">
 
 
 
@@ -1562,8 +1564,17 @@
 </div>
 </sc-if>
 
+<sc-if value="{{ isAcctLoading }}" hint-placeholder-val="{{ false }}">
+<div role="status" aria-live="polite" data-screen-label="Loading account" style="position:fixed;inset:0;z-index:40;background:var(--s-bg);display:flex;align-items:center;justify-content:center;padding:40px 16px">
+<div style="width:100%;max-width:420px">
+<div style="font-family:var(--font-heading);font-weight:800;font-size:18px;letter-spacing:-0.02em">{{ brand }}</div>
+<div style="height:2px;background:var(--color-accent);margin:16px 0;width:56px"></div>
+<div style="font-size:14px;color:var(--s-mute);line-height:1.5">{{ ui.acctLoading }}</div>
+</div>
+</div>
+</sc-if>
 <sc-if value="{{ isOnboard }}" hint-placeholder-val="{{ false }}">
-<div data-m="fade smooth" style="position:fixed;inset:0;z-index:40;background:var(--s-bg);overflow-y:auto">
+<div data-m="fade smooth" data-screen-label="Onboarding" style="position:fixed;inset:0;z-index:40;background:var(--s-bg);overflow-y:auto">
 <div style="max-width:720px;margin:0 auto;padding:56px 40px 60px">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:36px;letter-spacing:-0.03em;line-height:1.02">{{ ui.obTitle }}</div>
 <div style="font-size:14px;color:var(--s-mute);margin-top:10px;line-height:1.5;max-width:520px;text-wrap:pretty">{{ ui.obSub }}</div>
@@ -1656,7 +1667,7 @@
 </div>
 </sc-if>
 <sc-if value="{{ isLocked }}" hint-placeholder-val="{{ false }}">
-<div style="position:fixed;inset:0;z-index:50;background:var(--s-bg);display:flex;align-items:center;justify-content:center;padding:40px">
+<div data-screen-label="Locked" style="position:fixed;inset:0;z-index:50;background:var(--s-bg);display:flex;align-items:center;justify-content:center;padding:40px">
 <div style="width:100%;max-width:420px">
 <div style="font-family:var(--font-heading);font-weight:800;font-size:18px;letter-spacing:-0.02em">{{ brand }}</div>
 <div style="font-family:var(--font-heading);font-weight:800;font-size:40px;letter-spacing:-0.035em;line-height:1;margin-top:24px">{{ ui.lockedTitle }}</div>
@@ -1697,13 +1708,15 @@
 </div>
 </sc-if>
 </div>
+</div>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;finnhubToken&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Live data&quot;},&quot;brand&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Market Pulse&quot;,&quot;Heard It First&quot;],&quot;default&quot;:&quot;Market Pulse&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Brand&quot;},&quot;plan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;free&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;free&quot;,&quot;tsType&quot;:&quot;'free' | 'pro'&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;appLang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;RO&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;EN&quot;,&quot;RO&quot;,&quot;DE&quot;],&quot;default&quot;:&quot;EN&quot;,&quot;tsType&quot;:&quot;'EN' | 'RO' | 'DE'&quot;,&quot;section&quot;:&quot;Language&quot;},&quot;accountName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;}}">
 const STORE_KEY = 'hif.web.v2';
 // Keys that survive a reload. Live quotes and transient input (passwords, codes) never persist.
 const PERSIST = ['session','onboarded','plan','lang','appLang','follows','push','screenFilter','chartRange','overlays',
-  'screen','feedTab','selected','timeoutMin','locked','theme','positions','profiles','pfRange','dismissed','events','accountId','showOpinion'];
+  'screen','feedTab','selected','timeoutMin','locked','theme','positions','profiles','pfRange','dismissed','events','accountId','showOpinion',
+  'pfCur','lcIv','lcAuto','lcView'];
 // hif-store.js can finish loading after this logic is evaluated. Until the saved
 // record has been read, nothing may be written, or a reload would overwrite the
 // stored session with these defaults; see restoreLate().
@@ -1992,14 +2005,17 @@ class Component extends DCLogic {
     // Wait for the saved record (and its accountId) before deciding whether this is a new account.
     if (!this.restoreLate()) { pendingAuth = { sess }; return; }
     pendingAuth = null;
-    if (!sess) { this._wlUser = null; this._wlReady = false; this._hdReady = false; this.setState({ holdServer:false, session:null, locked:false, serverPlan:null, pending:false, isAdmin:false, adminRows:null, devicePush:'unavailable' }); return; }
+    if (!sess) { this._wlUser = null; this._wlReady = false; this._hdReady = false; this._stReady = false; this.setState({ holdServer:false, acctLoading:false, lcDrawings:{}, session:null, locked:false, serverPlan:null, pending:false, isAdmin:false, adminRows:null, devicePush:'unavailable' }); return; }
     const fresh = this.state.accountId !== sess.userId;
     // Signing in (rather than a token refresh) lands on the portfolio.
-    const landing = !this.state.session ? { screen:'portfolio' } : {};
+    const signingIn = !this.state.session, landing = signingIn ? { screen:'portfolio' } : {};
     this.setState(Object.assign(landing, {
       session:{ provider:sess.provider, email:sess.email, name:sess.name, since:sess.since, userId:sess.userId, phone:sess.phone || '' },
       accountId: sess.userId, authOpen:false, authPw:'', authPw2:'', authSent:'', authErr:''
-    }, this.langsFrom(sess), fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, events:[], selected:'', screen:'portfolio' } : {}));
+    }, this.langsFrom(sess), fresh ? { onboarded:false, follows:[], dismissed:[], positions:{}, posEdit:null, events:[], selected:'', screen:'portfolio', lcDrawings:{}, lcView:{} } : {}));
+    // Without a watchlist on this device, the account's is on its way: no ticker picker until
+    // it is in (loadAccountData).
+    if (fresh || (signingIn && !this.state.onboarded)) this.holdForAccount();
     this.loadPlan();
     // A choice made in this browser before the account had one is saved to the account.
     const p = sess.prefs || {}, A = window.HIFAuth;
@@ -2014,7 +2030,7 @@ class Component extends DCLogic {
     const uid=this.state.session&&this.state.session.userId;
     const actual=window.HIFAuth&&window.HIFAuth.session();
     if(!uid||!actual||actual.userId!==uid||!this.state.authLive||!window.HIFPush||this._wlUser===uid)return;
-    this._wlUser=uid;this.loadServerWatchlist();this.loadServerHoldings();
+    this._wlUser=uid;this.loadAccountData(uid);
   }
   // The language choices saved with the account win over this browser's, so they hold on
   // every device and after the browser's storage is cleared.
@@ -2078,20 +2094,61 @@ class Component extends DCLogic {
       this.refreshPush();
     }).catch(() => { this.setState({ pushBusy:false }); this.refreshPush(); });
   }
-  // The watchlist also lives on the server, for the background scan and for the user's
-  // other devices. On sign-in the server copy wins (every change goes up within seconds);
-  // from then on, changes made here are mirrored up.
-  loadServerWatchlist() {
+  // The watchlist, positions and settings also live on the server: the watchlist for the
+  // background scan, all three for the user's other devices. On sign-in the server copy wins
+  // (every change goes up within seconds); from then on, changes made here are mirrored up.
+  // The three are read together and applied at once: until they are in, a reader without a
+  // watchlist on this device sees a short "loading" screen, not the ticker picker, and the
+  // portfolio does not fill in piece by piece (2026-10-24).
+  // A server (or script) that does not answer must not hold the reader on the loading screen.
+  holdForAccount() {
+    clearTimeout(this._acctT);
+    if (!this.state.acctLoading) this.setState({ acctLoading: true });
+    this._acctT = setTimeout(() => { if (this.state.acctLoading) this.setState({ acctLoading: false }); }, 10000);
+  }
+  loadAccountData(uid) {
     const P = window.HIFPush; if (!P) return;
-    this._wlReady = false;
-    P.loadWatchlist().then(rows => {
+    this._wlReady = false; this._hdReady = false; this._stReady = false;
+    this.holdForAccount();
+    const ask = f => f ? f().catch(() => undefined) : Promise.resolve(undefined);
+    Promise.all([ask(P.loadWatchlist), ask(P.loadHoldings), ask(P.loadSettings)]).then(([rows, held, saved]) => {
+      clearTimeout(this._acctT);
+      if (!this.state.session || this.state.session.userId !== uid) return;
+      const H = window.HIFSettings, patch = { acctLoading: false };
       if (rows && rows.length) {
         const push = {}; rows.forEach(r => { if (!r.push) push[r.ticker] = false; });
-        const follows = rows.map(r => r.ticker);
-        this.setState(st => ({ follows, push, onboarded:true, selected: st.selected && follows.indexOf(st.selected) >= 0 ? st.selected : follows[0] }));
+        const follows = rows.map(r => r.ticker), sel = this.state.selected;
+        Object.assign(patch, { follows, push, onboarded: true, selected: sel && follows.indexOf(sel) >= 0 ? sel : follows[0] });
       }
-      this._wlReady = true; this._wlSig = ''; this.queueWatchlistSync();
-    }).catch(() => { this._wlReady = true; });
+      if (held && held.length) {
+        const positions = {};
+        held.forEach(r => { positions[r.ticker] = { shares: Number(r.shares), cost: r.avg_price == null ? null : String(r.avg_price) }; });
+        patch.positions = positions;
+      }
+      if (held !== undefined) patch.holdServer = !!held;
+      // Saved settings win; with none saved yet, this device's go up.
+      const set = saved && H ? H.clean(saved) : {};
+      Object.assign(patch, set);
+      if (set.lcAvg) this.lcRemember('lcAvg', set.lcAvg);
+      if (set.lcInd) this.lcRemember('lcInd', set.lcInd);
+      if (set.lcPen) this.lcRemember('lcPen', set.lcPen);
+      this._viewSym = null;
+      this.setState(patch);
+      this._wlReady = true; this._wlSig = '';
+      this._hdReady = !!held; this._hdSig = '';
+      this._stReady = !!saved && !!H; this._stSig = Object.keys(set).length ? JSON.stringify(H.pick(Object.assign({}, this.state, patch))) : '';
+      this.queueWatchlistSync(); this.queueHoldingsSync(); this.queueSettingsSync();
+    });
+  }
+  // Settings changed here go up to the account (hif-settings.js says which).
+  queueSettingsSync() {
+    const s = this.state, H = window.HIFSettings;
+    if (!this._stReady || !H || !s.authLive || !s.session || !window.HIFPush || !window.HIFPush.saveSettings) return;
+    const data = H.pick(s), sig = JSON.stringify(data);
+    if (sig === this._stSig) return;
+    this._stSig = sig;
+    clearTimeout(this._stT);
+    this._stT = setTimeout(() => window.HIFPush.saveSettings(data).catch(() => { this._stSig = ''; }), 1500);
   }
   queueWatchlistSync() {
     const s = this.state;
@@ -2101,21 +2158,6 @@ class Component extends DCLogic {
     this._wlSig = sig;
     clearTimeout(this._wlT);
     this._wlT = setTimeout(() => window.HIFPush.syncWatchlist(this.state.follows, this.state.push).catch(() => {}), 1500);
-  }
-  // Positions follow the same rule as the watchlist: the server copy wins on sign-in,
-  // then local edits go up. Without the holdings table (supabase/holdings.sql) both
-  // calls fail quietly and positions stay on this device.
-  loadServerHoldings() {
-    const P = window.HIFPush; if (!P || !P.loadHoldings) return;
-    this._hdReady = false;
-    P.loadHoldings().then(rows => {
-      if (rows && rows.length) {
-        const positions = {};
-        rows.forEach(r => { positions[r.ticker] = { shares: Number(r.shares), cost: r.avg_price == null ? null : String(r.avg_price) }; });
-        this.setState({ positions });
-      }
-      this._hdReady = !!rows; this._hdSig = ''; this.setState({ holdServer: !!rows }); this.queueHoldingsSync();
-    }).catch(() => {});
   }
   queueHoldingsSync() {
     const s = this.state;
@@ -2206,9 +2248,11 @@ class Component extends DCLogic {
     this.autoBio();
     this.maybeDeviceSetup();
     if (this.state.screen === 'detail') this.ensureQuote(this.state.selected);
+    this.applyChartView();
     this.syncLiveChart();
     this.queueWatchlistSync();
     this.queueHoldingsSync();
+    this.queueSettingsSync();
     const held = Object.keys(this.state.positions || {}).join(',');
     if (this._held !== undefined && held !== this._held) this.syncPositions();
     this._held = held;
@@ -3813,12 +3857,21 @@ class Component extends DCLogic {
   // Drawings on the chart, saved per account and ticker (supabase/drawings.sql).
   loadDrawings(sym) {
     const P = window.HIFPush, have = (this.state.lcDrawings || {})[sym];
-    if (have || !P || !P.loadDrawings) return Promise.resolve(have || []);
-    return P.loadDrawings(sym).then(list => { this.setState(st => ({ lcDrawings: Object.assign({}, st.lcDrawings, { [sym]: list || [] }) })); return list || []; })
-      .catch(() => []);
+    if (!P || !P.loadDrawings) return Promise.resolve(have || []);
+    if (have && (this._drawRead || {})[this.drawKey(sym)]) return Promise.resolve(have);
+    // A read that failed is not kept: the next opening tries again, and until one succeeds
+    // nothing is saved over the drawings on the server.
+    const failed = () => { this.flash(this.copy.lcLoadErr || 'Saved drawings could not be loaded'); return []; };
+    return P.loadDrawings(sym).then(list => {
+      if (!Array.isArray(list)) return failed();
+      (this._drawRead = this._drawRead || {})[this.drawKey(sym)] = true;
+      this.setState(st => ({ lcDrawings: Object.assign({}, st.lcDrawings, { [sym]: list }) })); return list;
+    }).catch(failed);
   }
+  drawKey(sym) { return ((this.state.session && this.state.session.userId) || '') + '|' + sym; }
   saveDrawings(sym, list) {
     const P = window.HIFPush;
+    if (P && P.loadDrawings && !(this._drawRead || {})[this.drawKey(sym)]) { this.flash(this.copy.lcSaveErr || 'Drawing not saved'); return; }
     clearTimeout((this._drawSave || {})[sym]);
     this._drawSave = this._drawSave || {};
     this._drawSave[sym] = setTimeout(() => { if (P && P.saveDrawings) P.saveDrawings(sym, list).catch(() => this.flash(this.copy.lcSaveErr || 'Drawing not saved')); }, 800);
@@ -3828,7 +3881,34 @@ class Component extends DCLogic {
     if (this._lc) { this._lc.destroy(); this._lc = null; }
     this._lcKey = ''; this._lcLoading = false;
   }
-  // The chart's averages, indicators and pen colour, kept on this device only.
+  // A change to the chart's set-up (bar size, averages, indicators, automatic levels): kept as
+  // this ticker's view, and as the start for tickers without one; saved with the account
+  // (queueSettingsSync).
+  chartPref(patch) {
+    const H = window.HIFSettings, sym = this.state.selected, next = Object.assign({}, this.state, patch);
+    const view = { iv: next.lcIv || '5m', avg: next.lcAvg || {}, ind: next.lcInd || {}, auto: !!next.lcAuto };
+    this.setState(Object.assign({}, patch, H && sym ? { lcView: H.withView(this.state.lcView, sym, view) } : {}));
+  }
+  // Opening a ticker brings back the chart set-up it had last time.
+  applyChartView() {
+    const s = this.state, sym = s.selected;
+    if (!sym || sym === this._viewSym) return;
+    this._viewSym = sym;
+    const v = (s.lcView || {})[sym];
+    if (!v) return;
+    const patch = {};
+    if (v.iv && v.iv !== (s.lcIv || '5m')) patch.lcIv = v.iv;
+    if (v.avg) patch.lcAvg = v.avg;
+    if (v.ind) patch.lcInd = v.ind;
+    if (v.auto !== undefined) patch.lcAuto = v.auto;
+    this.setState(patch);
+    if (this._lc && !patch.lcIv) {
+      if (patch.lcAvg) this._lc.setAverages(patch.lcAvg);
+      if (patch.lcInd) this._lc.setIndicators(patch.lcInd);
+      if (patch.lcAuto !== undefined) this._lc.setAutoLevels(patch.lcAuto);
+    }
+  }
+  // The chart's averages, indicators and pen colour on this device (the account keeps them too).
   lcRemember(key, val) { try { localStorage.setItem('mp.' + key, JSON.stringify(val)); } catch (e) {} }
   lcRecall() {
     const out = {};
@@ -3854,14 +3934,14 @@ class Component extends DCLogic {
       backLabel: '\u2190 ' + (this.tickerLabel ? this.tickerLabel(sym) : sym),
       intervals: this.constructor.LC_INTERVALS.map(([k]) => ({ label: ivLabel(k), on: (s.lcIv || '5m') === k,
         bg: (s.lcIv || '5m') === k ? 'var(--color-accent)' : 'transparent', ink: (s.lcIv || '5m') === k ? 'var(--s-on-accent)' : 'var(--s-mute)', edge: (s.lcIv || '5m') === k ? 'var(--color-accent)' : 'var(--s-rule)',
-        pick: () => this.setState({ lcIv: k, lcHover: null }) })),
+        pick: () => this.chartPref({ lcIv: k, lcHover: null }) })),
       // Averages over the price, indicators in panes under it; remembered on this device.
       avgs: this.constructor.LC_AVERAGES.map(([id, label, c]) => { const on = !!(s.lcAvg || {})[id]; return { label, on, color: 'var(--lc-' + c + ')', swatch: on ? 1 : 0.45,
         ink: on ? 'var(--s-ink)' : 'var(--s-mute)', edge: on ? 'var(--lc-' + c + ')' : 'var(--s-rule)',
-        toggle: () => { const next = Object.assign({}, this.state.lcAvg, { [id]: !(this.state.lcAvg || {})[id] }); this.setState({ lcAvg: next }); this.lcRemember('lcAvg', next); if (this._lc) this._lc.setAverages(next); } }; }),
+        toggle: () => { const next = Object.assign({}, this.state.lcAvg, { [id]: !(this.state.lcAvg || {})[id] }); this.chartPref({ lcAvg: next }); this.lcRemember('lcAvg', next); if (this._lc) this._lc.setAverages(next); } }; }),
       inds: [['macd', 'MACD'], ['dmi', 'DMI'], ['rsi', 'RSI']].map(([id, label]) => { const on = !!(s.lcInd || {})[id]; return { label, on, hint: u['lcInd_' + id] || '',
         bg: on ? 'var(--color-accent)' : 'transparent', ink: on ? 'var(--s-on-accent)' : 'var(--s-mute)', edge: on ? 'var(--color-accent)' : 'var(--s-rule)',
-        toggle: () => { const next = Object.assign({}, this.state.lcInd, { [id]: !(this.state.lcInd || {})[id] }); this.setState({ lcInd: next }); this.lcRemember('lcInd', next); if (this._lc) this._lc.setIndicators(next); } }; }),
+        toggle: () => { const next = Object.assign({}, this.state.lcInd, { [id]: !(this.state.lcInd || {})[id] }); this.chartPref({ lcInd: next }); this.lcRemember('lcInd', next); if (this._lc) this._lc.setIndicators(next); } }; }),
       pens: this.constructor.LC_PENS.map(c => { const on = (s.lcPen || 'blue') === c; return { color: 'var(--lc-' + c + ')', on, label: (u.lcColor || 'Line colour') + ': ' + (u['lcPen_' + c] || c),
         edge: on ? 'var(--s-ink)' : 'transparent', pick: () => { this.setState({ lcPen: c }); this.lcRemember('lcPen', c); if (this._lc) this._lc.setPen(c); } }; }),
       zoomIn: () => this._lc && this._lc.zoom(0.7), zoomOut: () => this._lc && this._lc.zoom(1.45), reset: () => this._lc && this._lc.reset(),
@@ -3876,7 +3956,7 @@ class Component extends DCLogic {
       toolHint: s.lcTool ? (u['lcHint_' + s.lcTool] || '') : '',
       cursor: s.lcTool ? 'crosshair' : 'default',
       autoOn: !!s.lcAuto, autoInk: s.lcAuto ? 'var(--s-ink)' : 'var(--s-mute)', autoEdge: s.lcAuto ? 'var(--color-accent)' : 'var(--s-rule)',
-      autoToggle: () => { const on = !s.lcAuto; this.setState({ lcAuto: on }); if (this._lc) this._lc.setAutoLevels(on); },
+      autoToggle: () => { const on = !s.lcAuto; this.chartPref({ lcAuto: on }); if (this._lc) this._lc.setAutoLevels(on); },
       hasLevels: !!s.lcAuto && !!this._lc && this._lc.autoLevels().length > 0,
       levels: s.lcAuto && this._lc ? this._lc.autoLevels().map(x => ({ label: x.label, price: dec(x.p), ink: x.label[0] === 'R' ? 'var(--lc-red)' : 'var(--lc-green)',
         touches: x.touches === 1 ? (u.lcTouch1 || '1 touch') : (u.lcTouches || '{n} touches').replace('{n}', x.touches) })) : [],
@@ -4359,7 +4439,7 @@ class Component extends DCLogic {
     const HB = IN && IN.holdings ? IN.holdings(posMap, t => {
       const r = rec(t) || {}, q = HQ[t] || {}, pr = PR[t] || {}, ch = s.charts[t + ':1d'];
       return { price: Number.isFinite(q.last) ? q.last : r.price, move: Number.isFinite(q.dp) ? q.dp : r.move,
-        name: (window.HIFBVB && window.HIFBVB.name(t)) || (window.HIFEU && window.HIFEU.name(t)) || pr.name || r.name, currency: pr.currency || (ch && ch.currency) || 'USD' };
+        name: (window.HIFBVB && window.HIFBVB.name(t)) || (window.HIFEU && window.HIFEU.name(t)) || pr.name || r.name, currency: pr.currency || (ch && ch.currency) || null };
     }) : { rows:[], totals:[], empty:true };
     const adding = s.posEdit === '__new';
     const stopEv = ev => { if (ev && ev.stopPropagation) ev.stopPropagation(); };
@@ -4491,7 +4571,10 @@ class Component extends DCLogic {
           return c === undefined ? undefined : (c ? c.points : null);
         };
         const PS = IN && IN.portfolioSeries ? IN.portfolioSeries(posMap, chartOf, curOf, cur) : { points:[], cost:0, currency:cur };
-        const tot = HB.totals.filter(t => t.currency === cur)[0] || {};
+        const tot0 = HB.totals.filter(t => t.currency === cur)[0] || {};
+        // While the account and the first prices load, a total without every price would show
+        // part of the portfolio and then jump: it waits instead.
+        const tot = tot0.missing && (s.acctLoading || s.liveStatus === 'loading') ? {} : tot0;
         const hp = s.pfHover != null ? PS.points[s.pfHover] : null, hl = hp ? IN.portfolioLabels(hp, cur) : null;
         const first = PS.points[0], nowV = byCur[cur] || 0, endV = hp ? hp.value : nowV;
         const chg = first ? endV - first.value : null, chgPct = first && first.value ? chg / first.value * 100 : null;
@@ -4550,7 +4633,8 @@ class Component extends DCLogic {
       ...this.alertVals(u),
       lc: this.liveChartVals(u),
       ...this.adminVals(u),
-      isAuth: !signedIn, isOnboard: signedIn && !s.onboarded && !s.pending, isLocked: signedIn && !!s.locked,
+      isAuth: !signedIn, isOnboard: signedIn && !s.onboarded && !s.pending && !s.acctLoading,
+      isAcctLoading: signedIn && !s.onboarded && !s.pending && !s.locked && !!s.acctLoading, isLocked: signedIn && !!s.locked,
       ...this.deviceSetupVals(u),
       // A new account the owner hasn't approved yet (supabase/approval.sql): only this screen.
       isPending: signedIn && !!s.pending && !s.locked, pendingEmail: (s.session && s.session.email) || '',
