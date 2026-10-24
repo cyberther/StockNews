@@ -129,6 +129,6 @@ test('Volume profile: the busiest price row is the point of control', () => {
 });
 
 test('every drawing tool says how many clicks it takes', () => {
-  for (const t of ['hline', 'hray', 'vline', 'text', 'trend', 'ext', 'arrow', 'zone', 'rect', 'fib', 'measure', 'channel', 'fibext', 'pitchfork'])
+  for (const t of ['hline', 'hray', 'vline', 'text', 'trend', 'ray', 'ext', 'arrow', 'zone', 'rect', 'fib', 'measure', 'channel', 'fibext', 'pitchfork'])
     assert.ok(C.POINTS[t] >= 1 && C.POINTS[t] <= 3, t);
 });

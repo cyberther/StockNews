@@ -210,7 +210,7 @@
   const INDICATORS = [['macd', 'MACD'], ['dmi', 'DMI'], ['rsi', 'RSI'], ['stoch', 'Stoch'], ['atr', 'ATR'], ['obv', 'OBV'], ['cci', 'CCI'], ['willr', '%R']];
   const TYPES = ['candles', 'bars', 'line', 'area', 'heikin'];
   // How many clicks each drawing takes.
-  const POINTS = { hline: 1, hray: 1, vline: 1, text: 1, trend: 2, ext: 2, arrow: 2, zone: 2, rect: 2, fib: 2, measure: 2, channel: 3, fibext: 3, pitchfork: 3 };
+  const POINTS = { hline: 1, hray: 1, vline: 1, text: 1, trend: 2, ray: 2, ext: 2, arrow: 2, zone: 2, rect: 2, fib: 2, measure: 2, channel: 3, fibext: 3, pitchfork: 3 };
   const FIBEXT = [0, 0.618, 1, 1.618, 2.618];
   const PENS = ['blue', 'orange', 'green', 'red', 'purple', 'yellow'];
   // A drawing saved before it had a colour.
@@ -369,8 +369,17 @@
       updateAllViews() {},
       paneViews() { return [{ zOrder: () => 'top', renderer: () => ({ draw: target => target.useMediaCoordinateSpace(sc => paint(sc.context, sc.mediaSize)) }) }]; }
     };
+    // The library places whole bar positions only (a fractional one comes back as 0): a time
+    // between two bars, as a daily drawing has on weekly bars, is placed between them here.
+    function xOfLogical(l) {
+      const ts = chart.timeScale(), i = Math.floor(l), f = l - i;
+      const x0 = ts.logicalToCoordinate(i);
+      if (x0 == null || f < 1e-9) return x0;
+      const x1 = ts.logicalToCoordinate(i + 1);
+      return x1 == null ? x0 : x0 + (x1 - x0) * f;
+    }
     const xy = pt => {
-      const l = logicalOf(pt.t), x = l == null ? null : chart.timeScale().logicalToCoordinate(l), y = candles.priceToCoordinate(pt.p);
+      const l = logicalOf(pt.t), x = l == null ? null : xOfLogical(l), y = candles.priceToCoordinate(pt.p);
       return x == null || y == null ? null : { x, y };
     };
     // The drawing being made: the points clicked so far, then the pointer.
@@ -409,7 +418,10 @@
         const col = penOf(d);
         ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash([]);
         if (d.type === 'trend') {
-          // A trend line runs on to the right edge, as a ray.
+          // From one point to the other, as drawn.
+          seg(A, B); [A, B].forEach(P => dot(P, col));
+        } else if (d.type === 'ray') {
+          // From the first point through the second, on to the right edge.
           if (d.temp) seg(A, B); else run(A, B);
           [A, B].forEach(P => dot(P, col));
         } else if (d.type === 'ext') {
@@ -749,6 +761,8 @@
         indKey = ''; drawIndicators();
         syncAuto(); redraw();
       },
+      // Where a drawing's point { t, p } is on the chart ({ x, y } in pixels), or null.
+      coordOf(pt) { return xy(pt); },
       get element() { return el; },
       destroy() { el.removeEventListener('pointerdown', onDown); el.removeEventListener('pointerup', onUp); try { chart.remove(); } catch (e) {} }
     };

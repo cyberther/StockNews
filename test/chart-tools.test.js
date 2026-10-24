@@ -107,3 +107,23 @@ test('chart types, log scale, a compared share, and every overlay and indicator 
     assert.deepEqual(errors, []);
   } finally { await page.close(); }
 });
+
+// 2026-10-24: a line drawn on daily bars ended up at the chart's left edge on weekly bars. The
+// library places whole bar positions only, and a weekday falls between two weekly bars.
+test('a point between two bars is drawn between them (a daily drawing on weekly bars)', { skip, timeout: 60000 }, async () => {
+  const { page, errors } = await chartPage();
+  try {
+    const r = await page.evaluate(async () => {
+      const week = 7 * 86400, t0 = 1736136000, bars = [];
+      for (let i = 0; i < 60; i++) bars.push({ t: t0 + i * week, o: 100, h: 101, l: 99, c: 100, v: 1 });
+      const lc = await window.HIFLiveChart.create(document.getElementById('host'), { tz: 'UTC', intraday: false, step: week });
+      lc.setBars(bars);
+      const at = t => lc.coordOf({ t, p: 100 }).x;
+      return { a: at(t0 + 40 * week), mid: at(t0 + 40 * week + 3.5 * 86400), b: at(t0 + 41 * week) };
+    });
+    assert.ok(r.a > 100 && r.b > r.a, JSON.stringify(r));
+    assert.ok(Math.abs(r.mid - (r.a + r.b) / 2) < 1, 'half-way between the two bars: ' + JSON.stringify(r));
+    assert.deepEqual(errors, []);
+  } finally { await page.close(); }
+});
+
